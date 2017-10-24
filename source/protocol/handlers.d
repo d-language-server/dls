@@ -9,9 +9,9 @@ alias RequestHandler = ResponseData function(Nullable!JSONValue);
 alias NotificationHandler = void function(Nullable!JSONValue);
 alias ResponseHandler = void function(Nullable!JSONValue, Nullable!ResponseError);
 
-private RequestHandler[string] requesthandlers;
-private NotificationHandler[string] notificationHandlers;
-private ResponseHandler[string] responseHandler;
+private shared(RequestHandler[string]) requesthandlers;
+private shared(NotificationHandler[string]) notificationHandlers;
+private shared(ResponseHandler[string]) responseHandler;
 
 /++
 Checks if a function is a `RequestHandler` or a `NotificationHandler`.

@@ -7,7 +7,6 @@ import std.typecons;
 import util.json;
 
 private enum jsonrpcVersion = "2.0";
-private enum jsonrpcContentType = "application/vscode-jsonrpc; charset=utf-8";
 private enum eol = "\r\n";
 
 abstract class Message

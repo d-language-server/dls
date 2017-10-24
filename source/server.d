@@ -36,10 +36,10 @@ shared static this()
 
 class Server
 {
-    static private bool _initialized = false;
-    static private bool _shutdown = false;
-    static private bool _exit = false;
-    static InitializeParams _initState;
+    static private shared(bool) _initialized = false;
+    static private shared(bool) _shutdown = false;
+    static private shared(bool) _exit = false;
+    static shared(InitializeParams) _initState;
 
     @property static opDispatch(string name, T)(T arg)
     {
@@ -81,63 +81,75 @@ class Server
                 continue;
             }
 
-            auto contentLength = contentLengthResult[0][1].strip().to!size_t;
-            auto content = stdin.rawRead(new char[contentLength]);
+            immutable contentLength = contentLengthResult[0][1].strip().to!size_t;
+            immutable content = stdin.rawRead(new char[contentLength]).idup;
             // TODO: support UTF-16/32 according to Content-Type when it's supported
 
-            RequestMessage request;
+            import std.concurrency : spawn;
 
-            try
+            spawn(&(handleJSON!char), content);
+        }
+
+        debug stderr.writeln("Server stopping");
+    }
+
+    static void handleJSON(T)(immutable(T[]) content)
+    {
+        RequestMessage request;
+
+        try
+        {
+            immutable json = parseJSON(content);
+
+            if ("method" in json)
             {
-                immutable json = parseJSON(content);
-
-                if ("method" in json)
+                if ("id" in json)
                 {
-                    if ("id" in json)
-                    {
-                        request = convertFromJSON!RequestMessage(json);
+                    request = convertFromJSON!RequestMessage(json);
 
-                        if (!_shutdown && (_initialized || request.method == "initialize"))
-                        {
-                            auto resAndErr = handler!RequestHandler(request.method)(request.params);
-                            send(request.id, resAndErr.result, resAndErr.error);
-                        }
-                        else
-                        {
-                            send(request.id, JSONValue().nullable,
-                                    ResponseError.fromErrorCode(ErrorCodes.serverNotInitialized));
-                        }
+                    if (!_shutdown && (_initialized || request.method == "initialize"))
+                    {
+                        auto resAndErr = handler!RequestHandler(request.method)(request.params);
+                        send(request.id, resAndErr.result, resAndErr.error);
                     }
                     else
                     {
-                        auto notification = convertFromJSON!NotificationMessage(json);
-
-                        if (_initialized)
-                        {
-                            handler!NotificationHandler(notification.method)(notification.params);
-                        }
+                        send(request.id, JSONValue().nullable,
+                                ResponseError.fromErrorCode(ErrorCodes.serverNotInitialized));
                     }
                 }
                 else
                 {
-                    auto response = convertFromJSON!ResponseMessage(json);
-                    handler(response.id)(response.result, response.error);
+                    auto notification = convertFromJSON!NotificationMessage(json);
+
+                    if (_initialized)
+                    {
+                        handler!NotificationHandler(notification.method)(notification.params);
+                    }
                 }
             }
-            catch (JSONException e)
+            else
             {
-                stderr.writeln(e);
-            }
-            catch (HandlerNotFoundException e)
-            {
-                stderr.writeln(e);
-
-                send(request.id, Nullable!JSONValue(),
-                        ResponseError.fromErrorCode(ErrorCodes.methodNotFound));
+                auto response = convertFromJSON!ResponseMessage(json);
+                handler(response.id)(response.result, response.error);
             }
         }
+        catch (JSONException e)
+        {
+            sendError!(ErrorCodes.parseError)(request);
+        }
+        catch (HandlerNotFoundException e)
+        {
+            sendError!(ErrorCodes.methodNotFound)(request);
+        }
+    }
 
-        debug stderr.writeln("Server stopping");
+    static void sendError(ErrorCodes error)(RequestMessage request)
+    {
+        if (request !is null)
+        {
+            send(request.id, Nullable!JSONValue(), ResponseError.fromErrorCode(error));
+        }
     }
 
     /++ Sends a request message. +/

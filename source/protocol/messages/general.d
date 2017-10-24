@@ -11,7 +11,7 @@ import util.json;
 @("")
 ResponseData initialize(Nullable!JSONValue jsonParams)
 {
-    auto params = convertFromJSON!InitializeParams(jsonParams);
+    shared params = convertFromJSON!InitializeParams(jsonParams);
     auto result = new InitializeResult();
 
     Server.initialized = true;
