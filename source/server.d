@@ -2,20 +2,20 @@ import protocol.handlers;
 import protocol.interfaces;
 import protocol.jsonrpc;
 import std.algorithm;
+import std.concurrency;
 import std.conv;
 import std.meta;
 import std.stdio;
 import std.string;
 import std.traits;
-import std.typecons;
 import util.json;
 
 shared static this()
 {
-    foreach (modname; AliasSeq!("general", "client", "text_document", "window", "workspace"))
+    foreach (modName; AliasSeq!("general", "client", "text_document", "window", "workspace"))
     {
-        mixin("alias mod = protocol.messages" ~ (modname.length ? "." ~ modname : "") ~ ";");
-        mixin("import protocol.messages" ~ (modname.length ? "." ~ modname : "") ~ ";");
+        mixin("alias mod = protocol.messages" ~ (modName.length ? "." ~ modName : "") ~ ";");
+        mixin("import protocol.messages" ~ (modName.length ? "." ~ modName : "") ~ ";");
 
         foreach (thing; __traits(allMembers, mod))
         {
@@ -24,11 +24,13 @@ shared static this()
             static if (isStaticHandler!t)
             {
                 enum attrs = tuple(__traits(getAttributes, t));
-                enum attrsWithDefaults = tuple(modname[0] ~ modname.split('_')
+                enum attrsWithDefaults = tuple(modName[0] ~ modName.split('_')
                             .map!capitalize().join()[1 .. $], thing, attrs.expand);
                 enum parts = tuple(attrsWithDefaults[attrs.length > 0 ? 2 : 0],
                             attrsWithDefaults[attrs.length > 1 ? 3 : 1]);
-                pushHandler(select!(parts[0].length != 0)(parts[0] ~ "/", "") ~ parts[1], &t);
+                enum method = select!(parts[0].length != 0)(parts[0] ~ "/", "") ~ parts[1];
+
+                pushHandler(method, &t);
             }
         }
     }
@@ -39,7 +41,7 @@ class Server
     static private shared(bool) _initialized = false;
     static private shared(bool) _shutdown = false;
     static private shared(bool) _exit = false;
-    static shared(InitializeParams) _initState;
+    static private shared(InitializeParams) _initState;
 
     @property static opDispatch(string name, T)(T arg)
     {
@@ -85,8 +87,6 @@ class Server
             immutable content = stdin.rawRead(new char[contentLength]).idup;
             // TODO: support UTF-16/32 according to Content-Type when it's supported
 
-            import std.concurrency : spawn;
-
             spawn(&(handleJSON!char), content);
         }
 
@@ -109,8 +109,7 @@ class Server
 
                     if (!_shutdown && (_initialized || request.method == "initialize"))
                     {
-                        auto resAndErr = handler!RequestHandler(request.method)(request.params);
-                        send(request.id, resAndErr.result, resAndErr.error);
+                        send(request.id, handler!RequestHandler(request.method)(request.params));
                     }
                     else
                     {
@@ -131,7 +130,11 @@ class Server
             else
             {
                 auto response = convertFromJSON!ResponseMessage(json);
-                handler(response.id)(response.result, response.error);
+
+                if (response.error.isNull)
+                {
+                    handler(response.id)(response.result);
+                }
             }
         }
         catch (JSONException e)
@@ -141,6 +144,10 @@ class Server
         catch (HandlerNotFoundException e)
         {
             sendError!(ErrorCodes.methodNotFound)(request);
+        }
+        catch (MessageException e)
+        {
+            send(request.id, Nullable!JSONValue(), ResponseError.fromException(e));
         }
     }
 

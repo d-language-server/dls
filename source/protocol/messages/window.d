@@ -1,8 +1,8 @@
 module protocol.messages.window;
 
 import protocol.handlers;
-import protocol.jsonrpc;
+import protocol.interfaces;
 
-void showMessageRequest(Nullable!JSONValue jsonResult, Nullable!ResponseError error)
+@serverRequest void showMessageRequest(MessageActionItem item)
 {
 }

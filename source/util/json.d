@@ -3,9 +3,7 @@ module util.json;
 import std.algorithm;
 import std.array;
 import std.conv;
-import std.file;
 import std.json;
-import std.stdio;
 import std.traits;
 import std.typecons;
 
@@ -150,6 +148,28 @@ Nullable!JSONValue convertToJSON(T : U[], U)(T value)
 {
     return JSONValue(value.map!((item) => convertToJSON(item))()
             .map!((json) => json.isNull ? JSONValue(null) : json.get())().array).nullable;
+}
+
+Nullable!JSONValue convertToJSON(T : U[string], U)(T value)
+        if (isAssociativeArray!T)
+{
+    auto result = JSONValue();
+
+    foreach (key; value.keys)
+    {
+        auto json = convertToJSON(value[key]);
+
+        if (json.isNull())
+        {
+            result[key] = null;
+        }
+        else
+        {
+            result[key] = json.get();
+        }
+    }
+
+    return result.nullable;
 }
 
 /++

@@ -1,119 +1,131 @@
 module protocol.messages.text_document;
 
-import protocol.handlers;
-import protocol.interfaces.text_document;
-import util.json;
+import protocol.interfaces;
 
-void didOpen(Nullable!JSONValue jsonParams)
+void didOpen(DidOpenTextDocumentParams params)
 {
 }
 
-void didChange(Nullable!JSONValue jsonParams)
+void didChange(DidChangeTextDocumentParams params)
 {
 }
 
-void willSave(Nullable!JSONValue jsonParams)
+void willSave(WillSaveTextDocumentParams params)
 {
 }
 
-ResponseData willSaveWaitUntil(Nullable!JSONValue jsonParams)
+auto willSaveWaitUntil(WillSaveTextDocumentParams params)
 {
-    return ResponseData();
+    TextEdit[] result;
+    return result;
 }
 
-void didSave(Nullable!JSONValue jsonParams)
+void didSave(DidSaveTextDocumentParams params)
 {
 }
 
-ResponseData didClose(Nullable!JSONValue jsonParams)
+void didClose(DidCloseTextDocumentParams params)
 {
-    return ResponseData();
 }
 
-ResponseData completion(Nullable!JSONValue jsonParams)
+auto completion(TextDocumentPositionParams params)
 {
-    return ResponseData();
+    CompletionItem[] result;
+    return result;
 }
 
 @("completionItem", "resolve")
-ResponseData completionItem_resolve(Nullable!JSONValue jsonParams)
+auto completionItem_resolve(CompletionItem item)
 {
-    return ResponseData();
+    return item;
 }
 
-ResponseData hover(Nullable!JSONValue jsonParams)
+auto hover(TextDocumentPositionParams params)
 {
-    return ResponseData();
+    auto result = new Hover();
+    return result;
 }
 
-ResponseData signatureHelp(Nullable!JSONValue jsonParams)
+auto signatureHelp(TextDocumentPositionParams params)
 {
-    return ResponseData();
+    auto result = new SignatureHelp();
+    return result;
 }
 
-ResponseData references(Nullable!JSONValue jsonParams)
+auto references(ReferenceParams params)
 {
-    return ResponseData();
+    Location[] result;
+    return result;
 }
 
-ResponseData documentHighlight(Nullable!JSONValue jsonParams)
+auto documentHighlight(TextDocumentPositionParams params)
 {
-    return ResponseData();
+    DocumentHighlight[] result;
+    return result;
 }
 
-ResponseData documentSymbol(Nullable!JSONValue jsonParams)
+auto documentSymbol(DocumentSymbolParams params)
 {
-    return ResponseData();
+    SymbolInformation[] result;
+    return result;
 }
 
-ResponseData formatting(Nullable!JSONValue jsonParams)
+auto formatting(DocumentFormattingParams params)
 {
-    return ResponseData();
+    TextEdit[] result;
+    return result;
 }
 
-ResponseData rangeFormatting(Nullable!JSONValue jsonParams)
+auto rangeFormatting(DocumentRangeFormattingParams params)
 {
-    return ResponseData();
+    TextEdit[] result;
+    return result;
 }
 
-ResponseData onTypeFormatting(Nullable!JSONValue jsonParams)
+auto onTypeFormatting(DocumentOnTypeFormattingParams params)
 {
-    return ResponseData();
+    TextEdit[] result;
+    return result;
 }
 
-ResponseData definition(Nullable!JSONValue jsonParams)
+auto definition(TextDocumentPositionParams params)
 {
-    return ResponseData();
+    auto result = new Location();
+    return result.nullable;
 }
 
-ResponseData codeAction(Nullable!JSONValue jsonParams)
+auto codeAction(CodeActionParams params)
 {
-    return ResponseData();
+    Command[] result;
+    return result;
 }
 
-ResponseData codeLens(Nullable!JSONValue jsonParams)
+auto codeLens(CodeLensParams params)
 {
-    return ResponseData();
+    CodeLens[] result;
+    return result;
 }
 
 @("codeLens", "resolve")
-ResponseData codeLens_resolve(Nullable!JSONValue jsonParams)
+auto codeLens_resolve(CodeLens codeLens)
 {
-    return ResponseData();
+    return codeLens;
 }
 
-ResponseData documentLink(Nullable!JSONValue jsonParams)
+auto documentLink(DocumentLinkParams params)
 {
-    return ResponseData();
+    DocumentLink[] result;
+    return result;
 }
 
 @("documentLink", "resolve")
-ResponseData documentLink_resolve(Nullable!JSONValue jsonParams)
+auto documentLink_resolve(DocumentLink link)
 {
-    return ResponseData();
+    return link;
 }
 
-ResponseData rename(Nullable!JSONValue jsonParams)
+auto rename(RenameParams params)
 {
-    return ResponseData();
+    WorkspaceEdit[] result;
+    return result;
 }

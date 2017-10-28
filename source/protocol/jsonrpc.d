@@ -50,6 +50,14 @@ class ResponseError
         response.message = errorCode[1];
         return response.nullable;
     }
+
+    static auto fromException(MessageException e)
+    {
+        auto response = new ResponseError();
+        response.code = e.code;
+        response.message = e.msg;
+        return response.nullable;
+    }
 }
 
 class NotificationMessage : Message

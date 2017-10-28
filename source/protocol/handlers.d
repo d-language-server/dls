@@ -4,49 +4,59 @@ import protocol.jsonrpc;
 public import std.json;
 import std.traits;
 public import std.typecons;
+import util.json;
 
-alias RequestHandler = ResponseData function(Nullable!JSONValue);
-alias NotificationHandler = void function(Nullable!JSONValue);
-alias ResponseHandler = void function(Nullable!JSONValue, Nullable!ResponseError);
+alias RequestHandler = Nullable!JSONValue delegate(Nullable!JSONValue);
+alias NotificationHandler = void delegate(Nullable!JSONValue);
+alias ResponseHandler = void delegate(Nullable!JSONValue);
 
 private shared(RequestHandler[string]) requesthandlers;
 private shared(NotificationHandler[string]) notificationHandlers;
-private shared(ResponseHandler[string]) responseHandler;
+private shared(ResponseHandler[string]) responseHandlers;
+
+enum serverRequest;
 
 /++
 Checks if a function is a `RequestHandler` or a `NotificationHandler`.
 They should only be registered at startup time and will never be unregistered.
 +/
-template isStaticHandler(T...)
+template isStaticHandler(func...)
 {
-    enum isStaticHandler = __traits(compiles, isSomeFunction!T) && isSomeFunction!T
-            && (is(FunctionTypeOf!T == FunctionTypeOf!RequestHandler)
-                    || is(FunctionTypeOf!T == FunctionTypeOf!NotificationHandler));
-}
-
-/++ Stores data to respond to a request: +/
-struct ResponseData
-{
-    Nullable!JSONValue result = JSONValue(null);
-    Nullable!ResponseError error;
-
-    this(JSONValue res)
-    {
-        this.result = res.nullable;
-    }
-
-    this(ResponseError err)
-    {
-        this.error = err.nullable;
-    }
+    enum isStaticHandler = __traits(compiles, isSomeFunction!func)
+            && isSomeFunction!func && !hasUDA!(func, serverRequest);
 }
 
 class HandlerNotFoundException : Exception
 {
     this(string method)
     {
-        super("No handler found for methodd " ~ method);
+        super("No handler found for method " ~ method);
     }
+}
+
+/++ Registers a new `RequestHandler` or `NotificationHandler`. +/
+void pushHandler(F)(string method, F func)
+        if (isSomeFunction!F && !is(F == RequestHandler) && !is(F == NotificationHandler))
+{
+    pushHandler(method, (Nullable!JSONValue params) {
+        static if ((Parameters!F).length == 0)
+        {
+            enum args = tuple().expand;
+        }
+        else
+        {
+            auto args = convertFromJSON!((Parameters!F)[0])(params);
+        }
+
+        static if (is(ReturnType!F == void))
+        {
+            func(args);
+        }
+        else
+        {
+            return convertToJSON(func(args));
+        }
+    });
 }
 
 /++ Registers a new `RequestHandler`. +/
@@ -64,11 +74,12 @@ void pushHandler(string method, NotificationHandler h)
 /++ Registers a new `ResponseHandler`. +/
 void pushHandler(JSONValue id, ResponseHandler h)
 {
-    responseHandler[id.toString()] = h;
+    responseHandlers[id.toString()] = h;
 }
 
 /++
-Returns the `RequestHandler`/`NotificationHandler` corresponding to `method`.
+Returns the `RequestHandler`/`NotificationHandler` corresponding to a specific
+LSP method.
 +/
 auto handler(T)(string method)
 {
@@ -101,8 +112,8 @@ than once.
 auto handler(JSONValue id)
 {
     auto idString = id.toString();
-    auto h = responseHandler[idString];
+    auto h = responseHandlers[idString];
 
-    responseHandler.remove(idString);
+    responseHandlers.remove(idString);
     return h;
 }

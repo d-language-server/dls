@@ -43,7 +43,7 @@ class ExecuteCommandRegistrationOptions
 
 class ApplyWorkspaceEditParams
 {
-    WorkspaceEdit edit;
+    WorkspaceEdit edit = new WorkspaceEdit();
 }
 
 class ApplyWorkspaceEditResponse

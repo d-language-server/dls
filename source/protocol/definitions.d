@@ -7,25 +7,25 @@ alias DocumentUri = string;
 
 class Position
 {
-    uint line;
-    uint character;
+    size_t line;
+    size_t character;
 }
 
 class Range
 {
-    Position start;
-    Position end;
+    Position start = new Position();
+    Position end = new Position();
 }
 
 class Location
 {
     DocumentUri uri;
-    Range range;
+    Range range = new Range();
 }
 
 class Diagnostic
 {
-    Range range;
+    Range range = new Range();
     Nullable!DiagnosticSeverity severity;
     Nullable!JSONValue code;
     Nullable!string source;
@@ -49,13 +49,13 @@ class Command
 
 class TextEdit
 {
-    Range range;
+    Range range = new Range();
     string newText;
 }
 
 class TextDocumentEdit
 {
-    VersionedTextDocumentIdentifier textDocument;
+    VersionedTextDocumentIdentifier textDocument = new VersionedTextDocumentIdentifier();
     TextEdit[] edits;
 }
 
@@ -85,8 +85,8 @@ class VersionedTextDocumentIdentifier
 
 class TextDocumentPositionParams
 {
-    TextDocumentIdentifier textDocument;
-    Position position;
+    TextDocumentIdentifier textDocument = new TextDocumentIdentifier();
+    Position position = new Position();
 }
 
 class DocumentFilter

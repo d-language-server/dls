@@ -1,21 +1,16 @@
 module protocol.messages.general;
 
-import protocol.definitions;
-import protocol.handlers;
 import protocol.interfaces;
 import server;
 import std.json;
-import std.typecons;
-import util.json;
 
 @("")
-ResponseData initialize(Nullable!JSONValue jsonParams)
+auto initialize(InitializeParams params)
 {
-    shared params = convertFromJSON!InitializeParams(jsonParams);
     auto result = new InitializeResult();
 
     Server.initialized = true;
-    Server.initState = params;
+    Server.initState = cast(shared(InitializeParams)) params;
 
     with (result)
     {
@@ -24,32 +19,38 @@ ResponseData initialize(Nullable!JSONValue jsonParams)
         with (capabilities)
         {
             textDocumentSync = new TextDocumentSyncOptions();
+
+            with (textDocumentSync)
+            {
+                openClose = true;
+                change = TextDocumentSyncKind.incremental;
+            }
         }
     }
 
-    return ResponseData(convertToJSON(result));
+    return result;
 }
 
 @("")
-void initialized(Nullable!JSONValue jsonParams)
+void initialized()
 {
     // Nothing to do
 }
 
 @("")
-ResponseData shutdown(Nullable!JSONValue jsonParams)
+auto shutdown()
 {
     Server.shutdown = true;
-    return ResponseData();
+    return JSONValue(null);
 }
 
 @("")
-void exit(Nullable!JSONValue jsonParams)
+void exit()
 {
     Server.exit = true;
 }
 
 @("$")
-void cancelRequest(Nullable!JSONValue jsonParams)
+void cancelRequest(JSONValue id)
 {
 }

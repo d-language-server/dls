@@ -10,12 +10,12 @@ class PublishDiagnosticsParams
 
 class DidOpenTextDocumentParams
 {
-    TextDocumentItem textDocument;
+    TextDocumentItem textDocument = new TextDocumentItem();
 }
 
 class DidChangeTextDocumentParams
 {
-    VersionedTextDocumentIdentifier textDocument;
+    VersionedTextDocumentIdentifier textDocument = new VersionedTextDocumentIdentifier();
     TextDocumentContentChangeEvent[] contentChanges;
 }
 
@@ -28,7 +28,7 @@ class TextDocumentContentChangeEvent
 
 private class ParamsBase
 {
-    TextDocumentIdentifier textDocument;
+    TextDocumentIdentifier textDocument = new TextDocumentIdentifier();
 }
 
 class WillSaveTextDocumentParams : ParamsBase
@@ -129,7 +129,7 @@ alias ParameterInformation = InformationBase;
 
 class ReferenceParams : TextDocumentPositionParams
 {
-    ReferenceContext context;
+    ReferenceContext context = new ReferenceContext();
 }
 
 class ReferenceContext
@@ -139,7 +139,7 @@ class ReferenceContext
 
 class DocumentHighlight
 {
-    Range range;
+    Range range = new Range();
     Nullable!DocumentHighlightKind kind;
 }
 
@@ -156,7 +156,7 @@ class SymbolInformation
 {
     string name;
     SymbolKind kind;
-    Location location;
+    Location location = new Location();
     Nullable!string containerName;
 }
 
@@ -184,30 +184,30 @@ enum SymbolKind
 
 class DocumentFormattingParams : ParamsBase
 {
-    FormattingOptions options;
+    FormattingOptions options = new FormattingOptions();
 }
 
 class FormattingOptions
 {
-    uint tabSize;
+    size_t tabSize;
     bool insertSpaces;
 }
 
 class DocumentRangeFormattingParams : DocumentFormattingParams
 {
-    Range range;
+    Range range = new Range();
 }
 
 class DocumentOnTypeFormattingParams : DocumentFormattingParams
 {
-    Position position;
+    Position position = new Position();
     string ch;
 }
 
 class CodeActionParams : ParamsBase
 {
-    Range range;
-    CodeActionContext context;
+    Range range = new Range();
+    CodeActionContext context = new CodeActionContext();
 }
 
 class CodeActionContext
@@ -219,7 +219,7 @@ alias CodeLensParams = ParamsBase;
 
 class CodeLens
 {
-    Range range;
+    Range range = new Range();
     Nullable!Command command;
     Nullable!JSONValue data;
 }
@@ -228,12 +228,12 @@ alias DocumentLinkParams = ParamsBase;
 
 class DocumentLink
 {
-    Range range;
+    Range range = new Range();
     Nullable!DocumentUri target;
 }
 
 class RenameParams : ParamsBase
 {
-    Position position;
+    Position position = new Position();
     string newName;
 }

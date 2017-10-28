@@ -20,7 +20,7 @@ class InitializeParams
     // deprecated Nullable!string rootPath; // TODO: add compatibility
     Nullable!DocumentUri rootUri;
     Nullable!JSONValue initializationOptions;
-    ClientCapabilities capabilities;
+    ClientCapabilities capabilities = new ClientCapabilities();
     Nullable!Trace trace;
 }
 
@@ -86,7 +86,7 @@ class ClientCapabilities
 
 class InitializeResult
 {
-    ServerCapabilities capabilities;
+    ServerCapabilities capabilities = new ServerCapabilities();
 }
 
 // deprecated enum InitializeErrorCode // TODO: add compatibility

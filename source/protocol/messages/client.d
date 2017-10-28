@@ -1,12 +1,11 @@
 module protocol.messages.client;
 
 import protocol.handlers;
-import protocol.jsonrpc;
 
-void registerCapability(Nullable!JSONValue jsonResult, Nullable!ResponseError error)
+@serverRequest void registerCapability()
 {
 }
 
-void unregisterCapability(Nullable!JSONValue jsonResult, Nullable!ResponseError error)
+@serverRequest void unregisterCapability()
 {
 }

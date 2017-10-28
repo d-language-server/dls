@@ -1,29 +1,29 @@
 module protocol.messages.workspace;
 
-import protocol.definitions;
 import protocol.handlers;
-import protocol.jsonrpc;
+import protocol.interfaces;
 import std.json;
-import std.typecons;
 
-void didChangeConfiguration(Nullable!JSONValue jsonParams)
+void didChangeConfiguration(DidChangeConfigurationParams params)
 {
 }
 
-void didChangeWatchedFiles(Nullable!JSONValue jsonParams)
+void didChangeWatchedFiles(DidChangeWatchedFilesParams params)
 {
 }
 
-ResponseData symbol(Nullable!JSONValue jsonParams)
+auto symbol(WorkspaceSymbolParams params)
 {
-    return ResponseData();
+    SymbolInformation[] result;
+    return result;
 }
 
-ResponseData executeCommand(Nullable!JSONValue jsonParams)
+auto executeCommand(ExecuteCommandParams params)
 {
-    return ResponseData();
+    auto result = JSONValue(null);
+    return result;
 }
 
-void applyEdit(Nullable!JSONValue jsonResult, Nullable!ResponseError error)
+@serverRequest void applyEdit(ApplyWorkspaceEditResponse response)
 {
 }
