@@ -9,6 +9,7 @@ import std.stdio;
 import std.string;
 import std.traits;
 import util.json;
+import util.signal;
 
 shared static this()
 {
@@ -38,12 +39,14 @@ shared static this()
 
 class Server
 {
-    static private shared(bool) _initialized = false;
-    static private shared(bool) _shutdown = false;
-    static private shared(bool) _exit = false;
-    static private shared(InitializeParams) _initState;
+    private static shared(bool) _initialized = false;
+    private static shared(bool) _shutdown = false;
+    private static shared(bool) _exit = false;
+    private static shared(InitializeParams) _initState;
+    private static shared(Tid[]) _threads;
+    private static shared(string[]) _threadNames;
 
-    @property static opDispatch(string name, T)(T arg)
+    @property static void opDispatch(string name, T)(T arg)
     {
         mixin("_" ~ name ~ "= arg;");
     }
@@ -87,7 +90,18 @@ class Server
             immutable content = stdin.rawRead(new char[contentLength]).idup;
             // TODO: support UTF-16/32 according to Content-Type when it's supported
 
-            spawn(&(handleJSON!char), content);
+            auto tid = spawn(&(handleJSON!char), content);
+            _threads ~= cast(shared(Tid)) tid;
+
+            tid.toString((str) {
+                _threadNames ~= cast(shared(string)) str;
+                register(str.dup, tid);
+            });
+
+            if (_threads.length == 1)
+            {
+                tid.send(Signal.MessageAtFront());
+            }
         }
 
         debug stderr.writeln("Server stopping");
@@ -148,6 +162,16 @@ class Server
         catch (MessageException e)
         {
             send(request.id, Nullable!JSONValue(), ResponseError.fromException(e));
+        }
+        finally
+        {
+            _threads = _threads[1 .. $];
+            _threadNames = _threadNames[1 .. $];
+
+            if (_threads.length)
+            {
+                locate(_threadNames[0]).send(Signal.MessageAtFront());
+            }
         }
     }
 

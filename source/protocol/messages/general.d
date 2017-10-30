@@ -19,6 +19,7 @@ auto initialize(InitializeParams params)
         with (capabilities)
         {
             textDocumentSync = new TextDocumentSyncOptions();
+            documentFormattingProvider = true;
 
             with (textDocumentSync)
             {

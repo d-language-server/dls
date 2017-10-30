@@ -1,13 +1,23 @@
 module protocol.messages.text_document;
 
 import protocol.interfaces;
+import std.concurrency;
+import tools.formatter;
+import util.document;
+import util.signal;
 
 void didOpen(DidOpenTextDocumentParams params)
 {
+    if (params.textDocument.languageId == "d")
+    {
+        Document.open(params.textDocument);
+    }
 }
 
 void didChange(DidChangeTextDocumentParams params)
 {
+    receiveOnly!(Signal.MessageAtFront)();
+    Document.change(params.textDocument, params.contentChanges);
 }
 
 void willSave(WillSaveTextDocumentParams params)
@@ -26,6 +36,7 @@ void didSave(DidSaveTextDocumentParams params)
 
 void didClose(DidCloseTextDocumentParams params)
 {
+    Document.close(params.textDocument);
 }
 
 auto completion(TextDocumentPositionParams params)
@@ -72,7 +83,14 @@ auto documentSymbol(DocumentSymbolParams params)
 
 auto formatting(DocumentFormattingParams params)
 {
+    receiveOnly!(Signal.MessageAtFront)();
+    auto formatResult = Formatter.formatFile(params.textDocument.uri, params.options);
     TextEdit[] result;
+
+    result ~= new TextEdit();
+    result[0].newText = formatResult[0];
+    result[0].range = formatResult[1];
+
     return result;
 }
 
