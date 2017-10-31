@@ -1,12 +1,12 @@
-module util.document;
+module dls.util.document;
 
-import protocol.definitions;
-import protocol.interfaces;
+import dls.protocol.definitions;
+import dls.protocol.interfaces;
+import dls.util.json;
 import std.array;
 import std.conv;
 import std.string;
 import std.utf;
-import util.json;
 
 shared class Document
 {

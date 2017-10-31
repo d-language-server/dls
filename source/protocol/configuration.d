@@ -1,4 +1,4 @@
-module protocol.configuration;
+module dls.protocol.configuration;
 
 class Configuration
 {

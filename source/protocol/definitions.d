@@ -1,4 +1,4 @@
-module protocol.definitions;
+module dls.protocol.definitions;
 
 public import std.json;
 public import std.typecons;

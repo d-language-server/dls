@@ -1,6 +1,6 @@
-module protocol.messages.client;
+module dls.protocol.messages.client;
 
-import protocol.handlers;
+import dls.protocol.handlers;
 
 @serverRequest void registerCapability()
 {

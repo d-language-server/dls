@@ -1,6 +1,10 @@
-import protocol.handlers;
-import protocol.interfaces;
-import protocol.jsonrpc;
+module dls.server;
+
+import dls.protocol.handlers;
+import dls.protocol.interfaces;
+import dls.protocol.jsonrpc;
+import dls.util.json;
+import dls.util.signal;
 import std.algorithm;
 import std.concurrency;
 import std.conv;
@@ -8,15 +12,13 @@ import std.meta;
 import std.stdio;
 import std.string;
 import std.traits;
-import util.json;
-import util.signal;
 
 shared static this()
 {
     foreach (modName; AliasSeq!("general", "client", "text_document", "window", "workspace"))
     {
-        mixin("alias mod = protocol.messages" ~ (modName.length ? "." ~ modName : "") ~ ";");
-        mixin("import protocol.messages" ~ (modName.length ? "." ~ modName : "") ~ ";");
+        mixin("alias mod = dls.protocol.messages" ~ (modName.length ? "." ~ modName : "") ~ ";");
+        mixin("import dls.protocol.messages" ~ (modName.length ? "." ~ modName : "") ~ ";");
 
         foreach (thing; __traits(allMembers, mod))
         {
@@ -218,6 +220,6 @@ class Server
             }
         }
 
-        protocol.jsonrpc.send(message);
+        dls.protocol.jsonrpc.send(message);
     }
 }

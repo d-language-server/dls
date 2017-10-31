@@ -1,10 +1,10 @@
-module protocol.messages.text_document;
+module dls.protocol.messages.text_document;
 
-import protocol.interfaces;
+import dls.protocol.interfaces;
+import dls.tools.formatter;
+import dls.util.document;
+import dls.util.signal;
 import std.concurrency;
-import tools.formatter;
-import util.document;
-import util.signal;
 
 void didOpen(DidOpenTextDocumentParams params)
 {

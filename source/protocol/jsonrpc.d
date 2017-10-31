@@ -1,10 +1,10 @@
-module protocol.jsonrpc;
+module dls.protocol.jsonrpc;
 
+import dls.util.json;
 import std.conv;
 import std.json;
 import std.stdio;
 import std.typecons;
-import util.json;
 
 private enum jsonrpcVersion = "2.0";
 private enum eol = "\r\n";

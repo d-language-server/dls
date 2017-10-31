@@ -1,7 +1,7 @@
-module protocol.messages.window;
+module dls.protocol.messages.window;
 
-import protocol.handlers;
-import protocol.interfaces;
+import dls.protocol.handlers;
+import dls.protocol.interfaces;
 
 @serverRequest void showMessageRequest(MessageActionItem item)
 {

@@ -1,6 +1,6 @@
-module protocol.interfaces.workspace;
+module dls.protocol.interfaces.workspace;
 
-public import protocol.definitions;
+public import dls.protocol.definitions;
 
 class DidChangeConfigurationParams
 {

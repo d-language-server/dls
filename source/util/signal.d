@@ -1,4 +1,4 @@
-module util.signal;
+module dls.util.signal;
 
 private struct S(uint i)
 {

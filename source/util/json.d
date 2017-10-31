@@ -1,4 +1,4 @@
-module util.json;
+module dls.util.json;
 
 import std.algorithm;
 import std.array;

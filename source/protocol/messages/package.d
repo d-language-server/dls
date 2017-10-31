@@ -1,7 +1,7 @@
-module protocol.messages;
+module dls.protocol.messages;
 
-public import protocol.messages.client;
-public import protocol.messages.general;
-public import protocol.messages.text_document;
-public import protocol.messages.window;
-public import protocol.messages.workspace;
+public import dls.protocol.messages.client;
+public import dls.protocol.messages.general;
+public import dls.protocol.messages.text_document;
+public import dls.protocol.messages.window;
+public import dls.protocol.messages.workspace;

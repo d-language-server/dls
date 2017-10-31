@@ -1,7 +1,7 @@
-module protocol.messages.general;
+module dls.protocol.messages.general;
 
-import protocol.interfaces;
-import server;
+import dls.protocol.interfaces;
+import dls.server;
 import std.json;
 
 @("")

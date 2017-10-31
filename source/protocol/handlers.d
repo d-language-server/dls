@@ -1,10 +1,10 @@
-module protocol.handlers;
+module dls.protocol.handlers;
 
-import protocol.jsonrpc;
+import dls.protocol.jsonrpc;
+import dls.util.json;
 public import std.json;
 import std.traits;
 public import std.typecons;
-import util.json;
 
 alias RequestHandler = Nullable!JSONValue delegate(Nullable!JSONValue);
 alias NotificationHandler = void delegate(Nullable!JSONValue);

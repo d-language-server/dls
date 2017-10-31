@@ -1,7 +1,7 @@
-module protocol.messages.workspace;
+module dls.protocol.messages.workspace;
 
-import protocol.handlers;
-import protocol.interfaces;
+import dls.protocol.handlers;
+import dls.protocol.interfaces;
 import std.json;
 
 void didChangeConfiguration(DidChangeConfigurationParams params)

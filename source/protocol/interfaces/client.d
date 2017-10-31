@@ -1,6 +1,6 @@
-module protocol.interfaces.client;
+module dls.protocol.interfaces.client;
 
-public import protocol.definitions;
+public import dls.protocol.definitions;
 
 private abstract class RegistrationBase
 {

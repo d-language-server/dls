@@ -1,6 +1,6 @@
-module protocol.interfaces.general;
+module dls.protocol.interfaces.general;
 
-public import protocol.definitions;
+public import dls.protocol.definitions;
 
 private class WithDynamicRegistration
 {

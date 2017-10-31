@@ -1,6 +1,6 @@
-module protocol.interfaces.window;
+module dls.protocol.interfaces.window;
 
-public import protocol.definitions;
+public import dls.protocol.definitions;
 
 class ShowMessageParams
 {

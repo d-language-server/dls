@@ -1,6 +1,6 @@
-module protocol.interfaces.text_document;
+module dls.protocol.interfaces.text_document;
 
-public import protocol.definitions;
+public import dls.protocol.definitions;
 
 class PublishDiagnosticsParams
 {

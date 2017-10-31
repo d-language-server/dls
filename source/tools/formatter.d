@@ -1,15 +1,15 @@
-module tools.formatter;
+module dls.tools.formatter;
 
 import dfmt.config;
 import dfmt.editorconfig;
 import dfmt.formatter;
-import protocol.configuration;
-import protocol.definitions;
-import protocol.interfaces;
+import dls.protocol.configuration;
+import dls.protocol.definitions;
+import dls.protocol.interfaces;
+import dls.util.document;
 import std.algorithm;
 import std.outbuffer;
 import std.range;
-import util.document;
 
 private immutable EOL[FormatterConfiguration.EndOfLine] eolMap;
 
