@@ -59,7 +59,7 @@ shared class Document
 
     string toString() const
     {
-        return this._lines.join().to!string;
+        return this._lines.join().toUTF8();
     }
 
     private void change(TextDocumentContentChangeEvent[] events)
