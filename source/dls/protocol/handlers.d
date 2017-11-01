@@ -34,11 +34,16 @@ class HandlerNotFoundException : Exception
     }
 }
 
-/++ Registers a new `RequestHandler` or `NotificationHandler`. +/
-void pushHandler(F)(string method, F func)
-        if (isSomeFunction!F && !is(F == RequestHandler) && !is(F == NotificationHandler))
+/++
+Registers a new handler of any kind (`RequestHandler`, `NotificationHandler` or
+`ResponseHandler`).
++/
+void pushHandler(T, F)(T methodOrId, F func)
+        if ((is(T : string) || is(T : JSONValue)) && isSomeFunction!F
+            && !is(F == RequestHandler) && !is(F == NotificationHandler)
+            && !is(F == ResponseHandler))
 {
-    pushHandler(method, (Nullable!JSONValue params) {
+    pushHandler(methodOrId, (Nullable!JSONValue params) {
         static if ((Parameters!F).length == 0)
         {
             enum args = tuple().expand;
