@@ -17,8 +17,8 @@ shared static this()
 {
     foreach (modName; AliasSeq!("general", "client", "text_document", "window", "workspace"))
     {
-        mixin("alias mod = dls.protocol.messages" ~ (modName.length ? "." ~ modName : "") ~ ";");
         mixin("import dls.protocol.messages" ~ (modName.length ? "." ~ modName : "") ~ ";");
+        mixin("alias mod = dls.protocol.messages" ~ (modName.length ? "." ~ modName : "") ~ ";");
 
         foreach (thing; __traits(allMembers, mod))
         {
