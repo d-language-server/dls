@@ -10,9 +10,9 @@ alias RequestHandler = Nullable!JSONValue delegate(Nullable!JSONValue);
 alias NotificationHandler = void delegate(Nullable!JSONValue);
 alias ResponseHandler = void delegate(Nullable!JSONValue);
 
-private shared(RequestHandler[string]) requesthandlers;
-private shared(NotificationHandler[string]) notificationHandlers;
-private shared(ResponseHandler[string]) responseHandlers;
+private RequestHandler[string] requesthandlers;
+private NotificationHandler[string] notificationHandlers;
+private ResponseHandler[string] responseHandlers;
 
 enum serverRequest;
 

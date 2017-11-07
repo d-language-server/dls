@@ -8,9 +8,9 @@ import std.conv;
 import std.string;
 import std.utf;
 
-shared class Document
+class Document
 {
-    private static shared(Document[DocumentUri]) _documents;
+    private static Document[DocumentUri] _documents;
     private DocumentUri _uri;
     private wchar[][] _lines;
 
@@ -21,7 +21,7 @@ shared class Document
 
     static void open(TextDocumentItem textDocument)
     {
-        _documents[textDocument.uri] = new shared Document(textDocument);
+        _documents[textDocument.uri] = new Document(textDocument);
     }
 
     static void close(TextDocumentIdentifier textDocument)
@@ -57,7 +57,7 @@ shared class Document
         this._lines = this.getText(textDocument.text);
     }
 
-    string toString() const
+    override string toString() const
     {
         return this._lines.join().toUTF8();
     }
@@ -100,14 +100,13 @@ shared class Document
 
     private auto getText(string text) const
     {
-        auto lines = cast(shared(wchar[][])) lineSplitter!(Yes.keepTerminator)(text.toUTF16())
-            .array;
+        auto lines = lineSplitter!(Yes.keepTerminator)(text.toUTF16()).array;
 
         if (!lines.length || lines[$ - 1].endsWith('\r', '\n'))
         {
-            lines ~= cast(shared(wchar[])) "";
+            lines ~= "";
         }
 
-        return lines;
+        return lines.to!(wchar[][]);
     }
 }

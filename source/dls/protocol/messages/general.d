@@ -10,7 +10,7 @@ auto initialize(InitializeParams params)
     auto result = new InitializeResult();
 
     Server.initialized = true;
-    Server.initState = cast(shared(InitializeParams)) params;
+    Server.initState = params;
 
     with (result)
     {

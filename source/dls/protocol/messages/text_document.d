@@ -3,8 +3,6 @@ module dls.protocol.messages.text_document;
 import dls.protocol.interfaces;
 import dls.tools.formatter;
 import dls.util.document;
-import dls.util.signal;
-import std.concurrency;
 
 void didOpen(DidOpenTextDocumentParams params)
 {
@@ -16,7 +14,6 @@ void didOpen(DidOpenTextDocumentParams params)
 
 void didChange(DidChangeTextDocumentParams params)
 {
-    receiveOnly!(Signal.MessageAtFront)();
     Document.change(params.textDocument, params.contentChanges);
 }
 
@@ -83,8 +80,7 @@ auto documentSymbol(DocumentSymbolParams params)
 
 auto formatting(DocumentFormattingParams params)
 {
-    receiveOnly!(Signal.MessageAtFront)();
-    auto formatResult = Formatter.formatFile(params.textDocument.uri, params.options);
+    auto formatResult = Formatter.format(params.textDocument.uri, params.options);
     TextEdit[] result;
 
     result ~= new TextEdit();

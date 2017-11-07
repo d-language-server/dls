@@ -4,16 +4,14 @@ import dls.protocol.handlers;
 import dls.protocol.interfaces;
 import dls.protocol.jsonrpc;
 import dls.util.json;
-import dls.util.signal;
 import std.algorithm;
-import std.concurrency;
 import std.conv;
 import std.meta;
 import std.stdio;
 import std.string;
 import std.traits;
 
-shared static this()
+static this()
 {
     foreach (modName; AliasSeq!("general", "client", "text_document", "window", "workspace"))
     {
@@ -39,18 +37,16 @@ shared static this()
     }
 }
 
-class Server
+abstract class Server
 {
-    private static shared(bool) _initialized = false;
-    private static shared(bool) _shutdown = false;
-    private static shared(bool) _exit = false;
-    private static shared(InitializeParams) _initState;
-    private static shared(Tid[]) _threads;
-    private static shared(string[]) _threadNames;
+    private static bool _initialized = false;
+    private static bool _shutdown = false;
+    private static bool _exit = false;
+    private static InitializeParams _initState;
 
     @property static void opDispatch(string name, T)(T arg)
     {
-        mixin("_" ~ name ~ "= arg;");
+        mixin("_" ~ name ~ " = arg;");
     }
 
     static void loop()
@@ -91,25 +87,14 @@ class Server
             immutable contentLength = contentLengthResult[0][1].strip().to!size_t;
             immutable content = stdin.rawRead(new char[contentLength]).idup;
             // TODO: support UTF-16/32 according to Content-Type when it's supported
-
-            auto tid = spawn(&(handleJSON!char), content);
-            _threads ~= cast(shared(Tid)) tid;
-
-            tid.toString((str) {
-                _threadNames ~= cast(shared(string)) str;
-                register(str.dup, tid);
-            });
-
-            if (_threads.length == 1)
-            {
-                tid.send(Signal.MessageAtFront());
-            }
+            
+            handleJSON(content);
         }
 
         debug stderr.writeln("Server stopping");
     }
 
-    static void handleJSON(T)(immutable(T[]) content)
+    private static void handleJSON(T)(immutable(T[]) content)
     {
         RequestMessage request;
 
@@ -164,16 +149,6 @@ class Server
         catch (MessageException e)
         {
             send(request.id, Nullable!JSONValue(), ResponseError.fromException(e));
-        }
-        finally
-        {
-            _threads = _threads[1 .. $];
-            _threadNames = _threadNames[1 .. $];
-
-            if (_threads.length)
-            {
-                locate(_threadNames[0]).send(Signal.MessageAtFront());
-            }
         }
     }
 

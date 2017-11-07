@@ -6,6 +6,7 @@ import dfmt.formatter;
 import dls.protocol.configuration;
 import dls.protocol.definitions;
 import dls.protocol.interfaces;
+import dls.tools.tool;
 import dls.util.document;
 import std.algorithm;
 import std.outbuffer;
@@ -14,7 +15,7 @@ import std.range;
 private immutable EOL[FormatterConfiguration.EndOfLine] eolMap;
 private immutable BraceStyle[FormatterConfiguration.BraceStyle] braceStyleMap;
 
-shared static this()
+static this()
 {
     eolMap = [FormatterConfiguration.EndOfLine.lf : EOL.lf, FormatterConfiguration.EndOfLine.cr
         : EOL.cr, FormatterConfiguration.EndOfLine.crlf : EOL.crlf];
@@ -23,16 +24,9 @@ shared static this()
         : BraceStyle.otbs, FormatterConfiguration.BraceStyle.stroustrup : BraceStyle.stroustrup];
 }
 
-class Formatter
+class Formatter : Tool!FormatterConfiguration
 {
-    private static shared(FormatterConfiguration) _configuration;
-
-    @property static void configuration(shared(FormatterConfiguration) config)
-    {
-        _configuration = config;
-    }
-
-    static auto formatFile(DocumentUri uri, FormattingOptions options)
+    static auto format(DocumentUri uri, FormattingOptions options)
     {
         const document = Document[uri];
         auto contents = cast(ubyte[]) document.toString();
@@ -67,7 +61,7 @@ class Formatter
         config.dfmt_compact_labeled_statements = _configuration.dfmtCompactLabeledStatements
             ? OptionalBoolean.t : OptionalBoolean.f;
 
-        format(uri, contents, buffer, &config);
+        dfmt.formatter.format(uri, contents, buffer, &config);
 
         return tuple(buffer.toString(), range);
     }

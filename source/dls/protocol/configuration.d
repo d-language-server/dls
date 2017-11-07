@@ -2,17 +2,21 @@ module dls.protocol.configuration;
 
 import dls.tools.formatter;
 
-shared class Configuration
+interface ToolConfiguration
+{
+}
+
+class Configuration
 {
     FormatterConfiguration formatter;
 
-    static void set(shared(Configuration) c)
+    static void set(Configuration c)
     {
         Formatter.configuration = c.formatter;
     }
 }
 
-shared class FormatterConfiguration
+class FormatterConfiguration : ToolConfiguration
 {
     static enum BraceStyle
     {
