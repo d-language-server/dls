@@ -1,7 +1,5 @@
 module dls.tools.tool;
 
-import dls.protocol.configuration;
-
 package abstract class Tool(C : ToolConfiguration)
 {
     protected static C _configuration;
@@ -10,4 +8,8 @@ package abstract class Tool(C : ToolConfiguration)
     {
         _configuration = config;
     }
+}
+
+package interface ToolConfiguration
+{
 }

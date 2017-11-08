@@ -8,6 +8,8 @@
 	"copyright": "Copyright © 2017, Laurent Tréguier",
 	"license": "MIT",
 	"dependencies": {
-		"dfmt": "~>0.5"
+		"dcd": "~>0.9",
+		"dfmt": "~>0.5",
+		"dsymbol": "~>0.2"
 	}
 }

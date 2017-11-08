@@ -19,12 +19,19 @@ auto initialize(InitializeParams params)
         with (capabilities)
         {
             textDocumentSync = new TextDocumentSyncOptions();
+            completionProvider = new CompletionOptions();
             documentFormattingProvider = true;
 
             with (textDocumentSync)
             {
                 openClose = true;
                 change = TextDocumentSyncKind.incremental;
+            }
+
+            with (completionProvider)
+            {
+                resolveProvider = false;
+                triggerCharacters = ["."];
             }
         }
     }

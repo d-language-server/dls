@@ -3,8 +3,10 @@ module dls.util.document;
 import dls.protocol.definitions;
 import dls.protocol.interfaces;
 import dls.util.json;
+import std.algorithm;
 import std.array;
 import std.conv;
+import std.range;
 import std.string;
 import std.utf;
 
@@ -60,6 +62,13 @@ class Document
     override string toString() const
     {
         return this._lines.join().toUTF8();
+    }
+
+    auto bytePosition(Position position)
+    {
+        return reduce!((s, i) => s + codeLength!char(this._lines[i]))(cast(size_t) 0,
+                iota(position.line)) + codeLength!char(
+                this._lines[position.line][0 .. position.character]);
     }
 
     private void change(TextDocumentContentChangeEvent[] events)

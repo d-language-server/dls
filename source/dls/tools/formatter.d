@@ -3,7 +3,6 @@ module dls.tools.formatter;
 import dfmt.config;
 import dfmt.editorconfig;
 import dfmt.formatter;
-import dls.protocol.configuration;
 import dls.protocol.definitions;
 import dls.protocol.interfaces;
 import dls.tools.tool;
@@ -32,10 +31,10 @@ class Formatter : Tool!FormatterConfiguration
         auto contents = cast(ubyte[]) document.toString();
         auto config = Config();
         auto buffer = new OutBuffer();
-        auto range = new Range();
+        auto result = new TextEdit();
 
-        range.end.line = document.lines.length;
-        range.end.character = document.lines[$ - 1].length;
+        result.range.end.line = document.lines.length;
+        result.range.end.character = document.lines[$ - 1].length;
 
         auto toOptBool(bool b)
         {
@@ -63,6 +62,38 @@ class Formatter : Tool!FormatterConfiguration
 
         dfmt.formatter.format(uri, contents, buffer, &config);
 
-        return tuple(buffer.toString(), range);
+        result.newText = buffer.toString();
+
+        return [result];
     }
+}
+
+class FormatterConfiguration : ToolConfiguration
+{
+    static enum BraceStyle
+    {
+        allman = "allman",
+        otbs = "otbs",
+        stroustrup = "stroustrup"
+    }
+
+    static enum EndOfLine
+    {
+        lf = "lf",
+        cr = "cr",
+        crlf = "crlf"
+    }
+
+    EndOfLine endOfLine = EndOfLine.lf;
+    int maxLineLength = 120;
+    BraceStyle dfmtBraceStyle = BraceStyle.allman;
+    int dfmtSoftMaxLineLength = 80;
+    bool dfmtAlignSwitchStatements = true;
+    bool dfmtOutdentAttributes = true;
+    bool dfmtSplitOperatorAtLineEnd = false;
+    bool dfmtSpaceAfterCast = true;
+    bool dfmtSpaceAfterKeywords = true;
+    bool dfmtSpaceBeforeFunctionParameters = false;
+    bool dfmtSelectiveImportSpace = true;
+    bool dfmtCompactLabeledStatements = true;
 }
