@@ -54,6 +54,7 @@ class TextDocumentClientCapabilities
         static class CompletionItem
         {
             Nullable!bool snippetSupport;
+            Nullable!bool commitCharactersSupport;
         }
 
         Nullable!bool dynamicRegistration;

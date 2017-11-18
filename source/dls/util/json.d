@@ -98,6 +98,18 @@ T convertFromJSON(T : U[], U)(JSONValue json) if (isArray!T && !isSomeString!T)
     return json.array.map!(value => convertFromJSON!U(value)).array;
 }
 
+T convertFromJSON(T : U[string], U)(JSONValue json) if (isAssociativeArray!T)
+{
+    U[string] result;
+
+    foreach (string key, value; json)
+    {
+        result[key] = convertFromJSON!U(value);
+    }
+
+    return result;
+}
+
 Nullable!JSONValue convertToJSON(T)(T value)
         if ((is(T == class) || is(T == struct)) && !is(T == JSONValue))
 {

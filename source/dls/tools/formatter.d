@@ -3,10 +3,10 @@ module dls.tools.formatter;
 import dfmt.config;
 import dfmt.editorconfig;
 import dfmt.formatter;
-import dls.protocol.definitions;
 import dls.protocol.interfaces;
 import dls.tools.tool;
 import dls.util.document;
+import dls.util.uri;
 import std.algorithm;
 import std.outbuffer;
 import std.range;
@@ -25,7 +25,7 @@ static this()
 
 class Formatter : Tool!FormatterConfiguration
 {
-    static auto format(DocumentUri uri, FormattingOptions options)
+    static auto format(Uri uri, FormattingOptions options)
     {
         const document = Document[uri];
         auto contents = cast(ubyte[]) document.toString();

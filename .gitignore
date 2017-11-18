@@ -38,5 +38,4 @@ docs/
 # End of https://www.gitignore.io/api/d,visualstudiocode
 
 /dls
-dub.selections.json
 dscanner.ini

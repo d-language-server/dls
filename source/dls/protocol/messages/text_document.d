@@ -4,6 +4,7 @@ import dls.protocol.interfaces;
 import dls.tools.code_completer;
 import dls.tools.formatter;
 import dls.util.document;
+import dls.util.uri;
 
 void didOpen(DidOpenTextDocumentParams params)
 {
@@ -39,7 +40,7 @@ void didClose(DidCloseTextDocumentParams params)
 
 auto completion(TextDocumentPositionParams params)
 {
-    return CodeCompleter.complete(params.textDocument.uri, params.position);
+    return CodeCompleter.complete(new Uri(params.textDocument.uri), params.position);
 }
 
 @("completionItem", "resolve")
@@ -80,7 +81,7 @@ auto documentSymbol(DocumentSymbolParams params)
 
 auto formatting(DocumentFormattingParams params)
 {
-    return Formatter.format(params.textDocument.uri, params.options);
+    return Formatter.format(new Uri(params.textDocument.uri), params.options);
 }
 
 auto rangeFormatting(DocumentRangeFormattingParams params)

@@ -42,7 +42,6 @@ auto initialize(InitializeParams params)
 @("")
 void initialized()
 {
-    // Nothing to do
 }
 
 @("")
