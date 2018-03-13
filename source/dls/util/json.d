@@ -77,25 +77,32 @@ T convertFromJSON(T)(JSONValue json) if (isBoolean!T)
 {
     switch (json.type)
     {
+    case JSON_TYPE.NULL:
     case JSON_TYPE.FALSE:
         return false;
 
-    case JSON_TYPE.TRUE:
-        return true;
+    case JSON_TYPE.FLOAT:
+        return json.floating != 0;
+
+    case JSON_TYPE.INTEGER:
+        return json.integer != 0;
+
+    case JSON_TYPE.UINTEGER:
+        return json.uinteger != 0;
 
     default:
-        throw new JSONException("JSONValue is not a boolean type");
+        return true;
     }
 }
 
-T convertFromJSON(T)(JSONValue json) if (isSomeString!T)
+T convertFromJSON(T)(JSONValue json) if (isSomeChar!T || isSomeString!T)
 {
     return json.str.to!T;
 }
 
 T convertFromJSON(T : U[], U)(JSONValue json) if (isArray!T && !isSomeString!T)
 {
-    return json.array.map!(value => convertFromJSON!U(value)).array;
+    return json.array.map!(value => convertFromJSON!U(value)).array.to!T;
 }
 
 T convertFromJSON(T : U[string], U)(JSONValue json) if (isAssociativeArray!T)
@@ -150,7 +157,7 @@ Nullable!JSONValue convertToJSON(T)(T value) if (is(T == JSONValue))
 }
 
 Nullable!JSONValue convertToJSON(T)(T value)
-        if (isNumeric!T || isBoolean!T || isSomeString!T)
+        if (isNumeric!T || isBoolean!T || isSomeChar!T || isSomeString!T)
 {
     return JSONValue(value).nullable;
 }
