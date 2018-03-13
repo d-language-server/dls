@@ -1,6 +1,7 @@
 module dls.tools.code_completer;
 
-import common.messages;
+import dcd.common.messages;
+import dcd.server.autocomplete;
 import dls.protocol.definitions;
 import dls.protocol.interfaces;
 import dls.tools.tool;
@@ -10,7 +11,6 @@ import dsymbol.modulecache;
 import dub.dub;
 import dub.internal.vibecompat.core.log;
 import dub.platform;
-import server.autocomplete;
 import std.algorithm;
 import std.array;
 import std.conv;
@@ -52,15 +52,15 @@ class CodeCompleter : Tool!CodeCompleterConfiguration
 {
     version (Posix)
     {
-        private enum _dmdConfigPaths = [`/etc/dmd.conf`, `/usr/local/etc/dmd.conf`];
+        private static immutable _dmdConfigPaths = [`/etc/dmd.conf`, `/usr/local/etc/dmd.conf`];
     }
     else version (Windows)
     {
-        private enum _dmdConfigPaths = [`c:\D\dmd2\windows\bin\sc.ini`];
+        private static immutable _dmdConfigPaths = [`c:\D\dmd2\windows\bin\sc.ini`];
     }
     else
     {
-        private enum string[] _dmdConfigPaths = [];
+        private static immutable string[] _dmdConfigPaths;
     }
 
     private static ModuleCache _cache = ModuleCache(new ASTAllocator());
@@ -129,17 +129,17 @@ class CodeCompleter : Tool!CodeCompleterConfiguration
         request.sourceCode = cast(ubyte[]) document.toString();
         request.cursorPosition = document.bytePosition(position);
 
-        auto result = server.autocomplete.complete(request, _cache);
+        auto result = dcd.server.autocomplete.complete.complete(request, _cache);
         CompletionItem[] items;
 
-        foreach (res; zip(result.completions, result.completionKinds))
+        foreach (res; result.completions)
         {
             items ~= new CompletionItem();
 
             with (items[$ - 1])
             {
-                label = res[0];
-                kind = completionKinds[res[1].to!char];
+                label = res.identifier;
+                kind = completionKinds[res.kind.to!char];
             }
         }
 
