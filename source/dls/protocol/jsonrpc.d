@@ -5,6 +5,7 @@ import std.conv;
 import std.json;
 import std.stdio;
 import std.typecons;
+import std.utf;
 
 private enum jsonrpcVersion = "2.0";
 private enum eol = "\r\n";
@@ -19,8 +20,11 @@ void send(T : Message)(T m)
     auto message = convertToJSON(m);
     auto messageString = message.get().toString();
 
-    stdout.write("Content-Length: ", messageString.length.to!string, eol, eol, messageString);
-    stdout.flush();
+    foreach (chunk; ["Content-Length: ", messageString.length.to!string, eol, eol, messageString])
+    {
+        stdout.rawWrite(chunk.toUTF8());
+        stdout.flush();
+    }
 }
 
 class RequestMessage : Message

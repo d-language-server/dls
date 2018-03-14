@@ -51,7 +51,11 @@ abstract class Server
 
     static void loop()
     {
-        debug stderr.writeln("Server starting");
+        debug
+        {
+            stderr.writeln("Server starting");
+            stderr.flush();
+        }
 
         while (!stdin.eof && !_exit)
         {
@@ -81,17 +85,22 @@ abstract class Server
             if (contentLengthResult.length == 0)
             {
                 stderr.writeln(new Exception("No valid Content-Length section in header"));
+                stderr.flush();
                 continue;
             }
 
             immutable contentLength = contentLengthResult[0][1].strip().to!size_t;
             immutable content = stdin.rawRead(new char[contentLength]).idup;
             // TODO: support UTF-16/32 according to Content-Type when it's supported
-            
+
             handleJSON(content);
         }
 
-        debug stderr.writeln("Server stopping");
+        debug
+        {
+            stderr.writeln("Server stopping");
+            stderr.flush();
+        }
     }
 
     private static void handleJSON(T)(immutable(T[]) content)
