@@ -82,7 +82,7 @@ class CodeCompleter : Tool!CodeCompleterConfiguration
                 try
                 {
                     readText(confPath).matchAll(regex(`-I[^\s"]+`))
-                        .each!((m) => paths ~= std.array.replace(m.hit[2 .. $], "%@P%", confPath));
+                        .each!((m) => paths ~= m.hit[2 .. $].replace("%@P%", confPath.dirName).asNormalizedPath().to!string);
                 }
                 catch (FileException e)
                 {
