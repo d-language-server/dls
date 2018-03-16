@@ -10,6 +10,18 @@ import std.algorithm;
 import std.json;
 import std.path;
 
+@serverRequest void workspaceFolders(Nullable!(WorkspaceFolder[]) folders)
+{
+}
+
+void didChangeWorkspaceFolders(DidChangeWorkspaceFoldersParams params)
+{
+}
+
+@serverRequest void configuration(JSONValue[] config)
+{
+}
+
 void didChangeConfiguration(DidChangeConfigurationParams params)
 {
     if ("d" in params.settings && "dls" in params.settings["d"])

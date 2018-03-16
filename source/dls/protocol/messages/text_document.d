@@ -38,7 +38,7 @@ void didClose(DidCloseTextDocumentParams params)
     Document.close(params.textDocument);
 }
 
-auto completion(TextDocumentPositionParams params)
+auto completion(CompletionParams params)
 {
     return CodeCompleter.complete(new Uri(params.textDocument.uri), params.position);
 }
@@ -61,6 +61,24 @@ auto signatureHelp(TextDocumentPositionParams params)
     return result;
 }
 
+auto definition(TextDocumentPositionParams params)
+{
+    auto result = new Location();
+    return result.nullable;
+}
+
+auto typeDefinition(TextDocumentPositionParams params)
+{
+    auto result = new Location();
+    return result.nullable;
+}
+
+auto implementation(TextDocumentPositionParams params)
+{
+    auto result = new Location();
+    return result.nullable;
+}
+
 auto references(ReferenceParams params)
 {
     Location[] result;
@@ -77,29 +95,6 @@ auto documentSymbol(DocumentSymbolParams params)
 {
     SymbolInformation[] result;
     return result;
-}
-
-auto formatting(DocumentFormattingParams params)
-{
-    return Formatter.format(new Uri(params.textDocument.uri), params.options);
-}
-
-auto rangeFormatting(DocumentRangeFormattingParams params)
-{
-    TextEdit[] result;
-    return result;
-}
-
-auto onTypeFormatting(DocumentOnTypeFormattingParams params)
-{
-    TextEdit[] result;
-    return result;
-}
-
-auto definition(TextDocumentPositionParams params)
-{
-    auto result = new Location();
-    return result.nullable;
 }
 
 auto codeAction(CodeActionParams params)
@@ -130,6 +125,35 @@ auto documentLink(DocumentLinkParams params)
 auto documentLink_resolve(DocumentLink link)
 {
     return link;
+}
+
+auto documentColor(DocumentColorParams params)
+{
+    ColorInformation[] result;
+    return result;
+}
+
+auto colorPresentation(ColorPresentationParams params)
+{
+    ColorPresentation[] result;
+    return result;
+}
+
+auto formatting(DocumentFormattingParams params)
+{
+    return Formatter.format(new Uri(params.textDocument.uri), params.options);
+}
+
+auto rangeFormatting(DocumentRangeFormattingParams params)
+{
+    TextEdit[] result;
+    return result;
+}
+
+auto onTypeFormatting(DocumentOnTypeFormattingParams params)
+{
+    TextEdit[] result;
+    return result;
 }
 
 auto rename(RenameParams params)

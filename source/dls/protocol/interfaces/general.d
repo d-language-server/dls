@@ -1,6 +1,7 @@
 module dls.protocol.interfaces.general;
 
 public import dls.protocol.definitions;
+import dls.protocol.interfaces.text_document;
 
 private class WithDynamicRegistration
 {
@@ -55,10 +56,18 @@ class TextDocumentClientCapabilities
         {
             Nullable!bool snippetSupport;
             Nullable!bool commitCharactersSupport;
+            Nullable!(MarkupKind[]) documentationFormat;
+        }
+
+        static class CompletionItemKind
+        {
+            Nullable!(dls.protocol.interfaces.text_document.CompletionItemKind[]) valueSet;
         }
 
         Nullable!bool dynamicRegistration;
         Nullable!CompletionItem completionItem;
+        Nullable!CompletionItemKind completionItemKind;
+        Nullable!bool contextSupport;
     }
 
     Nullable!Synchronisation synchronisation;

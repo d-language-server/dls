@@ -97,3 +97,15 @@ class DocumentFilter
 }
 
 alias DocumentSelector = DocumentFilter[];
+
+enum MarkupKind
+{
+    plaintext = "plaintext",
+    markdown = "markdown"
+}
+
+class MarkupContent
+{
+    MarkupContent content;
+    string value;
+}

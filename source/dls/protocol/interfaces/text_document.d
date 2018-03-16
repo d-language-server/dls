@@ -2,12 +2,6 @@ module dls.protocol.interfaces.text_document;
 
 public import dls.protocol.definitions;
 
-class PublishDiagnosticsParams
-{
-    DocumentUri uri;
-    Diagnostic[] diagnostics;
-}
-
 class DidOpenTextDocumentParams
 {
     TextDocumentItem textDocument = new TextDocumentItem();
@@ -49,6 +43,30 @@ class DidSaveTextDocumentParams : ParamsBase
 }
 
 alias DidCloseTextDocumentParams = ParamsBase;
+
+class PublishDiagnosticsParams
+{
+    DocumentUri uri;
+    Diagnostic[] diagnostics;
+}
+
+class CompletionParams : TextDocumentPositionParams
+{
+    Nullable!CompletionContext context;
+}
+
+class CompletionContext
+{
+    CompletionTriggerKind triggerKind;
+    Nullable!string triggerCharacter;
+}
+
+enum CompletionTriggerKind
+{
+    invoked = 1,
+    triggerCharacter = 2,
+    triggerForIncompleteCompletions = 3
+}
 
 class CompletionList
 {
@@ -98,7 +116,14 @@ enum CompletionItemKind
     snippet = 15,
     color = 16,
     file = 17,
-    reference = 18
+    reference = 18,
+    folder = 19,
+    enumMember = 20,
+    constant = 21,
+    struct_ = 22,
+    event = 23,
+    operator = 24,
+    typeParameter = 25
 }
 
 class Hover
@@ -179,29 +204,15 @@ enum SymbolKind
     string_ = 15,
     number = 16,
     boolean = 17,
-    array = 18
-}
-
-class DocumentFormattingParams : ParamsBase
-{
-    FormattingOptions options = new FormattingOptions();
-}
-
-class FormattingOptions
-{
-    size_t tabSize;
-    bool insertSpaces;
-}
-
-class DocumentRangeFormattingParams : DocumentFormattingParams
-{
-    Range range = new Range();
-}
-
-class DocumentOnTypeFormattingParams : DocumentFormattingParams
-{
-    Position position = new Position();
-    string ch;
+    array = 18,
+    object = 19,
+    key = 20,
+    null_ = 21,
+    enumMember = 22,
+    struct_ = 23,
+    event = 24,
+    operator = 25,
+    typeParameter = 26
 }
 
 class CodeActionParams : ParamsBase
@@ -230,6 +241,61 @@ class DocumentLink
 {
     Range range = new Range();
     Nullable!DocumentUri target;
+}
+
+class DocumentColorParams
+{
+    TextDocumentIdentifier textDocument;
+}
+
+class ColorInformation
+{
+    Range range;
+    Color color;
+}
+
+class Color
+{
+    float red;
+    float green;
+    float blue;
+    float alpha;
+}
+
+class ColorPresentationParams
+{
+    TextDocumentIdentifier textDocument;
+    Color colorInfo;
+    Range range;
+}
+
+class ColorPresentation
+{
+    string label;
+    Nullable!TextEdit textEdit;
+    Nullable!(TextEdit[]) additionalTextEdits;
+}
+
+class DocumentFormattingParams : ParamsBase
+{
+    FormattingOptions options = new FormattingOptions();
+}
+
+class FormattingOptions
+{
+    size_t tabSize;
+    bool insertSpaces;
+}
+
+class DocumentRangeFormattingParams : DocumentFormattingParams
+{
+    Range range = new Range();
+}
+
+class DocumentOnTypeFormattingParams : DocumentFormattingParams
+{
+    Position position = new Position();
+    string ch;
 }
 
 class RenameParams : ParamsBase
