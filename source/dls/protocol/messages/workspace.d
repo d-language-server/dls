@@ -1,9 +1,9 @@
 module dls.protocol.messages.workspace;
 
-import dls.protocol.configuration;
 import dls.protocol.handlers;
 import dls.protocol.interfaces;
 import dls.tools.code_completer;
+import dls.tools.configuration;
 import dls.util.json;
 import dls.util.uri;
 import std.algorithm;

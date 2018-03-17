@@ -2,9 +2,9 @@ module dls.tools.code_completer;
 
 import dcd.common.messages;
 import dcd.server.autocomplete;
-import dls.protocol.configuration;
 import dls.protocol.definitions;
 import dls.protocol.interfaces;
+import dls.tools.configuration;
 import dls.tools.tool;
 import dls.util.document;
 import dls.util.uri;
@@ -147,8 +147,4 @@ class CodeCompleter : Tool
 
         return items.uniq!((a, b) => a.label == b.label).array;
     }
-}
-
-class CodeCompleterConfiguration
-{
 }

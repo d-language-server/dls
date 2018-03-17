@@ -4,6 +4,7 @@ import dfmt.config;
 import dfmt.editorconfig;
 import dfmt.formatter;
 import dls.protocol.interfaces;
+import dls.tools.configuration;
 import dls.tools.tool;
 import dls.util.document;
 import dls.util.uri;
@@ -11,16 +12,18 @@ import std.algorithm;
 import std.outbuffer;
 import std.range;
 
-private immutable EOL[FormatterConfiguration.EndOfLine] eolMap;
-private immutable BraceStyle[FormatterConfiguration.BraceStyle] braceStyleMap;
+private immutable EOL[Configuration.FormatterConfiguration.EndOfLine] eolMap;
+private immutable BraceStyle[Configuration.FormatterConfiguration.BraceStyle] braceStyleMap;
 
 static this()
 {
-    eolMap = [FormatterConfiguration.EndOfLine.lf : EOL.lf, FormatterConfiguration.EndOfLine.cr
-        : EOL.cr, FormatterConfiguration.EndOfLine.crlf : EOL.crlf];
-    braceStyleMap = [FormatterConfiguration.BraceStyle.allman
-        : BraceStyle.allman, FormatterConfiguration.BraceStyle.otbs
-        : BraceStyle.otbs, FormatterConfiguration.BraceStyle.stroustrup : BraceStyle.stroustrup];
+    eolMap = [Configuration.FormatterConfiguration.EndOfLine.lf : EOL.lf,
+        Configuration.FormatterConfiguration.EndOfLine.cr : EOL.cr,
+        Configuration.FormatterConfiguration.EndOfLine.crlf : EOL.crlf];
+    braceStyleMap = [Configuration.FormatterConfiguration.BraceStyle.allman
+        : BraceStyle.allman, Configuration.FormatterConfiguration.BraceStyle.otbs
+        : BraceStyle.otbs, Configuration.FormatterConfiguration.BraceStyle.stroustrup
+        : BraceStyle.stroustrup];
 }
 
 class Formatter : Tool
@@ -69,34 +72,4 @@ class Formatter : Tool
 
         return [result];
     }
-}
-
-class FormatterConfiguration
-{
-    static enum BraceStyle
-    {
-        allman = "allman",
-        otbs = "otbs",
-        stroustrup = "stroustrup"
-    }
-
-    static enum EndOfLine
-    {
-        lf = "lf",
-        cr = "cr",
-        crlf = "crlf"
-    }
-
-    EndOfLine endOfLine = EndOfLine.lf;
-    int maxLineLength = 120;
-    BraceStyle dfmtBraceStyle = BraceStyle.allman;
-    int dfmtSoftMaxLineLength = 80;
-    bool dfmtAlignSwitchStatements = true;
-    bool dfmtOutdentAttributes = true;
-    bool dfmtSplitOperatorAtLineEnd = false;
-    bool dfmtSpaceAfterCast = true;
-    bool dfmtSpaceAfterKeywords = true;
-    bool dfmtSpaceBeforeFunctionParameters = false;
-    bool dfmtSelectiveImportSpace = true;
-    bool dfmtCompactLabeledStatements = true;
 }

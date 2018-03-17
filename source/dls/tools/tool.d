@@ -1,6 +1,6 @@
 module dls.tools.tool;
 
-import dls.protocol.configuration;
+import dls.tools.configuration;
 
 abstract class Tool
 {
