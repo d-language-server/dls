@@ -2,7 +2,7 @@ module dls.protocol.messages.workspace;
 
 import dls.protocol.handlers;
 import dls.protocol.interfaces;
-import dls.tools.code_completer;
+import dls.tools.tools;
 import dls.tools.configuration;
 import dls.util.json;
 import dls.util.uri;
@@ -26,7 +26,7 @@ void didChangeConfiguration(DidChangeConfigurationParams params)
 {
     if ("d" in params.settings && "dls" in params.settings["d"])
     {
-        Configuration.set(convertFromJSON!Configuration(params.settings["d"]["dls"]));
+        Tools.setConfiguration(convertFromJSON!Configuration(params.settings["d"]["dls"]));
     }
 }
 
@@ -38,7 +38,7 @@ void didChangeWatchedFiles(DidChangeWatchedFilesParams params)
 
         if (["dub.json", "dub.sdl", "dub.selections.json"].canFind(baseName(uri.path)))
         {
-            CodeCompleter.importSelections(uri);
+            Tools.codeCompleter.importSelections(uri);
         }
     }
 }

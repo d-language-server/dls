@@ -4,9 +4,9 @@ import dls.tools.configuration;
 
 abstract class Tool
 {
-    protected static Configuration _configuration;
+    protected Configuration _configuration;
 
-    @property static void configuration(Configuration configuration)
+    @property void configuration(Configuration configuration)
     {
         _configuration = configuration;
     }

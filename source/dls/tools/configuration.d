@@ -8,11 +8,6 @@ class Configuration
     CodeCompleterConfiguration codeCompleter;
     FormatterConfiguration formatter;
 
-    static void set(Configuration c)
-    {
-        Tool.configuration = c;
-    }
-
     static class GeneralConfiguration
     {
         string[] importPaths;

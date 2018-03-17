@@ -22,30 +22,32 @@ import std.range;
 import std.regex;
 import std.stdio;
 
-//dfmt off
-private enum completionKinds = [
-    'c' : CompletionItemKind.class_,
-    'i' : CompletionItemKind.interface_,
-    's' : CompletionItemKind.class_,
-    'u' : CompletionItemKind.interface_,
-    'v' : CompletionItemKind.variable,
-    'm' : CompletionItemKind.field,
-    'k' : CompletionItemKind.keyword,
-    'f' : CompletionItemKind.method,
-    'g' : CompletionItemKind.enum_,
-    'e' : CompletionItemKind.field,
-    'P' : CompletionItemKind.module_,
-    'M' : CompletionItemKind.module_,
-    'a' : CompletionItemKind.value,
-    'A' : CompletionItemKind.value,
-    'l' : CompletionItemKind.variable,
-    't' : CompletionItemKind.function_,
-    'T' : CompletionItemKind.function_
-];
-//dfmt on
+private immutable CompletionItemKind[char] completionKinds;
 
 static this()
 {
+    //dfmt off
+    completionKinds = [
+        'c' : CompletionItemKind.class_,
+        'i' : CompletionItemKind.interface_,
+        's' : CompletionItemKind.class_,
+        'u' : CompletionItemKind.interface_,
+        'v' : CompletionItemKind.variable,
+        'm' : CompletionItemKind.field,
+        'k' : CompletionItemKind.keyword,
+        'f' : CompletionItemKind.method,
+        'g' : CompletionItemKind.enum_,
+        'e' : CompletionItemKind.field,
+        'P' : CompletionItemKind.module_,
+        'M' : CompletionItemKind.module_,
+        'a' : CompletionItemKind.value,
+        'A' : CompletionItemKind.value,
+        'l' : CompletionItemKind.variable,
+        't' : CompletionItemKind.function_,
+        'T' : CompletionItemKind.function_
+    ];
+    //dfmt on
+
     setLogLevel(LogLevel.none);
 }
 
@@ -64,15 +66,15 @@ class CodeCompleter : Tool
         private static immutable string[] _dmdConfigPaths;
     }
 
-    private static ModuleCache _cache = ModuleCache(new ASTAllocator());
+    private ModuleCache _cache = ModuleCache(new ASTAllocator());
 
-    @property static void configuration(Configuration config)
+    @property override void configuration(Configuration config)
     {
         Tool.configuration(config);
         _cache.addImportPaths(_configuration.general.importPaths);
     }
 
-    @property static auto importPaths()
+    @property auto importPaths()
     {
         string[] paths;
 
@@ -96,12 +98,12 @@ class CodeCompleter : Tool
         return paths.sort().uniq().array;
     }
 
-    static this()
+    this()
     {
         _cache.addImportPaths(importPaths);
     }
 
-    static void importSelections(Uri uri)
+    void importSelections(Uri uri)
     {
         auto d = new Dub(dirName(uri.path));
 
@@ -121,7 +123,7 @@ class CodeCompleter : Tool
         }
     }
 
-    static auto complete(Uri uri, Position position)
+    auto complete(Uri uri, Position position)
     {
         auto request = AutocompleteRequest();
         auto document = Document[uri];

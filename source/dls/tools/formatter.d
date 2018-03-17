@@ -28,7 +28,7 @@ static this()
 
 class Formatter : Tool
 {
-    static auto format(Uri uri, FormattingOptions options)
+    auto format(Uri uri, FormattingOptions options)
     {
         const document = Document[uri];
         auto contents = cast(ubyte[]) document.toString();

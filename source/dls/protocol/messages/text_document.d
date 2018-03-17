@@ -1,8 +1,7 @@
 module dls.protocol.messages.text_document;
 
 import dls.protocol.interfaces;
-import dls.tools.code_completer;
-import dls.tools.formatter;
+import dls.tools.tools;
 import dls.util.document;
 import dls.util.uri;
 
@@ -40,7 +39,7 @@ void didClose(DidCloseTextDocumentParams params)
 
 auto completion(CompletionParams params)
 {
-    return CodeCompleter.complete(new Uri(params.textDocument.uri), params.position);
+    return Tools.codeCompleter.complete(new Uri(params.textDocument.uri), params.position);
 }
 
 @("completionItem", "resolve")
@@ -141,7 +140,7 @@ auto colorPresentation(ColorPresentationParams params)
 
 auto formatting(DocumentFormattingParams params)
 {
-    return Formatter.format(new Uri(params.textDocument.uri), params.options);
+    return Tools.formatter.format(new Uri(params.textDocument.uri), params.options);
 }
 
 auto rangeFormatting(DocumentRangeFormattingParams params)
