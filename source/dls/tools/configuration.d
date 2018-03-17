@@ -4,9 +4,9 @@ import dls.tools.tool;
 
 class Configuration
 {
-    GeneralConfiguration general;
-    CodeCompleterConfiguration codeCompleter;
-    FormatterConfiguration formatter;
+    GeneralConfiguration general = new GeneralConfiguration();
+    CodeCompleterConfiguration codeCompleter = new CodeCompleterConfiguration();
+    FormatterConfiguration formatter = new FormatterConfiguration();
 
     static class GeneralConfiguration
     {
