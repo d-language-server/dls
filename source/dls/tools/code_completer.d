@@ -2,6 +2,7 @@ module dls.tools.code_completer;
 
 import dcd.common.messages;
 import dcd.server.autocomplete;
+import dls.protocol.configuration;
 import dls.protocol.definitions;
 import dls.protocol.interfaces;
 import dls.tools.tool;
@@ -48,7 +49,7 @@ static this()
     setLogLevel(LogLevel.none);
 }
 
-class CodeCompleter : Tool!CodeCompleterConfiguration
+class CodeCompleter : Tool
 {
     version (Posix)
     {
@@ -65,10 +66,10 @@ class CodeCompleter : Tool!CodeCompleterConfiguration
 
     private static ModuleCache _cache = ModuleCache(new ASTAllocator());
 
-    @property static void configuration(CodeCompleterConfiguration config)
+    @property static void configuration(Configuration config)
     {
-        Tool!CodeCompleterConfiguration.configuration(config);
-        _cache.addImportPaths(_configuration.importPaths);
+        Tool.configuration(config);
+        _cache.addImportPaths(_configuration.general.importPaths);
     }
 
     @property static auto importPaths()
@@ -82,7 +83,8 @@ class CodeCompleter : Tool!CodeCompleterConfiguration
                 try
                 {
                     readText(confPath).matchAll(regex(`-I[^\s"]+`))
-                        .each!((m) => paths ~= m.hit[2 .. $].replace("%@P%", confPath.dirName).asNormalizedPath().to!string);
+                        .each!((m) => paths ~= m.hit[2 .. $].replace("%@P%",
+                                confPath.dirName).asNormalizedPath().to!string);
                 }
                 catch (FileException e)
                 {
@@ -147,7 +149,6 @@ class CodeCompleter : Tool!CodeCompleterConfiguration
     }
 }
 
-class CodeCompleterConfiguration : ToolConfiguration
+class CodeCompleterConfiguration
 {
-    string[] importPaths;
 }

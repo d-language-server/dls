@@ -23,7 +23,7 @@ static this()
         : BraceStyle.otbs, FormatterConfiguration.BraceStyle.stroustrup : BraceStyle.stroustrup];
 }
 
-class Formatter : Tool!FormatterConfiguration
+class Formatter : Tool
 {
     static auto format(Uri uri, FormattingOptions options)
     {
@@ -44,20 +44,23 @@ class Formatter : Tool!FormatterConfiguration
         config.indent_style = options.insertSpaces ? IndentStyle.space : IndentStyle.tab;
         config.indent_size = cast(typeof(config.indent_size)) options.tabSize;
         config.tab_width = config.indent_size;
-        config.end_of_line = eolMap[_configuration.endOfLine];
-        config.max_line_length = _configuration.maxLineLength;
-        config.dfmt_brace_style = braceStyleMap[_configuration.dfmtBraceStyle];
-        config.dfmt_soft_max_line_length = _configuration.dfmtSoftMaxLineLength;
-        config.dfmt_align_switch_statements = toOptBool(_configuration.dfmtAlignSwitchStatements);
-        config.dfmt_outdent_attributes = toOptBool(_configuration.dfmtOutdentAttributes);
+        config.end_of_line = eolMap[_configuration.formatter.endOfLine];
+        config.max_line_length = _configuration.formatter.maxLineLength;
+        config.dfmt_brace_style = braceStyleMap[_configuration.formatter.dfmtBraceStyle];
+        config.dfmt_soft_max_line_length = _configuration.formatter.dfmtSoftMaxLineLength;
+        config.dfmt_align_switch_statements = toOptBool(
+                _configuration.formatter.dfmtAlignSwitchStatements);
+        config.dfmt_outdent_attributes = toOptBool(_configuration.formatter.dfmtOutdentAttributes);
         config.dfmt_split_operator_at_line_end = toOptBool(
-                _configuration.dfmtSplitOperatorAtLineEnd);
-        config.dfmt_space_after_cast = toOptBool(_configuration.dfmtSpaceAfterCast);
-        config.dfmt_space_after_keywords = toOptBool(_configuration.dfmtSpaceAfterKeywords);
-        // TODO: dfmtSpaceBeforeFunctionParameters is not yet implemented in dfmt
+                _configuration.formatter.dfmtSplitOperatorAtLineEnd);
+        config.dfmt_space_after_cast = toOptBool(_configuration.formatter.dfmtSpaceAfterCast);
+        config.dfmt_space_after_keywords = toOptBool(
+                _configuration.formatter.dfmtSpaceAfterKeywords);
+        config.dfmt_space_before_function_parameters = toOptBool(
+                _configuration.formatter.dfmtSpaceBeforeFunctionParameters);
         config.dfmt_selective_import_space = toOptBool(
-                _configuration.dfmtSpaceBeforeFunctionParameters);
-        config.dfmt_compact_labeled_statements = _configuration.dfmtCompactLabeledStatements
+                _configuration.formatter.dfmtSpaceBeforeFunctionParameters);
+        config.dfmt_compact_labeled_statements = _configuration.formatter.dfmtCompactLabeledStatements
             ? OptionalBoolean.t : OptionalBoolean.f;
 
         dfmt.formatter.format(uri, contents, buffer, &config);
@@ -68,7 +71,7 @@ class Formatter : Tool!FormatterConfiguration
     }
 }
 
-class FormatterConfiguration : ToolConfiguration
+class FormatterConfiguration
 {
     static enum BraceStyle
     {
