@@ -70,7 +70,7 @@ class CodeCompleter : Tool
 
     @property override void configuration(Configuration config)
     {
-        Tool.configuration(config);
+        super.configuration(config);
         _cache.addImportPaths(_configuration.general.importPaths);
     }
 
