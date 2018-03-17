@@ -14,7 +14,7 @@ private RequestHandler[string] requesthandlers;
 private NotificationHandler[string] notificationHandlers;
 private ResponseHandler[string] responseHandlers;
 
-enum serverRequest;
+enum ServerRequest;
 
 /++
 Checks if a function is a `RequestHandler` or a `NotificationHandler`.
@@ -23,7 +23,7 @@ They should only be registered at startup time and will never be unregistered.
 template isStaticHandler(func...)
 {
     enum isStaticHandler = __traits(compiles, isSomeFunction!func)
-            && isSomeFunction!func && !hasUDA!(func, serverRequest);
+            && isSomeFunction!func && !hasUDA!(func, ServerRequest);
 }
 
 class HandlerNotFoundException : Exception

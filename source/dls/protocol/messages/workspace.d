@@ -10,7 +10,7 @@ import std.algorithm;
 import std.json;
 import std.path;
 
-@serverRequest void workspaceFolders(Nullable!(WorkspaceFolder[]) folders)
+@ServerRequest void workspaceFolders(Nullable!(WorkspaceFolder[]) folders)
 {
 }
 
@@ -18,7 +18,7 @@ void didChangeWorkspaceFolders(DidChangeWorkspaceFoldersParams params)
 {
 }
 
-@serverRequest void configuration(JSONValue[] config)
+@ServerRequest void configuration(JSONValue[] config)
 {
 }
 
@@ -55,6 +55,6 @@ auto executeCommand(ExecuteCommandParams params)
     return result;
 }
 
-@serverRequest void applyEdit(ApplyWorkspaceEditResponse response)
+@ServerRequest void applyEdit(ApplyWorkspaceEditResponse response)
 {
 }
