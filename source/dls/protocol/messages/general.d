@@ -2,6 +2,8 @@ module dls.protocol.messages.general;
 
 import dls.protocol.interfaces;
 import dls.server;
+import dls.tools.tools;
+import dls.util.uri;
 import std.json;
 
 @("")
@@ -11,6 +13,13 @@ auto initialize(InitializeParams params)
 
     Server.initialized = true;
     Server.initState = params;
+
+    if (!params.rootUri.isNull())
+    {
+        auto rootUri = new Uri(params.rootUri);
+        Tools.codeCompleter.importPath(rootUri);
+        Tools.codeCompleter.importSelections(rootUri);
+    }
 
     with (result)
     {

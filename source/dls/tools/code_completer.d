@@ -55,15 +55,18 @@ class CodeCompleter : Tool
 {
     version (Posix)
     {
-        private static immutable _dmdConfigPaths = [`/etc/dmd.conf`, `/usr/local/etc/dmd.conf`];
+        private static immutable _compilerConfigPaths = [
+            `/etc/dmd.conf`, `/usr/local/etc/dmd.conf`, `/etc/ldc2.conf`,
+            `/usr/local/etc/ldc2.conf`
+        ];
     }
     else version (Windows)
     {
-        private static immutable _dmdConfigPaths = [`c:\D\dmd2\windows\bin\sc.ini`];
+        private static immutable _compilerConfigPaths = [`c:\D\dmd2\windows\bin\sc.ini`];
     }
     else
     {
-        private static immutable string[] _dmdConfigPaths;
+        private static immutable string[] _compilerConfigPaths;
     }
 
     private ModuleCache _cache = ModuleCache(new ASTAllocator());
@@ -78,7 +81,7 @@ class CodeCompleter : Tool
     {
         string[] paths;
 
-        foreach (confPath; _dmdConfigPaths)
+        foreach (confPath; _compilerConfigPaths)
         {
             if (exists(confPath))
             {
@@ -87,6 +90,7 @@ class CodeCompleter : Tool
                     readText(confPath).matchAll(regex(`-I[^\s"]+`))
                         .each!((m) => paths ~= m.hit[2 .. $].replace("%@P%",
                                 confPath.dirName).asNormalizedPath().to!string);
+                    break;
                 }
                 catch (FileException e)
                 {
@@ -103,23 +107,42 @@ class CodeCompleter : Tool
         _cache.addImportPaths(importPaths);
     }
 
+    void importPath(Uri uri)
+    {
+        auto d = new Dub(isFile(uri.path) ? dirName(uri.path) : uri.path);
+        d.loadPackage();
+        importDirectories(d.project.rootPackage.describe(BuildPlatform.any, null, null).importPaths);
+    }
+
     void importSelections(Uri uri)
     {
-        auto d = new Dub(dirName(uri.path));
-
+        auto d = new Dub(isFile(uri.path) ? dirName(uri.path) : uri.path);
         d.loadPackage();
         d.upgrade(UpgradeOptions.select);
 
-        auto project = d.project;
+        const project = d.project;
 
         foreach (dep; project.dependencies)
         {
-            auto desc = dep.describe(BuildPlatform.any, null,
+            const desc = dep.describe(BuildPlatform.any, null,
                     dep.name in project.rootPackage.recipe.buildSettings.subConfigurations
                     ? project.rootPackage.recipe.buildSettings.subConfigurations[dep.name] : null);
 
-            _cache.addImportPaths(desc.importPaths.map!((importPath) => buildPath(dep.path.toString(),
-                    importPath)).array);
+            auto newImportPaths = desc.importPaths.map!(
+                    (importPath) => buildPath(dep.path.toString(), importPath));
+
+            importDirectories(newImportPaths.array);
+        }
+    }
+
+    private void importDirectories(string[] paths)
+    {
+        foreach (path; paths)
+        {
+            if (!_cache.getImportPaths().canFind(path))
+            {
+                _cache.addImportPaths([path]);
+            }
         }
     }
 
@@ -147,6 +170,6 @@ class CodeCompleter : Tool
             }
         }
 
-        return items.uniq!((a, b) => a.label == b.label).array;
+        return items.sort!((a, b) => a.label < b.label).uniq!((a, b) => a.label == b.label).array;
     }
 }
