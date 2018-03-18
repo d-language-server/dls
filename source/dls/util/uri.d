@@ -2,6 +2,7 @@ module dls.util.uri;
 
 import dls.protocol.definitions;
 import std.regex;
+import std.uri;
 
 class Uri
 {
@@ -21,7 +22,7 @@ class Uri
 
     this(DocumentUri uri)
     {
-        auto matches = matchAll(uri, _reg);
+        auto matches = matchAll(decodeComponent(uri), _reg);
 
         //dfmt off
         _uri        = uri;
@@ -31,6 +32,14 @@ class Uri
         _query      = matches.front[4];
         _fragment   = matches.front[5];
         //dfmt on
+
+        version (Windows)
+        {
+            if (_path.length && _path[0] == '/')
+            {
+                _path = _path[1 .. $];
+            }
+        }
     }
 
     override string toString() const
