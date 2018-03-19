@@ -10,6 +10,7 @@ import std.meta;
 import std.stdio;
 import std.string;
 import std.traits;
+import std.uuid;
 
 static this()
 {
@@ -22,16 +23,24 @@ static this()
         {
             mixin("alias t = " ~ thing ~ ";");
 
-            static if (isStaticHandler!t)
+            static if (isHandler!t)
             {
-                enum attrs = tuple(__traits(getAttributes, t));
+                static if (!hasUDA!(t, ServerRequest))
+                {
+                    enum attrs = tuple(__traits(getAttributes, t));
+                }
+                else
+                {
+                    enum attrs = tuple();
+                }
+
                 enum attrsWithDefaults = tuple(modName[0] ~ modName.split('_')
                             .map!capitalize().join()[1 .. $], thing, attrs.expand);
                 enum parts = tuple(attrsWithDefaults[attrs.length > 0 ? 2 : 0],
                             attrsWithDefaults[attrs.length > 1 ? 3 : 1]);
                 enum method = select!(parts[0].length != 0)(parts[0] ~ "/", "") ~ parts[1];
 
-                pushHandler(method, &t);
+                pushHandler!(hasUDA!(t, ServerRequest))(method, &t);
             }
         }
     }
@@ -169,10 +178,24 @@ abstract class Server
         }
     }
 
-    /++ Sends a request message. +/
-    static void send(JSONValue id, string method, Nullable!JSONValue params = Nullable!JSONValue())
+    /++ Sends a request or a notification message. +/
+    static void send(string method, Nullable!JSONValue params)
     {
-        send!RequestMessage(id, method, params, Nullable!ResponseError());
+        if (hasRegisterHandler(method))
+        {
+            auto id = "dls-" ~ randomUUID().toString();
+            pushHandler(JSONValue(id), method);
+            send!RequestMessage(JSONValue(id), method, params, Nullable!ResponseError());
+        }
+        else
+        {
+            send!NotificationMessage(JSONValue(), method, params, Nullable!ResponseError());
+        }
+    }
+
+    static void send(T)(string method, T params) if (!is(T : Nullable!JSONValue))
+    {
+        send(method, convertToJSON(params).nullable);
     }
 
     /++ Sends a response message. +/
@@ -180,12 +203,6 @@ abstract class Server
             Nullable!ResponseError error = Nullable!ResponseError())
     {
         send!ResponseMessage(id, null, result, error);
-    }
-
-    /++ Sends a notification message. +/
-    static void send(string method, Nullable!JSONValue params)
-    {
-        send!NotificationMessage(JSONValue(), method, params, Nullable!ResponseError());
     }
 
     private static void send(T : Message)(JSONValue id, string method,
