@@ -1,9 +1,9 @@
 module dls.protocol.messages.text_document;
 
 import dls.protocol.interfaces;
-import dls.tools.tools;
-import dls.util.document;
-import dls.util.uri;
+import dls.tools.tools : Tools;
+import dls.util.document : Document;
+import dls.util.uri : Uri;
 
 void didOpen(DidOpenTextDocumentParams params)
 {

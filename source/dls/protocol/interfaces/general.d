@@ -1,7 +1,7 @@
 module dls.protocol.interfaces.general;
 
 public import dls.protocol.definitions;
-import dls.protocol.interfaces.text_document;
+import dls.protocol.interfaces.text_document : CompletionItemKind;
 
 private class WithDynamicRegistration
 {

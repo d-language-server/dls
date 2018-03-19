@@ -1,11 +1,11 @@
 module dls.tools.tools;
 
-import dls.tools.code_completer;
-import dls.tools.configuration;
-import dls.tools.formatter;
-
 final class Tools
 {
+    import dls.tools.code_completer : CodeCompleter;
+    import dls.tools.configuration : Configuration;
+    import dls.tools.formatter : Formatter;
+
     static CodeCompleter codeCompleter;
     static Formatter formatter;
 

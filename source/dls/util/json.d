@@ -1,11 +1,11 @@
 module dls.util.json;
 
-import std.algorithm;
-import std.array;
-import std.conv;
+import std.algorithm : map;
+import std.array : array;
+import std.conv : to;
 import std.json;
 import std.traits;
-import std.typecons;
+import std.typecons : Nullable, nullable;
 
 /++
 Converts a `JSONValue` to an object of type `T` by filling its fields with the JSON's fields.

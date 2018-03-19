@@ -1,9 +1,9 @@
 module dls.tools.tool;
 
-import dls.tools.configuration;
-
 abstract class Tool
 {
+    import dls.tools.configuration : Configuration;
+
     protected Configuration _configuration;
 
     @property void configuration(Configuration configuration)

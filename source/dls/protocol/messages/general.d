@@ -1,10 +1,7 @@
 module dls.protocol.messages.general;
 
 import dls.protocol.interfaces;
-import dls.server;
-import dls.tools.tools;
-import dls.util.uri;
-import std.json;
+import dls.server : Server;
 
 @("")
 auto initialize(InitializeParams params)
@@ -16,6 +13,9 @@ auto initialize(InitializeParams params)
 
     if (!params.rootUri.isNull())
     {
+        import dls.tools.tools : Tools;
+        import dls.util.uri : Uri;
+
         auto rootUri = new Uri(params.rootUri);
         Tools.codeCompleter.importPath(rootUri);
         Tools.codeCompleter.importSelections(rootUri);

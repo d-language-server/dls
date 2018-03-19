@@ -1,7 +1,5 @@
 module dls.tools.configuration;
 
-import dls.tools.tool;
-
 class Configuration
 {
     GeneralConfiguration general = new GeneralConfiguration();

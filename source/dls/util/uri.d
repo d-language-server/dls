@@ -1,11 +1,10 @@
 module dls.util.uri;
 
-import dls.protocol.definitions;
-import std.regex;
-import std.uri;
-
 class Uri
 {
+    import dls.protocol.definitions : DocumentUri;
+    import std.regex : matchAll, regex;
+
     private static enum _reg = regex(
                 `([\w-]+)://([\w.]+(?::\d+)?)?([^\?#]+)(?:\?([\w=&]+))?(?:#([\w-]+))?`);
     private string _uri;
@@ -22,6 +21,8 @@ class Uri
 
     this(DocumentUri uri)
     {
+        import std.uri : decodeComponent;
+
         auto matches = matchAll(decodeComponent(uri), _reg);
 
         //dfmt off

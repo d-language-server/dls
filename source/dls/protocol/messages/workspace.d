@@ -1,14 +1,8 @@
 module dls.protocol.messages.workspace;
 
-import dls.protocol.handlers;
+import dls.protocol.handlers : ServerRequest;
 import dls.protocol.interfaces;
-import dls.tools.tools;
-import dls.tools.configuration;
-import dls.util.json;
-import dls.util.uri;
-import std.algorithm;
-import std.json;
-import std.path;
+import dls.tools.tools : Tools;
 
 @ServerRequest void workspaceFolders(Nullable!(WorkspaceFolder[]) folders)
 {
@@ -24,6 +18,9 @@ void didChangeWorkspaceFolders(DidChangeWorkspaceFoldersParams params)
 
 void didChangeConfiguration(DidChangeConfigurationParams params)
 {
+    import dls.tools.configuration : Configuration;
+    import dls.util.json : convertFromJSON;
+
     if ("d" in params.settings && "dls" in params.settings["d"])
     {
         Tools.setConfiguration(convertFromJSON!Configuration(params.settings["d"]["dls"]));
@@ -32,6 +29,10 @@ void didChangeConfiguration(DidChangeConfigurationParams params)
 
 void didChangeWatchedFiles(DidChangeWatchedFilesParams params)
 {
+    import dls.util.uri : Uri;
+    import std.algorithm : canFind;
+    import std.path : baseName;
+
     foreach (event; params.changes)
     {
         auto uri = new Uri(event.uri);

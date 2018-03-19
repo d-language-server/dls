@@ -1,35 +1,44 @@
 module dls.tools.formatter;
 
-import dfmt.config;
-import dfmt.editorconfig;
+import dfmt.config : BraceStyle;
+import dfmt.editorconfig : EOL;
 import dfmt.formatter;
-import dls.protocol.interfaces;
-import dls.tools.configuration;
-import dls.tools.tool;
-import dls.util.document;
-import dls.util.uri;
-import std.algorithm;
-import std.outbuffer;
-import std.range;
+import dls.tools.configuration : Configuration;
+import dls.tools.tool : Tool;
 
 private immutable EOL[Configuration.FormatterConfiguration.EndOfLine] eolMap;
 private immutable BraceStyle[Configuration.FormatterConfiguration.BraceStyle] braceStyleMap;
 
 static this()
 {
-    eolMap = [Configuration.FormatterConfiguration.EndOfLine.lf : EOL.lf,
-        Configuration.FormatterConfiguration.EndOfLine.cr : EOL.cr,
-        Configuration.FormatterConfiguration.EndOfLine.crlf : EOL.crlf];
-    braceStyleMap = [Configuration.FormatterConfiguration.BraceStyle.allman
-        : BraceStyle.allman, Configuration.FormatterConfiguration.BraceStyle.otbs
-        : BraceStyle.otbs, Configuration.FormatterConfiguration.BraceStyle.stroustrup
-        : BraceStyle.stroustrup];
+    //dfmt off
+    eolMap = [
+        Configuration.FormatterConfiguration.EndOfLine.lf   : EOL.lf,
+        Configuration.FormatterConfiguration.EndOfLine.cr   : EOL.cr,
+        Configuration.FormatterConfiguration.EndOfLine.crlf : EOL.crlf
+    ];
+
+    braceStyleMap = [
+        Configuration.FormatterConfiguration.BraceStyle.allman     : BraceStyle.allman,
+        Configuration.FormatterConfiguration.BraceStyle.otbs       : BraceStyle.otbs,
+        Configuration.FormatterConfiguration.BraceStyle.stroustrup : BraceStyle.stroustrup
+    ];
+    //dfmt on
 }
 
 class Formatter : Tool
 {
+    import dls.protocol.interfaces.text_document : FormattingOptions;
+    import dls.util.uri : Uri;
+
     auto format(Uri uri, FormattingOptions options)
     {
+        import dfmt.config : Config;
+        import dfmt.editorconfig : IndentStyle, OptionalBoolean;
+        import dls.protocol.definitions : TextEdit;
+        import dls.util.document : Document;
+        import std.outbuffer : OutBuffer;
+
         const document = Document[uri];
         auto contents = cast(ubyte[]) document.toString();
         auto config = Config();
@@ -67,7 +76,6 @@ class Formatter : Tool
             ? OptionalBoolean.t : OptionalBoolean.f;
 
         dfmt.formatter.format(uri, contents, buffer, &config);
-
         result.newText = buffer.toString();
 
         return [result];

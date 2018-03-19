@@ -1,19 +1,17 @@
 module dls.server;
 
 import dls.protocol.handlers;
-import dls.protocol.interfaces;
 import dls.protocol.jsonrpc;
-import dls.util.json;
-import std.algorithm;
-import std.conv;
-import std.meta;
-import std.stdio;
-import std.string;
-import std.traits;
-import std.uuid;
 
 static this()
 {
+    import std.algorithm : map;
+    import std.array : join, split;
+    import std.meta : AliasSeq;
+    import std.traits : hasUDA, select;
+    import std.typecons : tuple;
+    import std.string : capitalize;
+
     foreach (modName; AliasSeq!("general", "client", "text_document", "window", "workspace"))
     {
         mixin("import dls.protocol.messages" ~ (modName.length ? "." ~ modName : "") ~ ";");
@@ -48,6 +46,12 @@ static this()
 
 abstract class Server
 {
+    import dls.protocol.interfaces : InitializeParams;
+    import std.algorithm : find, findSplit;
+    import std.json : JSONValue;
+    import std.typecons : Nullable;
+    import std.string : strip, stripRight;
+
     private static bool _initialized = false;
     private static bool _shutdown = false;
     private static bool _exit = false;
@@ -60,6 +64,9 @@ abstract class Server
 
     static void loop()
     {
+        import std.conv : to;
+        import std.stdio : stderr, stdin;
+
         debug
         {
             stderr.writeln("Server starting");
@@ -68,7 +75,7 @@ abstract class Server
 
         while (!stdin.eof && !_exit)
         {
-            string[][] headers = [];
+            string[][] headers;
             string line;
 
             do
@@ -114,6 +121,10 @@ abstract class Server
 
     private static void handleJSON(T)(immutable(T[]) content)
     {
+        import dls.util.json : convertFromJSON;
+        import std.json : JSONException, parseJSON;
+        import std.typecons : nullable;
+
         RequestMessage request;
 
         try
@@ -181,7 +192,10 @@ abstract class Server
     /++ Sends a request or a notification message. +/
     static void send(string method, Nullable!JSONValue params)
     {
-        if (hasRegisterHandler(method))
+        import dls.protocol.handlers : hasRegisteredHandler, pushHandler;
+        import std.uuid : randomUUID;
+
+        if (hasRegisteredHandler(method))
         {
             auto id = "dls-" ~ randomUUID().toString();
             pushHandler(JSONValue(id), method);
@@ -195,6 +209,8 @@ abstract class Server
 
     static void send(T)(string method, T params) if (!is(T : Nullable!JSONValue))
     {
+        import dls.util.json : convertToJSON;
+
         send(method, convertToJSON(params).nullable);
     }
 
@@ -208,6 +224,10 @@ abstract class Server
     private static void send(T : Message)(JSONValue id, string method,
             Nullable!JSONValue payload, Nullable!ResponseError error)
     {
+        import dls.protocol.jsonrpc : send;
+        import std.meta : AliasSeq;
+        import std.traits : select;
+
         auto message = new T();
 
         __traits(getMember, message, select!(__traits(hasMember, T,
@@ -221,6 +241,6 @@ abstract class Server
             }
         }
 
-        dls.protocol.jsonrpc.send(message);
+        send(message);
     }
 }

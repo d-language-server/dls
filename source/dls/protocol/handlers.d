@@ -1,10 +1,9 @@
 module dls.protocol.handlers;
 
-import dls.protocol.jsonrpc;
-import dls.util.json;
-public import std.json;
-import std.traits;
+public import std.json : JSONValue;
 public import std.typecons;
+
+import std.traits;
 
 alias RequestHandler = Nullable!JSONValue delegate(Nullable!JSONValue);
 alias NotificationHandler = void delegate(Nullable!JSONValue);
@@ -39,7 +38,7 @@ Checks if a method has a handler registered for it. Used to determine if the
 server should send a request or a notification to the client (if the method has
 a handler, then the server will expect a response and thus send a request).
 +/
-bool hasRegisterHandler(string method)
+bool hasRegisteredHandler(string method)
 {
     return (method in requestHandlers) || (method in notificationHandlers)
         || (method in responseHandlers);
@@ -67,6 +66,8 @@ void pushHandler(bool serverRequest, F)(string method, F func)
     }
 
     pusher(method, (Nullable!JSONValue params) {
+        import dls.util.json : convertFromJSON, convertToJSON;
+
         static if ((Parameters!F).length == 0)
         {
             enum args = tuple().expand;

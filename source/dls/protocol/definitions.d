@@ -1,7 +1,7 @@
 module dls.protocol.definitions;
 
-public import std.json;
-public import std.typecons;
+public import std.json : JSONValue;
+public import std.typecons : Nullable, nullable;
 
 alias DocumentUri = string;
 

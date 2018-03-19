@@ -1,11 +1,7 @@
 module dls.protocol.jsonrpc;
 
-import dls.util.json;
-import std.conv;
-import std.json;
-import std.stdio;
+import std.json : JSONValue;
 import std.typecons;
-import std.utf;
 
 private enum jsonrpcVersion = "2.0";
 private enum eol = "\r\n";
@@ -17,6 +13,11 @@ abstract class Message
 
 void send(T : Message)(T m)
 {
+    import dls.util.json : convertToJSON;
+    import std.conv : to;
+    import std.stdio : stdout;
+    import std.utf : toUTF8;
+
     auto message = convertToJSON(m);
     auto messageString = message.get().toString();
 

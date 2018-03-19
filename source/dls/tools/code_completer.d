@@ -1,31 +1,16 @@
 module dls.tools.code_completer;
 
-import dcd.common.messages;
-import dcd.server.autocomplete;
-import dls.protocol.definitions;
-import dls.protocol.interfaces;
-import dls.tools.configuration;
-import dls.tools.tool;
-import dls.util.document;
-import dls.util.uri;
-import dsymbol.modulecache;
-import dub.dub;
-import dub.internal.vibecompat.core.log;
-import dub.platform;
+import dls.protocol.interfaces.text_document : CompletionItemKind;
+import dls.tools.tool : Tool;
 import std.algorithm;
-import std.array;
-import std.conv;
-import std.file;
-import std.experimental.allocator;
 import std.path;
-import std.range;
-import std.regex;
-import std.stdio;
 
 private immutable CompletionItemKind[char] completionKinds;
 
 static this()
 {
+    import dub.internal.vibecompat.core.log : LogLevel, setLogLevel;
+
     //dfmt off
     completionKinds = [
         'c' : CompletionItemKind.class_,
@@ -53,6 +38,16 @@ static this()
 
 class CodeCompleter : Tool
 {
+    import dls.protocol.definitions : Position;
+    import dls.tools.configuration : Configuration;
+    import dls.util.uri : Uri;
+    import dsymbol.modulecache : ASTAllocator, ModuleCache;
+    import dub.dub : Dub;
+    import dub.platform : BuildPlatform;
+    import std.array : array;
+    import std.conv : to;
+    import std.file : isFile;
+
     version (Posix)
     {
         private static immutable _compilerConfigPaths = [
@@ -79,6 +74,10 @@ class CodeCompleter : Tool
 
     @property auto importPaths()
     {
+        import std.file : FileException, exists, readText;
+        import std.range : replace;
+        import std.regex : matchAll, regex;
+
         string[] paths;
 
         foreach (confPath; _compilerConfigPaths)
@@ -116,6 +115,8 @@ class CodeCompleter : Tool
 
     void importSelections(Uri uri)
     {
+        import dub.dub : UpgradeOptions;
+
         auto d = new Dub(isFile(uri.path) ? dirName(uri.path) : uri.path);
         d.loadPackage();
         d.upgrade(UpgradeOptions.select);
@@ -148,6 +149,11 @@ class CodeCompleter : Tool
 
     auto complete(Uri uri, Position position)
     {
+        import dcd.common.messages : AutocompleteRequest, RequestKind;
+        import dcd.server.autocomplete : complete;
+        import dls.protocol.interfaces.text_document : CompletionItem;
+        import dls.util.document : Document;
+
         auto request = AutocompleteRequest();
         auto document = Document[uri];
 
@@ -156,7 +162,7 @@ class CodeCompleter : Tool
         request.sourceCode = cast(ubyte[]) document.toString();
         request.cursorPosition = document.bytePosition(position);
 
-        auto result = dcd.server.autocomplete.complete.complete(request, _cache);
+        auto result = complete(request, _cache);
         CompletionItem[] items;
 
         foreach (res; result.completions)
