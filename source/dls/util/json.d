@@ -25,6 +25,11 @@ T convertFromJSON(T)(JSONValue json) if (is(T == class) || is(T == struct))
         static assert(false, "Cannot convert JSON to " ~ typeid(T));
     }
 
+    if (json.type != JSON_TYPE.OBJECT)
+    {
+        return result;
+    }
+
     foreach (member; __traits(allMembers, T))
     {
         static if (__traits(getProtection, __traits(getMember, T,
@@ -59,17 +64,27 @@ T convertFromJSON(T)(JSONValue json) if (isNumeric!T)
 {
     switch (json.type)
     {
+    case JSON_TYPE.NULL:
+    case JSON_TYPE.FALSE:
+        return 0.to!T;
+
+    case JSON_TYPE.TRUE:
+        return 1.to!T;
+
+    case JSON_TYPE.FLOAT:
+        return json.floating.to!T;
+
     case JSON_TYPE.INTEGER:
         return json.integer.to!T;
 
     case JSON_TYPE.UINTEGER:
         return json.uinteger.to!T;
 
-    case JSON_TYPE.FLOAT:
-        return json.floating.to!T;
+    case JSON_TYPE.STRING:
+        return json.str.to!T;
 
     default:
-        throw new JSONException("JSONValue is not a numeric type");
+        throw new JSONException(json.toString() ~ " is not a numeric type");
     }
 }
 
@@ -95,23 +110,98 @@ T convertFromJSON(T)(JSONValue json) if (isBoolean!T)
     }
 }
 
-T convertFromJSON(T)(JSONValue json) if (isSomeChar!T || isSomeString!T)
+T convertFromJSON(T)(JSONValue json)
+        if (isSomeChar!T || isSomeString!T || is(T : string))
 {
-    return json.str.to!T;
+    switch (json.type)
+    {
+        static if (!is(T == enum))
+        {
+            static if (!isSomeChar!T)
+            {
+    case JSON_TYPE.NULL:
+                return "null";
+
+    case JSON_TYPE.FALSE:
+                return "false";
+
+    case JSON_TYPE.TRUE:
+                return "true";
+            }
+
+    case JSON_TYPE.FLOAT:
+            return json.floating.to!T;
+
+    case JSON_TYPE.INTEGER:
+            return json.integer.to!T;
+
+    case JSON_TYPE.UINTEGER:
+            return json.uinteger.to!T;
+
+    case JSON_TYPE.OBJECT:
+    case JSON_TYPE.ARRAY:
+            return json.toString().to!T;
+        }
+
+    case JSON_TYPE.STRING:
+        return json.str.to!T;
+
+    default:
+        throw new JSONException(json.toString() ~ " is not a string type");
+    }
 }
 
-T convertFromJSON(T : U[], U)(JSONValue json) if (isArray!T && !isSomeString!T)
+T convertFromJSON(T : U[], U)(JSONValue json)
+        if (isArray!T && !isSomeString!T && !is(T : string))
 {
-    return json.array.map!(value => convertFromJSON!U(value)).array.to!T;
+    switch (json.type)
+    {
+    case JSON_TYPE.NULL:
+    case JSON_TYPE.FALSE:
+    case JSON_TYPE.TRUE:
+        return [];
+
+    case JSON_TYPE.FLOAT:
+    case JSON_TYPE.INTEGER:
+    case JSON_TYPE.UINTEGER:
+    case JSON_TYPE.STRING:
+        return [convertFromJSON!U(json)];
+
+    case JSON_TYPE.ARRAY:
+        return json.array.map!(value => convertFromJSON!U(value)).array.to!T;
+
+    default:
+        throw new JSONException(json.toString() ~ " is not a string type");
+    }
 }
 
 T convertFromJSON(T : U[string], U)(JSONValue json) if (isAssociativeArray!T)
 {
     U[string] result;
 
-    foreach (string key, value; json)
+    switch (json.type)
     {
-        result[key] = convertFromJSON!U(value);
+    case JSON_TYPE.NULL:
+        return result;
+
+    case JSON_TYPE.OBJECT:
+        foreach (key, value; json.object)
+        {
+            result[key] = convertFromJSON!U(value);
+        }
+
+        break;
+
+    case JSON_TYPE.ARRAY:
+        foreach (key, value; json.array)
+        {
+            result[key] = convertFromJSON!U(value);
+        }
+
+        break;
+
+    default:
+        throw new JSONException(json.toString() ~ " is not an object type");
     }
 
     return result;
@@ -144,6 +234,11 @@ Nullable!JSONValue convertToJSON(T)(T value)
     }
 
     return result.nullable;
+}
+
+Nullable!JSONValue convertToJSON(typeof(null))
+{
+    return Nullable!JSONValue();
 }
 
 Nullable!JSONValue convertToJSON(N : Nullable!T, T)(N value)
