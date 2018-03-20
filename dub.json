@@ -7,6 +7,20 @@
 	"description": "D Language Server",
 	"copyright": "Copyright © 2017, Laurent Tréguier",
 	"license": "MIT",
+	"configurations": [
+		{
+			"name": "application",
+			"targetType": "executable",
+			"mainSourceFile": "source/main.d"
+		},
+		{
+			"name": "library",
+			"targetType": "library",
+			"excludedSourceFiles": [
+				"source/main.d"
+			]
+		}
+	],
 	"dependencies": {
 		"dub": "~>1.8.0",
 		"dcd": "~>0.9.2",
