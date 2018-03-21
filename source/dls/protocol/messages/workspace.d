@@ -7,10 +7,29 @@ import dls.tools.tools : Tools;
 
 @ServerRequest void workspaceFolders(Nullable!(WorkspaceFolder[]) folders)
 {
+    if (!folders.isNull)
+    {
+        util_importFolders(folders);
+    }
 }
 
 void didChangeWorkspaceFolders(DidChangeWorkspaceFoldersParams params)
 {
+    util_importFolders(params.event.added);
+}
+
+private void util_importFolders(WorkspaceFolder[] folders)
+{
+    import dls.util.uri : Uri;
+    import std.path : dirName;
+
+    foreach (workspaceFolder; folders)
+    {
+        auto uri = new Uri(workspaceFolder.uri);
+        logger.logf("Importing everything from %s", dirName(uri.path));
+        Tools.codeCompleter.importPath(uri);
+        Tools.codeCompleter.importSelections(uri);
+    }
 }
 
 @ServerRequest void configuration(JSONValue[] config)

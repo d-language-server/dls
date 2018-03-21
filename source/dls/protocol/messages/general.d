@@ -8,6 +8,11 @@ import dls.tools.tools : Tools;
 @("")
 auto initialize(InitializeParams params)
 {
+    import dls.tools.tools : Tools;
+    import dls.util.uri : Uri;
+    import std.algorithm : map;
+    import std.array : array;
+
     auto result = new InitializeResult();
 
     Server.initialized = true;
@@ -15,14 +20,22 @@ auto initialize(InitializeParams params)
     logger.log("Initializing server");
     Tools.initialize();
 
-    if (!params.rootUri.isNull())
-    {
-        import dls.tools.tools : Tools;
-        import dls.util.uri : Uri;
+    Uri[] uris;
 
-        auto rootUri = new Uri(params.rootUri);
-        Tools.codeCompleter.importPath(rootUri);
-        Tools.codeCompleter.importSelections(rootUri);
+    if (!params.rootUri.isNull)
+    {
+        uris ~= new Uri(params.rootUri);
+    }
+
+    if (!params.workspaceFolders.isNull)
+    {
+        uris ~= params.workspaceFolders.map!(wf => new Uri(wf.uri)).array;
+    }
+
+    foreach (uri; uris)
+    {
+        Tools.codeCompleter.importPath(uri);
+        Tools.codeCompleter.importSelections(uri);
     }
 
     with (result)
@@ -34,6 +47,7 @@ auto initialize(InitializeParams params)
             textDocumentSync = new TextDocumentSyncOptions();
             completionProvider = new CompletionOptions();
             documentFormattingProvider = true;
+            workspace = new ServerCapabilities.Workspace();
 
             with (textDocumentSync)
             {
@@ -45,6 +59,17 @@ auto initialize(InitializeParams params)
             {
                 resolveProvider = false;
                 triggerCharacters = ["."];
+            }
+
+            with (workspace)
+            {
+                workspaceFolders = new ServerCapabilities.Workspace.WorkspaceFolders();
+
+                with (workspaceFolders)
+                {
+                    supported = true;
+                    changeNotifications = JSONValue(true);
+                }
             }
         }
     }
