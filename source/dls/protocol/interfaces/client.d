@@ -13,6 +13,11 @@ class Registration : RegistrationBase
     Nullable!JSONValue registerOptions;
 }
 
+class TextDocumentRegistrationOptions
+{
+    Nullable!DocumentSelector documentSelector;
+}
+
 class RegistrationParams
 {
     Registration[] registrations;

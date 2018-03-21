@@ -2,6 +2,7 @@ module dls.protocol.interfaces.general;
 
 public import dls.protocol.definitions;
 import dls.protocol.interfaces.text_document : CompletionItemKind;
+import dls.protocol.interfaces.workspace : WorkspaceFolder;
 
 private class WithDynamicRegistration
 {
@@ -23,6 +24,7 @@ class InitializeParams
     Nullable!JSONValue initializationOptions;
     ClientCapabilities capabilities = new ClientCapabilities();
     Nullable!Trace trace;
+    Nullable!(WorkspaceFolder[]) workspaceFolders;
 }
 
 class WorkspaceClientCapabilities
@@ -38,6 +40,8 @@ class WorkspaceClientCapabilities
     Nullable!WithDynamicRegistration didChangeWatchedFiles;
     Nullable!WithDynamicRegistration symbol;
     Nullable!WithDynamicRegistration executeCommand;
+    Nullable!bool workspaceFolders;
+    Nullable!bool configuration;
 }
 
 class TextDocumentClientCapabilities
@@ -81,9 +85,12 @@ class TextDocumentClientCapabilities
     Nullable!WithDynamicRegistration rangeFormatting;
     Nullable!WithDynamicRegistration onTypeFormatting;
     Nullable!WithDynamicRegistration definition;
+    Nullable!WithDynamicRegistration typeDefinition;
+    Nullable!WithDynamicRegistration implementation;
     Nullable!WithDynamicRegistration codeAction;
     Nullable!WithDynamicRegistration codeLens;
     Nullable!WithDynamicRegistration documentLink;
+    Nullable!WithDynamicRegistration colorProvider;
     Nullable!WithDynamicRegistration rename;
 }
 
@@ -151,6 +158,10 @@ class SaveOptions
     Nullable!bool includeText;
 }
 
+class ColorProviderOptions
+{
+}
+
 class TextDocumentSyncOptions
 {
     Nullable!bool openClose;
@@ -160,13 +171,31 @@ class TextDocumentSyncOptions
     Nullable!SaveOptions save;
 }
 
+class StaticRegistrationOptions
+{
+    Nullable!string id;
+}
+
 class ServerCapabilities
 {
+    static class Workspace
+    {
+        static class WorkspaceFolders
+        {
+            Nullable!bool supported;
+            Nullable!JSONValue changeNotifications;
+        }
+
+        Nullable!WorkspaceFolders workspaceFolders;
+    }
+
     Nullable!TextDocumentSyncOptions textDocumentSync; // TODO: add TextDocumentSyncKind compatibility
     Nullable!bool hoverProvider;
     Nullable!CompletionOptions completionProvider;
     Nullable!SignatureHelpOptions signatureHelpProvider;
     Nullable!bool definitionProvider;
+    Nullable!JSONValue typeDefinitionProvider;
+    Nullable!JSONValue implementationProvider;
     Nullable!bool referencesProvider;
     Nullable!bool documentHighlightProvider;
     Nullable!bool documentSymbolProvider;
@@ -178,7 +207,9 @@ class ServerCapabilities
     Nullable!DocumentOnTypeFormattingOptions documentOnTypeFormattingProvider;
     Nullable!bool renameProvider;
     Nullable!DocumentLinkOptions documentLinkProvider;
+    Nullable!JSONValue colorProvider;
     Nullable!ExecuteCommandOptions executeCommandProvider;
+    Nullable!Workspace workspace;
     Nullable!JSONValue experimental;
 }
 
