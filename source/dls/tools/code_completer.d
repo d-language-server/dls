@@ -87,7 +87,7 @@ class CodeCompleter : Tool
                 try
                 {
                     readText(confPath).matchAll(regex(`-I[^\s"]+`))
-                        .each!((m) => paths ~= m.hit[2 .. $].replace("%@P%",
+                        .each!(m => paths ~= m.hit[2 .. $].replace("%@P%",
                                 confPath.dirName).asNormalizedPath().to!string);
                     break;
                 }
@@ -130,7 +130,7 @@ class CodeCompleter : Tool
                     ? project.rootPackage.recipe.buildSettings.subConfigurations[dep.name] : null);
 
             auto newImportPaths = desc.importPaths.map!(
-                    (importPath) => buildPath(dep.path.toString(), importPath));
+                    importPath => buildPath(dep.path.toString(), importPath));
 
             importDirectories(newImportPaths.array);
         }

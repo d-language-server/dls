@@ -461,8 +461,8 @@ unittest
 Nullable!JSONValue convertToJSON(T : U[], U)(T value)
         if (isArray!T && !isSomeString!T)
 {
-    return JSONValue(value.map!((item) => convertToJSON(item))()
-            .map!((json) => json.isNull ? JSONValue(null) : json)().array).nullable;
+    return JSONValue(value.map!(item => convertToJSON(item))()
+            .map!(json => json.isNull ? JSONValue(null) : json)().array).nullable;
 }
 
 unittest
