@@ -46,6 +46,8 @@ static this()
 
 abstract class Server
 {
+
+    import logger = std.experimental.logger;
     import dls.protocol.interfaces : InitializeParams;
     import std.algorithm : find, findSplit;
     import std.json : JSONValue;
@@ -57,6 +59,32 @@ abstract class Server
     private static bool _exit = false;
     private static InitializeParams _initState;
 
+    @property static auto initState()
+    {
+        return _initState;
+    }
+
+    @property static void initState(InitializeParams params)
+    {
+        _initState = params;
+
+        debug
+        {
+            logger.globalLogLevel = logger.LogLevel.all;
+        }
+        else
+        {
+            //dfmt off
+            immutable map = [
+                InitializeParams.Trace.off : logger.LogLevel.off,
+                InitializeParams.Trace.messages : logger.LogLevel.info,
+                InitializeParams.Trace.verbose : logger.LogLevel.all
+            ];
+            //dfmt on
+            logger.globalLogLevel = params.trace.isNull ? logger.LogLevel.off : map[params.trace];
+        }
+    }
+
     @property static void opDispatch(string name, T)(T arg)
     {
         mixin("_" ~ name ~ " = arg;");
@@ -65,13 +93,7 @@ abstract class Server
     static void loop()
     {
         import std.conv : to;
-        import std.stdio : stderr, stdin;
-
-        debug
-        {
-            stderr.writeln("Server starting");
-            stderr.flush();
-        }
+        import std.stdio : stdin;
 
         while (!stdin.eof && !_exit)
         {
@@ -100,8 +122,7 @@ abstract class Server
 
             if (contentLengthResult.length == 0)
             {
-                stderr.writeln(new Exception("No valid Content-Length section in header"));
-                stderr.flush();
+                logger.error("No valid Content-Length section in header");
                 continue;
             }
 
@@ -111,17 +132,12 @@ abstract class Server
 
             handleJSON(content);
         }
-
-        debug
-        {
-            stderr.writeln("Server stopping");
-            stderr.flush();
-        }
     }
 
     private static void handleJSON(T)(immutable(T[]) content)
     {
         import dls.util.json : convertFromJSON;
+        import std.algorithm : canFind;
         import std.json : JSONException, parseJSON;
         import std.typecons : nullable;
 
@@ -137,7 +153,8 @@ abstract class Server
                 {
                     request = convertFromJSON!RequestMessage(json);
 
-                    if (!_shutdown && (_initialized || request.method == "initialize"))
+                    if (!_shutdown && (_initialized || ["initialize",
+                            "exit"].canFind(request.method)))
                     {
                         send(request.id, handler!RequestHandler(request.method)(request.params));
                     }
@@ -165,6 +182,10 @@ abstract class Server
                 {
                     handler(response.id)(response.result);
                 }
+                else
+                {
+                    logger.error(response.error.message);
+                }
             }
         }
         catch (JSONException e)
@@ -181,7 +202,7 @@ abstract class Server
         }
     }
 
-    static void sendError(ErrorCodes error)(RequestMessage request)
+    private static void sendError(ErrorCodes error)(RequestMessage request)
     {
         if (request !is null)
         {
@@ -215,7 +236,7 @@ abstract class Server
     }
 
     /++ Sends a response message. +/
-    static void send(JSONValue id, Nullable!JSONValue result,
+    private static void send(JSONValue id, Nullable!JSONValue result,
             Nullable!ResponseError error = Nullable!ResponseError())
     {
         send!ResponseMessage(id, null, result, error);

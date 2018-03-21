@@ -1,5 +1,6 @@
 module dls.protocol.messages.text_document;
 
+import logger = std.experimental.logger;
 import dls.protocol.interfaces;
 import dls.tools.tools : Tools;
 import dls.util.document : Document;
@@ -9,6 +10,7 @@ void didOpen(DidOpenTextDocumentParams params)
 {
     if (params.textDocument.languageId == "d")
     {
+        logger.logf("Opening %s", new Uri(params.textDocument.uri).path);
         Document.open(params.textDocument);
     }
 }
@@ -39,7 +41,10 @@ void didClose(DidCloseTextDocumentParams params)
 
 auto completion(CompletionParams params)
 {
-    return Tools.codeCompleter.complete(new Uri(params.textDocument.uri), params.position);
+    auto uri = new Uri(params.textDocument.uri);
+    logger.logf("Getting completions for %s at position %s,%s", uri.path,
+            params.position.line, params.position.character);
+    return Tools.codeCompleter.complete(uri, params.position);
 }
 
 @("completionItem", "resolve")
@@ -140,7 +145,9 @@ auto colorPresentation(ColorPresentationParams params)
 
 auto formatting(DocumentFormattingParams params)
 {
-    return Tools.formatter.format(new Uri(params.textDocument.uri), params.options);
+    auto uri = new Uri(params.textDocument.uri);
+    logger.logf("Formatting %s", uri.path);
+    return Tools.formatter.format(uri, params.options);
 }
 
 auto rangeFormatting(DocumentRangeFormattingParams params)

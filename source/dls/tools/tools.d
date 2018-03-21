@@ -9,7 +9,7 @@ final class Tools
     static CodeCompleter codeCompleter;
     static Formatter formatter;
 
-    static this()
+    static void initialize()
     {
         codeCompleter = new CodeCompleter();
         formatter = new Formatter();

@@ -1,7 +1,9 @@
 module dls.protocol.messages.general;
 
+import logger = std.experimental.logger;
 import dls.protocol.interfaces;
 import dls.server : Server;
+import dls.tools.tools : Tools;
 
 @("")
 auto initialize(InitializeParams params)
@@ -10,6 +12,8 @@ auto initialize(InitializeParams params)
 
     Server.initialized = true;
     Server.initState = params;
+    logger.log("Initializing server");
+    Tools.initialize();
 
     if (!params.rootUri.isNull())
     {
@@ -56,6 +60,7 @@ void initialized()
 @("")
 auto shutdown()
 {
+    logger.log("Shutting down server");
     Server.shutdown = true;
     return JSONValue(null);
 }
@@ -63,6 +68,7 @@ auto shutdown()
 @("")
 void exit()
 {
+    logger.log("Exiting server");
     Server.exit = true;
 }
 
