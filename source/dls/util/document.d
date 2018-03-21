@@ -6,7 +6,6 @@ import dls.protocol.interfaces;
 class Document
 {
     private static Document[DocumentUri] _documents;
-    private DocumentUri _uri;
     private wchar[][] _lines;
 
     static auto opIndex(DocumentUri uri)
@@ -36,11 +35,6 @@ class Document
         }
     }
 
-    @property auto uri() const
-    {
-        return this._uri;
-    }
-
     @property auto lines() const
     {
         return this._lines;
@@ -48,7 +42,6 @@ class Document
 
     this(TextDocumentItem textDocument)
     {
-        this._uri = textDocument.uri;
         this._lines = this.getText(textDocument.text);
     }
 

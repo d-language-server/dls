@@ -72,7 +72,7 @@ class CodeCompleter : Tool
         _cache.addImportPaths(_configuration.general.importPaths);
     }
 
-    @property auto importPaths()
+    @property private auto defaultImportPaths()
     {
         import std.file : FileException, exists, readText;
         import std.range : replace;
@@ -103,7 +103,7 @@ class CodeCompleter : Tool
 
     this()
     {
-        _cache.addImportPaths(importPaths);
+        _cache.addImportPaths(defaultImportPaths);
     }
 
     void importPath(Uri uri)

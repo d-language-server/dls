@@ -455,6 +455,7 @@ unittest
     assert(convertToJSON(true) == JSONValue(true));
     assert(convertToJSON('a') == JSONValue('a'));
     assert(convertToJSON("Hello world") == JSONValue("Hello world"));
+    assert(convertToJSON(JSONValue(42)) == JSONValue(42));
 }
 
 Nullable!JSONValue convertToJSON(T : U[], U)(T value)
