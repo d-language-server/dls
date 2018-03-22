@@ -78,12 +78,12 @@ auto initialize(InitializeParams params)
 }
 
 @("")
-void initialized()
+void initialized(JSONValue nothing)
 {
 }
 
 @("")
-auto shutdown()
+auto shutdown(JSONValue nothing)
 {
     logger.log("Shutting down server");
     Server.shutdown = true;
@@ -91,7 +91,7 @@ auto shutdown()
 }
 
 @("")
-void exit()
+void exit(JSONValue nothing)
 {
     logger.log("Exiting server");
     Server.exit = true;

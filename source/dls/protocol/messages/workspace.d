@@ -1,11 +1,10 @@
 module dls.protocol.messages.workspace;
 
 import logger = std.experimental.logger;
-import dls.protocol.handlers : ServerRequest;
 import dls.protocol.interfaces;
 import dls.tools.tools : Tools;
 
-@ServerRequest void workspaceFolders(Nullable!(WorkspaceFolder[]) folders)
+void workspaceFolders(string id, Nullable!(WorkspaceFolder[]) folders)
 {
     if (!folders.isNull)
     {
@@ -32,7 +31,7 @@ private void util_importFolders(WorkspaceFolder[] folders)
     }
 }
 
-@ServerRequest void configuration(JSONValue[] config)
+void configuration(string id, JSONValue[] config)
 {
 }
 
@@ -82,6 +81,6 @@ auto executeCommand(ExecuteCommandParams params)
     return result;
 }
 
-@ServerRequest void applyEdit(ApplyWorkspaceEditResponse response)
+void applyEdit(string id, ApplyWorkspaceEditResponse response)
 {
 }

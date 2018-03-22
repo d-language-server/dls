@@ -7,14 +7,12 @@ import std.traits;
 
 alias RequestHandler = Nullable!JSONValue delegate(Nullable!JSONValue);
 alias NotificationHandler = void delegate(Nullable!JSONValue);
-alias ResponseHandler = void delegate(Nullable!JSONValue);
+alias ResponseHandler = void delegate(string id, Nullable!JSONValue);
 
 private RequestHandler[string] requestHandlers;
 private NotificationHandler[string] notificationHandlers;
 private ResponseHandler[string] responseHandlers;
 private ResponseHandler[string] runtimeResponseHandlers;
-
-enum ServerRequest;
 
 /++
 Checks if a function is correct handler function. These will only be registered
@@ -48,105 +46,95 @@ bool hasRegisteredHandler(string method)
 Registers a new handler of any kind (`RequestHandler`, `NotificationHandler` or
 `ResponseHandler`).
 +/
-void pushHandler(bool serverRequest, F)(string method, F func)
+void pushHandler(F)(string method, F func)
         if (isSomeFunction!F && !is(F == RequestHandler)
             && !is(F == NotificationHandler) && !is(F == ResponseHandler))
 {
-    static if (!is(ReturnType!F == void))
+    import dls.util.json : convertFromJSON;
+
+    static if ((Parameters!F).length == 1)
     {
-        const pusher = &pushRequestHandler;
+        pushHandler(method, (Nullable!JSONValue params) {
+            import dls.util.json : convertToJSON;
+
+            auto arg = convertFromJSON!((Parameters!F)[0])(params);
+
+            static if (is(ReturnType!F == void))
+            {
+                func(arg);
+            }
+            else
+            {
+                return convertToJSON(func(arg));
+            }
+        });
     }
-    else static if (serverRequest)
+    else static if ((Parameters!F).length == 2)
     {
-        const pusher = &pushResponseHandler;
-    }
-    else
-    {
-        const pusher = &pushNotificationHandler;
-    }
-
-    pusher(method, (Nullable!JSONValue params) {
-        import dls.util.json : convertFromJSON, convertToJSON;
-
-        static if ((Parameters!F).length == 0)
-        {
-            enum args = tuple().expand;
-        }
-        else
-        {
-            auto args = convertFromJSON!((Parameters!F)[0])(params);
-        }
-
-        static if (is(ReturnType!F == void))
-        {
-            func(args);
-        }
-        else
-        {
-            return convertToJSON(func(args));
-        }
-    });
-}
-
-/++ Registers a new static `RequestHandler`. +/
-private void pushRequestHandler(string method, RequestHandler h)
-{
-    requestHandlers[method] = h;
-}
-
-/++ Registers a new static `NotificationHandler`. +/
-private void pushNotificationHandler(string method, NotificationHandler h)
-{
-    notificationHandlers[method] = h;
-}
-
-/++ Registers a new static `ResponseHandler`. +/
-private void pushResponseHandler(string method, ResponseHandler h)
-{
-    responseHandlers[method] = h;
-}
-
-/++ Registers a new dynamic `ResponseHandler` (used at runtime) +/
-void pushHandler(JSONValue id, string method)
-{
-    runtimeResponseHandlers[id.str] = responseHandlers[method];
-}
-
-/++
-Returns the `RequestHandler`/`NotificationHandler` corresponding to a specific
-LSP method.
-+/
-auto handler(T)(string method)
-{
-    static if (is(T : RequestHandler))
-    {
-        alias handlers = requestHandlers;
-    }
-    else static if (is(T : NotificationHandler))
-    {
-        alias handlers = notificationHandlers;
+        pushHandler(method, (string id, Nullable!JSONValue params) => func(id,
+                convertFromJSON!((Parameters!F)[1])(params)));
     }
     else
     {
         static assert(false);
     }
+}
 
-    if (method in handlers)
-    {
-        return handlers[method];
-    }
+/++ Registers a new static `RequestHandler`. +/
+private void pushHandler(string method, RequestHandler h)
+{
+    requestHandlers[method] = h;
+}
 
-    throw new HandlerNotFoundException(method);
+/++ Registers a new static `NotificationHandler`. +/
+private void pushHandler(string method, NotificationHandler h)
+{
+    notificationHandlers[method] = h;
+}
+
+/++ Registers a new static `ResponseHandler`. +/
+private void pushHandler(string method, ResponseHandler h)
+{
+    responseHandlers[method] = h;
+}
+
+/++ Registers a new dynamic `ResponseHandler` (used at runtime) +/
+void pushHandler(string id, string method)
+{
+    runtimeResponseHandlers[id] = responseHandlers[method];
 }
 
 /++
-Returns the `ResponseHandler` corresponding to `id` and unregisters it. Runtime
-`ResponseHandler`s are registered dynamically and will never be used more than
-once, as the id should always be unique.
+Returns the `RequestHandler`/`NotificationHandler`/`ResponseHandler`
+corresponding to a specific LSP method.
 +/
-auto handler(JSONValue id)
+auto handler(T)(string methodOrId)
+        if (is(T == RequestHandler) || is(T == NotificationHandler) || is(T == ResponseHandler))
 {
-    auto h = runtimeResponseHandlers[id.str];
-    runtimeResponseHandlers.remove(id.str);
-    return h;
+    static if (is(T == RequestHandler))
+    {
+        alias handlers = requestHandlers;
+    }
+    else static if (is(T == NotificationHandler))
+    {
+        alias handlers = notificationHandlers;
+    }
+    else
+    {
+        alias handlers = runtimeResponseHandlers;
+    }
+
+    if (methodOrId in handlers)
+    {
+        auto h = handlers[methodOrId];
+
+        static if (is(T == ResponseHandler))
+        {
+            runtimeResponseHandlers.remove(methodOrId);
+        }
+
+        return h;
+    }
+
+    throw new HandlerNotFoundException(methodOrId);
 }

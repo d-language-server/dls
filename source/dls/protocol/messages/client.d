@@ -1,11 +1,11 @@
 module dls.protocol.messages.client;
 
-import dls.protocol.handlers : ServerRequest;
+import std.json : JSONValue;
 
-@ServerRequest void registerCapability()
+void registerCapability(string id, JSONValue nothing)
 {
 }
 
-@ServerRequest void unregisterCapability()
+void unregisterCapability(string id, JSONValue nothing)
 {
 }

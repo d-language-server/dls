@@ -23,22 +23,14 @@ static this()
 
             static if (isHandler!t)
             {
-                static if (!hasUDA!(t, ServerRequest))
-                {
-                    enum attrs = tuple(__traits(getAttributes, t));
-                }
-                else
-                {
-                    enum attrs = tuple();
-                }
-
+                enum attrs = tuple(__traits(getAttributes, t));
                 enum attrsWithDefaults = tuple(modName[0] ~ modName.split('_')
                             .map!capitalize().join()[1 .. $], thing, attrs.expand);
                 enum parts = tuple(attrsWithDefaults[attrs.length > 0 ? 2 : 0],
                             attrsWithDefaults[attrs.length > 1 ? 3 : 1]);
                 enum method = select!(parts[0].length != 0)(parts[0] ~ "/", "") ~ parts[1];
 
-                pushHandler!(hasUDA!(t, ServerRequest))(method, &t);
+                pushHandler(method, &t);
             }
         }
     }
@@ -180,7 +172,7 @@ abstract class Server
 
                 if (response.error.isNull)
                 {
-                    handler(response.id)(response.result);
+                    handler!ResponseHandler(response.id.str)(response.id.str, response.result);
                 }
                 else
                 {
@@ -219,7 +211,7 @@ abstract class Server
         if (hasRegisteredHandler(method))
         {
             auto id = "dls-" ~ randomUUID().toString();
-            pushHandler(JSONValue(id), method);
+            pushHandler(id, method);
             send!RequestMessage(JSONValue(id), method, params, Nullable!ResponseError());
         }
         else
