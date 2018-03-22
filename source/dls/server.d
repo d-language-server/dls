@@ -152,8 +152,7 @@ abstract class Server
                     }
                     else
                     {
-                        send(request.id, JSONValue().nullable,
-                                ResponseError.fromErrorCode(ErrorCodes.serverNotInitialized));
+                        sendError(ErrorCodes.serverNotInitialized, request);
                     }
                 }
                 else
@@ -182,11 +181,11 @@ abstract class Server
         }
         catch (JSONException e)
         {
-            sendError!(ErrorCodes.parseError)(request);
+            sendError(ErrorCodes.parseError, request);
         }
         catch (HandlerNotFoundException e)
         {
-            sendError!(ErrorCodes.methodNotFound)(request);
+            sendError(ErrorCodes.methodNotFound, request);
         }
         catch (MessageException e)
         {
@@ -194,7 +193,7 @@ abstract class Server
         }
     }
 
-    private static void sendError(ErrorCodes error)(RequestMessage request)
+    private static void sendError(ErrorCodes error, RequestMessage request)
     {
         if (request !is null)
         {
@@ -203,7 +202,7 @@ abstract class Server
     }
 
     /++ Sends a request or a notification message. +/
-    static void send(string method, Nullable!JSONValue params)
+    static auto send(string method, Nullable!JSONValue params)
     {
         import dls.protocol.handlers : hasRegisteredHandler, pushHandler;
         import std.uuid : randomUUID;
@@ -213,18 +212,18 @@ abstract class Server
             auto id = "dls-" ~ randomUUID().toString();
             pushHandler(id, method);
             send!RequestMessage(JSONValue(id), method, params, Nullable!ResponseError());
+            return id;
         }
-        else
-        {
-            send!NotificationMessage(JSONValue(), method, params, Nullable!ResponseError());
-        }
+
+        send!NotificationMessage(JSONValue(), method, params, Nullable!ResponseError());
+        return null;
     }
 
-    static void send(T)(string method, T params) if (!is(T : Nullable!JSONValue))
+    static auto send(T)(string method, T params) if (!is(T : Nullable!JSONValue))
     {
         import dls.util.json : convertToJSON;
 
-        send(method, convertToJSON(params).nullable);
+        return send(method, convertToJSON(params).nullable);
     }
 
     /++ Sends a response message. +/
