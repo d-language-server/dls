@@ -6,29 +6,23 @@ import dls.tools.tools : Tools;
 
 void workspaceFolders(string id, Nullable!(WorkspaceFolder[]) folders)
 {
+    import dls.util.uri : Uri;
+    import std.path : dirName;
+
     if (!folders.isNull)
     {
-        util_importFolders(folders);
+        foreach (workspaceFolder; folders)
+        {
+            auto uri = new Uri(workspaceFolder.uri);
+            Tools.codeCompleter.importPath(uri);
+            Tools.codeCompleter.importSelections(uri);
+        }
     }
 }
 
 void didChangeWorkspaceFolders(DidChangeWorkspaceFoldersParams params)
 {
-    util_importFolders(params.event.added);
-}
-
-private void util_importFolders(WorkspaceFolder[] folders)
-{
-    import dls.util.uri : Uri;
-    import std.path : dirName;
-
-    foreach (workspaceFolder; folders)
-    {
-        auto uri = new Uri(workspaceFolder.uri);
-        logger.logf("Importing everything from %s", dirName(uri.path));
-        Tools.codeCompleter.importPath(uri);
-        Tools.codeCompleter.importSelections(uri);
-    }
+    workspaceFolders(null, params.event.added.nullable);
 }
 
 void configuration(string id, JSONValue[] config)
@@ -51,6 +45,8 @@ void didChangeConfiguration(DidChangeConfigurationParams params)
 
 void didChangeWatchedFiles(DidChangeWatchedFilesParams params)
 {
+    import dls.server : Server;
+    import dls.protocol.messages.window : Util;
     import dls.util.uri : Uri;
     import std.algorithm : canFind;
     import std.path : baseName, dirName;
@@ -58,12 +54,24 @@ void didChangeWatchedFiles(DidChangeWatchedFilesParams params)
     foreach (event; params.changes)
     {
         auto uri = new Uri(event.uri);
+        auto fileName = baseName(uri.path);
 
         logger.logf("File changed: %s", uri.path);
 
-        if (["dub.json", "dub.sdl", "dub.selections.json"].canFind(baseName(uri.path)))
+        if (["dub.json", "dub.sdl"].canFind(fileName))
         {
-            logger.logf("Importing dependencies from %s", dirName(uri.path));
+            auto p = new ShowMessageRequestParams();
+            p.type = MessageType.info;
+            p.message = fileName ~ " was updated. Upgrade dependencies ?";
+            p.actions = [new MessageActionItem(), new MessageActionItem()];
+            p.actions[0].title = "Yes";
+            p.actions[1].title = "No";
+            auto id = Server.send("window/showMessageRequest", p);
+            Util.addMessageRequestType(id,
+                    Util.ShowMessageRequestType.upgradeSelections, JSONValue(uri.uri));
+        }
+        else if (fileName == "dub.selections.json")
+        {
             Tools.codeCompleter.importSelections(uri);
         }
     }

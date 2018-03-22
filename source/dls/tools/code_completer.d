@@ -38,6 +38,7 @@ static this()
 
 class CodeCompleter : Tool
 {
+    import logger = std.experimental.logger;
     import dls.protocol.definitions : Position;
     import dls.tools.configuration : Configuration;
     import dls.util.uri : Uri;
@@ -108,19 +109,15 @@ class CodeCompleter : Tool
 
     void importPath(Uri uri)
     {
-        auto d = new Dub(isFile(uri.path) ? dirName(uri.path) : uri.path);
-        d.loadPackage();
+        logger.logf("Importing from %s", dirName(uri.path));
+        const d = getDub(uri);
         importDirectories(d.project.rootPackage.describe(BuildPlatform.any, null, null).importPaths);
     }
 
     void importSelections(Uri uri)
     {
-        import dub.dub : UpgradeOptions;
-
-        auto d = new Dub(isFile(uri.path) ? dirName(uri.path) : uri.path);
-        d.loadPackage();
-        d.upgrade(UpgradeOptions.select);
-
+        logger.logf("Importing dependencies from %s", dirName(uri.path));
+        const d = getDub(uri);
         const project = d.project;
 
         foreach (dep; project.dependencies)
@@ -136,15 +133,13 @@ class CodeCompleter : Tool
         }
     }
 
-    private void importDirectories(string[] paths)
+    void upgradeSelections(Uri uri)
     {
-        foreach (path; paths)
-        {
-            if (!_cache.getImportPaths().canFind(path))
-            {
-                _cache.addImportPaths([path]);
-            }
-        }
+        import dub.dub : UpgradeOptions;
+
+        logger.logf("Upgrading dependencies from %s", dirName(uri.path));
+        auto d = getDub(uri);
+        d.upgrade(UpgradeOptions.select);
     }
 
     auto complete(Uri uri, Position position)
@@ -177,5 +172,23 @@ class CodeCompleter : Tool
         }
 
         return items.sort!((a, b) => a.label < b.label).uniq!((a, b) => a.label == b.label).array;
+    }
+
+    private void importDirectories(string[] paths)
+    {
+        foreach (path; paths)
+        {
+            if (!_cache.getImportPaths().canFind(path))
+            {
+                _cache.addImportPaths([path]);
+            }
+        }
+    }
+
+    private auto getDub(Uri uri)
+    {
+        auto d = new Dub(isFile(uri.path) ? dirName(uri.path) : uri.path);
+        d.loadPackage();
+        return d;
     }
 }
