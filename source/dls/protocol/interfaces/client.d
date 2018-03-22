@@ -8,13 +8,13 @@ private abstract class RegistrationBase
     string method;
 }
 
-package interface RegistrationOptionsBase
+package abstract class RegistrationOptionsBase
 {
 }
 
-class Registration : RegistrationBase
+class Registration(R : RegistrationOptionsBase) : RegistrationBase
 {
-    Nullable!RegistrationOptionsBase registerOptions;
+    Nullable!R registerOptions;
 }
 
 class TextDocumentRegistrationOptions : RegistrationOptionsBase
@@ -22,9 +22,9 @@ class TextDocumentRegistrationOptions : RegistrationOptionsBase
     Nullable!DocumentSelector documentSelector;
 }
 
-class RegistrationParams
+class RegistrationParams(R)
 {
-    Registration[] registrations;
+    Registration!R[] registrations;
 }
 
 class Unregistration : RegistrationBase

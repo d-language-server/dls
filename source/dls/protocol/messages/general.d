@@ -80,6 +80,29 @@ auto initialize(InitializeParams params)
 @("")
 void initialized(JSONValue nothing)
 {
+    const didChangeWatchedFiles = Server.initState.capabilities.workspace.didChangeWatchedFiles;
+
+    if (!didChangeWatchedFiles.isNull && didChangeWatchedFiles.dynamicRegistration)
+    {
+        auto params = new RegistrationParams!DidChangeWatchedFilesRegistrationOptions();
+        params.registrations ~= new Registration!DidChangeWatchedFilesRegistrationOptions();
+
+        with (params.registrations[0])
+        {
+            id = "dls-registration-watch-dub-files";
+            method = "workspace/didChangeWatchedFiles";
+            registerOptions = new DidChangeWatchedFilesRegistrationOptions();
+
+            with (registerOptions)
+            {
+                watchers = [new FileSystemWatcher(), new FileSystemWatcher()];
+                watchers[0].globPattern = "**/dub.selections.json";
+                watchers[1].globPattern = "**/dub.{json,sdl}";
+            }
+        }
+
+        Server.send("client/registerCapability", params);
+    }
 }
 
 @("")
