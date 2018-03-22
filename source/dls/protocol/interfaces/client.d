@@ -8,12 +8,16 @@ private abstract class RegistrationBase
     string method;
 }
 
-class Registration : RegistrationBase
+package interface RegistrationOptionsBase
 {
-    Nullable!JSONValue registerOptions;
 }
 
-class TextDocumentRegistrationOptions
+class Registration : RegistrationBase
+{
+    Nullable!RegistrationOptionsBase registerOptions;
+}
+
+class TextDocumentRegistrationOptions : RegistrationOptionsBase
 {
     Nullable!DocumentSelector documentSelector;
 }

@@ -1,6 +1,7 @@
 module dls.protocol.interfaces.workspace;
 
 public import dls.protocol.definitions;
+import dls.protocol.interfaces.client : RegistrationOptionsBase;
 
 class WorkspaceFolder
 {
@@ -46,16 +47,34 @@ class FileEvent
     FileChangeType type;
 }
 
-class WorkspaceSymbolParams
-{
-    string query;
-}
-
 enum FileChangeType
 {
     created = 1,
     changed = 2,
     deleted = 3
+}
+
+class DidChangeWatchedFilesRegistrationOptions : RegistrationOptionsBase
+{
+    FileSystemWatcher[] watchers;
+}
+
+class FileSystemWatcher
+{
+    string globPattern;
+    Nullable!WatchKind kind;
+}
+
+enum WatchKind
+{
+    create = 1,
+    change = 2,
+    delete_ = 4
+}
+
+class WorkspaceSymbolParams
+{
+    string query;
 }
 
 class ExecuteCommandParams
@@ -64,7 +83,7 @@ class ExecuteCommandParams
     Nullable!(JSONValue[]) arguments;
 }
 
-class ExecuteCommandRegistrationOptions
+class ExecuteCommandRegistrationOptions : RegistrationOptionsBase
 {
     string[] commands;
 }

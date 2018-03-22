@@ -1,6 +1,8 @@
 module dls.protocol.interfaces.text_document;
 
 public import dls.protocol.definitions;
+import dls.protocol.interfaces.client : TextDocumentRegistrationOptions;
+import dls.protocol.interfaces.general : TextDocumentSyncKind;
 
 class DidOpenTextDocumentParams
 {
@@ -18,6 +20,11 @@ class TextDocumentContentChangeEvent
     Nullable!Range range;
     Nullable!size_t rangeLength;
     string text;
+}
+
+class TextDocumentChangeRegistrationOptions : TextDocumentRegistrationOptions
+{
+    TextDocumentSyncKind syncKind;
 }
 
 private class ParamsBase
@@ -40,6 +47,11 @@ enum TextDocumentSaveReason
 class DidSaveTextDocumentParams : ParamsBase
 {
     Nullable!string text;
+}
+
+class TextDocumentSaveRegistrationOptions : TextDocumentRegistrationOptions
+{
+    Nullable!bool includeText;
 }
 
 alias DidCloseTextDocumentParams = ParamsBase;
@@ -126,6 +138,12 @@ enum CompletionItemKind
     typeParameter = 25
 }
 
+class CompletionRegistrationOptions : TextDocumentRegistrationOptions
+{
+    Nullable!(string[]) triggerCharacters;
+    Nullable!bool resolveProvider;
+}
+
 class Hover
 {
     JSONValue contents;
@@ -151,6 +169,11 @@ class SignatureInformation : InformationBase
 }
 
 alias ParameterInformation = InformationBase;
+
+class SignatureHelpRegistrationOptions : TextDocumentRegistrationOptions
+{
+    Nullable!(string[]) triggerCharacters;
+}
 
 class ReferenceParams : TextDocumentPositionParams
 {
@@ -235,12 +258,22 @@ class CodeLens
     Nullable!JSONValue data;
 }
 
+class CodeLensRegistrationOptions : TextDocumentRegistrationOptions
+{
+    Nullable!bool resolveProvider;
+}
+
 alias DocumentLinkParams = ParamsBase;
 
 class DocumentLink
 {
     Range range = new Range();
     Nullable!DocumentUri target;
+}
+
+class DocumentLinkRegistrationOptions : TextDocumentRegistrationOptions
+{
+    Nullable!bool resolveProvider;
 }
 
 class DocumentColorParams
@@ -296,6 +329,12 @@ class DocumentOnTypeFormattingParams : DocumentFormattingParams
 {
     Position position = new Position();
     string ch;
+}
+
+class DocumentOnTypeFormattingRegistrationOptions : TextDocumentRegistrationOptions
+{
+    string firstTriggerCharacter;
+    Nullable!(string[]) moreTriggerCharacter;
 }
 
 class RenameParams : ParamsBase
