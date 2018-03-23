@@ -15,20 +15,20 @@ All these keys should be formatted as `d.dls.[section].[key]` (e.g. `d.dls.forma
 |------------------|----------|-------------|
 |`importPaths`     |`string[]`|`[]`         |
 
-|Section: `formatter`               |Type                              |Default value|
-|-----------------------------------|----------------------------------|-------------|
-|`endOfLine`                        |`"lf" | "cr" | "crlf"`            |`"lf"`       |
-|`maxLineLength`                    |`number`                          |`120`        |
-|`dfmtBraceStyle`                   |`"allman" | "otbs" | "stroustrup"`|`"allman"`   |
-|`dfmtSoftMaxLineLength`            |`number`                          |`80`         |
-|`dfmtAlignSwitchStatements`        |`boolean`                         |`true`       |
-|`dfmtOutdentAttributes`            |`boolean`                         |`true`       |
-|`dfmtSplitOperatorAtLineEnd`       |`boolean`                         |`false`      |
-|`dfmtSpaceAfterCast`               |`boolean`                         |`true`       |
-|`dfmtSpaceAfterKeywords`           |`boolean`                         |`true`       |
-|`dfmtSpaceBeforeFunctionParameters`|`boolean`                         |`false`      |
-|`dfmtSelectiveImportSpace`         |`boolean`                         |`true`       |
-|`dfmtCompactLabeledStatements`     |`boolean`                         |`true`       |
+|Section: `formatter`               |Type                                    |Default value|
+|-----------------------------------|----------------------------------------|-------------|
+|`endOfLine`                        |`"lf"` or `"cr"` or `"crlf"`            |`"lf"`       |
+|`maxLineLength`                    |`number`                                |`120`        |
+|`dfmtBraceStyle`                   |`"allman"` or `"otbs"` or `"stroustrup"`|`"allman"`   |
+|`dfmtSoftMaxLineLength`            |`number`                                |`80`         |
+|`dfmtAlignSwitchStatements`        |`boolean`                               |`true`       |
+|`dfmtOutdentAttributes`            |`boolean`                               |`true`       |
+|`dfmtSplitOperatorAtLineEnd`       |`boolean`                               |`false`      |
+|`dfmtSpaceAfterCast`               |`boolean`                               |`true`       |
+|`dfmtSpaceAfterKeywords`           |`boolean`                               |`true`       |
+|`dfmtSpaceBeforeFunctionParameters`|`boolean`                               |`false`      |
+|`dfmtSelectiveImportSpace`         |`boolean`                               |`true`       |
+|`dfmtCompactLabeledStatements`     |`boolean`                               |`true`       |
 
 ## Caveats
 
@@ -52,7 +52,6 @@ Below is the code of a minimal Visual Studio Code extension using a hardcoded pa
 ```typescript
 'use strict';
 
-import * as cp from 'child_process';
 import * as vscode from 'vscode';
 import * as lc from 'vscode-languageclient';
 
@@ -66,7 +65,7 @@ export function activate(context: vscode.ExtensionContext) {
             configurationSection: 'd.dls'
         }
     };
-    const client = new lc.LanguageClient('dlang-vscode', 'D Language', serverOptions, clientOptions);
+    const client = new lc.LanguageClient('vscode-dls', 'D Language', serverOptions, clientOptions);
     context.subscriptions.push(client.start());
 }
 
