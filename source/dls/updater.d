@@ -14,7 +14,7 @@ void update()
     import dub.package_ : Package;
     import std.concurrency : ownerTid, receiveOnly, register, send, thisTid;
     import std.file : thisExePath;
-    import std.path : dirName;
+    import std.path : buildNormalizedPath, dirName;
 
     auto currentDlsPath = dirName(thisExePath());
     auto dub = new Dub(currentDlsPath);
@@ -100,7 +100,7 @@ void update()
     settings.tempBuild = false;
     settings.parallelBuild = false;
     dub.generateProject("build", settings);
-    latestDlsPath = pack.path.toString();
+    latestDlsPath = buildNormalizedPath(pack.path.toString(), "dls");
 
     auto notificationParams = new ShowMessageParams();
     notificationParams.type = MessageType.info;
