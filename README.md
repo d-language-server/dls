@@ -30,9 +30,25 @@ All these keys should be formatted as `d.dls.[section].[key]` (e.g. `d.dls.forma
 |`dfmtSelectiveImportSpace`         |`boolean`                               |`true`       |
 |`dfmtCompactLabeledStatements`     |`boolean`                               |`true`       |
 
+## The `find` subpackage and the update system
+
+In order to simplify the process of updating DLS, an update system is implemented.
+However, the extension will need to locate a first version of DLS; this is where `dls:find` comes in.
+The steps are:
+- `dub fetch dls` will fetch the latest version of DLS
+- `dub run --quiet dls:find` will output the directory to its parent DLS package
+- `dub build --build=release` launched in the just acquired DLS directory will build DLS (sending notifications before and after the build to the user might be a good idea, as it can take several minutes)
+- The `dls` executable will now be right under the same directory
+
+__IMPORTANT__: when building DLS on Windows, `--arch=x86_mscoff` must be added to the arguments for the build to succeed.
+
+After this, the Language Client has to listen to telemetry events.
+As this Language Server won't be using telemetry, the `telemetry/event` server-to-client notification has been re-purposed: the event sent by the server will be the path to the new DLS executable after every update.
+Otherwise nothing specific is required on the client's part regarding updates: the server will send notifications to the user when an update is available, and build its next version in parallel to responding to requests.
+
 ## Caveats
 
-The server may delegate a few operations to the client-side extension dpending on the language client's capabilities.
+The server may delegate a few operations to the client-side extension depending on the language client's capabilities.
 The client should watch these files for the server to work properly:
 - `dub.selections.json`
 - `dub.json`
@@ -44,101 +60,3 @@ The server needs to know at least when `dub.selections.json` files change to pro
 If `dub.json` and `dub.sdl` are also watched, `dub.selections.json` will automatically be regenerated and then it will be used for completion support.
 
 As support for messages regarding workspace folders are not yet supported in Visual Studio Code (used for testing the server), dls also lacks support for multiple workspace folders for now.
-
-## Example usage
-
-Below is the code of a minimal Visual Studio Code extension using a hardcoded path to the dls binary:
-
-```typescript
-'use strict';
-
-import * as vscode from 'vscode';
-import * as lc from 'vscode-languageclient';
-
-export function activate(context: vscode.ExtensionContext) {
-    const serverOptions: lc.ServerOptions = {
-        command: 'path/to/the/dls/binary'
-    };
-    const clientOptions: lc.LanguageClientOptions = {
-        documentSelector: [{ scheme: 'file', language: 'd' }],
-        synchronize: {
-            configurationSection: 'd.dls'
-        }
-    };
-    const client = new lc.LanguageClient('vscode-dls', 'D Language', serverOptions, clientOptions);
-    context.subscriptions.push(client.start());
-}
-
-export function deactivate() {
-}
-```
-
-Extract from the `properties` section of the `package.json` file:
-
-```json
-{
-    "title": "D",
-    "properties": {
-        "d.dls.general.importPaths": {
-            "type": "array",
-            "default": []
-        },
-        "d.dls.formatter.endOfLine": {
-            "enum": [
-                "lf",
-                "cr",
-                "crlf"
-            ],
-            "default": "lf"
-        },
-        "d.dls.formatter.maxLineLength": {
-            "type": "number",
-            "default": 120
-        },
-        "d.dls.formatter.dfmtBraceStyle": {
-            "enum": [
-                "allman",
-                "otbs",
-                "stroustrup"
-            ],
-            "default": "allman"
-        },
-        "d.dls.formatter.dfmtSoftMaxLineLength": {
-            "type": "number",
-            "default": 80
-        },
-        "d.dls.formatter.dfmtAlignSwitchStatements": {
-            "type": "boolean",
-            "default": true
-        },
-        "d.dls.formatter.dfmtOutdentAttributes": {
-            "type": "boolean",
-            "default": true
-        },
-        "d.dls.formatter.dfmtSplitOperatorAtLineEnd": {
-            "type": "boolean",
-            "default": false
-        },
-        "d.dls.formatter.dfmtSpaceAfterCast": {
-            "type": "boolean",
-            "default": true
-        },
-        "d.dls.formatter.dfmtSpaceAfterKeywords": {
-            "type": "boolean",
-            "default": true
-        },
-        "d.dls.formatter.dfmtSpaceBeforeFunctionParameters": {
-            "type": "boolean",
-            "default": false
-        },
-        "d.dls.formatter.dfmtSelectiveImportSpace": {
-            "type": "boolean",
-            "default": true
-        },
-        "d.dls.formatter.dfmtCompactLabeledStatements": {
-            "type": "boolean",
-            "default": true
-        }
-    }
-}
-```
