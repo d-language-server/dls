@@ -16,8 +16,8 @@ void update()
     import std.file : thisExePath;
     import std.path : buildNormalizedPath, dirName;
 
-    auto currentDlsPath = dirName(thisExePath());
-    auto dub = new Dub(currentDlsPath);
+    auto currentDlsPath = thisExePath();
+    auto dub = new Dub(dirName(currentDlsPath));
     dub.loadPackage();
     const currentDls = dub.project.rootPackage;
     Package[] toRemove;
