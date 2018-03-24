@@ -28,7 +28,7 @@ static this()
 
 class Formatter : Tool
 {
-    import dls.protocol.interfaces.text_document : FormattingOptions;
+    import dls.protocol.interfaces : FormattingOptions;
     import dls.util.uri : Uri;
 
     auto format(Uri uri, FormattingOptions options)

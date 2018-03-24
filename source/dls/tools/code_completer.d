@@ -1,6 +1,6 @@
 module dls.tools.code_completer;
 
-import dls.protocol.interfaces.text_document : CompletionItemKind;
+import dls.protocol.interfaces : CompletionItemKind;
 import dls.tools.tool : Tool;
 import std.algorithm;
 import std.path;
@@ -146,7 +146,7 @@ class CodeCompleter : Tool
     {
         import dcd.common.messages : AutocompleteRequest, RequestKind;
         import dcd.server.autocomplete : complete;
-        import dls.protocol.interfaces.text_document : CompletionItem;
+        import dls.protocol.interfaces : CompletionItem;
         import dls.util.document : Document;
 
         auto request = AutocompleteRequest();
