@@ -80,6 +80,11 @@ auto initialize(InitializeParams params)
 @("")
 void initialized(JSONValue nothing)
 {
+    import dls.updater : update;
+    import std.concurrency : spawn;
+
+    spawn(&update);
+
     const didChangeWatchedFiles = Server.initState.capabilities.workspace.didChangeWatchedFiles;
 
     if (!didChangeWatchedFiles.isNull && didChangeWatchedFiles.dynamicRegistration)

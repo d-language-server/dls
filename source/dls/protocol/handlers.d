@@ -9,10 +9,10 @@ alias RequestHandler = Nullable!JSONValue delegate(Nullable!JSONValue);
 alias NotificationHandler = void delegate(Nullable!JSONValue);
 alias ResponseHandler = void delegate(string id, Nullable!JSONValue);
 
-private RequestHandler[string] requestHandlers;
-private NotificationHandler[string] notificationHandlers;
-private ResponseHandler[string] responseHandlers;
-private ResponseHandler[string] runtimeResponseHandlers;
+private shared RequestHandler[string] requestHandlers;
+private shared NotificationHandler[string] notificationHandlers;
+private shared ResponseHandler[string] responseHandlers;
+private shared ResponseHandler[string] runtimeResponseHandlers;
 
 /++
 Checks if a function is correct handler function. These will only be registered

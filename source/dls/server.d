@@ -3,7 +3,7 @@ module dls.server;
 import dls.protocol.handlers;
 import dls.protocol.jsonrpc;
 
-static this()
+shared static this()
 {
     import std.algorithm : map;
     import std.array : join, split;

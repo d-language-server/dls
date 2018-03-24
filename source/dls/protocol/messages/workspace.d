@@ -67,8 +67,7 @@ void didChangeWatchedFiles(DidChangeWatchedFilesParams params)
             p.actions[0].title = "Yes";
             p.actions[1].title = "No";
             auto id = Server.send("window/showMessageRequest", p);
-            Util.addMessageRequestType(id,
-                    Util.ShowMessageRequestType.upgradeSelections, JSONValue(uri.uri));
+            Util.addMessageRequestType(id, Util.ShowMessageRequestType.upgradeSelections, uri);
         }
         else if (fileName == "dub.selections.json")
         {
