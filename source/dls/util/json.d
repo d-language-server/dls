@@ -3,7 +3,7 @@ module dls.util.json;
 import std.algorithm : map;
 import std.array : array;
 import std.conv : to;
-import std.json;
+import std.json : JSONException, JSON_TYPE, JSONValue;
 import std.traits;
 import std.typecons : Nullable, nullable;
 
@@ -71,6 +71,8 @@ version (unittest)
 
 unittest
 {
+    import std.json : parseJSON;
+
     const jsonString = `{
         "integer": 42,
         "floating": 3.0,
@@ -395,6 +397,8 @@ Nullable!JSONValue convertToJSON(T)(T value)
 
 unittest
 {
+    import std.json : parseJSON;
+
     auto testClass = new TestClass();
     testClass.integer = 42;
     testClass.floating = 3.5;

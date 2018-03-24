@@ -1,7 +1,7 @@
 module dls.protocol.handlers;
 
-public import std.json : JSONValue;
-public import std.typecons;
+import std.json : JSONValue;
+import std.typecons;
 
 import std.traits;
 

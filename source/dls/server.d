@@ -222,6 +222,7 @@ abstract class Server
     static auto send(T)(string method, T params) if (!is(T : Nullable!JSONValue))
     {
         import dls.util.json : convertToJSON;
+        import std.typecons : nullable;
 
         return send(method, convertToJSON(params).nullable);
     }
