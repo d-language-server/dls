@@ -39,4 +39,5 @@ docs/
 
 /dls
 /dls-test-library
-dscanner.ini
+/dscanner.ini
+/find/find
