@@ -105,6 +105,7 @@ void initialized(JSONValue nothing)
             }
         }
 
+        logger.log("Registering watchers");
         Server.send("client/registerCapability", params);
     }
 }

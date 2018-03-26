@@ -10,13 +10,14 @@ void didOpen(DidOpenTextDocumentParams params)
 {
     if (params.textDocument.languageId == "d")
     {
-        logger.logf("Opening %s", new Uri(params.textDocument.uri).path);
+        logger.logf("Document opened: %s", new Uri(params.textDocument.uri).path);
         Document.open(params.textDocument);
     }
 }
 
 void didChange(DidChangeTextDocumentParams params)
 {
+    logger.logf("Document changed: %s", new Uri(params.textDocument.uri).path);
     Document.change(params.textDocument, params.contentChanges);
 }
 
@@ -36,6 +37,7 @@ void didSave(DidSaveTextDocumentParams params)
 
 void didClose(DidCloseTextDocumentParams params)
 {
+    logger.logf("Document closed: %s", new Uri(params.textDocument.uri).path);
     Document.close(params.textDocument);
 }
 
