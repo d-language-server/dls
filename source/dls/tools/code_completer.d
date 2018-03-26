@@ -135,11 +135,16 @@ class CodeCompleter : Tool
 
     void upgradeSelections(Uri uri)
     {
-        import dub.dub : UpgradeOptions;
+        import std.concurrency : spawn;
 
         logger.logf("Upgrading dependencies from %s", dirName(uri.path));
-        auto d = getDub(uri);
-        d.upgrade(UpgradeOptions.select);
+
+        spawn((string uriString) {
+            import dub.dub : UpgradeOptions;
+
+            auto d = getDub(new Uri(uriString));
+            d.upgrade(UpgradeOptions.select);
+        }, uri.toString());
     }
 
     auto complete(Uri uri, Position position)
@@ -185,7 +190,7 @@ class CodeCompleter : Tool
         }
     }
 
-    private auto getDub(Uri uri)
+    private static auto getDub(Uri uri)
     {
         auto d = new Dub(isFile(uri.path) ? dirName(uri.path) : uri.path);
         d.loadPackage();
