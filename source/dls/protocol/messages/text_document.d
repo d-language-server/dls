@@ -46,7 +46,7 @@ auto completion(CompletionParams params)
     auto uri = new Uri(params.textDocument.uri);
     logger.logf("Getting completions for %s at position %s,%s", uri.path,
             params.position.line, params.position.character);
-    return Tools.codeCompleter.complete(uri, params.position);
+    return Tools.symbolTool.complete(uri, params.position);
 }
 
 @("completionItem", "resolve")
@@ -149,7 +149,7 @@ auto formatting(DocumentFormattingParams params)
 {
     auto uri = new Uri(params.textDocument.uri);
     logger.logf("Formatting %s", uri.path);
-    return Tools.formatter.format(uri, params.options);
+    return Tools.formatTool.format(uri, params.options);
 }
 
 auto rangeFormatting(DocumentRangeFormattingParams params)

@@ -33,8 +33,8 @@ auto initialize(InitializeParams params)
 
     foreach (uri; uris)
     {
-        Tools.codeCompleter.importPath(uri);
-        Tools.codeCompleter.importSelections(uri);
+        Tools.symbolTool.importPath(uri);
+        Tools.symbolTool.importSelections(uri);
     }
 
     with (result)

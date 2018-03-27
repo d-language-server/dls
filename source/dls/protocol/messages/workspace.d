@@ -14,8 +14,8 @@ void workspaceFolders(string id, Nullable!(WorkspaceFolder[]) folders)
         foreach (workspaceFolder; folders)
         {
             auto uri = new Uri(workspaceFolder.uri);
-            Tools.codeCompleter.importPath(uri);
-            Tools.codeCompleter.importSelections(uri);
+            Tools.symbolTool.importPath(uri);
+            Tools.symbolTool.importSelections(uri);
         }
     }
 }
@@ -71,7 +71,7 @@ void didChangeWatchedFiles(DidChangeWatchedFilesParams params)
         }
         else if (fileName == "dub.selections.json")
         {
-            Tools.codeCompleter.importSelections(uri);
+            Tools.symbolTool.importSelections(uri);
         }
     }
 }

@@ -1,31 +1,31 @@
-module dls.tools.formatter;
+module dls.tools.format_tool;
 
 import dfmt.config : BraceStyle;
 import dfmt.editorconfig : EOL;
 import dls.tools.configuration : Configuration;
 import dls.tools.tool : Tool;
 
-private immutable EOL[Configuration.FormatterConfiguration.EndOfLine] eolMap;
-private immutable BraceStyle[Configuration.FormatterConfiguration.BraceStyle] braceStyleMap;
+private immutable EOL[Configuration.FormatConfiguration.EndOfLine] eolMap;
+private immutable BraceStyle[Configuration.FormatConfiguration.BraceStyle] braceStyleMap;
 
 static this()
 {
     //dfmt off
     eolMap = [
-        Configuration.FormatterConfiguration.EndOfLine.lf   : EOL.lf,
-        Configuration.FormatterConfiguration.EndOfLine.cr   : EOL.cr,
-        Configuration.FormatterConfiguration.EndOfLine.crlf : EOL.crlf
+        Configuration.FormatConfiguration.EndOfLine.lf   : EOL.lf,
+        Configuration.FormatConfiguration.EndOfLine.cr   : EOL.cr,
+        Configuration.FormatConfiguration.EndOfLine.crlf : EOL.crlf
     ];
 
     braceStyleMap = [
-        Configuration.FormatterConfiguration.BraceStyle.allman     : BraceStyle.allman,
-        Configuration.FormatterConfiguration.BraceStyle.otbs       : BraceStyle.otbs,
-        Configuration.FormatterConfiguration.BraceStyle.stroustrup : BraceStyle.stroustrup
+        Configuration.FormatConfiguration.BraceStyle.allman     : BraceStyle.allman,
+        Configuration.FormatConfiguration.BraceStyle.otbs       : BraceStyle.otbs,
+        Configuration.FormatConfiguration.BraceStyle.stroustrup : BraceStyle.stroustrup
     ];
     //dfmt on
 }
 
-class Formatter : Tool
+class FormatTool : Tool
 {
     import dls.protocol.interfaces : FormattingOptions;
     import dls.util.uri : Uri;
@@ -56,23 +56,22 @@ class Formatter : Tool
         config.indent_style = options.insertSpaces ? IndentStyle.space : IndentStyle.tab;
         config.indent_size = cast(typeof(config.indent_size)) options.tabSize;
         config.tab_width = config.indent_size;
-        config.end_of_line = eolMap[_configuration.formatter.endOfLine];
-        config.max_line_length = _configuration.formatter.maxLineLength;
-        config.dfmt_brace_style = braceStyleMap[_configuration.formatter.dfmtBraceStyle];
-        config.dfmt_soft_max_line_length = _configuration.formatter.dfmtSoftMaxLineLength;
+        config.end_of_line = eolMap[_configuration.format.endOfLine];
+        config.max_line_length = _configuration.format.maxLineLength;
+        config.dfmt_brace_style = braceStyleMap[_configuration.format.dfmtBraceStyle];
+        config.dfmt_soft_max_line_length = _configuration.format.dfmtSoftMaxLineLength;
         config.dfmt_align_switch_statements = toOptBool(
-                _configuration.formatter.dfmtAlignSwitchStatements);
-        config.dfmt_outdent_attributes = toOptBool(_configuration.formatter.dfmtOutdentAttributes);
+                _configuration.format.dfmtAlignSwitchStatements);
+        config.dfmt_outdent_attributes = toOptBool(_configuration.format.dfmtOutdentAttributes);
         config.dfmt_split_operator_at_line_end = toOptBool(
-                _configuration.formatter.dfmtSplitOperatorAtLineEnd);
-        config.dfmt_space_after_cast = toOptBool(_configuration.formatter.dfmtSpaceAfterCast);
-        config.dfmt_space_after_keywords = toOptBool(
-                _configuration.formatter.dfmtSpaceAfterKeywords);
+                _configuration.format.dfmtSplitOperatorAtLineEnd);
+        config.dfmt_space_after_cast = toOptBool(_configuration.format.dfmtSpaceAfterCast);
+        config.dfmt_space_after_keywords = toOptBool(_configuration.format.dfmtSpaceAfterKeywords);
         config.dfmt_space_before_function_parameters = toOptBool(
-                _configuration.formatter.dfmtSpaceBeforeFunctionParameters);
+                _configuration.format.dfmtSpaceBeforeFunctionParameters);
         config.dfmt_selective_import_space = toOptBool(
-                _configuration.formatter.dfmtSpaceBeforeFunctionParameters);
-        config.dfmt_compact_labeled_statements = _configuration.formatter.dfmtCompactLabeledStatements
+                _configuration.format.dfmtSpaceBeforeFunctionParameters);
+        config.dfmt_compact_labeled_statements = _configuration.format.dfmtCompactLabeledStatements
             ? OptionalBoolean.t : OptionalBoolean.f;
 
         format(uri, contents, buffer, &config);

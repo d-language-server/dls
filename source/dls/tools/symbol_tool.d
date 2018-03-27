@@ -1,4 +1,4 @@
-module dls.tools.code_completer;
+module dls.tools.symbol_tool;
 
 import dls.protocol.interfaces : CompletionItemKind;
 import dls.tools.tool : Tool;
@@ -36,7 +36,7 @@ static this()
     setLogLevel(LogLevel.none);
 }
 
-class CodeCompleter : Tool
+class SymbolTool : Tool
 {
     import logger = std.experimental.logger;
     import dls.protocol.definitions : Position;
@@ -70,7 +70,7 @@ class CodeCompleter : Tool
     @property override void configuration(Configuration config)
     {
         super.configuration(config);
-        _cache.addImportPaths(_configuration.general.importPaths);
+        _cache.addImportPaths(_configuration.symbol.importPaths);
     }
 
     @property private auto defaultImportPaths()

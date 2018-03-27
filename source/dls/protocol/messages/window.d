@@ -22,7 +22,7 @@ void showMessageRequest(string id, MessageActionItem item)
         if (item.title == "Yes")
         {
             auto uri = new Uri(Util.messageRequestTypes[id][1]);
-            Tools.codeCompleter.upgradeSelections(uri);
+            Tools.symbolTool.upgradeSelections(uri);
         }
 
         break;

@@ -2,22 +2,22 @@ module dls.tools.tools;
 
 final class Tools
 {
-    import dls.tools.code_completer : CodeCompleter;
     import dls.tools.configuration : Configuration;
-    import dls.tools.formatter : Formatter;
+    import dls.tools.format_tool : FormatTool;
+    import dls.tools.symbol_tool : SymbolTool;
 
-    static CodeCompleter codeCompleter;
-    static Formatter formatter;
+    static SymbolTool symbolTool;
+    static FormatTool formatTool;
 
     static void initialize()
     {
-        codeCompleter = new CodeCompleter();
-        formatter = new Formatter();
+        symbolTool = new SymbolTool();
+        formatTool = new FormatTool();
     }
 
     static void setConfiguration(Configuration c)
     {
-        codeCompleter.configuration = c;
-        formatter.configuration = c;
+        symbolTool.configuration = c;
+        formatTool.configuration = c;
     }
 }

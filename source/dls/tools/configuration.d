@@ -2,20 +2,15 @@ module dls.tools.configuration;
 
 class Configuration
 {
-    GeneralConfiguration general = new GeneralConfiguration();
-    CodeCompleterConfiguration codeCompleter = new CodeCompleterConfiguration();
-    FormatterConfiguration formatter = new FormatterConfiguration();
+    SymbolConfiguration symbol = new SymbolConfiguration();
+    FormatConfiguration format = new FormatConfiguration();
 
-    static class GeneralConfiguration
+    static class SymbolConfiguration
     {
         string[] importPaths;
     }
 
-    static class CodeCompleterConfiguration
-    {
-    }
-
-    static class FormatterConfiguration
+    static class FormatConfiguration
     {
         static enum BraceStyle
         {
