@@ -25,7 +25,7 @@ void update()
     auto latestDlsPath = currentDlsPath;
     scope (exit)
     {
-        Server.send("telemetry/event", latestDlsPath);
+        Server.send("dls/path", latestDlsPath);
     }
 
     foreach (dls; dub.packageManager.getPackageIterator("dls"))
