@@ -6,7 +6,7 @@ class Uri
     import std.regex : matchAll, regex;
 
     private static enum _reg = regex(
-                `([\w-]+)://([\w.]+(?::\d+)?)?([^\?#]+)(?:\?([\w=&]+))?(?:#([\w-]+))?`);
+                `(?:([\w-]+)://)?([\w.]+(?::\d+)?)?([^\?#]+)(?:\?([\w=&]+))?(?:#([\w-]+))?`);
     private string _uri;
     private string _scheme;
     private string _authority;
@@ -46,6 +46,18 @@ class Uri
     override string toString() const
     {
         return _uri;
+    }
+
+    static auto getPath(DocumentUri uri)
+    {
+        return new Uri(uri).path;
+    }
+
+    static fromPath(string path)
+    {
+        import std.algorithm : startsWith;
+
+        return new Uri("file://" ~ (path.startsWith('/') ? "" : "/") ~ path);
     }
 
     alias toString this;
