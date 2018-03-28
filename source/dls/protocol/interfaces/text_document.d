@@ -99,7 +99,7 @@ class CompletionItem
     Nullable!string detail;
     Nullable!string documentation;
     Nullable!string sortText;
-    Nullable!string filtrText;
+    Nullable!string filterText;
     Nullable!string insertText;
     Nullable!InsertTextFormat insertTextFormat;
     Nullable!TextEdit textEdit;

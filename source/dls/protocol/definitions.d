@@ -106,6 +106,6 @@ enum MarkupKind
 
 class MarkupContent
 {
-    MarkupContent content;
+    MarkupKind kind;
     string value;
 }
