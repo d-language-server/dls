@@ -3,16 +3,21 @@ module dls.protocol.interfaces.text_document;
 public import dls.protocol.definitions;
 import dls.protocol.interfaces.client : TextDocumentRegistrationOptions;
 import dls.protocol.interfaces.general : TextDocumentSyncKind;
+import dls.util.constructor : Constructor;
 
 class DidOpenTextDocumentParams
 {
-    TextDocumentItem textDocument = new TextDocumentItem();
+    TextDocumentItem textDocument;
+
+    mixin Constructor!DidOpenTextDocumentParams;
 }
 
 class DidChangeTextDocumentParams
 {
-    VersionedTextDocumentIdentifier textDocument = new VersionedTextDocumentIdentifier();
+    VersionedTextDocumentIdentifier textDocument;
     TextDocumentContentChangeEvent[] contentChanges;
+
+    mixin Constructor!DidChangeTextDocumentParams;
 }
 
 class TextDocumentContentChangeEvent
@@ -29,7 +34,9 @@ class TextDocumentChangeRegistrationOptions : TextDocumentRegistrationOptions
 
 private class ParamsBase
 {
-    TextDocumentIdentifier textDocument = new TextDocumentIdentifier();
+    TextDocumentIdentifier textDocument;
+
+    mixin Constructor!ParamsBase;
 }
 
 class WillSaveTextDocumentParams : ParamsBase
@@ -177,7 +184,9 @@ class SignatureHelpRegistrationOptions : TextDocumentRegistrationOptions
 
 class ReferenceParams : TextDocumentPositionParams
 {
-    ReferenceContext context = new ReferenceContext();
+    ReferenceContext context;
+
+    mixin Constructor!ReferenceParams;
 }
 
 class ReferenceContext
@@ -187,8 +196,10 @@ class ReferenceContext
 
 class DocumentHighlight
 {
-    Range range = new Range();
+    Range range;
     Nullable!DocumentHighlightKind kind;
+
+    mixin Constructor!DocumentHighlight;
 }
 
 enum DocumentHighlightKind
@@ -204,8 +215,10 @@ class SymbolInformation
 {
     string name;
     SymbolKind kind;
-    Location location = new Location();
+    Location location;
     Nullable!string containerName;
+
+    mixin Constructor!SymbolInformation;
 }
 
 enum SymbolKind
@@ -240,8 +253,10 @@ enum SymbolKind
 
 class CodeActionParams : ParamsBase
 {
-    Range range = new Range();
-    CodeActionContext context = new CodeActionContext();
+    Range range;
+    CodeActionContext context;
+
+    mixin Constructor!CodeActionParams;
 }
 
 class CodeActionContext
@@ -253,9 +268,11 @@ alias CodeLensParams = ParamsBase;
 
 class CodeLens
 {
-    Range range = new Range();
+    Range range;
     Nullable!Command command;
     Nullable!JSONValue data;
+
+    mixin Constructor!CodeLens;
 }
 
 class CodeLensRegistrationOptions : TextDocumentRegistrationOptions
@@ -267,8 +284,10 @@ alias DocumentLinkParams = ParamsBase;
 
 class DocumentLink
 {
-    Range range = new Range();
+    Range range;
     Nullable!DocumentUri target;
+
+    mixin Constructor!DocumentLink;
 }
 
 class DocumentLinkRegistrationOptions : TextDocumentRegistrationOptions
@@ -311,7 +330,9 @@ class ColorPresentation
 
 class DocumentFormattingParams : ParamsBase
 {
-    FormattingOptions options = new FormattingOptions();
+    FormattingOptions options;
+
+    mixin Constructor!DocumentFormattingParams;
 }
 
 class FormattingOptions
@@ -322,13 +343,17 @@ class FormattingOptions
 
 class DocumentRangeFormattingParams : DocumentFormattingParams
 {
-    Range range = new Range();
+    Range range;
+
+    mixin Constructor!DocumentRangeFormattingParams;
 }
 
 class DocumentOnTypeFormattingParams : DocumentFormattingParams
 {
-    Position position = new Position();
+    Position position;
     string ch;
+
+    mixin Constructor!DocumentOnTypeFormattingParams;
 }
 
 class DocumentOnTypeFormattingRegistrationOptions : TextDocumentRegistrationOptions
@@ -339,6 +364,8 @@ class DocumentOnTypeFormattingRegistrationOptions : TextDocumentRegistrationOpti
 
 class RenameParams : ParamsBase
 {
-    Position position = new Position();
+    Position position;
     string newName;
+
+    mixin Constructor!RenameParams;
 }

@@ -2,6 +2,7 @@ module dls.protocol.definitions;
 
 public import std.json : JSONValue;
 public import std.typecons : Nullable, nullable;
+import dls.util.constructor : Constructor;
 
 alias DocumentUri = string;
 
@@ -13,23 +14,29 @@ class Position
 
 class Range
 {
-    Position start = new Position();
-    Position end = new Position();
+    Position start;
+    Position end;
+
+    mixin Constructor!Range;
 }
 
 class Location
 {
     DocumentUri uri;
-    Range range = new Range();
+    Range range;
+
+    mixin Constructor!Location;
 }
 
 class Diagnostic
 {
-    Range range = new Range();
+    Range range;
     Nullable!DiagnosticSeverity severity;
     Nullable!JSONValue code;
     Nullable!string source;
     string message;
+
+    mixin Constructor!Diagnostic;
 }
 
 enum DiagnosticSeverity
@@ -49,14 +56,18 @@ class Command
 
 class TextEdit
 {
-    Range range = new Range();
+    Range range;
     string newText;
+
+    mixin Constructor!TextEdit;
 }
 
 class TextDocumentEdit
 {
-    VersionedTextDocumentIdentifier textDocument = new VersionedTextDocumentIdentifier();
+    VersionedTextDocumentIdentifier textDocument;
     TextEdit[] edits;
+
+    mixin Constructor!TextDocumentEdit;
 }
 
 class WorkspaceEdit
@@ -85,8 +96,10 @@ class VersionedTextDocumentIdentifier : TextDocumentIdentifier
 
 class TextDocumentPositionParams
 {
-    TextDocumentIdentifier textDocument = new TextDocumentIdentifier();
-    Position position = new Position();
+    TextDocumentIdentifier textDocument;
+    Position position;
+
+    mixin Constructor!TextDocumentPositionParams;
 }
 
 class DocumentFilter

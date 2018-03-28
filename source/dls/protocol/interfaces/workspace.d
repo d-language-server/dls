@@ -2,6 +2,7 @@ module dls.protocol.interfaces.workspace;
 
 public import dls.protocol.definitions;
 import dls.protocol.interfaces.client : RegistrationOptionsBase;
+import dls.util.constructor : Constructor;
 
 class WorkspaceFolder
 {
@@ -90,7 +91,9 @@ class ExecuteCommandRegistrationOptions : RegistrationOptionsBase
 
 class ApplyWorkspaceEditParams
 {
-    WorkspaceEdit edit = new WorkspaceEdit();
+    WorkspaceEdit edit;
+
+    mixin Constructor!ApplyWorkspaceEditParams;
 }
 
 class ApplyWorkspaceEditResponse

@@ -3,6 +3,7 @@ module dls.protocol.interfaces.general;
 public import dls.protocol.definitions;
 import dls.protocol.interfaces.text_document : CompletionItemKind;
 import dls.protocol.interfaces.workspace : WorkspaceFolder;
+import dls.util.constructor : Constructor;
 
 private class WithDynamicRegistration
 {
@@ -22,9 +23,11 @@ class InitializeParams
     // deprecated Nullable!string rootPath; // TODO: add compatibility
     Nullable!DocumentUri rootUri;
     Nullable!JSONValue initializationOptions;
-    ClientCapabilities capabilities = new ClientCapabilities();
+    ClientCapabilities capabilities;
     Nullable!Trace trace;
     Nullable!(WorkspaceFolder[]) workspaceFolders;
+
+    mixin Constructor!InitializeParams;
 }
 
 class WorkspaceClientCapabilities
@@ -103,7 +106,9 @@ class ClientCapabilities
 
 class InitializeResult
 {
-    ServerCapabilities capabilities = new ServerCapabilities();
+    ServerCapabilities capabilities;
+
+    mixin Constructor!InitializeResult;
 }
 
 // deprecated enum InitializeErrorCode // TODO: add compatibility
