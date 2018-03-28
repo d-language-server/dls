@@ -370,7 +370,7 @@ Nullable!JSONValue convertToJSON(T)(T value)
     {
         if (value is null)
         {
-            return Nullable!JSONValue();
+            return JSONValue(null).nullable;
         }
     }
 
