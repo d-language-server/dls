@@ -6,6 +6,7 @@ DLS implements the server side of the [Language Server Protocol (LSP)](https://m
 It currently provides:
 - formatting using [DFMT](https://github.com/dlang-community/dfmt)
 - code completion using [DCD](https://github.com/dlang-community/DCD)
+- definitions using [DCD](https://github.com/dlang-community/DCD)
 
 ## Client side configuration
 
