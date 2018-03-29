@@ -2,36 +2,56 @@ module dls.util.document;
 
 import dls.protocol.definitions;
 import dls.protocol.interfaces;
+import dls.util.uri : Uri;
 
 class Document
 {
-    private static Document[DocumentUri] _documents;
+    import std.utf : codeLength, toUTF8;
+
+    private static Document[string] _documents;
     private wchar[][] _lines;
 
-    static auto opIndex(DocumentUri uri)
+    static auto opIndex(Uri uri)
     {
-        return uri in _documents ? _documents[uri] : null;
+        return uri.path in _documents ? _documents[uri.path] : null;
+    }
+
+    static auto opIndex(string uri)
+    {
+        auto path = Uri.getPath(uri);
+        return path in _documents ? _documents[path] : null;
     }
 
     static void open(TextDocumentItem textDocument)
     {
-        _documents[textDocument.uri] = new Document(textDocument);
+        auto path = Uri.getPath(textDocument.uri);
+
+        if (path in _documents)
+        {
+            _documents.remove(path);
+        }
+
+        _documents[path] = new Document(textDocument);
     }
 
     static void close(TextDocumentIdentifier textDocument)
     {
-        if (textDocument.uri in _documents)
+        auto path = Uri.getPath(textDocument.uri);
+
+        if (path in _documents)
         {
-            _documents.remove(textDocument.uri);
+            _documents.remove(path);
         }
     }
 
     static void change(VersionedTextDocumentIdentifier textDocument,
             TextDocumentContentChangeEvent[] events)
     {
-        if (textDocument.uri in _documents)
+        auto path = Uri.getPath(textDocument.uri);
+
+        if (path in _documents)
         {
-            _documents[textDocument.uri].change(events);
+            _documents[path].change(events);
         }
     }
 
@@ -48,20 +68,31 @@ class Document
     override string toString() const
     {
         import std.range : join;
-        import std.utf : toUTF8;
 
         return this._lines.join().toUTF8();
     }
 
-    auto bytePosition(Position position)
+    auto byteAtPosition(Position position)
     {
         import std.algorithm : reduce;
         import std.range : iota;
-        import std.utf : codeLength;
 
-        return reduce!((s, i) => s + codeLength!char(this._lines[i]))(cast(size_t) 0,
-                iota(position.line)) + codeLength!char(
-                this._lines[position.line][0 .. position.character]);
+        const linesBytes = reduce!((s, i) => s + codeLength!char(this._lines[i]))(
+                cast(size_t) 0, iota(position.line));
+        const characterBytes = codeLength!char(this._lines[position.line][0 .. position.character]);
+        return linesBytes + characterBytes;
+    }
+
+    auto lineNumberAtByte(size_t bytePosition)
+    {
+        size_t i;
+
+        for (size_t bytes; bytes < bytePosition && i < this._lines.length; ++i)
+        {
+            bytes += codeLength!char(this._lines[i]);
+        }
+
+        return i - 1;
     }
 
     private void change(TextDocumentContentChangeEvent[] events)

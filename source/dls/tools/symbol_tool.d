@@ -39,8 +39,10 @@ static this()
 class SymbolTool : Tool
 {
     import logger = std.experimental.logger;
+    import dcd.common.messages : RequestKind;
     import dls.protocol.definitions : Position;
     import dls.tools.configuration : Configuration;
+    import dls.util.document : Document;
     import dls.util.uri : Uri;
     import dsymbol.modulecache : ASTAllocator, ModuleCache;
     import dub.dub : Dub;
@@ -149,18 +151,11 @@ class SymbolTool : Tool
 
     auto complete(Uri uri, Position position)
     {
-        import dcd.common.messages : AutocompleteRequest, RequestKind;
         import dcd.server.autocomplete : complete;
         import dls.protocol.interfaces : CompletionItem;
-        import dls.util.document : Document;
 
-        auto request = AutocompleteRequest();
-        auto document = Document[uri];
-
-        request.fileName = uri.path;
+        auto request = getPreparedRequest(uri, position);
         request.kind = RequestKind.autocomplete;
-        request.sourceCode = cast(ubyte[]) document.toString();
-        request.cursorPosition = document.bytePosition(position);
 
         auto result = complete(request, _cache);
         CompletionItem[] items;
@@ -179,6 +174,46 @@ class SymbolTool : Tool
         return items.sort!((a, b) => a.label < b.label).uniq!((a, b) => a.label == b.label).array;
     }
 
+    auto find(Uri uri, Position position)
+    {
+        import dcd.server.autocomplete : findDeclaration;
+        import dls.protocol.interfaces : Location, Range, TextDocumentItem;
+        import std.file : readText;
+
+        auto request = getPreparedRequest(uri, position);
+        request.kind = RequestKind.symbolLocation;
+
+        auto result = findDeclaration(request, _cache);
+
+        if (result.symbolFilePath.length == 0)
+        {
+            return null;
+        }
+
+        auto resultPath = result.symbolFilePath == "stdin" ? uri.path : result.symbolFilePath;
+        const externalDocument = Document[resultPath] is null;
+
+        if (externalDocument)
+        {
+            auto doc = new TextDocumentItem();
+            doc.uri = resultPath;
+            doc.languageId = "d";
+            doc.text = readText(resultPath);
+            Document.open(doc);
+        }
+
+        auto lineNumber = Document[resultPath].lineNumberAtByte(result.symbolLocation);
+        auto location = new Location();
+        location.uri = Uri.fromPath(resultPath);
+        location.range = new Range();
+        location.range.start.line = lineNumber;
+        location.range.start.character = 0;
+        location.range.end.line = lineNumber;
+        location.range.end.character = Document[resultPath].lines[lineNumber].length;
+
+        return location.uri.length ? location : null;
+    }
+
     private void importDirectories(string[] paths)
     {
         foreach (path; paths)
@@ -188,6 +223,20 @@ class SymbolTool : Tool
                 _cache.addImportPaths([path]);
             }
         }
+    }
+
+    private auto getPreparedRequest(Uri uri, Position position)
+    {
+        import dcd.common.messages : AutocompleteRequest;
+
+        auto request = AutocompleteRequest();
+        auto document = Document[uri];
+
+        request.fileName = uri.path;
+        request.sourceCode = cast(ubyte[]) document.toString();
+        request.cursorPosition = document.byteAtPosition(position);
+
+        return request;
     }
 
     private static auto getDub(Uri uri)

@@ -69,8 +69,10 @@ auto signatureHelp(TextDocumentPositionParams params)
 
 auto definition(TextDocumentPositionParams params)
 {
-    auto result = new Location();
-    return result.nullable;
+    auto uri = new Uri(params.textDocument.uri);
+    logger.logf("Finding declaration for %s at position %s,%s", uri.path,
+            params.position.line, params.position.character);
+    return Tools.symbolTool.find(uri, params.position);
 }
 
 auto typeDefinition(TextDocumentPositionParams params)
