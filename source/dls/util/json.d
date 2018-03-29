@@ -431,6 +431,10 @@ unittest
     // parseJSON() will parse `uinteger` as a regular integer, meaning that the JSON's are considered equal,
     // even though technically they are equivalent (16 as int or as uint is technically the same value)
     assert(json.get().toString() == parseJSON(jsonString).toString());
+
+    TestClass nullTestClass = null;
+    auto nullJson = convertToJSON(nullTestClass);
+    assert(!nullJson.isNull && nullJson.get().isNull);
 }
 
 Nullable!JSONValue convertToJSON(N : Nullable!T, T)(N value)
