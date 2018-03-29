@@ -83,7 +83,13 @@ void initialized(JSONValue nothing)
     import dls.updater : update;
     import std.concurrency : spawn;
 
-    spawn(&update);
+    debug
+    {
+    }
+    else
+    {
+        spawn(&update);
+    }
 
     const didChangeWatchedFiles = Server.initState.capabilities.workspace.didChangeWatchedFiles;
 
