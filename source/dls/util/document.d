@@ -87,7 +87,7 @@ class Document
     {
         size_t i;
 
-        for (size_t bytes; bytes < bytePosition && i < this._lines.length; ++i)
+        for (size_t bytes; bytes <= bytePosition && i < this._lines.length; ++i)
         {
             bytes += codeLength!char(this._lines[i]);
         }
