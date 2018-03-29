@@ -9,13 +9,13 @@ It currently provides:
 
 ## Client side configuration
 
-All these keys should be formatted as `d.dls.[section].[key]` (e.g. `d.dls.formatter.endOfLine`).
+All these keys should be formatted as `d.dls.[section].[key]` (e.g. `d.dls.format.endOfLine`).
 
-|Section: `general`|Type      |Default value|
-|------------------|----------|-------------|
-|`importPaths`     |`string[]`|`[]`         |
+|Section: `symbol`|Type      |Default value|
+|-----------------|----------|-------------|
+|`importPaths`    |`string[]`|`[]`         |
 
-|Section: `formatter`               |Type                                    |Default value|
+|Section: `format`                  |Type                                    |Default value|
 |-----------------------------------|----------------------------------------|-------------|
 |`endOfLine`                        |`"lf"` or `"cr"` or `"crlf"`            |`"lf"`       |
 |`maxLineLength`                    |`number`                                |`120`        |
@@ -37,13 +37,13 @@ However, the extension will need to locate a first version of DLS; this is where
 The steps are:
 - `dub fetch dls` will fetch the latest version of DLS
 - `dub run --quiet dls:find` will output the directory to its parent DLS package
-- `dub build --build=release` launched in the just acquired DLS directory will build DLS (sending notifications before and after the build to the user might be a good idea, as it can take several minutes)
+- `dub build --build=release` launched in the just acquired DLS directory will build DLS (notifying the user before and after the build might be a good idea, as it can take several minutes)
 - The `dls` executable will now be right under the same directory
 
 __IMPORTANT__: when building DLS on Windows, `--arch=x86_mscoff` must be added to the arguments for the build to succeed.
 
-After this, the Language Client has to listen to telemetry events.
-As this Language Server won't be using telemetry, the `telemetry/event` server-to-client notification has been re-purposed: the event sent by the server will be the path to the new DLS executable after every update.
+After this, the Language Client has to listen to the `dls/updatedPath` notification.
+This notification, sent by the server after every update, will be the path to the new DLS executable.
 Otherwise nothing specific is required on the client's part regarding updates: the server will send notifications to the user when an update is available, and build its next version in parallel to responding to requests.
 
 ## Caveats

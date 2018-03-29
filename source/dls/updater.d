@@ -104,6 +104,7 @@ void update()
 
     auto notificationParams = new ShowMessageParams();
     notificationParams.type = MessageType.info;
-    notificationParams.message = "DLS " ~ latestVersion.toString() ~ " built";
+    notificationParams.message = "DLS " ~ latestVersion.toString()
+        ~ " built, and will be used next time.";
     Server.send("window/showMessage", notificationParams);
 }
