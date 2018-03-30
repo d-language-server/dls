@@ -25,7 +25,7 @@ void update()
     auto latestDlsPath = currentDlsPath;
     scope (exit)
     {
-        Server.send("dls/path", latestDlsPath);
+        Server.send("dls/didUpdatePath", latestDlsPath);
     }
 
     foreach (dls; dub.packageManager.getPackageIterator("dls"))
