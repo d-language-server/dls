@@ -1,5 +1,7 @@
 module dls.updater;
 
+enum changelogURL = "https://github.com/LaurentTreguier/dls/blob/master/CHANGELOG.md";
+
 void update()
 {
     import dls.protocol.interfaces : MessageActionItem, MessageType,
@@ -102,9 +104,10 @@ void update()
     dub.generateProject("build", settings);
     latestDlsPath = buildNormalizedPath(pack.path.toString(), "dls");
 
-    auto notificationParams = new ShowMessageParams();
-    notificationParams.type = MessageType.info;
-    notificationParams.message = "DLS " ~ latestVersion.toString()
+    requestParams.message = "DLS " ~ latestVersion.toString()
         ~ " built, and will be used next time.";
-    Server.send("window/showMessage", notificationParams);
+    requestParams.actions[0].title = "See what's new";
+    id = Server.send("window/showMessageRequest", requestParams);
+    send(ownerTid(), Util.ThreadMessageData(id,
+            Util.ShowMessageRequestType.showChangelog, changelogURL));
 }

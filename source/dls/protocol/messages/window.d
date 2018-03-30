@@ -9,30 +9,35 @@ void showMessageRequest(string id, MessageActionItem item)
     import dls.util.uri : Uri;
     import std.concurrency : locate, receiveOnly, send;
     import std.path : dirName;
+    import std.process : browse;
 
-    while (!(id in Util.messageRequestTypes))
+    while (!(id in Util.messageRequestInfo))
     {
         auto data = receiveOnly!(Util.ThreadMessageData)();
         Util.addMessageRequestType(data[0], data[1], data[2]);
     }
 
-    final switch (Util.messageRequestTypes[id][0])
+    final switch (Util.messageRequestInfo[id][0])
     {
     case Util.ShowMessageRequestType.upgradeSelections:
         if (item.title == "Yes")
         {
-            auto uri = new Uri(Util.messageRequestTypes[id][1]);
+            auto uri = new Uri(Util.messageRequestInfo[id][1]);
             Tools.symbolTool.upgradeSelections(uri);
         }
 
         break;
 
     case Util.ShowMessageRequestType.upgradeDls:
-        send(locate(Util.messageRequestTypes[id][1]), item.title.length > 0);
+        send(locate(Util.messageRequestInfo[id][1]), item.title.length > 0);
+        break;
+
+    case Util.ShowMessageRequestType.showChangelog:
+        browse(Util.messageRequestInfo[id][1]);
         break;
     }
 
-    Util.messageRequestTypes.remove(id);
+    Util.messageRequestInfo.remove(id);
 }
 
 abstract class Util
@@ -43,15 +48,16 @@ abstract class Util
     enum ShowMessageRequestType
     {
         upgradeSelections,
-        upgradeDls
+        upgradeDls,
+        showChangelog
     }
 
     shared alias ThreadMessageData = Tuple!(string, ShowMessageRequestType, string);
 
-    private static Tuple!(ShowMessageRequestType, string)[string] messageRequestTypes;
+    private static Tuple!(ShowMessageRequestType, string)[string] messageRequestInfo;
 
     static void addMessageRequestType(string id, ShowMessageRequestType type, string data = null)
     {
-        messageRequestTypes[id] = tuple(type, data);
+        messageRequestInfo[id] = tuple(type, data);
     }
 }
