@@ -102,7 +102,17 @@ void update()
     settings.tempBuild = false;
     settings.parallelBuild = false;
     dub.generateProject("build", settings);
-    latestDlsPath = buildNormalizedPath(pack.path.toString(), "dls");
+
+    version (Windows)
+    {
+        auto executable = "dls.exe";
+    }
+    else
+    {
+        auto executable = "dls";
+    }
+
+    latestDlsPath = buildNormalizedPath(pack.path.toString(), executable);
 
     requestParams.message = "DLS " ~ latestVersion.toString()
         ~ " built, and will be used next time.";
