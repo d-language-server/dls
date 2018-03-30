@@ -111,14 +111,16 @@ class SymbolTool : Tool
 
     void importPath(Uri uri)
     {
-        logger.logf("Importing from %s", dirName(uri.path));
+        logger.logf("Importing from %s", uri.path);
         const d = getDub(uri);
-        importDirectories(d.project.rootPackage.describe(BuildPlatform.any, null, null).importPaths);
+        const desc = d.project.rootPackage.describe(BuildPlatform.any, null, null);
+        importDirectories(desc.importPaths.map!(importPath => buildPath(uri.path,
+                importPath)).array);
     }
 
     void importSelections(Uri uri)
     {
-        logger.logf("Importing dependencies from %s", dirName(uri.path));
+        logger.logf("Importing dependencies from %s", uri.path);
         const d = getDub(uri);
         const project = d.project;
 
@@ -127,11 +129,8 @@ class SymbolTool : Tool
             const desc = dep.describe(BuildPlatform.any, null,
                     dep.name in project.rootPackage.recipe.buildSettings.subConfigurations
                     ? project.rootPackage.recipe.buildSettings.subConfigurations[dep.name] : null);
-
-            auto newImportPaths = desc.importPaths.map!(
-                    importPath => buildPath(dep.path.toString(), importPath));
-
-            importDirectories(newImportPaths.array);
+            importDirectories(desc.importPaths.map!(importPath => buildPath(dep.path.toString(),
+                    importPath)).array);
         }
     }
 
