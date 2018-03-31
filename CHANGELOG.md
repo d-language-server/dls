@@ -4,6 +4,10 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.2.1
+- Fixed "See what's new" button being activated even if not clicked
+- Fixed dfmtSelectiveImportSpace not being respected
+
 ### 0.2.0
 - __Changed the naming convention of the tools' configuration for consistency__
 - __Changed from `telemetry/event` to custom `dls/didUpdatePath` notification__
