@@ -70,7 +70,7 @@ class FormatTool : Tool
         config.dfmt_space_before_function_parameters = toOptBool(
                 _configuration.format.dfmtSpaceBeforeFunctionParameters);
         config.dfmt_selective_import_space = toOptBool(
-                _configuration.format.dfmtSpaceBeforeFunctionParameters);
+                _configuration.format.dfmtSelectiveImportSpace);
         config.dfmt_compact_labeled_statements = _configuration.format.dfmtCompactLabeledStatements
             ? OptionalBoolean.t : OptionalBoolean.f;
 
