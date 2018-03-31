@@ -45,7 +45,7 @@ void update()
 
     const latestVersion = dub.getLatestVersion("dls");
 
-    if (latestVersion.isUnknown() || currentDls.version_ == latestVersion)
+    if (latestVersion.isUnknown() || currentDls.version_ >= latestVersion)
     {
         return;
     }
