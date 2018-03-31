@@ -33,7 +33,10 @@ void showMessageRequest(string id, MessageActionItem item)
         break;
 
     case Util.ShowMessageRequestType.showChangelog:
-        browse(Util.messageRequestInfo[id][1]);
+        if (item.title.length) {
+            browse(Util.messageRequestInfo[id][1]);
+        }
+
         break;
     }
 

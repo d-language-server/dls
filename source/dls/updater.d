@@ -81,10 +81,12 @@ void update()
     version (Windows)
     {
         const arch = "x86_mscoff";
+        const executable = "dls.exe";
     }
     else
     {
         const arch = dub.defaultArchitecture;
+        const executable = "dls";
     }
 
     auto compiler = getCompiler(dub.defaultCompiler);
@@ -102,15 +104,6 @@ void update()
     settings.tempBuild = false;
     settings.parallelBuild = false;
     dub.generateProject("build", settings);
-
-    version (Windows)
-    {
-        auto executable = "dls.exe";
-    }
-    else
-    {
-        auto executable = "dls";
-    }
 
     latestDlsPath = buildNormalizedPath(pack.path.toString(), executable);
 
