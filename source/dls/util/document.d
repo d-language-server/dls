@@ -113,9 +113,8 @@ class Document
 
     auto wordRangeAtLineAndByte(size_t lineNumber, size_t bytePosition)
     {
-        import dls.protocol.definitions : Range;
         import std.regex : ctRegex, matchAll;
-        import std.utf : toUCSindex, toUTF8;
+        import std.utf : toUCSindex;
 
         const line = this._lines[lineNumber];
         const startCharacter = toUCSindex(line.toUTF8(), bytePosition);

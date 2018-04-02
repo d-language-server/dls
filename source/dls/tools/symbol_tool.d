@@ -152,6 +152,9 @@ class SymbolTool : Tool
         import dcd.server.autocomplete : complete;
         import dls.protocol.interfaces : CompletionItem;
 
+        logger.logf("Getting completions for %s at position %s,%s", uri.path,
+                position.line, position.character);
+
         auto request = getPreparedRequest(uri, position);
         request.kind = RequestKind.autocomplete;
 
@@ -177,6 +180,9 @@ class SymbolTool : Tool
         import dcd.server.autocomplete : findDeclaration;
         import dls.protocol.interfaces : Location, Range, TextDocumentItem;
         import std.file : readText;
+
+        logger.logf("Finding declaration for %s at position %s,%s", uri.path,
+                position.line, position.character);
 
         auto request = getPreparedRequest(uri, position);
         request.kind = RequestKind.symbolLocation;
@@ -216,6 +222,8 @@ class SymbolTool : Tool
         import dscanner.analysis.config : defaultStaticAnalysisConfig;
         import dscanner.analysis.run : analyze;
         import std.json : JSONValue;
+
+        logger.logf("Scanning document %s", uri.path);
 
         LexerConfig lexerConfig;
         lexerConfig.fileName = uri.path;

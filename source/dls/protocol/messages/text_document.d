@@ -2,6 +2,7 @@ module dls.protocol.messages.text_document;
 
 import logger = std.experimental.logger;
 import dls.protocol.interfaces;
+import dls.server : Server;
 import dls.tools.tools : Tools;
 import dls.util.document : Document;
 import dls.util.uri : Uri;
@@ -10,8 +11,14 @@ void didOpen(DidOpenTextDocumentParams params)
 {
     if (params.textDocument.languageId == "d")
     {
-        logger.logf("Document opened: %s", new Uri(params.textDocument.uri).path);
+        auto uri = new Uri(params.textDocument.uri);
+        logger.logf("Document opened: %s", uri.path);
         Document.open(params.textDocument);
+
+        auto diagnosticParams = new PublishDiagnosticsParams();
+        diagnosticParams.uri = uri;
+        diagnosticParams.diagnostics = Tools.symbolTool.scan(uri);
+        Server.send("textDocument/publishDiagnostics", diagnosticParams);
     }
 }
 
@@ -33,28 +40,33 @@ auto willSaveWaitUntil(WillSaveTextDocumentParams params)
 
 void didSave(DidSaveTextDocumentParams params)
 {
-    import dls.server : Server;
-
     auto uri = new Uri(params.textDocument.uri);
-    auto diagnosticParams = new PublishDiagnosticsParams();
 
-    diagnosticParams.uri = uri;
-    diagnosticParams.diagnostics = Tools.symbolTool.scan(uri);
-    Server.send("textDocument/publishDiagnostics", diagnosticParams);
+    if (Document[uri])
+    {
+        logger.logf("Document saved: %s", uri.path);
+
+        auto diagnosticParams = new PublishDiagnosticsParams();
+        diagnosticParams.uri = uri;
+        diagnosticParams.diagnostics = Tools.symbolTool.scan(uri);
+        Server.send("textDocument/publishDiagnostics", diagnosticParams);
+    }
 }
 
 void didClose(DidCloseTextDocumentParams params)
 {
-    logger.logf("Document closed: %s", new Uri(params.textDocument.uri).path);
+    auto uri = new Uri(params.textDocument.uri);
+    logger.logf("Document closed: %s", uri.path);
     Document.close(params.textDocument);
+
+    auto diagnosticParams = new PublishDiagnosticsParams();
+    diagnosticParams.uri = uri;
+    Server.send("textDocument/publishDiagnostics", diagnosticParams);
 }
 
 auto completion(CompletionParams params)
 {
-    auto uri = new Uri(params.textDocument.uri);
-    logger.logf("Getting completions for %s at position %s,%s", uri.path,
-            params.position.line, params.position.character);
-    return Tools.symbolTool.complete(uri, params.position);
+    return Tools.symbolTool.complete(new Uri(params.textDocument.uri), params.position);
 }
 
 @("completionItem", "resolve")
@@ -77,10 +89,7 @@ auto signatureHelp(TextDocumentPositionParams params)
 
 auto definition(TextDocumentPositionParams params)
 {
-    auto uri = new Uri(params.textDocument.uri);
-    logger.logf("Finding declaration for %s at position %s,%s", uri.path,
-            params.position.line, params.position.character);
-    return Tools.symbolTool.find(uri, params.position);
+    return Tools.symbolTool.find(new Uri(params.textDocument.uri), params.position);
 }
 
 auto typeDefinition(TextDocumentPositionParams params)
