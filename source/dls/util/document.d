@@ -57,19 +57,19 @@ class Document
 
     @property auto lines() const
     {
-        return this._lines;
+        return _lines;
     }
 
     this(TextDocumentItem textDocument)
     {
-        this._lines = this.getText(textDocument.text);
+        _lines = getText(textDocument.text);
     }
 
     override string toString() const
     {
         import std.range : join;
 
-        return this._lines.join().toUTF8();
+        return _lines.join().toUTF8();
     }
 
     auto byteAtPosition(Position position)
@@ -77,9 +77,9 @@ class Document
         import std.algorithm : reduce;
         import std.range : iota;
 
-        const linesBytes = reduce!((s, i) => s + codeLength!char(this._lines[i]))(
-                cast(size_t) 0, iota(position.line));
-        const characterBytes = codeLength!char(this._lines[position.line][0 .. position.character]);
+        const linesBytes = reduce!((s, i) => s + codeLength!char(_lines[i]))(cast(size_t) 0,
+                iota(position.line));
+        const characterBytes = codeLength!char(_lines[position.line][0 .. position.character]);
         return linesBytes + characterBytes;
     }
 
@@ -87,9 +87,9 @@ class Document
     {
         size_t i;
 
-        for (size_t bytes; bytes <= bytePosition && i < this._lines.length; ++i)
+        for (size_t bytes; bytes <= bytePosition && i < _lines.length; ++i)
         {
-            bytes += codeLength!char(this._lines[i]);
+            bytes += codeLength!char(_lines[i]);
         }
 
         return i - 1;
@@ -100,14 +100,14 @@ class Document
         size_t i;
         size_t bytes;
 
-        while (bytes <= bytePosition && i < this._lines.length)
+        while (bytes <= bytePosition && i < _lines.length)
         {
-            bytes += codeLength!char(this._lines[i]);
+            bytes += codeLength!char(_lines[i]);
             ++i;
         }
 
         const lineNumber = i - 1;
-        bytes -= codeLength!char(this._lines[lineNumber]);
+        bytes -= codeLength!char(_lines[lineNumber]);
         return wordRangeAtLineAndByte(lineNumber, bytePosition - bytes);
     }
 
@@ -116,7 +116,7 @@ class Document
         import std.regex : ctRegex, matchAll;
         import std.utf : toUCSindex;
 
-        const line = this._lines[lineNumber];
+        const line = _lines[lineNumber];
         const startCharacter = toUCSindex(line.toUTF8(), bytePosition);
         auto endCharacter = startCharacter + 1;
 
@@ -139,19 +139,19 @@ class Document
         {
             if (event.range.isNull)
             {
-                this._lines = this.getText(event.text);
+                _lines = getText(event.text);
             }
             else
             {
                 with (event.range)
                 {
-                    auto linesBefore = this._lines[0 .. start.line];
-                    auto linesAfter = this._lines[end.line + 1 .. $];
+                    auto linesBefore = _lines[0 .. start.line];
+                    auto linesAfter = _lines[end.line + 1 .. $];
 
-                    auto lineStart = this._lines[start.line][0 .. start.character];
-                    auto lineEnd = this._lines[end.line][end.character .. $];
+                    auto lineStart = _lines[start.line][0 .. start.character];
+                    auto lineEnd = _lines[end.line][end.character .. $];
 
-                    auto newLines = this.getText(event.text);
+                    auto newLines = getText(event.text);
 
                     if (newLines.length)
                     {
@@ -163,7 +163,7 @@ class Document
                         newLines = [lineStart ~ lineEnd];
                     }
 
-                    this._lines = linesBefore ~ newLines ~ linesAfter;
+                    _lines = linesBefore ~ newLines ~ linesAfter;
                 }
             }
         }
