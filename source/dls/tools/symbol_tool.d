@@ -5,6 +5,7 @@ import dls.tools.tool : Tool;
 import std.algorithm;
 import std.path;
 
+private enum diagnosticSource = "D-Scanner";
 private immutable CompletionItemKind[char] completionKinds;
 
 static this()
@@ -214,6 +215,7 @@ class SymbolTool : Tool
         import dparse.rollback_allocator : RollbackAllocator;
         import dscanner.analysis.config : defaultStaticAnalysisConfig;
         import dscanner.analysis.run : analyze;
+        import std.json : JSONValue;
 
         LexerConfig lexerConfig;
         lexerConfig.fileName = uri.path;
@@ -230,6 +232,7 @@ class SymbolTool : Tool
             auto d = new Diagnostic();
             d.range = document.wordRangeAtLineAndByte(line - 1, column - 1);
             d.severity = isError ? DiagnosticSeverity.error : DiagnosticSeverity.warning;
+            d.source = diagnosticSource;
             d.message = msg;
             diagnostics ~= d;
         };
@@ -237,7 +240,17 @@ class SymbolTool : Tool
         const mod = parseModule(tokens, uri.path, &ra, syntaxProblemhandler);
         const analysisConfig = defaultStaticAnalysisConfig();
         const analysisResults = analyze(uri.path, mod, analysisConfig, _cache, tokens, true);
-        // TODO: use ananysisResults as well
+
+        foreach (result; analysisResults)
+        {
+            auto d = new Diagnostic();
+            d.range = document.wordRangeAtLineAndByte(result.line - 1, result.column - 1);
+            d.severity = DiagnosticSeverity.warning;
+            d.code = JSONValue(result.key);
+            d.source = diagnosticSource;
+            d.message = result.message;
+            diagnostics ~= d;
+        }
 
         return diagnostics;
     }
