@@ -199,15 +199,9 @@ class SymbolTool : Tool
             Document.open(doc);
         }
 
-        auto lineNumber = Document[resultPath].lineNumberAtByte(result.symbolLocation);
         auto location = new Location();
         location.uri = Uri.fromPath(resultPath);
-        location.range = new Range();
-        location.range.start.line = lineNumber;
-        location.range.start.character = 0;
-        location.range.end.line = lineNumber;
-        location.range.end.character = Document[resultPath].lines[lineNumber].length;
-
+        location.range = Document[resultPath].wordRangeAtByte(result.symbolLocation);
         return location.uri.length ? location : null;
     }
 
@@ -234,7 +228,7 @@ class SymbolTool : Tool
         const syntaxProblemhandler = delegate(string path, size_t line,
                 size_t column, string msg, bool isError) {
             auto d = new Diagnostic();
-            d.range = document.wordRangeAtByte(line - 1, column - 1);
+            d.range = document.wordRangeAtLineAndByte(line - 1, column - 1);
             d.severity = isError ? DiagnosticSeverity.error : DiagnosticSeverity.warning;
             d.message = msg;
             diagnostics ~= d;

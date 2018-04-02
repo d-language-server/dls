@@ -95,7 +95,23 @@ class Document
         return i - 1;
     }
 
-    auto wordRangeAtByte(size_t lineNumber, size_t bytePosition)
+    auto wordRangeAtByte(size_t bytePosition)
+    {
+        size_t i;
+        size_t bytes;
+
+        while (bytes <= bytePosition && i < this._lines.length)
+        {
+            bytes += codeLength!char(this._lines[i]);
+            ++i;
+        }
+
+        const lineNumber = i - 1;
+        bytes -= codeLength!char(this._lines[lineNumber]);
+        return wordRangeAtLineAndByte(lineNumber, bytePosition - bytes);
+    }
+
+    auto wordRangeAtLineAndByte(size_t lineNumber, size_t bytePosition)
     {
         import dls.protocol.definitions : Range;
         import std.regex : ctRegex, matchAll;
