@@ -33,6 +33,14 @@ auto willSaveWaitUntil(WillSaveTextDocumentParams params)
 
 void didSave(DidSaveTextDocumentParams params)
 {
+    import dls.server : Server;
+
+    auto uri = new Uri(params.textDocument.uri);
+    auto diagnosticParams = new PublishDiagnosticsParams();
+
+    diagnosticParams.uri = uri;
+    diagnosticParams.diagnostics = Tools.symbolTool.scan(uri);
+    Server.send("textDocument/publishDiagnostics", diagnosticParams);
 }
 
 void didClose(DidCloseTextDocumentParams params)

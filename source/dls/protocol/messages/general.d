@@ -53,6 +53,12 @@ auto initialize(InitializeParams params)
             {
                 openClose = true;
                 change = TextDocumentSyncKind.incremental;
+                save = new SaveOptions();
+
+                with (save)
+                {
+                    includeText = false;
+                }
             }
 
             with (completionProvider)
@@ -80,14 +86,14 @@ auto initialize(InitializeParams params)
 @("")
 void initialized(JSONValue nothing)
 {
-    import dls.updater : update;
-    import std.concurrency : spawn;
-
     debug
     {
     }
     else
     {
+        import dls.updater : update;
+        import std.concurrency : spawn;
+
         spawn(&update);
     }
 

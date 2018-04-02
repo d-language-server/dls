@@ -3,10 +3,13 @@
 	"versions": {
 		"dcd": "0.9.2",
 		"dfmt": "0.7.0",
+		"dscanner": "0.5.0",
 		"dsymbol": "0.3.0",
 		"dub": "1.8.0",
 		"emsi_containers": "0.6.0",
-		"libdparse": "0.8.0-alpha.5",
+		"inifiled": "1.2.0",
+		"libddoc": "0.3.0-beta.1",
+		"libdparse": "0.8.0",
 		"msgpack-d": "1.0.0-beta.6",
 		"stdx-allocator": "2.77.0"
 	}

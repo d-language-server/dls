@@ -95,6 +95,29 @@ class Document
         return i - 1;
     }
 
+    auto wordRangeAtByte(size_t lineNumber, size_t bytePosition)
+    {
+        import dls.protocol.definitions : Range;
+        import std.regex : ctRegex, matchAll;
+        import std.utf : toUCSindex, toUTF8;
+
+        const line = this._lines[lineNumber];
+        const startCharacter = toUCSindex(line.toUTF8(), bytePosition);
+        auto endCharacter = startCharacter + 1;
+
+        while (endCharacter < line.length && ![line[endCharacter]].matchAll(ctRegex!`\w`w).empty())
+        {
+            ++endCharacter;
+        }
+
+        auto range = new Range();
+        range.start.line = lineNumber;
+        range.start.character = startCharacter;
+        range.end.line = lineNumber;
+        range.end.character = endCharacter;
+        return range;
+    }
+
     private void change(TextDocumentContentChangeEvent[] events)
     {
         foreach (event; events)

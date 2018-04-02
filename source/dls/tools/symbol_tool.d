@@ -45,11 +45,9 @@ class SymbolTool : Tool
     import dls.util.document : Document;
     import dls.util.uri : Uri;
     import dsymbol.modulecache : ASTAllocator, ModuleCache;
-    import dub.dub : Dub;
     import dub.platform : BuildPlatform;
     import std.array : array;
     import std.conv : to;
-    import std.file : isFile;
 
     version (Posix)
     {
@@ -79,7 +77,7 @@ class SymbolTool : Tool
     {
         import std.file : FileException, exists, readText;
         import std.range : replace;
-        import std.regex : matchAll, regex;
+        import std.regex : ctRegex, matchAll;
 
         string[] paths;
 
@@ -89,7 +87,7 @@ class SymbolTool : Tool
             {
                 try
                 {
-                    readText(confPath).matchAll(regex(`-I[^\s"]+`))
+                    readText(confPath).matchAll(ctRegex!`-I[^\s"]+`)
                         .each!(m => paths ~= m.hit[2 .. $].replace("%@P%",
                                 confPath.dirName).asNormalizedPath().to!string);
                     break;
@@ -213,6 +211,43 @@ class SymbolTool : Tool
         return location.uri.length ? location : null;
     }
 
+    auto scan(Uri uri)
+    {
+        import dls.protocol.definitions : Diagnostic, DiagnosticSeverity;
+        import dparse.lexer : LexerConfig, StringBehavior, StringCache,
+            getTokensForParser;
+        import dparse.parser : parseModule;
+        import dparse.rollback_allocator : RollbackAllocator;
+        import dscanner.analysis.config : defaultStaticAnalysisConfig;
+        import dscanner.analysis.run : analyze;
+
+        LexerConfig lexerConfig;
+        lexerConfig.fileName = uri.path;
+        lexerConfig.stringBehavior = StringBehavior.source;
+
+        auto stringCache = StringCache(StringCache.defaultBucketCount);
+        auto tokens = getTokensForParser(Document[uri].toString(), lexerConfig, &stringCache);
+        RollbackAllocator ra;
+        auto document = Document[uri];
+        Diagnostic[] diagnostics;
+
+        const syntaxProblemhandler = delegate(string path, size_t line,
+                size_t column, string msg, bool isError) {
+            auto d = new Diagnostic();
+            d.range = document.wordRangeAtByte(line - 1, column - 1);
+            d.severity = isError ? DiagnosticSeverity.error : DiagnosticSeverity.warning;
+            d.message = msg;
+            diagnostics ~= d;
+        };
+
+        const mod = parseModule(tokens, uri.path, &ra, syntaxProblemhandler);
+        const analysisConfig = defaultStaticAnalysisConfig();
+        const analysisResults = analyze(uri.path, mod, analysisConfig, _cache, tokens, true);
+        // TODO: use ananysisResults as well
+
+        return diagnostics;
+    }
+
     private void importDirectories(string[] paths)
     {
         foreach (path; paths)
@@ -240,6 +275,9 @@ class SymbolTool : Tool
 
     private static auto getDub(Uri uri)
     {
+        import dub.dub : Dub;
+        import std.file : isFile;
+
         auto d = new Dub(isFile(uri.path) ? dirName(uri.path) : uri.path);
         d.loadPackage();
         return d;

@@ -3,10 +3,9 @@ module dls.util.uri;
 class Uri
 {
     import dls.protocol.definitions : DocumentUri;
-    import std.regex : matchAll, regex;
+    import std.regex : ctRegex, matchAll;
 
-    private static enum _reg = regex(
-                `(?:([\w-]+)://)?([\w.]+(?::\d+)?)?([^\?#]+)(?:\?([\w=&]+))?(?:#([\w-]+))?`);
+    private static enum _reg = ctRegex!`(?:([\w-]+)://)?([\w.]+(?::\d+)?)?([^\?#]+)(?:\?([\w=&]+))?(?:#([\w-]+))?`;
     private string _uri;
     private string _scheme;
     private string _authority;
