@@ -83,18 +83,6 @@ class Document
         return linesBytes + characterBytes;
     }
 
-    auto lineNumberAtByte(size_t bytePosition)
-    {
-        size_t i;
-
-        for (size_t bytes; bytes <= bytePosition && i < _lines.length; ++i)
-        {
-            bytes += codeLength!char(_lines[i]);
-        }
-
-        return i - 1;
-    }
-
     auto wordRangeAtByte(size_t bytePosition)
     {
         size_t i;
@@ -118,18 +106,12 @@ class Document
 
         const line = _lines[lineNumber];
         const startCharacter = toUCSindex(line.toUTF8(), bytePosition);
-        auto endCharacter = startCharacter + 1;
-
-        while (endCharacter < line.length && ![line[endCharacter]].matchAll(ctRegex!`\w`w).empty())
-        {
-            ++endCharacter;
-        }
-
+        auto word = matchAll(line[startCharacter .. $], ctRegex!`\w+|.`w);
         auto range = new Range();
         range.start.line = lineNumber;
         range.start.character = startCharacter;
         range.end.line = lineNumber;
-        range.end.character = endCharacter;
+        range.end.character = startCharacter + word.hit.length;
         return range;
     }
 
