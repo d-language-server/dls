@@ -35,6 +35,7 @@ class Diagnostic
     Nullable!JSONValue code;
     Nullable!string source;
     string message;
+    Nullable!(DiagnosticRelatedInformation[]) relatedInformation;
 
     mixin Constructor!Diagnostic;
 }
@@ -45,6 +46,12 @@ enum DiagnosticSeverity
     warning = 2,
     information = 3,
     hint = 4
+}
+
+class DiagnosticRelatedInformation
+{
+    Location location;
+    string message;
 }
 
 class Command
