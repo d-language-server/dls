@@ -17,14 +17,15 @@ void didOpen(DidOpenTextDocumentParams params)
 
         auto diagnosticParams = new PublishDiagnosticsParams();
         diagnosticParams.uri = uri;
-        diagnosticParams.diagnostics = Tools.symbolTool.scan(uri);
+        diagnosticParams.diagnostics = Tools.analysisTool.scan(uri);
         Server.send("textDocument/publishDiagnostics", diagnosticParams);
     }
 }
 
 void didChange(DidChangeTextDocumentParams params)
 {
-    logger.logf("Document changed: %s", new Uri(params.textDocument.uri).path);
+    auto uri = new Uri(params.textDocument.uri);
+    logger.logf("Document changed: %s", uri.path);
     Document.change(params.textDocument, params.contentChanges);
 }
 
@@ -48,7 +49,7 @@ void didSave(DidSaveTextDocumentParams params)
 
         auto diagnosticParams = new PublishDiagnosticsParams();
         diagnosticParams.uri = uri;
-        diagnosticParams.diagnostics = Tools.symbolTool.scan(uri);
+        diagnosticParams.diagnostics = Tools.analysisTool.scan(uri);
         Server.send("textDocument/publishDiagnostics", diagnosticParams);
     }
 }

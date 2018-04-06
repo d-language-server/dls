@@ -2,12 +2,25 @@ module dls.tools.configuration;
 
 class Configuration
 {
-    SymbolConfiguration symbol = new SymbolConfiguration();
-    FormatConfiguration format = new FormatConfiguration();
+    SymbolConfiguration symbol;
+    AnalysisConfiguration analysis;
+    FormatConfiguration format;
+
+    this()
+    {
+        symbol = new SymbolConfiguration();
+        analysis = new AnalysisConfiguration();
+        format = new FormatConfiguration();
+    }
 
     static class SymbolConfiguration
     {
         string[] importPaths;
+    }
+
+    static class AnalysisConfiguration
+    {
+        string configFile = "dscanner.ini";
     }
 
     static class FormatConfiguration

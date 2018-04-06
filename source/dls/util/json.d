@@ -131,8 +131,7 @@ T convertFromJSON(T)(JSONValue json) if (isNumeric!T)
 {
     switch (json.type)
     {
-    case JSON_TYPE.NULL:
-    case JSON_TYPE.FALSE:
+    case JSON_TYPE.NULL, JSON_TYPE.FALSE:
         return 0.to!T;
 
     case JSON_TYPE.TRUE:
@@ -173,8 +172,7 @@ T convertFromJSON(T)(JSONValue json) if (isBoolean!T)
 {
     switch (json.type)
     {
-    case JSON_TYPE.NULL:
-    case JSON_TYPE.FALSE:
+    case JSON_TYPE.NULL, JSON_TYPE.FALSE:
         return false;
 
     case JSON_TYPE.FLOAT:
@@ -237,8 +235,7 @@ T convertFromJSON(T)(JSONValue json)
     case JSON_TYPE.UINTEGER:
             return json.uinteger.to!T;
 
-    case JSON_TYPE.OBJECT:
-    case JSON_TYPE.ARRAY:
+    case JSON_TYPE.OBJECT, JSON_TYPE.ARRAY:
             return json.toString().to!T;
         }
 
@@ -285,16 +282,12 @@ T convertFromJSON(T : U[], U)(JSONValue json)
 {
     switch (json.type)
     {
-    case JSON_TYPE.NULL:
-    case JSON_TYPE.FALSE:
-    case JSON_TYPE.TRUE:
+    case JSON_TYPE.NULL, JSON_TYPE.FALSE, JSON_TYPE.TRUE:
         return [];
 
-    case JSON_TYPE.FLOAT:
-    case JSON_TYPE.INTEGER:
-    case JSON_TYPE.UINTEGER:
-    case JSON_TYPE.STRING:
-        return [convertFromJSON!U(json)];
+    case JSON_TYPE.FLOAT, JSON_TYPE.INTEGER, JSON_TYPE.UINTEGER,
+            JSON_TYPE.STRING:
+            return [convertFromJSON!U(json)];
 
     case JSON_TYPE.ARRAY:
         return json.array.map!(value => convertFromJSON!U(value)).array.to!T;

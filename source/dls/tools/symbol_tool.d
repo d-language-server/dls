@@ -2,10 +2,8 @@ module dls.tools.symbol_tool;
 
 import dls.protocol.interfaces : CompletionItemKind;
 import dls.tools.tool : Tool;
-import std.algorithm;
 import std.path;
 
-private enum diagnosticSource = "D-Scanner";
 private immutable CompletionItemKind[char] completionKinds;
 
 static this()
@@ -47,6 +45,7 @@ class SymbolTool : Tool
     import dls.util.uri : Uri;
     import dsymbol.modulecache : ASTAllocator, ModuleCache;
     import dub.platform : BuildPlatform;
+    import std.algorithm : map, sort, uniq;
     import std.array : array;
     import std.conv : to;
 
@@ -86,16 +85,16 @@ class SymbolTool : Tool
         private static immutable snapPath = "/var/lib/snapd/snap";
     }
 
-    private ModuleCache _cache = ModuleCache(new ASTAllocator());
+    private ModuleCache _cache;
 
-    @property override void configuration(Configuration config)
+    @property ref cache()
     {
-        super.configuration(config);
-        _cache.addImportPaths(_configuration.symbol.importPaths);
+        return _cache;
     }
 
     @property private auto defaultImportPaths()
     {
+        import std.algorithm : each;
         import std.file : FileException, exists, readText;
         import std.range : replace;
         import std.regex : ctRegex, matchAll;
@@ -104,7 +103,7 @@ class SymbolTool : Tool
 
         foreach (confPath; _compilerConfigPaths)
         {
-            if (exists(confPath))
+            if (confPath.exists())
             {
                 try
                 {
@@ -134,6 +133,7 @@ class SymbolTool : Tool
 
     this()
     {
+        _cache = ModuleCache(new ASTAllocator());
         _cache.addImportPaths(defaultImportPaths);
     }
 
@@ -142,7 +142,7 @@ class SymbolTool : Tool
         logger.logf("Importing from %s", uri.path);
         const d = getDub(uri);
         const desc = d.project.rootPackage.describe(BuildPlatform.any, null, null);
-        importDirectories(desc.importPaths.map!(importPath => buildPath(uri.path,
+        importDirectories(desc.importPaths.map!(importPath => buildNormalizedPath(uri.path,
                 importPath)).array);
     }
 
@@ -157,7 +157,7 @@ class SymbolTool : Tool
             const desc = dep.describe(BuildPlatform.any, null,
                     dep.name in project.rootPackage.recipe.buildSettings.subConfigurations
                     ? project.rootPackage.recipe.buildSettings.subConfigurations[dep.name] : null);
-            importDirectories(desc.importPaths.map!(importPath => buildPath(dep.path.toString(),
+            importDirectories(desc.importPaths.map!(importPath => buildNormalizedPath(dep.path.toString(),
                     importPath)).array);
         }
     }
@@ -241,59 +241,10 @@ class SymbolTool : Tool
         return location.uri.length ? location : null;
     }
 
-    auto scan(Uri uri)
+    package void importDirectories(string[] paths)
     {
-        import dls.protocol.definitions : Diagnostic, DiagnosticSeverity;
-        import dparse.lexer : LexerConfig, StringBehavior, StringCache,
-            getTokensForParser;
-        import dparse.parser : parseModule;
-        import dparse.rollback_allocator : RollbackAllocator;
-        import dscanner.analysis.config : defaultStaticAnalysisConfig;
-        import dscanner.analysis.run : analyze;
-        import std.json : JSONValue;
+        import std.algorithm : canFind;
 
-        logger.logf("Scanning document %s", uri.path);
-
-        LexerConfig lexerConfig;
-        lexerConfig.fileName = uri.path;
-        lexerConfig.stringBehavior = StringBehavior.source;
-
-        auto stringCache = StringCache(StringCache.defaultBucketCount);
-        auto tokens = getTokensForParser(Document[uri].toString(), lexerConfig, &stringCache);
-        RollbackAllocator ra;
-        auto document = Document[uri];
-        Diagnostic[] diagnostics;
-
-        const syntaxProblemhandler = delegate(string path, size_t line,
-                size_t column, string msg, bool isError) {
-            auto d = new Diagnostic();
-            d.range = document.wordRangeAtLineAndByte(line - 1, column - 1);
-            d.severity = isError ? DiagnosticSeverity.error : DiagnosticSeverity.warning;
-            d.source = diagnosticSource;
-            d.message = msg;
-            diagnostics ~= d;
-        };
-
-        const mod = parseModule(tokens, uri.path, &ra, syntaxProblemhandler);
-        const analysisConfig = defaultStaticAnalysisConfig();
-        const analysisResults = analyze(uri.path, mod, analysisConfig, _cache, tokens, true);
-
-        foreach (result; analysisResults)
-        {
-            auto d = new Diagnostic();
-            d.range = document.wordRangeAtLineAndByte(result.line - 1, result.column - 1);
-            d.severity = DiagnosticSeverity.warning;
-            d.code = JSONValue(result.key);
-            d.source = diagnosticSource;
-            d.message = result.message;
-            diagnostics ~= d;
-        }
-
-        return diagnostics;
-    }
-
-    private void importDirectories(string[] paths)
-    {
         foreach (path; paths)
         {
             if (!_cache.getImportPaths().canFind(path))

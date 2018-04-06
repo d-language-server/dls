@@ -4,10 +4,10 @@ abstract class Tool
 {
     import dls.tools.configuration : Configuration;
 
-    protected Configuration _configuration = new Configuration();
+    package static Configuration _configuration;
 
-    @property void configuration(Configuration configuration)
+    static this()
     {
-        _configuration = configuration;
+        _configuration = new Configuration();
     }
 }

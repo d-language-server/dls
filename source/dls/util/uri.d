@@ -21,8 +21,9 @@ class Uri
     this(DocumentUri uri)
     {
         import std.uri : decodeComponent;
+        import std.utf : toUTF32;
 
-        auto matches = matchAll(decodeComponent(uri), _reg);
+        auto matches = matchAll(decodeComponent(uri.toUTF32()), _reg);
 
         //dfmt off
         _uri        = uri;

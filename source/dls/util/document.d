@@ -22,6 +22,13 @@ class Document
         return path in _documents ? _documents[path] : null;
     }
 
+    @property static auto uris()
+    {
+        import std.algorithm : map;
+
+        return _documents.keys.map!(path => Uri.fromPath(path));
+    }
+
     static void open(TextDocumentItem textDocument)
     {
         auto path = Uri.getPath(textDocument.uri);

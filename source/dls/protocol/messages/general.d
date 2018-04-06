@@ -35,6 +35,7 @@ auto initialize(InitializeParams params)
     {
         Tools.symbolTool.importPath(uri);
         Tools.symbolTool.importSelections(uri);
+        Tools.analysisTool.addAnalysisConfigPath(uri);
     }
 
     with (result)
@@ -112,9 +113,11 @@ void initialized(JSONValue nothing)
 
             with (registerOptions)
             {
-                watchers = [new FileSystemWatcher(), new FileSystemWatcher()];
+                watchers = [new FileSystemWatcher(), new FileSystemWatcher(),
+                    new FileSystemWatcher()];
                 watchers[0].globPattern = "**/dub.selections.json";
                 watchers[1].globPattern = "**/dub.{json,sdl}";
+                watchers[2].globPattern = "**/*.ini";
             }
         }
 
