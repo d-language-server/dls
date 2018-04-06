@@ -59,7 +59,22 @@ class SymbolTool : Tool
     }
     else version (Windows)
     {
-        private static immutable _compilerConfigPaths = [`c:\D\dmd2\windows\bin\sc.ini`];
+        @property private static string[] _compilerConfigPaths()
+        {
+            import std.algorithm : splitter;
+            import std.file : exists;
+            import std.process : environment;
+
+            foreach (path; splitter(environment["PATH"], ';'))
+            {
+                if (buildNormalizedPath(path, "dmd.exe").exists())
+                {
+                    return [buildNormalizedPath(path, "sc.ini")];
+                }
+            }
+
+            return [];
+        }
     }
     else
     {
