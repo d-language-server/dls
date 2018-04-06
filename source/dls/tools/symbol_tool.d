@@ -81,6 +81,11 @@ class SymbolTool : Tool
         private static immutable string[] _compilerConfigPaths;
     }
 
+    version (linux)
+    {
+        private static immutable snapPath = "/var/lib/snapd/snap";
+    }
+
     private ModuleCache _cache = ModuleCache(new ASTAllocator());
 
     @property override void configuration(Configuration config)
@@ -112,6 +117,15 @@ class SymbolTool : Tool
                 {
                     // File doesn't exist or could't be read
                 }
+            }
+        }
+
+        version (linux)
+        {
+            if (paths.length == 0 && buildNormalizedPath(snapPath, "dmd").exists())
+            {
+                paths = ["druntime", "phobos"].map!(end => buildNormalizedPath(snapPath,
+                        "dmd", "current", "import", end)).array;
             }
         }
 
