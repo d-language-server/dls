@@ -1,12 +1,15 @@
 # D Language Server
 
+### LSP compliance: `3.7.0`
+
 _This is a work in progress..._
 
 DLS implements the server side of the [Language Server Protocol (LSP)](https://microsoft.github.io/language-server-protocol/) for the [D programming language](https://dlang.org). It does not contain any language feature itself (yet), but uses existing components and provides an interface to work with the LSP.
 It currently provides:
-- formatting using [DFMT](https://github.com/dlang-community/dfmt)
-- code completion using [DCD](https://github.com/dlang-community/DCD)
-- go to definition using [DCD](https://github.com/dlang-community/DCD)
+- Code completion using [DCD](https://github.com/dlang-community/DCD)
+- Go to definition using [DCD](https://github.com/dlang-community/DCD)
+- Error checking using [D-Scanner](https://github.com/dlang-community/D-Scanner)
+- Formatting using [DFMT](https://github.com/dlang-community/dfmt)
 
 ## Client side configuration
 
@@ -15,6 +18,10 @@ All these keys should be formatted as `d.dls.[section].[key]` (e.g. `d.dls.forma
 |Section: `symbol`|Type      |Default value|
 |-----------------|----------|-------------|
 |`importPaths`    |`string[]`|`[]`         |
+
+|Section: `analysis`|Type    |Default value   |
+|-------------------|--------|----------------|
+|`configFile`       |`string`|`"dscanner.ini"`|
 
 |Section: `format`                  |Type                                    |Default value|
 |-----------------------------------|----------------------------------------|-------------|
@@ -54,10 +61,18 @@ The client should watch these files for the server to work properly:
 - `dub.selections.json`
 - `dub.json`
 - `dub.sdl`
+- `*.ini`
 
 If the client supports dynamic registration of the `workspace/didChangeWatchedFiles` method, then the server will automatically register file watching.
 If the client doesn't support dynamic registration however, the client-side extension will need to manually do it.
 The server needs to know at least when `dub.selections.json` files change to properly provide completion support.
 If `dub.json` and `dub.sdl` are also watched, `dub.selections.json` will automatically be regenerated and then it will be used for completion support.
+Watching `*.ini` allows DLS to monitor D-Scanner config files, even if the name is changed in the config and isn't precisly `dscanner.ini`.
 
 As support for messages regarding workspace folders are not yet supported in Visual Studio Code (used for testing the server), dls also lacks support for multiple workspace folders for now.
+
+## Example usage
+
+I made a VSCode extension and an atom package using DLS:
+- https://github.com/LaurentTreguier/vscode-dls
+- https://github.com/LaurentTreguier/ide-dlang

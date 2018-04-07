@@ -4,6 +4,14 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+### 0.3.0
+- Added linting support on file save, along with support for workspace-local D-Scanner config files
+- Enhanced go-to-definition: the range of the symbol is now used instead of the whole line
+- Enhanced automatic druntime/phobos path detection:
+    - On Windows, import paths should be detected regardless of DMD's install location
+    - On Linux, DLS will now also try to import paths from the DMD snap package
+- Fixed server crash on exit notification
+
 #### 0.2.1
 - Fixed "See what's new" button being activated even if not clicked
 - Fixed dfmtSelectiveImportSpace not being respected
@@ -11,7 +19,7 @@ Breaking changes will be in bold.
 ### 0.2.0
 - __Changed the naming convention of the tools' configuration for consistency__
 - __Changed from `telemetry/event` to custom `dls/didUpdatePath` notification__
-- Added go to definition support
+- Added go-to-definition support
 - Added guard to prevent debug builds to update
 - Added "See what's new" button to message shown when a new version of DLS has been built
 - Added CHANGELOG file
