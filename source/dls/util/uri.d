@@ -38,10 +38,9 @@ class Uri
 
         version (Windows)
         {
-            if (_path.length && _path[0] == '/')
-            {
-                _path = _path[1 .. $];
-            }
+            import std.string : stripLeft;
+
+            _path = _path.stripLeft(`/\`);
         }
     }
 
@@ -58,8 +57,11 @@ class Uri
     static fromPath(string path)
     {
         import std.algorithm : startsWith;
+        import std.string : tr;
+        import std.uri : encode;
 
-        return new Uri("file://" ~ (path.startsWith('/') ? "" : "/") ~ path);
+        const uriPath = path.tr(`\`, `/`);
+        return new Uri(encode("file://" ~ (uriPath.startsWith('/') ? "" : "/") ~ uriPath));
     }
 
     alias toString this;

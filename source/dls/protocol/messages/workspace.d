@@ -81,7 +81,7 @@ void didChangeWatchedFiles(DidChangeWatchedFilesParams params)
             break;
 
         default:
-            Tools.analysisTool.updateAnalysisConfigPath(new Uri(uri.path.dirName));
+            Tools.analysisTool.updateAnalysisConfigPath(Uri.fromPath(uri.path.dirName));
             break;
         }
     }
