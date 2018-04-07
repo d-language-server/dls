@@ -9,7 +9,7 @@ auto initialize(InitializeParams params)
 {
     import dls.tools.tools : Tools;
     import dls.util.uri : Uri;
-    import std.algorithm : map;
+    import std.algorithm : map, sort, uniq;
     import std.array : array;
 
     auto result = new InitializeResult();
@@ -31,7 +31,7 @@ auto initialize(InitializeParams params)
         uris ~= params.workspaceFolders.map!(wf => new Uri(wf.uri)).array;
     }
 
-    foreach (uri; uris)
+    foreach (uri; uris.sort!q{a.path < b.path}.uniq!q{a.path == b.path})
     {
         Tools.symbolTool.importPath(uri);
         Tools.symbolTool.importSelections(uri);
