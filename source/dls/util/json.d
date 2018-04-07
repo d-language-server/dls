@@ -10,7 +10,8 @@ import std.typecons : Nullable, nullable;
 /++
 Converts a `JSONValue` to an object of type `T` by filling its fields with the JSON's fields.
 +/
-T convertFromJSON(T)(JSONValue json) if (is(T == class) || is(T == struct))
+T convertFromJSON(T)(JSONValue json)
+        if ((is(T == class) || is(T == struct)) && !is(T == JSONValue))
 {
     static if (is(T == class))
     {
