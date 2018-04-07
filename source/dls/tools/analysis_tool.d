@@ -41,7 +41,8 @@ class AnalysisTool : Tool
         if (configPath.exists())
         {
             logger.logf("Updating config from file %s", configPath);
-            StaticAnalysisConfig conf;
+            auto conf = uri.path in _analysisConfigs ? _analysisConfigs[uri.path]
+                : defaultStaticAnalysisConfig();
             readINIFile(conf, configPath);
             _analysisConfigs[uri.path] = conf;
 
