@@ -131,7 +131,6 @@ abstract class Server
         import dls.util.json : convertFromJSON;
         import std.algorithm : canFind;
         import std.json : JSONException, parseJSON;
-        import std.typecons : nullable;
 
         RequestMessage request;
 
@@ -145,8 +144,7 @@ abstract class Server
                 {
                     request = convertFromJSON!RequestMessage(json);
 
-                    if (!_shutdown && (_initialized || ["initialize",
-                            "exit"].canFind(request.method)))
+                    if (!_shutdown && (_initialized || ["initialize"].canFind(request.method)))
                     {
                         send(request.id, handler!RequestHandler(request.method)(request.params));
                     }

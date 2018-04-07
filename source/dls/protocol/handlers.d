@@ -57,7 +57,7 @@ void pushHandler(F)(string method, F func)
         pushHandler(method, (Nullable!JSONValue params) {
             import dls.util.json : convertToJSON;
 
-            auto arg = convertFromJSON!((Parameters!F)[0])(params);
+            auto arg = convertFromJSON!((Parameters!F)[0])(params.isNull ? JSONValue(null) : params);
 
             static if (is(ReturnType!F == void))
             {
@@ -72,7 +72,7 @@ void pushHandler(F)(string method, F func)
     else static if ((Parameters!F).length == 2)
     {
         pushHandler(method, (string id, Nullable!JSONValue params) => func(id,
-                convertFromJSON!((Parameters!F)[1])(params)));
+                convertFromJSON!((Parameters!F)[1])(params.isNull ? JSONValue(null) : params)));
     }
     else
     {
