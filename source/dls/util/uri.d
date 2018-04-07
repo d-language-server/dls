@@ -20,6 +20,8 @@ class Uri
 
     this(DocumentUri uri)
     {
+        import std.conv : to;
+        import std.path : asNormalizedPath;
         import std.uri : decodeComponent;
         import std.utf : toUTF32;
 
@@ -29,7 +31,7 @@ class Uri
         _uri        = uri;
         _scheme     = matches.front[1];
         _authority  = matches.front[2];
-        _path       = matches.front[3];
+        _path       = matches.front[3].asNormalizedPath().to!string;
         _query      = matches.front[4];
         _fragment   = matches.front[5];
         //dfmt on
