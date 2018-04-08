@@ -1,6 +1,7 @@
 module dls.updater;
 
-enum changelogURL = "https://github.com/LaurentTreguier/dls/blob/master/CHANGELOG.md";
+private enum changelogURL = "https://github.com/LaurentTreguier/dls/blob/master/CHANGELOG.md";
+private enum maxTries = 3;
 
 void update()
 {
@@ -15,8 +16,10 @@ void update()
     import dub.generators.generator : GeneratorSettings;
     import dub.package_ : Package;
     import std.concurrency : ownerTid, receiveOnly, register, send, thisTid;
-    import std.file : thisExePath;
+    import std.conv : to;
+    import std.file : FileException, thisExePath;
     import std.path : buildNormalizedPath, dirName;
+    import std.process : Config, execute;
 
     auto currentDlsPath = thisExePath();
     auto dub = new Dub(dirName(currentDlsPath));
@@ -40,7 +43,14 @@ void update()
 
     foreach (dls; toRemove)
     {
-        dub.remove(dls);
+        try
+        {
+            dub.remove(dls);
+        }
+        catch (FileException e)
+        {
+            // No big deal if they can't be removed for some reason
+        }
     }
 
     const latestVersion = dub.getLatestVersion("dls");
@@ -72,45 +82,46 @@ void update()
     FetchOptions fetchOpts;
     fetchOpts |= FetchOptions.forceBranchUpgrade;
     const pack = dub.fetch("dls", Dependency(">=0.0.0"), dub.defaultPlacementLocation, fetchOpts);
-    dub = new Dub(pack.path.toString());
-    dub.loadPackage();
 
-    GeneratorSettings settings;
-    BuildSettings buildSettings;
+    int i;
+    int status;
+    auto cmdLine = ["dub", "build", "--build=release"];
 
     version (Windows)
     {
-        const arch = "x86_mscoff";
         const executable = "dls.exe";
+        cmdLine ~= "--arch=x86_mscoff";
     }
     else
     {
-        const arch = dub.defaultArchitecture;
         const executable = "dls";
     }
 
-    auto compiler = getCompiler(dub.defaultCompiler);
-    auto buildPlatform = compiler.determinePlatform(buildSettings, dub.defaultCompiler, arch);
+    do
+    {
+        status = execute(cmdLine, null, Config.suppressConsole, size_t.max, pack.path.toString())
+            .status;
+        ++i;
+    }
+    while (i < maxTries && status != 0);
 
-    settings.platform = buildPlatform;
-    settings.config = "application";
-    settings.buildType = "release";
-    settings.compiler = compiler;
-    settings.buildSettings = buildSettings;
-    settings.combined = false;
-    settings.run = false;
-    settings.force = false;
-    settings.rdmd = false;
-    settings.tempBuild = false;
-    settings.parallelBuild = false;
-    dub.generateProject("build", settings);
+    if (status == 0)
+    {
+        latestDlsPath = buildNormalizedPath(pack.path.toString(), executable);
 
-    latestDlsPath = buildNormalizedPath(pack.path.toString(), executable);
-
-    requestParams.message = "DLS " ~ latestVersion.toString()
-        ~ " built, and will be used next time.";
-    requestParams.actions[0].title = "See what's new";
-    id = Server.send("window/showMessageRequest", requestParams);
-    send(ownerTid(), Util.ThreadMessageData(id,
-            Util.ShowMessageRequestType.showChangelog, changelogURL));
+        requestParams.message = "DLS " ~ latestVersion.toString()
+            ~ " built, and will be used next time.";
+        requestParams.actions[0].title = "See what's new";
+        id = Server.send("window/showMessageRequest", requestParams);
+        send(ownerTid(), Util.ThreadMessageData(id,
+                Util.ShowMessageRequestType.showChangelog, changelogURL));
+    }
+    else
+    {
+        auto messageParams = new ShowMessageParams();
+        messageParams.type = MessageType.error;
+        messageParams.message = "DLS " ~ latestVersion.toString()
+            ~ " could not be built after " ~ maxTries.to!string ~ " tries";
+        Server.send("window/showMessage", messageParams);
+    }
 }
