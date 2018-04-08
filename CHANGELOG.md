@@ -4,6 +4,11 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.3.1
+- Added missing DFMT options
+- Fixed (hopefully for good this time) the updater by using the system installed dub to build next versions of DLS
+- Fixed crashes with DFMT due to the missing options
+
 ### 0.3.0
 - Added linting support on file save, along with support for workspace-local D-Scanner config files
 - Enhanced go-to-definition: the range of the symbol is now used instead of the whole line
