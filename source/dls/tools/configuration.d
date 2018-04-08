@@ -39,17 +39,28 @@ class Configuration
             crlf = "crlf"
         }
 
+        static enum TemplateConstraintStyle
+        {
+            conditionalNewlineIndent = "conditionalNewlineIndent",
+            conditionalNewline = "conditionalNewline",
+            alwaysNewline = "alwaysNewline",
+            alwaysNewlineIndent = "alwaysNewlineIndent"
+        }
+
         EndOfLine endOfLine = EndOfLine.lf;
         int maxLineLength = 120;
-        BraceStyle dfmtBraceStyle = BraceStyle.allman;
-        int dfmtSoftMaxLineLength = 80;
         bool dfmtAlignSwitchStatements = true;
+        BraceStyle dfmtBraceStyle = BraceStyle.allman;
         bool dfmtOutdentAttributes = true;
-        bool dfmtSplitOperatorAtLineEnd = false;
+        int dfmtSoftMaxLineLength = 80;
         bool dfmtSpaceAfterCast = true;
         bool dfmtSpaceAfterKeywords = true;
         bool dfmtSpaceBeforeFunctionParameters = false;
+        bool dfmtSplitOperatorAtLineEnd = false;
         bool dfmtSelectiveImportSpace = true;
         bool dfmtCompactLabeledStatements = true;
+        TemplateConstraintStyle dfmtTemplateConstraintStyle = TemplateConstraintStyle
+            .conditionalNewlineIndent;
+        bool dfmtSingleTemplateConstraintIndent = false;
     }
 }
