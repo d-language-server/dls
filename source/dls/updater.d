@@ -7,7 +7,7 @@ void update()
 {
     import dls.protocol.interfaces : MessageActionItem, MessageType,
         ShowMessageParams, ShowMessageRequestParams;
-    import dls.protocol.messages : Util;
+    import dls.protocol.messages.window : Util;
     import dls.server : Server;
     import dub.compilers.buildsettings : BuildSettings;
     import dub.compilers.compiler : getCompiler;
