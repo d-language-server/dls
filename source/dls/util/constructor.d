@@ -8,8 +8,10 @@ mixin template Constructor(T)
         {
             static if (is(typeof(__traits(getMember, T, member)) == class))
             {
-                mixin(member ~ " = new " ~ __traits(identifier,
-                        typeof(__traits(getMember, T, member))) ~ "();");
+                import std.format : format;
+
+                mixin(format!"%s = new %s();"(member, __traits(identifier,
+                        typeof(__traits(getMember, T, member)))));
             }
         }
     }

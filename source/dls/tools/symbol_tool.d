@@ -2,7 +2,7 @@ module dls.tools.symbol_tool;
 
 import dls.protocol.interfaces : CompletionItemKind;
 import dls.tools.tool : Tool;
-import std.path;
+import std.path : asNormalizedPath, buildNormalizedPath, dirName;
 
 private immutable CompletionItemKind[char] completionKinds;
 
@@ -40,10 +40,9 @@ class SymbolTool : Tool
     import logger = std.experimental.logger;
     import dcd.common.messages : RequestKind;
     import dls.protocol.definitions : Position;
-    import dls.tools.configuration : Configuration;
     import dls.util.document : Document;
     import dls.util.uri : Uri;
-    import dsymbol.modulecache : ASTAllocator, ModuleCache;
+    import dsymbol.modulecache : ModuleCache;
     import dub.platform : BuildPlatform;
     import std.algorithm : map, sort, uniq;
     import std.array : array;
@@ -133,6 +132,8 @@ class SymbolTool : Tool
 
     this()
     {
+        import dsymbol.modulecache : ASTAllocator;
+
         _cache = ModuleCache(new ASTAllocator());
         _cache.addImportPaths(defaultImportPaths);
     }
@@ -207,7 +208,7 @@ class SymbolTool : Tool
     auto find(Uri uri, Position position)
     {
         import dcd.server.autocomplete : findDeclaration;
-        import dls.protocol.interfaces : Location, Range, TextDocumentItem;
+        import dls.protocol.interfaces : Location, TextDocumentItem;
         import std.file : readText;
 
         logger.logf("Finding declaration for %s at position %s,%s", uri.path,

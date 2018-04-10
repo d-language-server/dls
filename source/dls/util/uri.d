@@ -13,9 +13,9 @@ class Uri
     private string _query;
     private string _fragment;
 
-    @property auto opDispatch(string name)() const
+    @property auto path() const
     {
-        mixin("return _" ~ name ~ ";");
+        return _path;
     }
 
     this(DocumentUri uri)
@@ -57,11 +57,12 @@ class Uri
     static fromPath(string path)
     {
         import std.algorithm : startsWith;
+        import std.format : format;
         import std.string : tr;
         import std.uri : encode;
 
         const uriPath = path.tr(`\`, `/`);
-        return new Uri(encode("file://" ~ (uriPath.startsWith('/') ? "" : "/") ~ uriPath));
+        return new Uri(encode(format!"file://%s%s"(uriPath.startsWith('/') ? "" : "/", uriPath)));
     }
 
     alias toString this;

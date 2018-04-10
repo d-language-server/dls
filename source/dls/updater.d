@@ -9,15 +9,13 @@ void update()
         ShowMessageParams, ShowMessageRequestParams;
     import dls.protocol.messages.window : Util;
     import dls.server : Server;
-    import dub.compilers.buildsettings : BuildSettings;
-    import dub.compilers.compiler : getCompiler;
     import dub.dependency : Dependency;
     import dub.dub : Dub, FetchOptions;
-    import dub.generators.generator : GeneratorSettings;
     import dub.package_ : Package;
     import std.concurrency : ownerTid, receiveOnly, register, send, thisTid;
     import std.conv : to;
     import std.file : FileException, thisExePath;
+    import std.format : format;
     import std.path : buildNormalizedPath, dirName;
     import std.process : Config, execute;
 
@@ -62,12 +60,12 @@ void update()
 
     auto requestParams = new ShowMessageRequestParams();
     requestParams.type = MessageType.info;
-    requestParams.message = "DLS version " ~ latestVersion.toString() ~ " available";
+    requestParams.message = format!"DLS version %s is available"(latestVersion);
     requestParams.actions = [new MessageActionItem()];
     requestParams.actions[0].title = "Upgrade";
 
     auto id = Server.send("window/showMessageRequest", requestParams);
-    auto threadName = "updater";
+    const threadName = "updater";
     register(threadName, thisTid());
     send(ownerTid(), Util.ThreadMessageData(id,
             Util.ShowMessageRequestType.upgradeDls, threadName));
@@ -90,7 +88,7 @@ void update()
     version (Windows)
     {
         const executable = "dls.exe";
-        cmdLine ~= "--arch=x86_mscoff";
+        cmdLine ~= ["--arch=x86_mscoff", "--compiler=dmd"];
     }
     else
     {
@@ -109,8 +107,7 @@ void update()
     {
         latestDlsPath = buildNormalizedPath(pack.path.toString(), executable);
 
-        requestParams.message = "DLS " ~ latestVersion.toString()
-            ~ " built, and will be used next time.";
+        requestParams.message = format!" DLS %s built, and will be used next time."(latestVersion);
         requestParams.actions[0].title = "See what's new";
         id = Server.send("window/showMessageRequest", requestParams);
         send(ownerTid(), Util.ThreadMessageData(id,
@@ -120,8 +117,8 @@ void update()
     {
         auto messageParams = new ShowMessageParams();
         messageParams.type = MessageType.error;
-        messageParams.message = "DLS " ~ latestVersion.toString()
-            ~ " could not be built after " ~ maxTries.to!string ~ " tries";
+        messageParams.message = format!"DLS %s could not be built after %s tries"(
+                latestVersion, maxTries);
         Server.send("window/showMessage", messageParams);
     }
 }

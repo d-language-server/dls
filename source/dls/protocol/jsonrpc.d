@@ -1,7 +1,7 @@
 module dls.protocol.jsonrpc;
 
 import std.json : JSONValue;
-import std.typecons;
+import std.typecons : Nullable, Tuple, nullable, tuple;
 
 private enum jsonrpcVersion = "2.0";
 private enum eol = "\r\n";
@@ -21,10 +21,14 @@ void send(T : Message)(T m)
     auto message = convertToJSON(m);
     auto messageString = message.get().toString();
 
-    foreach (chunk; ["Content-Length: ", messageString.length.to!string, eol, eol, messageString])
+    synchronized
     {
-        stdout.rawWrite(chunk.toUTF8());
-        stdout.flush();
+        foreach (chunk; ["Content-Length: ", messageString.length.to!string,
+                eol, eol, messageString])
+        {
+            stdout.rawWrite(chunk.toUTF8());
+            stdout.flush();
+        }
     }
 }
 
