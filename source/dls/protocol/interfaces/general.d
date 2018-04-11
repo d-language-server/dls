@@ -20,7 +20,7 @@ class InitializeParams
     }
 
     Nullable!ulong processId;
-    // deprecated Nullable!string rootPath; // TODO: add compatibility
+    Nullable!string rootPath;
     Nullable!DocumentUri rootUri;
     Nullable!JSONValue initializationOptions;
     ClientCapabilities capabilities;
@@ -110,11 +110,6 @@ class InitializeResult
 
     mixin Constructor!InitializeResult;
 }
-
-// deprecated enum InitializeErrorCode // TODO: add compatibility
-// {
-//     unknownProtocolVersion = 1
-// }
 
 class InitializeErrorData
 {

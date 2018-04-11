@@ -25,6 +25,10 @@ auto initialize(InitializeParams params)
     {
         uris ~= new Uri(params.rootUri);
     }
+    else if (!params.rootPath.isNull)
+    {
+        uris ~= Uri.fromPath(params.rootPath);
+    }
 
     if (!params.workspaceFolders.isNull)
     {
