@@ -242,6 +242,36 @@ class SymbolTool : Tool
         return location.uri.length ? location : null;
     }
 
+    auto highlight(Uri uri, Position position)
+    {
+        import dcd.server.autocomplete.localuse : findLocalUse;
+        import dls.protocol.interfaces : DocumentHighlight,
+            DocumentHighlightKind;
+
+        logger.logf("Highlighting usages for %s at position %s,%s", uri.path,
+                position.line, position.character);
+
+        auto request = getPreparedRequest(uri, position);
+        request.kind = RequestKind.localUse;
+
+        auto result = findLocalUse(request, _cache);
+        DocumentHighlight[] highlights;
+
+        foreach (res; result.completions)
+        {
+            highlights ~= new DocumentHighlight();
+
+            with (highlights[$ - 1])
+            {
+                range = Document[uri].wordRangeAtByte(res.symbolLocation);
+                kind = res.symbolLocation == result.symbolLocation
+                    ? DocumentHighlightKind.write : DocumentHighlightKind.text;
+            }
+        }
+
+        return highlights;
+    }
+
     package void importDirectories(string[] paths)
     {
         import std.algorithm : canFind;

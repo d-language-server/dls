@@ -113,8 +113,7 @@ auto references(ReferenceParams params)
 
 auto documentHighlight(TextDocumentPositionParams params)
 {
-    DocumentHighlight[] result;
-    return result;
+    return Tools.symbolTool.highlight(new Uri(params.textDocument.uri), params.position);
 }
 
 auto documentSymbol(DocumentSymbolParams params)

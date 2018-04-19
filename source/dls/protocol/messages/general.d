@@ -52,6 +52,7 @@ auto initialize(InitializeParams params)
             completionProvider = new CompletionOptions();
             documentFormattingProvider = true;
             definitionProvider = true;
+            documentHighlightProvider = true;
             workspace = new ServerCapabilities.Workspace();
 
             with (textDocumentSync)
