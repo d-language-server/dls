@@ -1,7 +1,7 @@
 module dls.updater;
 
 private enum changelogURL = "https://github.com/LaurentTreguier/dls/blob/master/CHANGELOG.md";
-private enum maxTries = 3;
+private auto additionalArgs = [[], ["--force"]];
 
 void update()
 {
@@ -97,11 +97,11 @@ void update()
 
     do
     {
-        status = execute(cmdLine, null, Config.suppressConsole, size_t.max, pack.path.toString())
-            .status;
+        status = execute(cmdLine ~ additionalArgs[i], null,
+                Config.suppressConsole, size_t.max, pack.path.toString()).status;
         ++i;
     }
-    while (i < maxTries && status != 0);
+    while (i < additionalArgs.length && status != 0);
 
     if (status == 0)
     {
@@ -117,8 +117,7 @@ void update()
     {
         auto messageParams = new ShowMessageParams();
         messageParams.type = MessageType.error;
-        messageParams.message = format!"DLS %s could not be built after %s tries"(
-                latestVersion, maxTries);
+        messageParams.message = "DLS could not be built";
         Server.send("window/showMessage", messageParams);
     }
 }
