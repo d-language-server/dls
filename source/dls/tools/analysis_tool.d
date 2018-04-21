@@ -66,7 +66,7 @@ class AnalysisTool : Tool
         import dscanner.analysis.run : analyze;
         import std.array : appender;
         import std.json : JSONValue;
-        import std.typecons : nullable;
+        import std.typecons : Nullable, nullable;
 
         logger.logf("Scanning document %s", uri.path);
 
@@ -80,12 +80,11 @@ class AnalysisTool : Tool
         auto document = Document[uri];
         auto diagnostics = appender!(Diagnostic[]);
 
-        const syntaxProblemhandler = delegate(string path, size_t line,
-                size_t column, string msg, bool isError) {
-            auto d = new Diagnostic(document.wordRangeAtLineAndByte(line - 1, column - 1), msg);
-            d.severity = isError ? DiagnosticSeverity.error : DiagnosticSeverity.warning;
-            d.source = diagnosticSource;
-            diagnostics ~= d;
+        const syntaxProblemhandler = (string path, size_t line, size_t column,
+                string msg, bool isError) {
+            diagnostics ~= new Diagnostic(document.wordRangeAtLineAndByte(line - 1, column - 1), msg, (isError
+                    ? DiagnosticSeverity.error : DiagnosticSeverity.warning).nullable,
+                    Nullable!JSONValue.init, diagnosticSource.nullable);
         };
 
         const mod = parseModule(tokens, uri.path, &ra, syntaxProblemhandler);

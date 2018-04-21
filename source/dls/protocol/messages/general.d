@@ -87,6 +87,7 @@ void initialized(JSONValue nothing)
 
     if (!didChangeWatchedFiles.isNull && didChangeWatchedFiles.dynamicRegistration)
     {
+        logger.log("Registering watchers");
         auto watchers = [
             new FileSystemWatcher("**/dub.selections.json"),
             new FileSystemWatcher("**/dub.{json,sdl}"), new FileSystemWatcher("**/*.ini")
@@ -95,11 +96,8 @@ void initialized(JSONValue nothing)
         auto registration = new Registration!DidChangeWatchedFilesRegistrationOptions(
                 "dls-registration-watch-dub-files",
                 "workspace/didChangeWatchedFiles", registrationOptions.nullable);
-        auto params = new RegistrationParams!DidChangeWatchedFilesRegistrationOptions(
-                [registration]);
-
-        logger.log("Registering watchers");
-        Server.send("client/registerCapability", params);
+        Server.send("client/registerCapability",
+                new RegistrationParams!DidChangeWatchedFilesRegistrationOptions([registration]));
     }
 }
 

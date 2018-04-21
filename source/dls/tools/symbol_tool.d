@@ -190,8 +190,7 @@ class SymbolTool : Tool
 
         return complete(request, _cache).completions.sort!q{a.identifier > b.identifier}
             .uniq!q{a.identifier == b.identifier}.map!((res) {
-                auto item = new CompletionItem();
-                item.label = res.identifier;
+                auto item = new CompletionItem(res.identifier);
                 item.kind = completionKinds[res.kind.to!char];
                 return item;
             }).array;

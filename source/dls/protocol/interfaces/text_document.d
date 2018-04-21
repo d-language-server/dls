@@ -138,6 +138,32 @@ class CompletionItem
     Nullable!(string[]) commitCharacters;
     Nullable!Command command;
     Nullable!JSONValue data;
+
+    this(string label = string.init, Nullable!CompletionItemKind kind = Nullable!CompletionItemKind.init,
+            Nullable!string detail = Nullable!string.init, Nullable!string documentation = Nullable!string.init,
+            Nullable!string sortText = Nullable!string.init, Nullable!string filterText = Nullable!string.init,
+            Nullable!string insertText = Nullable!string.init,
+            Nullable!InsertTextFormat insertTextFormat = Nullable!InsertTextFormat.init,
+            Nullable!TextEdit textEdit = Nullable!TextEdit.init,
+            Nullable!(TextEdit[]) additionalTextEdits = Nullable!(TextEdit[]).init,
+            Nullable!(string[]) commitCharacters = Nullable!(string[])
+            .init, Nullable!Command command = Nullable!Command.init,
+            Nullable!JSONValue data = Nullable!JSONValue.init)
+    {
+        this.label = label;
+        this.kind = kind;
+        this.detail = detail;
+        this.documentation = documentation;
+        this.sortText = sortText;
+        this.filterText = filterText;
+        this.insertText = insertText;
+        this.insertTextFormat = insertTextFormat;
+        this.textEdit = textEdit;
+        this.additionalTextEdits = additionalTextEdits;
+        this.commitCharacters = commitCharacters;
+        this.command = command;
+        this.data = data;
+    }
 }
 
 enum CompletionItemKind
