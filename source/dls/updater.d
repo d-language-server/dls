@@ -5,6 +5,7 @@ private auto additionalArgs = [[], ["--force"]];
 
 void update()
 {
+    import dls.bootstrap : makeLink;
     import dls.protocol.interfaces : MessageActionItem, MessageType,
         ShowMessageParams, ShowMessageRequestParams;
     import dls.protocol.messages.window : Util;
@@ -13,7 +14,7 @@ void update()
     import dub.dub : Dub, FetchOptions;
     import dub.package_ : Package;
     import std.concurrency : ownerTid, receiveOnly, register, send, thisTid;
-    import std.file : FileException, thisExePath;
+    import std.file : FileException, exists, remove, thisExePath;
     import std.format : format;
     import std.path : buildNormalizedPath, dirName;
     import std.process : Config, execute;
@@ -102,9 +103,8 @@ void update()
 
     if (status == 0)
     {
-        latestDlsPath = buildNormalizedPath(pack.path.toString(), executable);
-
-        requestParams.message = format!" DLS %s built, and will be used next time."(latestVersion);
+        latestDlsPath = makeLink(pack.path.toString(), executable);
+        requestParams.message = format!" DLS updated to %s [%s]"(latestVersion, latestDlsPath);
         requestParams.actions[0].title = "See what's new";
         id = Server.send("window/showMessageRequest", requestParams);
         send(ownerTid(), Util.ThreadMessageData(id,

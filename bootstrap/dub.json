@@ -1,0 +1,12 @@
+{
+	"name": "bootstrap",
+	"authors": [
+		"Laurent Tréguier"
+	],
+	"description": "DLS bootstrap utility",
+	"copyright": "Copyright © 2018, Laurent Tréguier",
+	"license": "MIT",
+	"dependencies": {
+		"dub": "~>1.8.1"
+	}
+}
