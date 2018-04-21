@@ -9,7 +9,7 @@ class Document
     import std.utf : codeLength, toUTF8;
 
     private static Document[string] _documents;
-    private wchar[][] _lines;
+    private wstring[] _lines;
 
     static auto opIndex(Uri uri)
     {
@@ -162,7 +162,6 @@ class Document
     {
         import std.algorithm : endsWith;
         import std.array : array;
-        import std.conv : to;
         import std.string : lineSplitter;
         import std.typecons : Yes;
         import std.utf : toUTF16;
@@ -174,6 +173,6 @@ class Document
             lines ~= "";
         }
 
-        return lines.to!(wchar[][]);
+        return lines;
     }
 }
