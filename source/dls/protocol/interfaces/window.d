@@ -1,11 +1,17 @@
 module dls.protocol.interfaces.window;
 
-public import dls.protocol.definitions;
+import std.typecons : Nullable;
 
 class ShowMessageParams
 {
     MessageType type;
     string message;
+
+    this(MessageType type = MessageType.init, string message = string.init)
+    {
+        this.type = type;
+        this.message = message;
+    }
 }
 
 enum MessageType
@@ -19,11 +25,23 @@ enum MessageType
 class ShowMessageRequestParams : ShowMessageParams
 {
     Nullable!(MessageActionItem[]) actions;
+
+    this(MessageType type = MessageType.init, string message = string.init,
+            Nullable!(MessageActionItem[]) actions = Nullable!(MessageActionItem[]).init)
+    {
+        super(type, message);
+        this.actions = actions;
+    }
 }
 
 class MessageActionItem
 {
     string title;
+
+    this(string title = string.init)
+    {
+        this.title = title;
+    }
 }
 
 alias LogMessageParams = ShowMessageParams;

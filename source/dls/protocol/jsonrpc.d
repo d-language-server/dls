@@ -27,8 +27,9 @@ void send(T : Message)(T m)
                 eol, eol, messageString])
         {
             stdout.rawWrite(chunk.toUTF8());
-            stdout.flush();
         }
+
+        stdout.flush();
     }
 }
 
@@ -59,14 +60,6 @@ class ResponseError
         response.message = errorCode[1];
         return response.nullable;
     }
-
-    static auto fromException(MessageException e)
-    {
-        auto response = new ResponseError();
-        response.code = e.code;
-        response.message = e.msg;
-        return response.nullable;
-    }
 }
 
 class NotificationMessage : Message
@@ -91,17 +84,6 @@ enum ErrorCodes : Tuple!(int, string)
     unknownErrorCode = tuple(-32_201,
             "Unknown error"),
     requestCancelled = tuple(-32_800, "Request cancelled")
-}
-
-class MessageException : Exception
-{
-    immutable int code;
-
-    this(string message, int code)
-    {
-        super(message);
-        this.code = code;
-    }
 }
 
 class CancelParams

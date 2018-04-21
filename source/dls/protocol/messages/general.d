@@ -1,11 +1,13 @@
 module dls.protocol.messages.general;
 
 import logger = std.experimental.logger;
-import dls.protocol.interfaces;
+import dls.protocol.interfaces.general;
 import dls.server : Server;
+import std.json : JSONValue;
+import std.typecons : nullable;
 
 @("")
-auto initialize(InitializeParams params)
+InitializeResult initialize(InitializeParams params)
 {
     import dls.tools.tools : Tools;
     import dls.util.uri : Uri;
@@ -48,41 +50,16 @@ auto initialize(InitializeParams params)
 
         with (capabilities)
         {
-            textDocumentSync = new TextDocumentSyncOptions();
-            completionProvider = new CompletionOptions();
+            textDocumentSync = new TextDocumentSyncOptions(true.nullable,
+                    TextDocumentSyncKind.incremental.nullable);
+            textDocumentSync.save = new SaveOptions(false.nullable);
+            completionProvider = new CompletionOptions(false.nullable, ["."].nullable);
             documentFormattingProvider = true;
             definitionProvider = true;
             documentHighlightProvider = true;
-            workspace = new ServerCapabilities.Workspace();
-
-            with (textDocumentSync)
-            {
-                openClose = true;
-                change = TextDocumentSyncKind.incremental;
-                save = new SaveOptions();
-
-                with (save)
-                {
-                    includeText = false;
-                }
-            }
-
-            with (completionProvider)
-            {
-                resolveProvider = false;
-                triggerCharacters = ["."];
-            }
-
-            with (workspace)
-            {
-                workspaceFolders = new ServerCapabilities.Workspace.WorkspaceFolders();
-
-                with (workspaceFolders)
-                {
-                    supported = true;
-                    changeNotifications = JSONValue(true);
-                }
-            }
+            workspace = new ServerCapabilities.Workspace(
+                    new ServerCapabilities.Workspace.WorkspaceFolders(true.nullable,
+                    JSONValue(true).nullable).nullable);
         }
     }
 
@@ -92,6 +69,9 @@ auto initialize(InitializeParams params)
 @("")
 void initialized(JSONValue nothing)
 {
+    import dls.protocol.interfaces : DidChangeWatchedFilesRegistrationOptions,
+        FileSystemWatcher, Registration, RegistrationParams;
+
     debug
     {
     }
@@ -107,24 +87,16 @@ void initialized(JSONValue nothing)
 
     if (!didChangeWatchedFiles.isNull && didChangeWatchedFiles.dynamicRegistration)
     {
-        auto params = new RegistrationParams!DidChangeWatchedFilesRegistrationOptions();
-        params.registrations ~= new Registration!DidChangeWatchedFilesRegistrationOptions();
-
-        with (params.registrations[0])
-        {
-            id = "dls-registration-watch-dub-files";
-            method = "workspace/didChangeWatchedFiles";
-            registerOptions = new DidChangeWatchedFilesRegistrationOptions();
-
-            with (registerOptions)
-            {
-                watchers = [new FileSystemWatcher(), new FileSystemWatcher(),
-                    new FileSystemWatcher()];
-                watchers[0].globPattern = "**/dub.selections.json";
-                watchers[1].globPattern = "**/dub.{json,sdl}";
-                watchers[2].globPattern = "**/*.ini";
-            }
-        }
+        auto watchers = [
+            new FileSystemWatcher("**/dub.selections.json"),
+            new FileSystemWatcher("**/dub.{json,sdl}"), new FileSystemWatcher("**/*.ini")
+        ];
+        auto registrationOptions = new DidChangeWatchedFilesRegistrationOptions(watchers);
+        auto registration = new Registration!DidChangeWatchedFilesRegistrationOptions(
+                "dls-registration-watch-dub-files",
+                "workspace/didChangeWatchedFiles", registrationOptions.nullable);
+        auto params = new RegistrationParams!DidChangeWatchedFilesRegistrationOptions(
+                [registration]);
 
         logger.log("Registering watchers");
         Server.send("client/registerCapability", params);
@@ -132,7 +104,7 @@ void initialized(JSONValue nothing)
 }
 
 @("")
-auto shutdown(JSONValue nothing)
+JSONValue shutdown(JSONValue nothing)
 {
     logger.log("Shutting down server");
     Server.shutdown = true;

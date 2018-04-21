@@ -43,18 +43,13 @@ class FormatTool : Tool
         import dfmt.config : Config;
         import dfmt.editorconfig : IndentStyle, OptionalBoolean;
         import dfmt.formatter : format;
-        import dls.protocol.definitions : TextEdit;
+        import dls.protocol.definitions : Position, Range, TextEdit;
         import dls.util.document : Document;
         import std.outbuffer : OutBuffer;
 
         const document = Document[uri];
         auto contents = cast(ubyte[]) document.toString();
         auto config = Config();
-        auto buffer = new OutBuffer();
-        auto result = new TextEdit();
-
-        result.range.end.line = document.lines.length;
-        result.range.end.character = document.lines[$ - 1].length;
 
         auto toOptBool(bool b)
         {
@@ -87,9 +82,10 @@ class FormatTool : Tool
         config.dfmt_single_template_constraint_indent = toOptBool(
                 _configuration.format.dfmtSingleTemplateConstraintIndent);
 
+        auto buffer = new OutBuffer();
         format(uri, contents, buffer, &config);
-        result.newText = buffer.toString();
-
-        return [result];
+        auto range = new Range(new Position(0, 0),
+                new Position(document.lines.length, document.lines[$ - 1].length));
+        return [new TextEdit(range, buffer.toString())];
     }
 }

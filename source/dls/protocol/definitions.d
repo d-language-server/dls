@@ -1,7 +1,7 @@
 module dls.protocol.definitions;
 
-public import std.json : JSONValue;
-public import std.typecons : Nullable, nullable;
+import std.json : JSONValue;
+import std.typecons : Nullable, nullable;
 import dls.util.constructor : Constructor;
 
 alias DocumentUri = string;
@@ -10,6 +10,12 @@ class Position
 {
     size_t line;
     size_t character;
+
+    this(size_t line = size_t.init, size_t character = size_t.init)
+    {
+        this.line = line;
+        this.character = character;
+    }
 }
 
 class Range
@@ -17,7 +23,11 @@ class Range
     Position start;
     Position end;
 
-    mixin Constructor!Range;
+    this(Position start = new Position(), Position end = new Position())
+    {
+        this.start = start;
+        this.end = end;
+    }
 }
 
 class Location
@@ -25,19 +35,36 @@ class Location
     DocumentUri uri;
     Range range;
 
-    mixin Constructor!Location;
+    this(DocumentUri uri = DocumentUri.init, Range range = new Range())
+    {
+        this.uri = uri;
+        this.range = range;
+    }
 }
 
 class Diagnostic
 {
     Range range;
+    string message;
     Nullable!DiagnosticSeverity severity;
     Nullable!JSONValue code;
     Nullable!string source;
-    string message;
     Nullable!(DiagnosticRelatedInformation[]) relatedInformation;
 
-    mixin Constructor!Diagnostic;
+    this(Range range = new Range(), string message = string.init,
+            Nullable!DiagnosticSeverity severity = Nullable!DiagnosticSeverity.init,
+            Nullable!JSONValue code = Nullable!JSONValue.init,
+            Nullable!string source = Nullable!string.init,
+            Nullable!(DiagnosticRelatedInformation[]) relatedInformation = Nullable!(
+                DiagnosticRelatedInformation[]).init)
+    {
+        this.range = range;
+        this.message = message;
+        this.severity = severity;
+        this.code = code;
+        this.source = source;
+        this.relatedInformation = relatedInformation;
+    }
 }
 
 enum DiagnosticSeverity
@@ -52,6 +79,12 @@ class DiagnosticRelatedInformation
 {
     Location location;
     string message;
+
+    this(Location location = new Location(), string message = string.init)
+    {
+        this.location = location;
+        this.message = message;
+    }
 }
 
 class Command
@@ -59,6 +92,14 @@ class Command
     string title;
     string command;
     Nullable!(JSONValue[]) arguments;
+
+    this(string title = string.init, string command = string.init,
+            Nullable!(JSONValue[]) arguments = Nullable!(JSONValue[]).init)
+    {
+        this.title = title;
+        this.command = command;
+        this.arguments = arguments;
+    }
 }
 
 class TextEdit
@@ -66,7 +107,11 @@ class TextEdit
     Range range;
     string newText;
 
-    mixin Constructor!TextEdit;
+    this(Range range = new Range(), string newText = string.init)
+    {
+        this.range = range;
+        this.newText = newText;
+    }
 }
 
 class TextDocumentEdit
@@ -74,13 +119,25 @@ class TextDocumentEdit
     VersionedTextDocumentIdentifier textDocument;
     TextEdit[] edits;
 
-    mixin Constructor!TextDocumentEdit;
+    this(VersionedTextDocumentIdentifier textDocument = new VersionedTextDocumentIdentifier(),
+            TextEdit[] edits = TextEdit[].init)
+    {
+        this.textDocument = textDocument;
+        this.edits = edits;
+    }
 }
 
 class WorkspaceEdit
 {
-    Nullable!(TextEdit[string]) changes;
+    Nullable!((TextEdit[])[string]) changes;
     Nullable!(TextDocumentEdit[]) documentChanges;
+
+    this(Nullable!((TextEdit[])[string]) changes = Nullable!((TextEdit[])[string]).init,
+            Nullable!(TextDocumentEdit[]) documentChanges = Nullable!(TextDocumentEdit[]).init)
+    {
+        this.changes = changes;
+        this.documentChanges = documentChanges;
+    }
 }
 
 class TextDocumentIdentifier
@@ -114,6 +171,15 @@ class DocumentFilter
     Nullable!string languageId;
     Nullable!string scheme;
     Nullable!string pattern;
+
+    this(Nullable!string languageId = Nullable!string.init,
+            Nullable!string scheme = Nullable!string.init,
+            Nullable!string pattern = Nullable!string.init)
+    {
+        this.languageId = languageId;
+        this.scheme = scheme;
+        this.pattern = pattern;
+    }
 }
 
 alias DocumentSelector = DocumentFilter[];
@@ -128,4 +194,10 @@ class MarkupContent
 {
     MarkupKind kind;
     string value;
+
+    this(MarkupKind kind = MarkupKind.init, string value = string.init)
+    {
+        this.kind = kind;
+        this.value = value;
+    }
 }

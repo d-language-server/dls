@@ -1,9 +1,11 @@
 module dls.protocol.interfaces.general;
 
-public import dls.protocol.definitions;
+import dls.protocol.definitions : DocumentUri, MarkupKind;
 import dls.protocol.interfaces.text_document : CompletionItemKind;
 import dls.protocol.interfaces.workspace : WorkspaceFolder;
 import dls.util.constructor : Constructor;
+import std.json : JSONValue;
+import std.typecons : Nullable;
 
 private class WithDynamicRegistration
 {
@@ -108,7 +110,10 @@ class InitializeResult
 {
     ServerCapabilities capabilities;
 
-    mixin Constructor!InitializeResult;
+    this(ServerCapabilities capabilities = new ServerCapabilities())
+    {
+        this.capabilities = capabilities;
+    }
 }
 
 class InitializeErrorData
@@ -126,16 +131,33 @@ enum TextDocumentSyncKind
 private class OptionsBase
 {
     Nullable!bool resolveProvider;
+
+    this(Nullable!bool resolveProvider = Nullable!bool.init)
+    {
+        this.resolveProvider = resolveProvider;
+    }
 }
 
 class CompletionOptions : OptionsBase
 {
     Nullable!(string[]) triggerCharacters;
+
+    this(Nullable!bool resolveProvider = Nullable!bool.init,
+            Nullable!(string[]) triggerCharacters = Nullable!(string[]).init)
+    {
+        super(resolveProvider);
+        this.triggerCharacters = triggerCharacters;
+    }
 }
 
 class SignatureHelpOptions
 {
     Nullable!(string[]) triggerCharacters;
+
+    this(Nullable!(string[]) triggerCharacters = Nullable!(string[]).init)
+    {
+        this.triggerCharacters = triggerCharacters;
+    }
 }
 
 alias CodeLensOptions = OptionsBase;
@@ -144,6 +166,13 @@ class DocumentOnTypeFormattingOptions
 {
     string firstTriggerCharacter;
     Nullable!(string[]) moreTriggerCharacter;
+
+    this(string firstTriggerCharacter = string.init,
+            Nullable!(string[]) moreTriggerCharacter = Nullable!(string[]).init)
+    {
+        this.firstTriggerCharacter = firstTriggerCharacter;
+        this.moreTriggerCharacter = moreTriggerCharacter;
+    }
 }
 
 alias DocumentLinkOptions = OptionsBase;
@@ -151,11 +180,21 @@ alias DocumentLinkOptions = OptionsBase;
 class ExecuteCommandOptions
 {
     string[] commands;
+
+    this(string[] commands = string[].init)
+    {
+        this.commands = commands;
+    }
 }
 
 class SaveOptions
 {
     Nullable!bool includeText;
+
+    this(Nullable!bool includeText = Nullable!bool.init)
+    {
+        this.includeText = includeText;
+    }
 }
 
 class ColorProviderOptions
@@ -169,11 +208,28 @@ class TextDocumentSyncOptions
     Nullable!bool willSave;
     Nullable!bool willSaveWaitUntil;
     Nullable!SaveOptions save;
+
+    this(Nullable!bool openClose = Nullable!bool.init,
+            Nullable!TextDocumentSyncKind change = Nullable!TextDocumentSyncKind.init,
+            Nullable!bool willSave = Nullable!bool.init, Nullable!bool willSaveWaitUntil = Nullable!bool.init,
+            Nullable!SaveOptions save = Nullable!SaveOptions.init)
+    {
+        this.openClose = openClose;
+        this.change = change;
+        this.willSave = willSave;
+        this.willSaveWaitUntil = willSaveWaitUntil;
+        this.save = save;
+    }
 }
 
 class StaticRegistrationOptions
 {
     Nullable!string id;
+
+    this(Nullable!string id = Nullable!string.init)
+    {
+        this.id = id;
+    }
 }
 
 class ServerCapabilities
@@ -184,9 +240,21 @@ class ServerCapabilities
         {
             Nullable!bool supported;
             Nullable!JSONValue changeNotifications;
+
+            this(Nullable!bool supported = Nullable!bool.init,
+                    Nullable!JSONValue changeNotifications = Nullable!JSONValue.init)
+            {
+                this.supported = supported;
+                this.changeNotifications = changeNotifications;
+            }
         }
 
         Nullable!WorkspaceFolders workspaceFolders;
+
+        this(Nullable!WorkspaceFolders workspaceFolders = Nullable!WorkspaceFolders.init)
+        {
+            this.workspaceFolders = workspaceFolders;
+        }
     }
 
     Nullable!TextDocumentSyncOptions textDocumentSync; // TODO: add TextDocumentSyncKind compatibility

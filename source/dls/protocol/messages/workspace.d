@@ -1,9 +1,12 @@
 module dls.protocol.messages.workspace;
 
 import logger = std.experimental.logger;
-import dls.protocol.interfaces;
+import dls.protocol.interfaces : SymbolInformation;
+import dls.protocol.interfaces.workspace;
 import dls.tools.tools : Tools;
 import dls.util.uri : Uri;
+import std.json : JSONValue;
+import std.typecons : Nullable;
 
 void workspaceFolders(string id, Nullable!(WorkspaceFolder[]) folders)
 {
@@ -21,6 +24,8 @@ void workspaceFolders(string id, Nullable!(WorkspaceFolder[]) folders)
 
 void didChangeWorkspaceFolders(DidChangeWorkspaceFoldersParams params)
 {
+    import std.typecons : nullable;
+
     // TODO: separate caches depending on the workspace folder to be abe to remove them afterwards
     workspaceFolders(null, params.event.added.nullable);
 
@@ -51,6 +56,8 @@ void didChangeConfiguration(DidChangeConfigurationParams params)
 void didChangeWatchedFiles(DidChangeWatchedFilesParams params)
 {
     import dls.server : Server;
+    import dls.protocol.interfaces : MessageActionItem, MessageType,
+        ShowMessageRequestParams;
     import dls.protocol.messages.window : Util;
     import std.algorithm : canFind;
     import std.path : baseName, dirName;
@@ -65,12 +72,9 @@ void didChangeWatchedFiles(DidChangeWatchedFilesParams params)
         switch (fileName)
         {
         case "dub.json", "dub.sdl":
-            auto p = new ShowMessageRequestParams();
-            p.type = MessageType.info;
-            p.message = fileName ~ " was updated. Upgrade dependencies ?";
-            p.actions = [new MessageActionItem(), new MessageActionItem()];
-            p.actions[0].title = "Yes";
-            p.actions[1].title = "No";
+            auto p = new ShowMessageRequestParams(MessageType.info,
+                    fileName ~ " was updated. Upgrade dependencies ?");
+            p.actions = [new MessageActionItem("Yes"), new MessageActionItem("No")];
 
             auto id = Server.send("window/showMessageRequest", p);
             Util.addMessageRequestType(id, Util.ShowMessageRequestType.upgradeSelections, uri);
@@ -87,16 +91,14 @@ void didChangeWatchedFiles(DidChangeWatchedFilesParams params)
     }
 }
 
-auto symbol(WorkspaceSymbolParams params)
+SymbolInformation[] symbol(WorkspaceSymbolParams params)
 {
-    SymbolInformation[] result;
-    return result;
+    return [];
 }
 
-auto executeCommand(ExecuteCommandParams params)
+JSONValue executeCommand(ExecuteCommandParams params)
 {
-    auto result = JSONValue(null);
-    return result;
+    return JSONValue(null);
 }
 
 void applyEdit(string id, ApplyWorkspaceEditResponse response)

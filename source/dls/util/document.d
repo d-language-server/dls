@@ -1,11 +1,12 @@
 module dls.util.document;
 
-import dls.protocol.definitions;
-import dls.protocol.interfaces;
 import dls.util.uri : Uri;
 
 class Document
 {
+    import dls.protocol.definitions : Position, TextDocumentIdentifier,
+        TextDocumentItem, VersionedTextDocumentIdentifier;
+    import dls.protocol.interfaces : TextDocumentContentChangeEvent;
     import std.utf : codeLength, toUTF8;
 
     private static Document[string] _documents;
@@ -108,18 +109,15 @@ class Document
 
     auto wordRangeAtLineAndByte(size_t lineNumber, size_t bytePosition)
     {
+        import dls.protocol.definitions : Range;
         import std.regex : ctRegex, matchAll;
         import std.utf : toUCSindex;
 
         const line = _lines[lineNumber];
         const startCharacter = toUCSindex(line.toUTF8(), bytePosition);
         auto word = matchAll(line[startCharacter .. $], ctRegex!`\w+|.`w);
-        auto range = new Range();
-        range.start.line = lineNumber;
-        range.start.character = startCharacter;
-        range.end.line = lineNumber;
-        range.end.character = startCharacter + word.hit.length;
-        return range;
+        return new Range(new Position(lineNumber, startCharacter),
+                new Position(lineNumber, startCharacter + word.hit.length));
     }
 
     private void change(TextDocumentContentChangeEvent[] events)

@@ -1,11 +1,13 @@
 module dls.protocol.messages.text_document;
 
 import logger = std.experimental.logger;
-import dls.protocol.interfaces;
+import dls.protocol.definitions;
+import dls.protocol.interfaces.text_document;
 import dls.server : Server;
 import dls.tools.tools : Tools;
 import dls.util.document : Document;
 import dls.util.uri : Uri;
+import std.typecons : Nullable;
 
 void didOpen(DidOpenTextDocumentParams params)
 {
@@ -14,11 +16,8 @@ void didOpen(DidOpenTextDocumentParams params)
         auto uri = new Uri(params.textDocument.uri);
         logger.logf("Document opened: %s", uri.path);
         Document.open(params.textDocument);
-
-        auto diagnosticParams = new PublishDiagnosticsParams();
-        diagnosticParams.uri = uri;
-        diagnosticParams.diagnostics = Tools.analysisTool.scan(uri);
-        Server.send("textDocument/publishDiagnostics", diagnosticParams);
+        Server.send("textDocument/publishDiagnostics",
+                new PublishDiagnosticsParams(uri, Tools.analysisTool.scan(uri)));
     }
 }
 
@@ -33,10 +32,9 @@ void willSave(WillSaveTextDocumentParams params)
 {
 }
 
-auto willSaveWaitUntil(WillSaveTextDocumentParams params)
+TextEdit[] willSaveWaitUntil(WillSaveTextDocumentParams params)
 {
-    TextEdit[] result;
-    return result;
+    return [];
 }
 
 void didSave(DidSaveTextDocumentParams params)
@@ -46,11 +44,8 @@ void didSave(DidSaveTextDocumentParams params)
     if (Document[uri])
     {
         logger.logf("Document saved: %s", uri.path);
-
-        auto diagnosticParams = new PublishDiagnosticsParams();
-        diagnosticParams.uri = uri;
-        diagnosticParams.diagnostics = Tools.analysisTool.scan(uri);
-        Server.send("textDocument/publishDiagnostics", diagnosticParams);
+        Server.send("textDocument/publishDiagnostics",
+                new PublishDiagnosticsParams(uri, Tools.analysisTool.scan(uri)));
     }
 }
 
@@ -59,10 +54,7 @@ void didClose(DidCloseTextDocumentParams params)
     auto uri = new Uri(params.textDocument.uri);
     logger.logf("Document closed: %s", uri.path);
     Document.close(params.textDocument);
-
-    auto diagnosticParams = new PublishDiagnosticsParams();
-    diagnosticParams.uri = uri;
-    Server.send("textDocument/publishDiagnostics", diagnosticParams);
+    Server.send("textDocument/publishDiagnostics", new PublishDiagnosticsParams(uri, []));
 }
 
 auto completion(CompletionParams params)
@@ -76,115 +68,101 @@ auto completionItem_resolve(CompletionItem item)
     return item;
 }
 
-auto hover(TextDocumentPositionParams params)
+Hover hover(TextDocumentPositionParams params)
 {
-    auto result = new Hover();
-    return result;
+    return null;
 }
 
-auto signatureHelp(TextDocumentPositionParams params)
+SignatureHelp signatureHelp(TextDocumentPositionParams params)
 {
-    auto result = new SignatureHelp();
-    return result;
+    return null;
 }
 
-auto definition(TextDocumentPositionParams params)
+Location definition(TextDocumentPositionParams params)
 {
     return Tools.symbolTool.find(new Uri(params.textDocument.uri), params.position);
 }
 
-auto typeDefinition(TextDocumentPositionParams params)
+Nullable!Location typeDefinition(TextDocumentPositionParams params)
 {
-    auto result = new Location();
-    return result.nullable;
+    return Nullable!Location();
 }
 
-auto implementation(TextDocumentPositionParams params)
+Nullable!Location implementation(TextDocumentPositionParams params)
 {
-    auto result = new Location();
-    return result.nullable;
+    return Nullable!Location();
 }
 
-auto references(ReferenceParams params)
+Location[] references(ReferenceParams params)
 {
-    Location[] result;
-    return result;
+    return [];
 }
 
-auto documentHighlight(TextDocumentPositionParams params)
+DocumentHighlight[] documentHighlight(TextDocumentPositionParams params)
 {
     return Tools.symbolTool.highlight(new Uri(params.textDocument.uri), params.position);
 }
 
-auto documentSymbol(DocumentSymbolParams params)
+SymbolInformation[] documentSymbol(DocumentSymbolParams params)
 {
-    SymbolInformation[] result;
-    return result;
+    return [];
 }
 
-auto codeAction(CodeActionParams params)
+Command[] codeAction(CodeActionParams params)
 {
-    Command[] result;
-    return result;
+    return [];
 }
 
-auto codeLens(CodeLensParams params)
+CodeLens[] codeLens(CodeLensParams params)
 {
-    CodeLens[] result;
-    return result;
+    return [];
 }
 
 @("codeLens", "resolve")
-auto codeLens_resolve(CodeLens codeLens)
+CodeLens codeLens_resolve(CodeLens codeLens)
 {
     return codeLens;
 }
 
-auto documentLink(DocumentLinkParams params)
+DocumentLink[] documentLink(DocumentLinkParams params)
 {
-    DocumentLink[] result;
-    return result;
+    return [];
 }
 
 @("documentLink", "resolve")
-auto documentLink_resolve(DocumentLink link)
+DocumentLink documentLink_resolve(DocumentLink link)
 {
     return link;
 }
 
-auto documentColor(DocumentColorParams params)
+ColorInformation[] documentColor(DocumentColorParams params)
 {
-    ColorInformation[] result;
-    return result;
+    return [];
 }
 
-auto colorPresentation(ColorPresentationParams params)
+ColorPresentation[] colorPresentation(ColorPresentationParams params)
 {
-    ColorPresentation[] result;
-    return result;
+    return [];
 }
 
-auto formatting(DocumentFormattingParams params)
+TextEdit[] formatting(DocumentFormattingParams params)
 {
     auto uri = new Uri(params.textDocument.uri);
     logger.logf("Formatting %s", uri.path);
     return Tools.formatTool.format(uri, params.options);
 }
 
-auto rangeFormatting(DocumentRangeFormattingParams params)
+TextEdit[] rangeFormatting(DocumentRangeFormattingParams params)
 {
-    TextEdit[] result;
-    return result;
+    return [];
 }
 
-auto onTypeFormatting(DocumentOnTypeFormattingParams params)
+TextEdit[] onTypeFormatting(DocumentOnTypeFormattingParams params)
 {
-    TextEdit[] result;
-    return result;
+    return [];
 }
 
-auto rename(RenameParams params)
+WorkspaceEdit[] rename(RenameParams params)
 {
-    WorkspaceEdit[] result;
-    return result;
+    return [];
 }

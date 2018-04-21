@@ -48,10 +48,8 @@ class AnalysisTool : Tool
 
             foreach (documentUri; Document.uris)
             {
-                auto diagnosticParams = new PublishDiagnosticsParams();
-                diagnosticParams.uri = documentUri;
-                diagnosticParams.diagnostics = scan(documentUri);
-                Server.send("textDocument/publishDiagnostics", diagnosticParams);
+                Server.send("textDocument/publishDiagnostics",
+                        new PublishDiagnosticsParams(documentUri, scan(documentUri)));
             }
         }
     }
@@ -66,7 +64,9 @@ class AnalysisTool : Tool
         import dparse.parser : parseModule;
         import dparse.rollback_allocator : RollbackAllocator;
         import dscanner.analysis.run : analyze;
+        import std.array : appender;
         import std.json : JSONValue;
+        import std.typecons : nullable;
 
         logger.logf("Scanning document %s", uri.path);
 
@@ -78,15 +78,13 @@ class AnalysisTool : Tool
         auto tokens = getTokensForParser(Document[uri].toString(), lexerConfig, &stringCache);
         RollbackAllocator ra;
         auto document = Document[uri];
-        Diagnostic[] diagnostics;
+        auto diagnostics = appender!(Diagnostic[]);
 
         const syntaxProblemhandler = delegate(string path, size_t line,
                 size_t column, string msg, bool isError) {
-            auto d = new Diagnostic();
-            d.range = document.wordRangeAtLineAndByte(line - 1, column - 1);
+            auto d = new Diagnostic(document.wordRangeAtLineAndByte(line - 1, column - 1), msg);
             d.severity = isError ? DiagnosticSeverity.error : DiagnosticSeverity.warning;
             d.source = diagnosticSource;
-            d.message = msg;
             diagnostics ~= d;
         };
 
@@ -96,16 +94,12 @@ class AnalysisTool : Tool
 
         foreach (result; analysisResults)
         {
-            auto d = new Diagnostic();
-            d.range = document.wordRangeAtLineAndByte(result.line - 1, result.column - 1);
-            d.severity = DiagnosticSeverity.warning;
-            d.code = JSONValue(result.key);
-            d.source = diagnosticSource;
-            d.message = result.message;
-            diagnostics ~= d;
+            diagnostics ~= new Diagnostic(document.wordRangeAtLineAndByte(result.line - 1, result.column - 1),
+                    result.message, DiagnosticSeverity.warning.nullable,
+                    JSONValue(result.key).nullable, diagnosticSource.nullable);
         }
 
-        return diagnostics;
+        return diagnostics.data;
     }
 
     private auto getConfig(Uri uri)

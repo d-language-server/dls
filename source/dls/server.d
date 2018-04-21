@@ -185,9 +185,9 @@ abstract class Server
         {
             sendError(ErrorCodes.methodNotFound, request);
         }
-        catch (MessageException e)
+        catch (Exception e)
         {
-            send(request.id, Nullable!JSONValue(), ResponseError.fromException(e));
+            sendError(ErrorCodes.unknownErrorCode, request);
         }
     }
 

@@ -13,7 +13,6 @@ void update()
     import dub.dub : Dub, FetchOptions;
     import dub.package_ : Package;
     import std.concurrency : ownerTid, receiveOnly, register, send, thisTid;
-    import std.conv : to;
     import std.file : FileException, thisExePath;
     import std.format : format;
     import std.path : buildNormalizedPath, dirName;
@@ -58,11 +57,9 @@ void update()
         return;
     }
 
-    auto requestParams = new ShowMessageRequestParams();
-    requestParams.type = MessageType.info;
-    requestParams.message = format!"DLS version %s is available"(latestVersion);
-    requestParams.actions = [new MessageActionItem()];
-    requestParams.actions[0].title = "Upgrade";
+    auto requestParams = new ShowMessageRequestParams(MessageType.info,
+            format!"DLS version %s is available"(latestVersion));
+    requestParams.actions = [new MessageActionItem("Upgrade")];
 
     auto id = Server.send("window/showMessageRequest", requestParams);
     const threadName = "updater";
@@ -115,9 +112,7 @@ void update()
     }
     else
     {
-        auto messageParams = new ShowMessageParams();
-        messageParams.type = MessageType.error;
-        messageParams.message = "DLS could not be built";
-        Server.send("window/showMessage", messageParams);
+        Server.send("window/showMessage",
+                new ShowMessageParams(MessageType.error, "DLS could not be built"));
     }
 }

@@ -1,8 +1,10 @@
 module dls.protocol.interfaces.workspace;
 
-public import dls.protocol.definitions;
+import dls.protocol.definitions : DocumentUri, MarkupKind, WorkspaceEdit;
 import dls.protocol.interfaces.client : RegistrationOptionsBase;
 import dls.util.constructor : Constructor;
+import std.json : JSONValue;
+import std.typecons : Nullable;
 
 class WorkspaceFolder
 {
@@ -29,12 +31,24 @@ class DidChangeConfigurationParams
 class ConfigurationParams
 {
     ConfigurationItem[] items;
+
+    this(ConfigurationItem[] items = ConfigurationItem[].init)
+    {
+        this.items = items;
+    }
 }
 
 class ConfigurationItem
 {
     Nullable!string scopeUri;
     Nullable!string section;
+
+    this(Nullable!string scopeUri = Nullable!string.init,
+            Nullable!string section = Nullable!string.init)
+    {
+        this.scopeUri = scopeUri;
+        this.section = section;
+    }
 }
 
 class DidChangeWatchedFilesParams
@@ -58,12 +72,23 @@ enum FileChangeType
 class DidChangeWatchedFilesRegistrationOptions : RegistrationOptionsBase
 {
     FileSystemWatcher[] watchers;
+
+    this(FileSystemWatcher[] watchers = FileSystemWatcher[].init)
+    {
+        this.watchers = watchers;
+    }
 }
 
 class FileSystemWatcher
 {
     string globPattern;
     Nullable!WatchKind kind;
+
+    this(string globPattern = string.init, Nullable!WatchKind kind = Nullable!WatchKind.init)
+    {
+        this.globPattern = globPattern;
+        this.kind = kind;
+    }
 }
 
 enum WatchKind
@@ -87,13 +112,21 @@ class ExecuteCommandParams
 class ExecuteCommandRegistrationOptions : RegistrationOptionsBase
 {
     string[] commands;
+
+    this(string[] commands = string[].init)
+    {
+        this.commands = commands;
+    }
 }
 
 class ApplyWorkspaceEditParams
 {
     WorkspaceEdit edit;
 
-    mixin Constructor!ApplyWorkspaceEditParams;
+    this(WorkspaceEdit edit = WorkspaceEdit.init)
+    {
+        this.edit = edit;
+    }
 }
 
 class ApplyWorkspaceEditResponse

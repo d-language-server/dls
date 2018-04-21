@@ -188,27 +188,19 @@ class SymbolTool : Tool
         auto request = getPreparedRequest(uri, position);
         request.kind = RequestKind.autocomplete;
 
-        auto result = complete(request, _cache);
-        CompletionItem[] items;
-
-        foreach (res; result.completions)
-        {
-            items ~= new CompletionItem();
-
-            with (items[$ - 1])
-            {
-                label = res.identifier;
-                kind = completionKinds[res.kind.to!char];
-            }
-        }
-
-        return items.sort!((a, b) => a.label < b.label).uniq!((a, b) => a.label == b.label).array;
+        return complete(request, _cache).completions.sort!q{a.identifier > b.identifier}
+            .uniq!q{a.identifier == b.identifier}.map!((res) {
+                auto item = new CompletionItem();
+                item.label = res.identifier;
+                item.kind = completionKinds[res.kind.to!char];
+                return item;
+            }).array;
     }
 
     auto find(Uri uri, Position position)
     {
         import dcd.server.autocomplete : findDeclaration;
-        import dls.protocol.interfaces : Location, TextDocumentItem;
+        import dls.protocol.definitions : Location, TextDocumentItem;
         import std.file : readText;
 
         logger.logf("Finding declaration for %s at position %s,%s", uri.path,
@@ -236,10 +228,8 @@ class SymbolTool : Tool
             Document.open(doc);
         }
 
-        auto location = new Location();
-        location.uri = Uri.fromPath(resultPath);
-        location.range = Document[resultPath].wordRangeAtByte(result.symbolLocation);
-        return location.uri.length ? location : null;
+        auto resultUri = Uri.fromPath(resultPath);
+        return new Location(resultUri, Document[resultPath].wordRangeAtByte(result.symbolLocation));
     }
 
     auto highlight(Uri uri, Position position)
@@ -247,29 +237,18 @@ class SymbolTool : Tool
         import dcd.server.autocomplete.localuse : findLocalUse;
         import dls.protocol.interfaces : DocumentHighlight,
             DocumentHighlightKind;
+        import std.typecons : nullable;
 
         logger.logf("Highlighting usages for %s at position %s,%s", uri.path,
                 position.line, position.character);
 
         auto request = getPreparedRequest(uri, position);
         request.kind = RequestKind.localUse;
-
         auto result = findLocalUse(request, _cache);
-        DocumentHighlight[] highlights;
 
-        foreach (res; result.completions)
-        {
-            highlights ~= new DocumentHighlight();
-
-            with (highlights[$ - 1])
-            {
-                range = Document[uri].wordRangeAtByte(res.symbolLocation);
-                kind = res.symbolLocation == result.symbolLocation
-                    ? DocumentHighlightKind.write : DocumentHighlightKind.text;
-            }
-        }
-
-        return highlights;
+        return result.completions.map!((res) => new DocumentHighlight(
+                Document[uri].wordRangeAtByte(res.symbolLocation), (res.symbolLocation == result.symbolLocation
+                ? DocumentHighlightKind.write : DocumentHighlightKind.text).nullable)).array;
     }
 
     package void importDirectories(string[] paths)

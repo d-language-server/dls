@@ -1,6 +1,6 @@
 module dls.protocol.messages.window;
 
-import dls.protocol.interfaces;
+import dls.protocol.interfaces : MessageActionItem;
 
 void showMessageRequest(string id, MessageActionItem item)
 {
