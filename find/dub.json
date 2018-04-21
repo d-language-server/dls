@@ -5,8 +5,5 @@
     ],
     "description": "D Language Server",
     "copyright": "Copyright © 2017, Laurent Tréguier",
-    "license": "MIT",
-    "dependencies": {
-        "dub": "~>1.8.0"
-    }
+    "license": "MIT"
 }
