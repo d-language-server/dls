@@ -40,6 +40,7 @@ class SymbolTool : Tool
     import logger = std.experimental.logger;
     import dcd.common.messages : RequestKind;
     import dls.protocol.definitions : Position;
+    import dls.protocol.interfaces : CompletionItem;
     import dls.util.document : Document;
     import dls.util.uri : Uri;
     import dsymbol.modulecache : ModuleCache;
@@ -47,6 +48,7 @@ class SymbolTool : Tool
     import std.algorithm : map, sort, uniq;
     import std.array : array;
     import std.conv : to;
+    import std.regex : ctRegex;
 
     version (Posix)
     {
@@ -91,7 +93,7 @@ class SymbolTool : Tool
         import std.algorithm : each;
         import std.file : FileException, exists, readText;
         import std.range : replace;
-        import std.regex : ctRegex, matchAll;
+        import std.regex : matchAll;
 
         string[] paths;
 
@@ -182,7 +184,7 @@ class SymbolTool : Tool
     auto complete(Uri uri, Position position)
     {
         import dcd.server.autocomplete : complete;
-        import dls.protocol.interfaces : CompletionItem;
+        import std.json : JSONValue;
 
         logger.logf("Getting completions for %s at position %s,%s", uri.path,
                 position.line, position.character);
@@ -194,8 +196,20 @@ class SymbolTool : Tool
             .uniq!q{a.identifier == b.identifier}.map!((res) {
                 auto item = new CompletionItem(res.identifier);
                 item.kind = completionKinds[res.kind.to!char];
+                item.detail = res.definition;
+                item.data = JSONValue(res.documentation);
                 return item;
             }).array;
+    }
+
+    auto completeResolve(CompletionItem item)
+    {
+        if (!item.data.isNull)
+        {
+            item.documentation = getDocumentation(item.data.str);
+        }
+
+        return item;
     }
 
     auto find(Uri uri, Position position)
@@ -265,7 +279,7 @@ class SymbolTool : Tool
         }
     }
 
-    private auto getPreparedRequest(Uri uri, Position position)
+    private static auto getPreparedRequest(Uri uri, Position position)
     {
         import dcd.common.messages : AutocompleteRequest;
 
@@ -287,5 +301,37 @@ class SymbolTool : Tool
         auto d = new Dub(isFile(uri.path) ? dirName(uri.path) : uri.path);
         d.loadPackage();
         return d;
+    }
+
+    private static auto getDocumentation(string documentation)
+    {
+        import dls.protocol.definitions : MarkupContent, MarkupKind;
+
+        import std.array : appender, replace;
+        import std.regex : split;
+
+        auto content = documentation.split(ctRegex!`\n-+(\n|$)`)
+            .map!(chunk => chunk.replace(`\n`, " "));
+        auto result = appender!string;
+        bool isExample;
+
+        foreach (chunk; content)
+        {
+            if (isExample)
+            {
+                result ~= "```d\n";
+                result ~= chunk;
+                result ~= "\n```\n";
+            }
+            else
+            {
+                result ~= chunk;
+                result ~= '\n';
+            }
+
+            isExample = !isExample;
+        }
+
+        return new MarkupContent(MarkupKind.markdown, result.data);
     }
 }

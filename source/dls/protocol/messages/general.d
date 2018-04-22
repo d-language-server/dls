@@ -53,7 +53,7 @@ InitializeResult initialize(InitializeParams params)
             textDocumentSync = new TextDocumentSyncOptions(true.nullable,
                     TextDocumentSyncKind.incremental.nullable);
             textDocumentSync.save = new SaveOptions(false.nullable);
-            completionProvider = new CompletionOptions(false.nullable, ["."].nullable);
+            completionProvider = new CompletionOptions(true.nullable, ["."].nullable);
             documentFormattingProvider = true;
             definitionProvider = true;
             documentHighlightProvider = true;

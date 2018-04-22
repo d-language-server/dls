@@ -128,7 +128,7 @@ class CompletionItem
     string label;
     Nullable!CompletionItemKind kind;
     Nullable!string detail;
-    Nullable!string documentation;
+    Nullable!MarkupContent documentation;
     Nullable!string sortText;
     Nullable!string filterText;
     Nullable!string insertText;
@@ -140,7 +140,8 @@ class CompletionItem
     Nullable!JSONValue data;
 
     this(string label = string.init, Nullable!CompletionItemKind kind = Nullable!CompletionItemKind.init,
-            Nullable!string detail = Nullable!string.init, Nullable!string documentation = Nullable!string.init,
+            Nullable!string detail = Nullable!string.init,
+            Nullable!MarkupContent documentation = Nullable!MarkupContent.init,
             Nullable!string sortText = Nullable!string.init, Nullable!string filterText = Nullable!string.init,
             Nullable!string insertText = Nullable!string.init,
             Nullable!InsertTextFormat insertTextFormat = Nullable!InsertTextFormat.init,

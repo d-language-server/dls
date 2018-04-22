@@ -65,7 +65,7 @@ auto completion(CompletionParams params)
 @("completionItem", "resolve")
 auto completionItem_resolve(CompletionItem item)
 {
-    return item;
+    return Tools.symbolTool.completeResolve(item);
 }
 
 Hover hover(TextDocumentPositionParams params)
