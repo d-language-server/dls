@@ -118,8 +118,10 @@ abstract class Server
                 continue;
             }
 
+            static char[] buffer;
             immutable contentLength = contentLengthResult[0][1].strip().to!size_t;
-            immutable content = stdin.rawRead(new char[contentLength]).idup;
+            buffer.length = contentLength;
+            immutable content = stdin.rawRead(buffer).idup;
             // TODO: support UTF-16/32 according to Content-Type when it's supported
 
             handleJSON(content);
