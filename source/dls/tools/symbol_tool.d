@@ -79,11 +79,6 @@ class SymbolTool : Tool
         private static immutable string[] _compilerConfigPaths;
     }
 
-    version (linux)
-    {
-        private static immutable snapPath = "/var/lib/snapd/snap";
-    }
-
     private ModuleCache _cache;
 
     @property ref cache()
@@ -120,10 +115,17 @@ class SymbolTool : Tool
 
         version (linux)
         {
-            if (paths.length == 0 && buildNormalizedPath(snapPath, "dmd").exists())
+            if (paths.length == 0)
             {
-                paths = ["druntime", "phobos"].map!(end => buildNormalizedPath(snapPath,
-                        "dmd", "current", "import", end)).array;
+                foreach (path; ["/snap", "/var/lib/snapd/snap"])
+                {
+                    if (buildNormalizedPath(path, "dmd").exists())
+                    {
+                        paths = ["druntime", "phobos"].map!(end => buildNormalizedPath(path,
+                                "dmd", "current", "import", end)).array;
+                        break;
+                    }
+                }
             }
         }
 
