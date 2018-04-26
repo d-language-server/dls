@@ -20,7 +20,7 @@ void showMessageRequest(string id, MessageActionItem item)
     final switch (Util.messageRequestInfo[id][0])
     {
     case Util.ShowMessageRequestType.upgradeSelections:
-        if (item.title == "Yes")
+        if (item.title == "Upgrade")
         {
             auto uri = new Uri(Util.messageRequestInfo[id][1]);
             Tools.symbolTool.upgradeSelections(uri);

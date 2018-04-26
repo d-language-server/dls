@@ -74,7 +74,7 @@ void didChangeWatchedFiles(DidChangeWatchedFilesParams params)
         case "dub.json", "dub.sdl":
             auto p = new ShowMessageRequestParams(MessageType.info,
                     fileName ~ " was updated. Upgrade dependencies ?");
-            p.actions = [new MessageActionItem("Yes"), new MessageActionItem("No")];
+            p.actions = [new MessageActionItem("Upgrade")];
 
             auto id = Server.send("window/showMessageRequest", p);
             Util.addMessageRequestType(id, Util.ShowMessageRequestType.upgradeSelections, uri);
