@@ -89,7 +89,7 @@ class AnalysisTool : Tool
 
         const mod = parseModule(tokens, uri.path, &ra, syntaxProblemhandler);
         const analysisResults = analyze(uri.path, mod, getConfig(uri),
-                Tools.symbolTool.cache, tokens, true);
+                *Tools.symbolTool.getWorkspaceCache(uri), tokens, true);
 
         foreach (result; analysisResults)
         {

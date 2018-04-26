@@ -43,10 +43,10 @@ class SymbolTool : Tool
     import dls.protocol.interfaces : CompletionItem;
     import dls.util.document : Document;
     import dls.util.uri : Uri;
-    import dsymbol.modulecache : ModuleCache;
+    import dsymbol.modulecache : ASTAllocator, ModuleCache;
     import dub.platform : BuildPlatform;
     import std.algorithm : map, sort, uniq;
-    import std.array : array;
+    import std.array : appender, array;
     import std.conv : to;
     import std.regex : ctRegex;
 
@@ -81,12 +81,7 @@ class SymbolTool : Tool
         private static immutable string[] _compilerConfigPaths;
     }
 
-    private ModuleCache _cache;
-
-    @property ref cache()
-    {
-        return _cache;
-    }
+    private ModuleCache*[string] _caches;
 
     @property private auto defaultImportPaths()
     {
@@ -136,10 +131,37 @@ class SymbolTool : Tool
 
     this()
     {
-        import dsymbol.modulecache : ASTAllocator;
+        _caches[""] = new ModuleCache(new ASTAllocator());
+        _caches[""].addImportPaths(defaultImportPaths);
+    }
 
-        _cache = ModuleCache(new ASTAllocator());
-        _cache.addImportPaths(defaultImportPaths);
+    auto getRelevantCaches(Uri uri)
+    {
+        return [getWorkspaceCache(uri), _caches[""]].uniq;
+    }
+
+    auto getWorkspaceCache(Uri uri)
+    {
+        import std.algorithm : startsWith;
+        import std.array : array;
+        import std.path : pathSplitter;
+
+        string[] cachePathParts;
+
+        foreach (path; _caches.keys)
+        {
+            if (pathSplitter(uri.path).startsWith(pathSplitter(path)))
+            {
+                auto pathParts = pathSplitter(path).array;
+
+                if (pathParts.length > cachePathParts.length)
+                {
+                    cachePathParts = pathParts;
+                }
+            }
+        }
+
+        return _caches[buildNormalizedPath(cachePathParts)];
     }
 
     void importPath(Uri uri)
@@ -147,8 +169,9 @@ class SymbolTool : Tool
         logger.logf("Importing from %s", uri.path);
         const d = getDub(uri);
         const desc = d.project.rootPackage.describe(BuildPlatform.any, null, null);
-        importDirectories(desc.importPaths.map!(importPath => buildNormalizedPath(uri.path,
-                importPath)).array);
+        importDirectories(uri.path,
+                desc.importPaths.map!(importPath => buildNormalizedPath(uri.path,
+                    importPath)).array);
     }
 
     void importSelections(Uri uri)
@@ -162,8 +185,9 @@ class SymbolTool : Tool
             const desc = dep.describe(BuildPlatform.any, null,
                     dep.name in project.rootPackage.recipe.buildSettings.subConfigurations
                     ? project.rootPackage.recipe.buildSettings.subConfigurations[dep.name] : null);
-            importDirectories(desc.importPaths.map!(importPath => buildNormalizedPath(dep.path.toString(),
-                    importPath)).array);
+            importDirectories(uri.path,
+                    desc.importPaths.map!(importPath => buildNormalizedPath(dep.path.toString(),
+                        importPath)).array);
         }
     }
 
@@ -184,6 +208,7 @@ class SymbolTool : Tool
     auto complete(Uri uri, Position position)
     {
         import dcd.server.autocomplete : complete;
+        import std.algorithm : reduce;
         import std.json : JSONValue;
 
         logger.logf("Getting completions for %s at position %s,%s", uri.path,
@@ -192,8 +217,9 @@ class SymbolTool : Tool
         auto request = getPreparedRequest(uri, position);
         request.kind = RequestKind.autocomplete;
 
-        return complete(request, _cache).completions.sort!q{a.identifier > b.identifier}
-            .uniq!q{a.identifier == b.identifier}.map!((res) {
+        return _caches.byValue.map!(cache => complete(request, *cache).completions)
+            .reduce!"a ~ b".sort!q{a.identifier > b.identifier}.uniq!q{a.identifier == b.identifier}.map!(
+                    (res) {
                 auto item = new CompletionItem(res.identifier);
                 item.kind = completionKinds[res.kind.to!char];
                 item.detail = res.definition;
@@ -214,8 +240,10 @@ class SymbolTool : Tool
 
     auto find(Uri uri, Position position)
     {
+        import dcd.common.messages : AutocompleteResponse;
         import dcd.server.autocomplete : findDeclaration;
         import dls.protocol.definitions : Location, TextDocumentItem;
+        import std.algorithm : find;
         import std.file : readText;
 
         logger.logf("Finding declaration for %s at position %s,%s", uri.path,
@@ -224,14 +252,22 @@ class SymbolTool : Tool
         auto request = getPreparedRequest(uri, position);
         request.kind = RequestKind.symbolLocation;
 
-        auto result = findDeclaration(request, _cache);
+        AutocompleteResponse[] results;
 
-        if (result.symbolFilePath.length == 0)
+        foreach (cache; getRelevantCaches(uri))
+        {
+            results ~= findDeclaration(request, *cache);
+        }
+
+        results = results.find!"a.symbolFilePath.length > 0".array;
+
+        if (results.length == 0)
         {
             return null;
         }
 
-        auto resultPath = result.symbolFilePath == "stdin" ? uri.path : result.symbolFilePath;
+        auto resultPath = results[0].symbolFilePath == "stdin" ? uri.path
+            : results[0].symbolFilePath;
         const externalDocument = Document[resultPath] is null;
 
         if (externalDocument)
@@ -244,7 +280,8 @@ class SymbolTool : Tool
         }
 
         auto resultUri = Uri.fromPath(resultPath);
-        return new Location(resultUri, Document[resultPath].wordRangeAtByte(result.symbolLocation));
+        return new Location(resultUri,
+                Document[resultPath].wordRangeAtByte(results[0].symbolLocation));
     }
 
     auto highlight(Uri uri, Position position)
@@ -259,22 +296,27 @@ class SymbolTool : Tool
 
         auto request = getPreparedRequest(uri, position);
         request.kind = RequestKind.localUse;
-        auto result = findLocalUse(request, _cache);
+        auto result = findLocalUse(request, *getWorkspaceCache(uri));
 
         return result.completions.map!((res) => new DocumentHighlight(
                 Document[uri].wordRangeAtByte(res.symbolLocation), (res.symbolLocation == result.symbolLocation
                 ? DocumentHighlightKind.write : DocumentHighlightKind.text).nullable)).array;
     }
 
-    package void importDirectories(string[] paths)
+    package void importDirectories(string root, string[] paths)
     {
         import std.algorithm : canFind;
 
+        if (!(root in _caches))
+        {
+            _caches[root] = new ModuleCache(new ASTAllocator());
+        }
+
         foreach (path; paths)
         {
-            if (!_cache.getImportPaths().canFind(path))
+            if (!_caches[root].getImportPaths().canFind(path))
             {
-                _cache.addImportPaths([path]);
+                _caches[root].addImportPaths([path]);
             }
         }
     }
@@ -307,7 +349,7 @@ class SymbolTool : Tool
     {
         import dls.protocol.definitions : MarkupContent, MarkupKind;
 
-        import std.array : appender, replace;
+        import std.array : replace;
         import std.regex : split;
 
         auto content = documentation.split(ctRegex!`\n-+(\n|$)`)
