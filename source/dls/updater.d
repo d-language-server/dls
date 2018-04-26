@@ -1,7 +1,7 @@
 module dls.updater;
 
 private enum changelogURL = "https://github.com/LaurentTreguier/dls/blob/master/CHANGELOG.md";
-private auto additionalArgs = [[], ["--force"]];
+private immutable additionalArgs = [[], ["--force"]];
 
 void update()
 {

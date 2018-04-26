@@ -44,23 +44,17 @@ InitializeResult initialize(InitializeParams params)
         Tools.analysisTool.addAnalysisConfigPath(uri);
     }
 
-    with (result)
+    with (result.capabilities)
     {
-        capabilities = new ServerCapabilities();
-
-        with (capabilities)
-        {
-            textDocumentSync = new TextDocumentSyncOptions(true.nullable,
-                    TextDocumentSyncKind.incremental.nullable);
-            textDocumentSync.save = new SaveOptions(false.nullable);
-            completionProvider = new CompletionOptions(true.nullable, ["."].nullable);
-            documentFormattingProvider = true;
-            definitionProvider = true;
-            documentHighlightProvider = true;
-            workspace = new ServerCapabilities.Workspace(
-                    new ServerCapabilities.Workspace.WorkspaceFolders(true.nullable,
-                    JSONValue(true).nullable).nullable);
-        }
+        textDocumentSync = new TextDocumentSyncOptions(true.nullable,
+                TextDocumentSyncKind.incremental.nullable);
+        textDocumentSync.save = new SaveOptions(false.nullable);
+        completionProvider = new CompletionOptions(true.nullable, ["."].nullable);
+        documentFormattingProvider = true;
+        definitionProvider = true;
+        documentHighlightProvider = true;
+        workspace = new ServerCapabilities.Workspace(new ServerCapabilities.Workspace.WorkspaceFolders(true.nullable,
+                JSONValue(true).nullable).nullable);
     }
 
     return result;

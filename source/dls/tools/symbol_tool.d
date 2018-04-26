@@ -50,14 +50,7 @@ class SymbolTool : Tool
     import std.conv : to;
     import std.regex : ctRegex;
 
-    version (Posix)
-    {
-        private static immutable _compilerConfigPaths = [
-            `/etc/dmd.conf`, `/usr/local/etc/dmd.conf`, `/etc/ldc2.conf`,
-            `/usr/local/etc/ldc2.conf`
-        ];
-    }
-    else version (Windows)
+    version (Windows)
     {
         @property private static string[] _compilerConfigPaths()
         {
@@ -75,6 +68,13 @@ class SymbolTool : Tool
 
             return [];
         }
+    }
+    else version (Posix)
+    {
+        private static immutable _compilerConfigPaths = [
+            `/etc/dmd.conf`, `/usr/local/etc/dmd.conf`, `/etc/ldc2.conf`,
+            `/usr/local/etc/ldc2.conf`
+        ];
     }
     else
     {
