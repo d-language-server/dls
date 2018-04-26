@@ -191,6 +191,12 @@ class SymbolTool : Tool
         }
     }
 
+    void clearPath(Uri uri)
+    {
+        logger.logf("Clearing imports from %s", uri.path);
+        _caches.remove(uri.path);
+    }
+
     void upgradeSelections(Uri uri)
     {
         import std.concurrency : spawn;

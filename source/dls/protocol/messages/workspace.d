@@ -26,12 +26,13 @@ void didChangeWorkspaceFolders(DidChangeWorkspaceFoldersParams params)
 {
     import std.typecons : nullable;
 
-    // TODO: separate caches depending on the workspace folder to be abe to remove them afterwards
     workspaceFolders(null, params.event.added.nullable);
 
     foreach (folder; params.event.removed)
     {
-        Tools.analysisTool.removeAnalysisConfigPath(new Uri(folder.uri));
+        auto uri = new Uri(folder.uri);
+        Tools.symbolTool.clearPath(uri);
+        Tools.analysisTool.removeAnalysisConfigPath(uri);
     }
 }
 
