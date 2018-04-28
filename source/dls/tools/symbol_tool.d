@@ -68,7 +68,7 @@ class SymbolTool : Tool
     import std.conv : to;
     import std.file : readText;
     import std.json : JSONValue;
-    import std.path : isAbsolute;
+    import std.range : chain;
     import std.regex : ctRegex;
     import std.typecons : nullable;
 
@@ -103,7 +103,8 @@ class SymbolTool : Tool
         private static immutable string[] _compilerConfigPaths;
     }
 
-    private ModuleCache*[string] _caches;
+    private ModuleCache*[string] _workspaceCaches;
+    private ModuleCache*[string] _libraryCaches;
 
     @property private auto defaultImportPaths()
     {
@@ -153,23 +154,20 @@ class SymbolTool : Tool
 
     this()
     {
-        _caches[""] = new ModuleCache(new ASTAllocator());
-        _caches[""].addImportPaths(defaultImportPaths);
+        _libraryCaches[""] = new ModuleCache(new ASTAllocator());
+        _libraryCaches[""].addImportPaths(defaultImportPaths);
     }
 
     auto getRelevantCaches(Uri uri)
     {
         auto result = appender([getWorkspaceCache(uri)]);
 
-        foreach (pair; _caches.byKeyValue)
+        foreach (cache; _workspaceCaches.byValue)
         {
-            if (pair.key.length > 0 && !pair.key.isAbsolute)
-            {
-                result ~= pair.value;
-            }
+            result ~= cache;
         }
 
-        result ~= _caches[""];
+        result ~= _libraryCaches[""];
 
         return result.data;
     }
@@ -177,16 +175,17 @@ class SymbolTool : Tool
     auto getWorkspaceCache(Uri uri)
     {
         import std.algorithm : startsWith;
-        import std.array : array;
         import std.path : pathSplitter;
 
         string[] cachePathParts;
 
-        foreach (path; _caches.byKey)
+        foreach (path; chain(_workspaceCaches.byKey, _libraryCaches.byKey))
         {
-            if (pathSplitter(uri.path).startsWith(pathSplitter(path)))
+            auto splitter = pathSplitter(path);
+
+            if (pathSplitter(uri.path).startsWith(splitter))
             {
-                auto pathParts = pathSplitter(path).array;
+                auto pathParts = splitter.array;
 
                 if (pathParts.length > cachePathParts.length)
                 {
@@ -195,7 +194,9 @@ class SymbolTool : Tool
             }
         }
 
-        return _caches[buildNormalizedPath(cachePathParts)];
+        auto cachePath = buildNormalizedPath(cachePathParts);
+        return cachePath in _workspaceCaches ? _workspaceCaches[cachePath]
+            : _libraryCaches[cachePath];
     }
 
     void importPath(Uri uri)
@@ -203,7 +204,7 @@ class SymbolTool : Tool
         logger.logf("Importing from %s", uri.path);
         const d = getDub(uri);
         const desc = d.project.rootPackage.describe(BuildPlatform.any, null, null);
-        importDirectories(uri.path,
+        importDirectories!false(uri.path,
                 desc.importPaths.map!(importPath => buildNormalizedPath(uri.path,
                     importPath)).array);
     }
@@ -219,15 +220,24 @@ class SymbolTool : Tool
             const desc = dep.describe(BuildPlatform.any, null,
                     dep.name in project.rootPackage.recipe.buildSettings.subConfigurations
                     ? project.rootPackage.recipe.buildSettings.subConfigurations[dep.name] : null);
-            importDirectories(dep.name, desc.importPaths.map!(importPath => buildNormalizedPath(dep.path.toString(),
-                    importPath)).array, true);
+            importDirectories!true(dep.name,
+                    desc.importPaths.map!(importPath => buildNormalizedPath(dep.path.toString(),
+                        importPath)).array, true);
         }
     }
 
     void clearPath(Uri uri)
     {
         logger.logf("Clearing imports from %s", uri.path);
-        _caches.remove(uri.path);
+
+        if (uri.path in _workspaceCaches)
+        {
+            _workspaceCaches.remove(uri.path);
+        }
+        else
+        {
+            _libraryCaches.remove(uri.path);
+        }
     }
 
     void upgradeSelections(Uri uri)
@@ -284,35 +294,32 @@ class SymbolTool : Tool
             return result.data;
         }
 
-        foreach (pair; _caches.byKeyValue)
+        foreach (pair; _workspaceCaches.byKeyValue)
         {
-            if (pair.key.length > 0 && pair.key.isAbsolute)
+            foreach (cacheEntry; pair.value.getAllSymbols())
             {
-                foreach (cacheEntry; pair.value.getAllSymbols())
+                auto uri = Uri.fromPath(cacheEntry.symbol.symbolFile);
+                const closedDoc = Document[uri] is null;
+
+                if (closedDoc)
                 {
-                    auto uri = Uri.fromPath(cacheEntry.symbol.symbolFile);
-                    const closedDoc = Document[uri] is null;
+                    auto doc = new TextDocumentItem();
+                    doc.uri = uri;
+                    doc.languageId = "d";
+                    doc.text = readText(uri.path);
+                    Document.open(doc);
+                }
 
-                    if (closedDoc)
-                    {
-                        auto doc = new TextDocumentItem();
-                        doc.uri = uri;
-                        doc.languageId = "d";
-                        doc.text = readText(uri.path);
-                        Document.open(doc);
-                    }
+                foreach (symbol; cacheEntry.symbol.getPartsByName(internString("")))
+                {
+                    result ~= getSymbolInformations(uri, symbol);
+                }
 
-                    foreach (symbol; cacheEntry.symbol.getPartsByName(internString("")))
-                    {
-                        result ~= getSymbolInformations(uri, symbol);
-                    }
-
-                    if (closedDoc)
-                    {
-                        auto docIdentifier = new TextDocumentIdentifier();
-                        docIdentifier.uri = uri;
-                        Document.close(docIdentifier);
-                    }
+                if (closedDoc)
+                {
+                    auto docIdentifier = new TextDocumentIdentifier();
+                    docIdentifier.uri = uri;
+                    Document.close(docIdentifier);
                 }
             }
         }
@@ -331,7 +338,8 @@ class SymbolTool : Tool
         auto request = getPreparedRequest(uri, position);
         request.kind = RequestKind.autocomplete;
 
-        return _caches.byValue.map!(cache => complete(request, *cache).completions)
+        return chain(_workspaceCaches.byValue, _libraryCaches.byValue).map!(
+                cache => complete(request, *cache).completions)
             .reduce!q{a ~ b}.chunkBy!q{a.identifier == b.identifier}.map!((resGroup) {
                 auto item = new CompletionItem(resGroup.front.identifier);
                 item.kind = completionKinds[resGroup.front.kind.to!CompletionKind];
@@ -442,25 +450,34 @@ class SymbolTool : Tool
                 ? DocumentHighlightKind.write : DocumentHighlightKind.text).nullable)).array;
     }
 
-    package void importDirectories(string root, string[] paths, bool refresh = false)
+    package void importDirectories(bool isLibrary)(string root, string[] paths, bool refresh = false)
     {
         import std.algorithm : canFind;
 
-        if (refresh && (root in _caches))
+        static if (isLibrary)
         {
-            _caches.remove(root);
+            alias caches = _libraryCaches;
+        }
+        else
+        {
+            alias caches = _workspaceCaches;
         }
 
-        if (!(root in _caches))
+        if (refresh && (root in caches))
         {
-            _caches[root] = new ModuleCache(new ASTAllocator());
+            caches.remove(root);
+        }
+
+        if (!(root in caches))
+        {
+            caches[root] = new ModuleCache(new ASTAllocator());
         }
 
         foreach (path; paths)
         {
-            if (!_caches[root].getImportPaths().canFind(path))
+            if (!caches[root].getImportPaths().canFind(path))
             {
-                _caches[root].addImportPaths([path]);
+                caches[root].addImportPaths([path]);
             }
         }
     }

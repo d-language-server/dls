@@ -111,9 +111,11 @@ class AnalysisTool : Tool
 
         foreach (path, config; _analysisConfigs)
         {
-            if (pathSplitter(uri.path).startsWith(pathSplitter(path)))
+            auto splitter = pathSplitter(path);
+
+            if (pathSplitter(uri.path).startsWith(splitter))
             {
-                auto pathParts = pathSplitter(path).array;
+                auto pathParts = splitter.array;
 
                 if (pathParts.length > configPathParts.length)
                 {
