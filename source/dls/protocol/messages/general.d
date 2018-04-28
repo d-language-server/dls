@@ -53,6 +53,7 @@ InitializeResult initialize(InitializeParams params)
         documentFormattingProvider = true;
         definitionProvider = true;
         documentHighlightProvider = true;
+        workspaceSymbolProvider = true;
         workspace = new ServerCapabilities.Workspace(new ServerCapabilities.Workspace.WorkspaceFolders(true.nullable,
                 JSONValue(true).nullable).nullable);
     }

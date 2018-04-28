@@ -54,7 +54,7 @@ class Uri
         return new Uri(uri).path;
     }
 
-    static fromPath(string path)
+    static auto fromPath(string path)
     {
         import std.algorithm : startsWith;
         import std.format : format;

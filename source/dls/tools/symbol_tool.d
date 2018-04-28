@@ -1,10 +1,12 @@
 module dls.tools.symbol_tool;
 
-import dls.protocol.interfaces : CompletionItemKind;
+import dls.protocol.interfaces : CompletionItemKind, SymbolKind;
 import dls.tools.tool : Tool;
+import dsymbol.symbol : CompletionKind;
 import std.path : asNormalizedPath, buildNormalizedPath, dirName;
 
-private immutable CompletionItemKind[char] completionKinds;
+private immutable CompletionItemKind[CompletionKind] completionKinds;
+private immutable SymbolKind[CompletionKind] symbolKinds;
 
 static this()
 {
@@ -12,23 +14,39 @@ static this()
 
     //dfmt off
     completionKinds = [
-        'c' : CompletionItemKind.class_,
-        'i' : CompletionItemKind.interface_,
-        's' : CompletionItemKind.struct_,
-        'u' : CompletionItemKind.interface_,
-        'v' : CompletionItemKind.variable,
-        'm' : CompletionItemKind.field,
-        'k' : CompletionItemKind.keyword,
-        'f' : CompletionItemKind.method,
-        'g' : CompletionItemKind.enum_,
-        'e' : CompletionItemKind.enumMember,
-        'P' : CompletionItemKind.folder,
-        'M' : CompletionItemKind.module_,
-        'a' : CompletionItemKind.value,
-        'A' : CompletionItemKind.value,
-        'l' : CompletionItemKind.variable,
-        't' : CompletionItemKind.function_,
-        'T' : CompletionItemKind.function_
+        CompletionKind.className            : CompletionItemKind.class_,
+        CompletionKind.interfaceName        : CompletionItemKind.interface_,
+        CompletionKind.structName           : CompletionItemKind.struct_,
+        CompletionKind.unionName            : CompletionItemKind.interface_,
+        CompletionKind.variableName         : CompletionItemKind.variable,
+        CompletionKind.memberVariableName   : CompletionItemKind.field,
+        CompletionKind.keyword              : CompletionItemKind.keyword,
+        CompletionKind.functionName         : CompletionItemKind.function_,
+        CompletionKind.enumName             : CompletionItemKind.enum_,
+        CompletionKind.enumMember           : CompletionItemKind.enumMember,
+        CompletionKind.packageName          : CompletionItemKind.folder,
+        CompletionKind.moduleName           : CompletionItemKind.module_,
+        CompletionKind.aliasName            : CompletionItemKind.variable,
+        CompletionKind.templateName         : CompletionItemKind.function_,
+        CompletionKind.mixinTemplateName    : CompletionItemKind.function_
+    ];
+
+    symbolKinds = [
+        CompletionKind.className            : SymbolKind.class_,
+        CompletionKind.interfaceName        : SymbolKind.interface_,
+        CompletionKind.structName           : SymbolKind.struct_,
+        CompletionKind.unionName            : SymbolKind.interface_,
+        CompletionKind.variableName         : SymbolKind.variable,
+        CompletionKind.memberVariableName   : SymbolKind.field,
+        CompletionKind.keyword              : SymbolKind.constant,
+        CompletionKind.functionName         : SymbolKind.function_,
+        CompletionKind.enumName             : SymbolKind.enum_,
+        CompletionKind.enumMember           : SymbolKind.enumMember,
+        CompletionKind.packageName          : SymbolKind.package_,
+        CompletionKind.moduleName           : SymbolKind.module_,
+        CompletionKind.aliasName            : SymbolKind.variable,
+        CompletionKind.templateName         : SymbolKind.function_,
+        CompletionKind.mixinTemplateName    : SymbolKind.function_
     ];
     //dfmt on
 
@@ -39,7 +57,7 @@ class SymbolTool : Tool
 {
     import logger = std.experimental.logger;
     import dcd.common.messages : RequestKind;
-    import dls.protocol.definitions : Position;
+    import dls.protocol.definitions : Location, Position, TextDocumentItem;
     import dls.protocol.interfaces : CompletionItem;
     import dls.util.document : Document;
     import dls.util.uri : Uri;
@@ -48,7 +66,10 @@ class SymbolTool : Tool
     import std.algorithm : map, sort, uniq;
     import std.array : appender, array;
     import std.conv : to;
+    import std.file : readText;
+    import std.path : isAbsolute;
     import std.regex : ctRegex;
+    import std.typecons : nullable;
 
     version (Windows)
     {
@@ -86,7 +107,7 @@ class SymbolTool : Tool
     @property private auto defaultImportPaths()
     {
         import std.algorithm : each;
-        import std.file : FileException, exists, readText;
+        import std.file : FileException, exists;
         import std.range : replace;
         import std.regex : matchAll;
 
@@ -137,8 +158,6 @@ class SymbolTool : Tool
 
     auto getRelevantCaches(Uri uri)
     {
-        import std.path : isAbsolute;
-
         auto result = appender([getWorkspaceCache(uri)]);
 
         foreach (pair; _caches.byKeyValue)
@@ -223,6 +242,83 @@ class SymbolTool : Tool
         }, uri.toString());
     }
 
+    auto symbols(string query)
+    {
+        import dls.protocol.definitions : TextDocumentIdentifier;
+        import dls.protocol.interfaces : SymbolInformation;
+        import dsymbol.string_interning : internString;
+        import dsymbol.symbol : DSymbol;
+        import std.regex : regex;
+
+        logger.log("Fetching workspaces symbols");
+
+        const queryRegex = regex(query);
+        auto result = appender!(SymbolInformation[]);
+
+        SymbolInformation[] getSymbolInformations(Uri uri,
+                const(DSymbol)* symbol, string containerName = "")
+        {
+            import std.regex : matchFirst;
+            import std.stdio : stderr;
+
+            if (symbol.symbolFile.length == 0)
+            {
+                return [];
+            }
+
+            auto location = new Location(uri, Document[uri].wordRangeAtByte(symbol.location));
+            auto result = appender!(SymbolInformation[]);
+
+            if (symbol.name.data.matchFirst(queryRegex))
+            {
+                result ~= new SymbolInformation(symbol.name,
+                        symbolKinds[symbol.kind], location, containerName.nullable);
+            }
+
+            foreach (s; symbol.getPartsByName(internString("")))
+            {
+                result ~= getSymbolInformations(uri, s, symbol.name);
+            }
+
+            return result.data;
+        }
+
+        foreach (pair; _caches.byKeyValue)
+        {
+            if (pair.key.length && pair.key.isAbsolute)
+            {
+                foreach (cacheEntry; pair.value.getAllSymbols())
+                {
+                    auto uri = Uri.fromPath(cacheEntry.symbol.symbolFile);
+                    const closedDoc = Document[uri] is null;
+
+                    if (closedDoc)
+                    {
+                        auto doc = new TextDocumentItem();
+                        doc.uri = uri;
+                        doc.languageId = "d";
+                        doc.text = readText(uri.path);
+                        Document.open(doc);
+                    }
+
+                    foreach (symbol; cacheEntry.symbol.getPartsByName(internString("")))
+                    {
+                        result ~= getSymbolInformations(uri, symbol);
+                    }
+
+                    if (closedDoc)
+                    {
+                        auto docIdentifier = new TextDocumentIdentifier();
+                        docIdentifier.uri = uri;
+                        Document.close(docIdentifier);
+                    }
+                }
+            }
+        }
+
+        return result.data;
+    }
+
     auto complete(Uri uri, Position position)
     {
         import dcd.server.autocomplete : complete;
@@ -239,7 +335,7 @@ class SymbolTool : Tool
             .reduce!"a ~ b".sort!q{a.identifier > b.identifier}.uniq!q{a.identifier == b.identifier}.map!(
                     (res) {
                 auto item = new CompletionItem(res.identifier);
-                item.kind = completionKinds[res.kind.to!char];
+                item.kind = completionKinds[res.kind.to!CompletionKind];
                 item.detail = res.definition;
                 item.data = JSONValue(res.documentation);
                 return item;
@@ -260,9 +356,7 @@ class SymbolTool : Tool
     {
         import dcd.common.messages : AutocompleteResponse;
         import dcd.server.autocomplete : findDeclaration;
-        import dls.protocol.definitions : Location, TextDocumentItem;
         import std.algorithm : find;
-        import std.file : readText;
 
         logger.logf("Finding declaration for %s at position %s,%s", uri.path,
                 position.line, position.character);
@@ -307,7 +401,6 @@ class SymbolTool : Tool
         import dcd.server.autocomplete.localuse : findLocalUse;
         import dls.protocol.interfaces : DocumentHighlight,
             DocumentHighlightKind;
-        import std.typecons : nullable;
 
         logger.logf("Highlighting usages for %s at position %s,%s", uri.path,
                 position.line, position.character);
