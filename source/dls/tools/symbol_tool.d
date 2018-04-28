@@ -63,10 +63,11 @@ class SymbolTool : Tool
     import dls.util.uri : Uri;
     import dsymbol.modulecache : ASTAllocator, ModuleCache;
     import dub.platform : BuildPlatform;
-    import std.algorithm : map, sort, uniq;
+    import std.algorithm : map, reduce, sort, uniq;
     import std.array : appender, array;
     import std.conv : to;
     import std.file : readText;
+    import std.json : JSONValue;
     import std.path : isAbsolute;
     import std.regex : ctRegex;
     import std.typecons : nullable;
@@ -162,7 +163,7 @@ class SymbolTool : Tool
 
         foreach (pair; _caches.byKeyValue)
         {
-            if (!pair.key.isAbsolute)
+            if (pair.key.length > 0 && !pair.key.isAbsolute)
             {
                 result ~= pair.value;
             }
@@ -285,7 +286,7 @@ class SymbolTool : Tool
 
         foreach (pair; _caches.byKeyValue)
         {
-            if (pair.key.length && pair.key.isAbsolute)
+            if (pair.key.length > 0 && pair.key.isAbsolute)
             {
                 foreach (cacheEntry; pair.value.getAllSymbols())
                 {
@@ -322,8 +323,7 @@ class SymbolTool : Tool
     auto complete(Uri uri, Position position)
     {
         import dcd.server.autocomplete : complete;
-        import std.algorithm : reduce;
-        import std.json : JSONValue;
+        import std.algorithm : chunkBy;
 
         logger.logf("Getting completions for %s at position %s,%s", uri.path,
                 position.line, position.character);
@@ -332,12 +332,19 @@ class SymbolTool : Tool
         request.kind = RequestKind.autocomplete;
 
         return _caches.byValue.map!(cache => complete(request, *cache).completions)
-            .reduce!"a ~ b".sort!q{a.identifier > b.identifier}.uniq!q{a.identifier == b.identifier}.map!(
-                    (res) {
-                auto item = new CompletionItem(res.identifier);
-                item.kind = completionKinds[res.kind.to!CompletionKind];
-                item.detail = res.definition;
-                item.data = JSONValue(res.documentation);
+            .reduce!q{a ~ b}.chunkBy!q{a.identifier == b.identifier}.map!((resGroup) {
+                auto item = new CompletionItem(resGroup.front.identifier);
+                item.kind = completionKinds[resGroup.front.kind.to!CompletionKind];
+                item.detail = resGroup.front.definition;
+
+                string[][] data;
+
+                foreach (res; resGroup)
+                {
+                    data ~= [res.definition, res.documentation];
+                }
+
+                item.data = JSONValue(data);
                 return item;
             }).array;
     }
@@ -346,10 +353,31 @@ class SymbolTool : Tool
     {
         if (!item.data.isNull)
         {
-            item.documentation = getDocumentation(item.data.str);
+            item.documentation = getDocumentation(
+                    item.data.array.map!q{ [a[0].str, a[1].str] }.array);
+            item.data.nullify();
         }
 
         return item;
+    }
+
+    auto hover(Uri uri, Position position)
+    {
+        import dcd.server.autocomplete : getDoc;
+        import dls.protocol.interfaces : Hover;
+        import std.algorithm : filter;
+
+        logger.logf("Getting documentation for %s at position %s,%s", uri.path,
+                position.line, position.character);
+
+        auto request = getPreparedRequest(uri, position);
+        request.kind = RequestKind.doc;
+
+        auto completions = getRelevantCaches(uri).map!(cache => getDoc(request, *cache).completions)
+            .reduce!q{a ~ b}.map!q{a.documentation}.filter!q{a.length > 0}.array.sort().uniq();
+
+        return completions.empty ? null
+            : new Hover(getDocumentation(completions.map!q{ ["", a] }.array));
     }
 
     auto find(Uri uri, Position position)
@@ -371,7 +399,7 @@ class SymbolTool : Tool
             results ~= findDeclaration(request, *cache);
         }
 
-        results = results.find!"a.symbolFilePath.length > 0".array;
+        results = results.find!q{a.symbolFilePath.length > 0}.array;
 
         if (results.length == 0)
         {
@@ -461,33 +489,56 @@ class SymbolTool : Tool
         return d;
     }
 
-    private static auto getDocumentation(string documentation)
+    private static auto getDocumentation(string[][] detailsAndDocumentations)
     {
         import dls.protocol.definitions : MarkupContent, MarkupKind;
 
         import std.array : replace;
         import std.regex : split;
 
-        auto content = documentation.split(ctRegex!`\n-+(\n|$)`)
-            .map!(chunk => chunk.replace(`\n`, " "));
         auto result = appender!string;
-        bool isExample;
+        bool putSeparator;
 
-        foreach (chunk; content)
+        foreach (dad; detailsAndDocumentations)
         {
-            if (isExample)
+            if (putSeparator)
             {
-                result ~= "```d\n";
-                result ~= chunk;
-                result ~= "\n```\n";
+                result ~= "\n\n---\n\n";
             }
             else
             {
-                result ~= chunk;
-                result ~= '\n';
+                putSeparator = true;
             }
 
-            isExample = !isExample;
+            auto detail = dad[0];
+            auto documentation = dad[1];
+            auto content = documentation.split(ctRegex!`\n-+(\n|$)`)
+                .map!(chunk => chunk.replace(`\n`, " "));
+            bool isExample;
+
+            if (detail.length > 0 && detailsAndDocumentations.length > 1)
+            {
+                result ~= "### ";
+                result ~= detail;
+                result ~= "\n\n";
+            }
+
+            foreach (chunk; content)
+            {
+                if (isExample)
+                {
+                    result ~= "```d\n";
+                    result ~= chunk;
+                    result ~= "\n```\n";
+                }
+                else
+                {
+                    result ~= chunk;
+                    result ~= '\n';
+                }
+
+                isExample = !isExample;
+            }
         }
 
         return new MarkupContent(MarkupKind.markdown, result.data);

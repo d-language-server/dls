@@ -57,20 +57,20 @@ void didClose(DidCloseTextDocumentParams params)
     Server.send("textDocument/publishDiagnostics", new PublishDiagnosticsParams(uri, []));
 }
 
-auto completion(CompletionParams params)
+CompletionItem[] completion(CompletionParams params)
 {
     return Tools.symbolTool.complete(new Uri(params.textDocument.uri), params.position);
 }
 
 @("completionItem", "resolve")
-auto completionItem_resolve(CompletionItem item)
+CompletionItem completionItem_resolve(CompletionItem item)
 {
     return Tools.symbolTool.completeResolve(item);
 }
 
 Hover hover(TextDocumentPositionParams params)
 {
-    return null;
+    return Tools.symbolTool.hover(new Uri(params.textDocument.uri), params.position);
 }
 
 SignatureHelp signatureHelp(TextDocumentPositionParams params)

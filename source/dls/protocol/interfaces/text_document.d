@@ -211,10 +211,10 @@ class CompletionRegistrationOptions : TextDocumentRegistrationOptions
 
 class Hover
 {
-    JSONValue contents;
+    MarkupContent contents;
     Nullable!Range range;
 
-    this(JSONValue contents = JSONValue.init, Nullable!Range range = Nullable!Range.init)
+    this(MarkupContent contents = MarkupContent.init, Nullable!Range range = Nullable!Range.init)
     {
         this.contents = contents;
         this.range = range;

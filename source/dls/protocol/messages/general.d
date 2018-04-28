@@ -50,6 +50,7 @@ InitializeResult initialize(InitializeParams params)
                 TextDocumentSyncKind.incremental.nullable);
         textDocumentSync.save = new SaveOptions(false.nullable);
         completionProvider = new CompletionOptions(true.nullable, ["."].nullable);
+        hoverProvider = true;
         documentFormattingProvider = true;
         definitionProvider = true;
         documentHighlightProvider = true;
