@@ -137,7 +137,21 @@ class SymbolTool : Tool
 
     auto getRelevantCaches(Uri uri)
     {
-        return [getWorkspaceCache(uri), _caches[""]].uniq;
+        import std.path : isAbsolute;
+
+        auto result = appender([getWorkspaceCache(uri)]);
+
+        foreach (pair; _caches.byKeyValue)
+        {
+            if (!pair.key.isAbsolute)
+            {
+                result ~= pair.value;
+            }
+        }
+
+        result ~= _caches[""];
+
+        return result.data;
     }
 
     auto getWorkspaceCache(Uri uri)
@@ -148,7 +162,7 @@ class SymbolTool : Tool
 
         string[] cachePathParts;
 
-        foreach (path; _caches.keys)
+        foreach (path; _caches.byKey)
         {
             if (pathSplitter(uri.path).startsWith(pathSplitter(path)))
             {
@@ -185,9 +199,8 @@ class SymbolTool : Tool
             const desc = dep.describe(BuildPlatform.any, null,
                     dep.name in project.rootPackage.recipe.buildSettings.subConfigurations
                     ? project.rootPackage.recipe.buildSettings.subConfigurations[dep.name] : null);
-            importDirectories(uri.path,
-                    desc.importPaths.map!(importPath => buildNormalizedPath(dep.path.toString(),
-                        importPath)).array);
+            importDirectories(dep.name, desc.importPaths.map!(importPath => buildNormalizedPath(dep.path.toString(),
+                    importPath)).array, true);
         }
     }
 
@@ -206,8 +219,7 @@ class SymbolTool : Tool
         spawn((string uriString) {
             import dub.dub : UpgradeOptions;
 
-            auto d = getDub(new Uri(uriString));
-            d.upgrade(UpgradeOptions.select);
+            getDub(new Uri(uriString)).upgrade(UpgradeOptions.select);
         }, uri.toString());
     }
 
@@ -309,9 +321,14 @@ class SymbolTool : Tool
                 ? DocumentHighlightKind.write : DocumentHighlightKind.text).nullable)).array;
     }
 
-    package void importDirectories(string root, string[] paths)
+    package void importDirectories(string root, string[] paths, bool refresh = false)
     {
         import std.algorithm : canFind;
+
+        if (refresh && (root in _caches))
+        {
+            _caches.remove(root);
+        }
 
         if (!(root in _caches))
         {
