@@ -340,7 +340,8 @@ class SymbolTool : Tool
 
         return chain(_workspaceCaches.byValue, _libraryCaches.byValue).map!(
                 cache => complete(request, *cache).completions)
-            .reduce!q{a ~ b}.chunkBy!q{a.identifier == b.identifier}.map!((resGroup) {
+            .reduce!q{a ~ b}.sort!q{a.identifier < b.identifier}.chunkBy!q{a.identifier == b.identifier}.map!(
+                    (resGroup) {
                 auto item = new CompletionItem(resGroup.front.identifier);
                 item.kind = completionKinds[resGroup.front.kind.to!CompletionKind];
                 item.detail = resGroup.front.definition;
@@ -352,7 +353,11 @@ class SymbolTool : Tool
                     data ~= [res.definition, res.documentation];
                 }
 
-                item.data = JSONValue(data);
+                if (data.length > 0)
+                {
+                    item.data = JSONValue(data);
+                }
+
                 return item;
             }).array;
     }
