@@ -350,7 +350,10 @@ class SymbolTool : Tool
 
                 foreach (res; resGroup)
                 {
-                    data ~= [res.definition, res.documentation];
+                    if (res.documentation != "ditto")
+                    {
+                        data ~= [res.definition, res.documentation];
+                    }
                 }
 
                 if (data.length > 0)
@@ -513,8 +516,9 @@ class SymbolTool : Tool
 
     private static auto getDocumentation(string[][] detailsAndDocumentations)
     {
+        import arsd.htmltotext : htmlToText;
+        import ddoc : Lexer, expand;
         import dls.protocol.definitions : MarkupContent, MarkupKind;
-
         import std.array : replace;
         import std.regex : split;
 
@@ -555,7 +559,8 @@ class SymbolTool : Tool
                 }
                 else
                 {
-                    result ~= chunk;
+                    string[string] macros;
+                    result ~= htmlToText(expand(Lexer(chunk), macros));
                     result ~= '\n';
                 }
 
