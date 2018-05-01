@@ -258,7 +258,8 @@ class SymbolTool : Tool
         import dsymbol.symbol : DSymbol;
         import std.regex : regex;
 
-        logger.log("Fetching workspaces symbols");
+        logger.logf("Fetching symbols from %s with query %s", uri is null
+                ? "workspace" : uri.path, query);
 
         const queryRegex = regex(query);
         auto result = appender!(SymbolInformation[]);
@@ -289,29 +290,27 @@ class SymbolTool : Tool
             }
         }
 
-        void collectSymbolInformations(const(DSymbol)* symbol, string containerName = "")
+        void collectSymbolInformations(Uri symbolUri, const(DSymbol)* symbol,
+                string containerName = "")
         {
             import std.regex : matchFirst;
 
-            if (symbol.symbolFile.length == 0)
+            if (symbol.symbolFile != symbolUri.path)
             {
                 return;
             }
 
             if (symbol.name.data.matchFirst(queryRegex))
             {
-                auto symbolUri = Uri.fromPath(symbol.symbolFile);
-                const closed = openDocument(symbolUri);
                 auto location = new Location(symbolUri,
                         Document[symbolUri].wordRangeAtByte(symbol.location));
                 result ~= new SymbolInformation(symbol.name,
                         symbolKinds[symbol.kind], location, containerName.nullable);
-                closeDocument(symbolUri, closed);
             }
 
             foreach (s; symbol.getPartsByName(internString("")))
             {
-                collectSymbolInformations(s, symbol.name);
+                collectSymbolInformations(symbolUri, s, symbol.name);
             }
         }
 
@@ -326,7 +325,7 @@ class SymbolTool : Tool
 
                     foreach (symbol; cacheEntry.symbol.getPartsByName(internString("")))
                     {
-                        collectSymbolInformations(symbol);
+                        collectSymbolInformations(symbolUri, symbol);
                     }
 
                     closeDocument(symbolUri, closed);
@@ -334,7 +333,7 @@ class SymbolTool : Tool
             }
         }
 
-        return result.data;
+        return result.data.sort!q{a.name < b.name}.array;
     }
 
     auto complete(Uri uri, Position position)
