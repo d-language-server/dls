@@ -61,7 +61,7 @@ class SymbolTool : Tool
     import dls.protocol.interfaces : CompletionItem;
     import dls.util.document : Document;
     import dls.util.uri : Uri;
-    import dsymbol.modulecache : ASTAllocator, ModuleCache;
+    import dsymbol.modulecache : ModuleCache;
     import dub.platform : BuildPlatform;
     import std.algorithm : map, reduce, sort, uniq;
     import std.array : appender, array;
@@ -154,8 +154,7 @@ class SymbolTool : Tool
 
     this()
     {
-        _libraryCaches[""] = new ModuleCache(new ASTAllocator());
-        _libraryCaches[""].addImportPaths(defaultImportPaths);
+        importDirectories!true("", defaultImportPaths);
     }
 
     auto getRelevantCaches(Uri uri)
@@ -201,7 +200,6 @@ class SymbolTool : Tool
 
     void importPath(Uri uri)
     {
-        logger.logf("Importing from %s", uri.path);
         const d = getDub(uri);
         const desc = d.project.rootPackage.describe(BuildPlatform.any, null, null);
         importDirectories!false(uri.path,
@@ -211,7 +209,6 @@ class SymbolTool : Tool
 
     void importSelections(Uri uri)
     {
-        logger.logf("Importing dependencies from %s", uri.path);
         const d = getDub(uri);
         const project = d.project;
 
@@ -460,7 +457,10 @@ class SymbolTool : Tool
 
     package void importDirectories(bool isLibrary)(string root, string[] paths, bool refresh = false)
     {
+        import dsymbol.modulecache : ASTAllocator;
         import std.algorithm : canFind;
+
+        logger.logf(`Importing into cache "%s": %s`, root, paths);
 
         static if (isLibrary)
         {

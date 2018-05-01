@@ -181,14 +181,17 @@ abstract class Server
         }
         catch (JSONException e)
         {
+            logger.errorf("%s: %s", ErrorCodes.parseError[0], e);
             sendError(ErrorCodes.parseError, request);
         }
         catch (HandlerNotFoundException e)
         {
+            logger.errorf("%s: %s", ErrorCodes.methodNotFound[0], e);
             sendError(ErrorCodes.methodNotFound, request);
         }
         catch (Exception e)
         {
+            logger.errorf("%s: %s", ErrorCodes.unknownErrorCode[0], e);
             sendError(ErrorCodes.unknownErrorCode, request);
         }
     }
