@@ -3,7 +3,7 @@ module dls.util.uri;
 class Uri
 {
     import dls.protocol.definitions : DocumentUri;
-    import std.regex : ctRegex, matchAll;
+    import std.regex : ctRegex;
 
     private static enum _reg = ctRegex!`(?:([\w-]+)://)?([\w.]+(?::\d+)?)?([^\?#]+)(?:\?([\w=&]+))?(?:#([\w-]+))?`;
     private string _uri;
@@ -22,6 +22,7 @@ class Uri
     {
         import std.conv : to;
         import std.path : asNormalizedPath;
+        import std.regex : matchAll;
         import std.uri : decodeComponent;
         import std.utf : toUTF32;
 
@@ -38,9 +39,12 @@ class Uri
 
         version (Windows)
         {
-            import std.string : stripLeft;
+            import std.algorithm : startsWith;
 
-            _path = _path.stripLeft(`/\`);
+            if (_path.startsWith('/') || _path.startsWith(`\`))
+            {
+                _path = _path[1 .. $];
+            }
         }
     }
 
