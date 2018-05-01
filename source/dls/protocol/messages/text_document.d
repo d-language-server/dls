@@ -105,7 +105,7 @@ DocumentHighlight[] documentHighlight(TextDocumentPositionParams params)
 
 SymbolInformation[] documentSymbol(DocumentSymbolParams params)
 {
-    return [];
+    return Tools.symbolTool.symbols("", new Uri(params.textDocument.uri));
 }
 
 Command[] codeAction(CodeActionParams params)
