@@ -250,7 +250,7 @@ class SymbolTool : Tool
         }, uri.toString());
     }
 
-    auto symbols(string query)
+    auto symbols(string query, Uri uri = null)
     {
         import dls.protocol.definitions : TextDocumentIdentifier;
         import dls.protocol.interfaces : SymbolInformation;
@@ -263,60 +263,73 @@ class SymbolTool : Tool
         const queryRegex = regex(query);
         auto result = appender!(SymbolInformation[]);
 
-        SymbolInformation[] getSymbolInformations(Uri uri,
-                const(DSymbol)* symbol, string containerName = "")
+        bool openDocument(Uri docUri)
+        {
+            auto closed = Document[docUri] is null;
+
+            if (closed)
+            {
+                auto doc = new TextDocumentItem();
+                doc.uri = docUri;
+                doc.languageId = "d";
+                doc.text = readText(docUri.path);
+                Document.open(doc);
+            }
+
+            return closed;
+        }
+
+        void closeDocument(Uri docUri, bool wasClosed)
+        {
+            if (wasClosed)
+            {
+                auto docIdentifier = new TextDocumentIdentifier();
+                docIdentifier.uri = docUri;
+                Document.close(docIdentifier);
+            }
+        }
+
+        void collectSymbolInformations(const(DSymbol)* symbol, string containerName = "")
         {
             import std.regex : matchFirst;
-            import std.stdio : stderr;
 
             if (symbol.symbolFile.length == 0)
             {
-                return [];
+                return;
             }
-
-            auto location = new Location(uri, Document[uri].wordRangeAtByte(symbol.location));
-            auto result = appender!(SymbolInformation[]);
 
             if (symbol.name.data.matchFirst(queryRegex))
             {
+                auto symbolUri = Uri.fromPath(symbol.symbolFile);
+                const closed = openDocument(symbolUri);
+                auto location = new Location(symbolUri,
+                        Document[symbolUri].wordRangeAtByte(symbol.location));
                 result ~= new SymbolInformation(symbol.name,
                         symbolKinds[symbol.kind], location, containerName.nullable);
+                closeDocument(symbolUri, closed);
             }
 
             foreach (s; symbol.getPartsByName(internString("")))
             {
-                result ~= getSymbolInformations(uri, s, symbol.name);
+                collectSymbolInformations(s, symbol.name);
             }
-
-            return result.data;
         }
 
-        foreach (pair; _workspaceCaches.byKeyValue)
+        foreach (cache; _workspaceCaches.byValue)
         {
-            foreach (cacheEntry; pair.value.getAllSymbols())
+            foreach (cacheEntry; cache.getAllSymbols())
             {
-                auto uri = Uri.fromPath(cacheEntry.symbol.symbolFile);
-                const closedDoc = Document[uri] is null;
-
-                if (closedDoc)
+                if (uri is null || uri.path == cacheEntry.symbol.symbolFile)
                 {
-                    auto doc = new TextDocumentItem();
-                    doc.uri = uri;
-                    doc.languageId = "d";
-                    doc.text = readText(uri.path);
-                    Document.open(doc);
-                }
+                    auto symbolUri = Uri.fromPath(cacheEntry.symbol.symbolFile);
+                    const closed = openDocument(symbolUri);
 
-                foreach (symbol; cacheEntry.symbol.getPartsByName(internString("")))
-                {
-                    result ~= getSymbolInformations(uri, symbol);
-                }
+                    foreach (symbol; cacheEntry.symbol.getPartsByName(internString("")))
+                    {
+                        collectSymbolInformations(symbol);
+                    }
 
-                if (closedDoc)
-                {
-                    auto docIdentifier = new TextDocumentIdentifier();
-                    docIdentifier.uri = uri;
-                    Document.close(docIdentifier);
+                    closeDocument(symbolUri, closed);
                 }
             }
         }
@@ -339,6 +352,8 @@ class SymbolTool : Tool
                 cache => complete(request, *cache).completions)
             .reduce!q{a ~ b}.sort!q{a.identifier < b.identifier}.chunkBy!q{a.identifier == b.identifier}.map!(
                     (resGroup) {
+                import std.uni : toLower;
+
                 auto item = new CompletionItem(resGroup.front.identifier);
                 item.kind = completionKinds[resGroup.front.kind.to!CompletionKind];
                 item.detail = resGroup.front.definition;
@@ -347,7 +362,7 @@ class SymbolTool : Tool
 
                 foreach (res; resGroup)
                 {
-                    if (res.documentation != "ditto")
+                    if (res.documentation.toLower() != "ditto")
                     {
                         data ~= [res.definition, res.documentation];
                     }
