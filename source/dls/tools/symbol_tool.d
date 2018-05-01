@@ -256,13 +256,14 @@ class SymbolTool : Tool
         import dls.protocol.interfaces : SymbolInformation;
         import dsymbol.string_interning : internString;
         import dsymbol.symbol : DSymbol;
+        import std.container : RedBlackTree;
         import std.regex : regex;
 
-        logger.logf("Fetching symbols from %s with query %s", uri is null
+        logger.logf(`Fetching symbols from %s with query "%s"`, uri is null
                 ? "workspace" : uri.path, query);
 
         const queryRegex = regex(query);
-        auto result = appender!(SymbolInformation[]);
+        auto result = new RedBlackTree!(SymbolInformation, q{a.name > b.name});
 
         bool openDocument(Uri docUri)
         {
@@ -304,8 +305,8 @@ class SymbolTool : Tool
             {
                 auto location = new Location(symbolUri,
                         Document[symbolUri].wordRangeAtByte(symbol.location));
-                result ~= new SymbolInformation(symbol.name,
-                        symbolKinds[symbol.kind], location, containerName.nullable);
+                result.insert(new SymbolInformation(symbol.name,
+                        symbolKinds[symbol.kind], location, containerName.nullable));
             }
 
             foreach (s; symbol.getPartsByName(internString("")))
@@ -333,7 +334,7 @@ class SymbolTool : Tool
             }
         }
 
-        return result.data.sort!q{a.name < b.name}.array;
+        return result.array;
     }
 
     auto complete(Uri uri, Position position)
