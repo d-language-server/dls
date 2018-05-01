@@ -5,10 +5,12 @@ import dls.tools.tool : Tool;
 import dsymbol.symbol : CompletionKind;
 import std.path : asNormalizedPath, buildNormalizedPath, dirName;
 
+private enum macrosUrl = "https://raw.githubusercontent.com/dlang/dlang.org/master/std.ddoc";
+private string[string] macros;
 private immutable CompletionItemKind[CompletionKind] completionKinds;
 private immutable SymbolKind[CompletionKind] symbolKinds;
 
-static this()
+shared static this()
 {
     import dub.internal.vibecompat.core.log : LogLevel, setLogLevel;
 
@@ -68,8 +70,10 @@ class SymbolTool : Tool
     import std.conv : to;
     import std.file : readText;
     import std.json : JSONValue;
+    import std.net.curl : byLine;
+    import std.parallelism : Task;
     import std.range : chain;
-    import std.regex : ctRegex;
+    import std.regex : ctRegex, matchFirst;
     import std.typecons : nullable;
 
     version (Windows)
@@ -103,6 +107,7 @@ class SymbolTool : Tool
         private static immutable string[] _compilerConfigPaths;
     }
 
+    private Task!(byLine, string)* _macrosTask;
     private ModuleCache*[string] _workspaceCaches;
     private ModuleCache*[string] _libraryCaches;
 
@@ -154,6 +159,10 @@ class SymbolTool : Tool
 
     this()
     {
+        import std.parallelism : task;
+
+        _macrosTask = task!byLine(macrosUrl);
+        _macrosTask.executeInNewThread();
         importDirectories!true("", defaultImportPaths);
     }
 
@@ -505,37 +514,26 @@ class SymbolTool : Tool
         }
     }
 
-    private static auto getPreparedRequest(Uri uri, Position position)
-    {
-        import dcd.common.messages : AutocompleteRequest;
-
-        auto request = AutocompleteRequest();
-        auto document = Document[uri];
-
-        request.fileName = uri.path;
-        request.sourceCode = cast(ubyte[]) document.toString();
-        request.cursorPosition = document.byteAtPosition(position);
-
-        return request;
-    }
-
-    private static auto getDub(Uri uri)
-    {
-        import dub.dub : Dub;
-        import std.file : isFile;
-
-        auto d = new Dub(isFile(uri.path) ? dirName(uri.path) : uri.path);
-        d.loadPackage();
-        return d;
-    }
-
-    private static auto getDocumentation(string[][] detailsAndDocumentations)
+    private auto getDocumentation(string[][] detailsAndDocumentations)
     {
         import arsd.htmltotext : htmlToText;
         import ddoc : Lexer, expand;
         import dls.protocol.definitions : MarkupContent, MarkupKind;
         import std.array : replace;
         import std.regex : split;
+
+        if (macros.keys.length == 0 && _macrosTask.done)
+        {
+            foreach (line; _macrosTask.yieldForce())
+            {
+                auto result = matchFirst(line, ctRegex!`(\w+)\s*=\s*(.*)`);
+
+                if (result.length > 0)
+                {
+                    macros[result[1].to!string] = result[2].to!string;
+                }
+            }
+        }
 
         auto result = appender!string;
         bool putSeparator;
@@ -574,7 +572,6 @@ class SymbolTool : Tool
                 }
                 else
                 {
-                    string[string] macros;
                     result ~= htmlToText(expand(Lexer(chunk), macros));
                     result ~= '\n';
                 }
@@ -584,5 +581,29 @@ class SymbolTool : Tool
         }
 
         return new MarkupContent(MarkupKind.markdown, result.data);
+    }
+
+    private static auto getPreparedRequest(Uri uri, Position position)
+    {
+        import dcd.common.messages : AutocompleteRequest;
+
+        auto request = AutocompleteRequest();
+        auto document = Document[uri];
+
+        request.fileName = uri.path;
+        request.sourceCode = cast(ubyte[]) document.toString();
+        request.cursorPosition = document.byteAtPosition(position);
+
+        return request;
+    }
+
+    private static auto getDub(Uri uri)
+    {
+        import dub.dub : Dub;
+        import std.file : isFile;
+
+        auto d = new Dub(isFile(uri.path) ? dirName(uri.path) : uri.path);
+        d.loadPackage();
+        return d;
     }
 }

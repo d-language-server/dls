@@ -1,6 +1,6 @@
 module dls.updater;
 
-private enum changelogURL = "https://github.com/LaurentTreguier/dls/blob/master/CHANGELOG.md";
+private enum changelogUrl = "https://github.com/LaurentTreguier/dls/blob/master/CHANGELOG.md";
 private immutable additionalArgs = [[], ["--force"]];
 
 void update()
@@ -108,7 +108,7 @@ void update()
         requestParams.actions[0].title = "See what's new";
         id = Server.send("window/showMessageRequest", requestParams);
         send(ownerTid(), Util.ThreadMessageData(id,
-                Util.ShowMessageRequestType.showChangelog, changelogURL));
+                Util.ShowMessageRequestType.showChangelog, changelogUrl));
     }
     else
     {
