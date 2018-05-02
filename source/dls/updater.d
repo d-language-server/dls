@@ -5,7 +5,7 @@ private immutable additionalArgs = [[], ["--force"]];
 
 void update()
 {
-    import dls.bootstrap : makeLink;
+    import dls.bootstrap : BuildFailedException, buildDls, linkDls;
     import dls.protocol.interfaces : MessageActionItem, MessageType,
         ShowMessageParams, ShowMessageRequestParams;
     import dls.protocol.messages.window : Util;
@@ -80,30 +80,26 @@ void update()
     const pack = dub.fetch("dls", Dependency(">=0.0.0"), dub.defaultPlacementLocation, fetchOpts);
 
     int i;
-    int status;
-    auto cmdLine = ["dub", "build", "--build=release"];
-
-    version (Windows)
-    {
-        const executable = "dls.exe";
-        cmdLine ~= ["--arch=x86_mscoff", "--compiler=dmd"];
-    }
-    else
-    {
-        const executable = "dls";
-    }
+    bool success;
+    string executable;
 
     do
     {
-        status = execute(cmdLine ~ additionalArgs[i], null,
-                Config.suppressConsole, size_t.max, pack.path.toString()).status;
-        ++i;
+        try
+        {
+            executable = buildDls(pack.path.toString(), additionalArgs[i]);
+            success = true;
+        }
+        catch (BuildFailedException e)
+        {
+            ++i;
+        }
     }
-    while (i < additionalArgs.length && status != 0);
+    while (i < additionalArgs.length && !success);
 
-    if (status == 0)
+    if (success)
     {
-        latestDlsPath = makeLink(pack.path.toString(), executable);
+        latestDlsPath = linkDls(pack.path.toString(), executable);
         requestParams.message = format!" DLS updated to %s [%s]"(latestVersion, latestDlsPath);
         requestParams.actions[0].title = "See what's new";
         id = Server.send("window/showMessageRequest", requestParams);

@@ -1,6 +1,32 @@
 module dls.bootstrap;
 
-auto makeLink(string dlsDir, string executable)
+auto buildDls(const(string) dlsDir, const(string[]) additionalArgs = [])
+{
+    import std.process : Config, execute;
+
+    auto cmdLine = ["dub", "build", "--build=release"] ~ additionalArgs;
+
+    version (Windows)
+    {
+        const executable = "dls.exe";
+        cmdLine ~= ["--compiler=dmd", "--arch=x86_mscoff"];
+    }
+    else
+    {
+        const executable = "dls";
+    }
+
+    auto result = execute(cmdLine, null, Config.suppressConsole, size_t.max, dlsDir);
+
+    if (result.status != 0)
+    {
+        throw new BuildFailedException("Build failed: " ~ result.output);
+    }
+
+    return executable;
+}
+
+auto linkDls(const(string) dlsDir, const(string) executable)
 {
     import dub.dub : Dub;
     import std.file : exists, mkdirRecurse, remove;
@@ -21,10 +47,17 @@ auto makeLink(string dlsDir, string executable)
 
     version (Windows)
     {
+        import std.file : FileException;
         import std.format : format;
         import std.process : Config, executeShell;
 
-        executeShell(format!"MKLINK %s %s"(linkPath, dlsPath), null, Config.suppressConsole);
+        const result = executeShell(format!"MKLINK %s %s"(linkPath, dlsPath),
+                null, Config.suppressConsole);
+
+        if (result.status != 0)
+        {
+            throw new FileException("Symlink failed: " ~ result.output);
+        }
     }
     else version (Posix)
     {
@@ -38,4 +71,12 @@ auto makeLink(string dlsDir, string executable)
     }
 
     return linkPath;
+}
+
+class BuildFailedException : Exception
+{
+    this(string message)
+    {
+        super(message);
+    }
 }
