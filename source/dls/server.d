@@ -249,7 +249,7 @@ abstract class Server
         __traits(getMember, message, select!(__traits(hasMember, T,
                 "params"))("params", "result")) = payload;
 
-        foreach (member; AliasSeq!("id", "method", "error"))
+        static foreach (member; AliasSeq!("id", "method", "error"))
         {
             static if (__traits(hasMember, T, member))
             {
