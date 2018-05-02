@@ -7,6 +7,6 @@
 	"copyright": "Copyright © 2018, Laurent Tréguier",
 	"license": "MIT",
 	"dependencies": {
-		"dub": "~>1.8.1"
+		"dub": "1.9.0"
 	}
 }
