@@ -5,7 +5,8 @@ import dls.tools.tool : Tool;
 import dsymbol.symbol : CompletionKind;
 import std.path : asNormalizedPath, buildNormalizedPath, dirName;
 
-private enum macrosUrl = "https://raw.githubusercontent.com/dlang/dlang.org/master/std.ddoc";
+private enum macroUrl = "http://raw.githubusercontent.com/dlang/dlang.org/stable/%s.ddoc";
+private immutable macroFiles = ["html", "macros", "std", "std_consolidated", "std-ddox"];
 private string[string] macros;
 private immutable CompletionItemKind[CompletionKind] completionKinds;
 private immutable SymbolKind[CompletionKind] symbolKinds;
@@ -66,7 +67,7 @@ class SymbolTool : Tool
     import dsymbol.modulecache : ModuleCache;
     import dub.platform : BuildPlatform;
     import std.algorithm : map, reduce, sort, uniq;
-    import std.array : appender, array;
+    import std.array : appender, array, replace;
     import std.conv : to;
     import std.file : readText;
     import std.json : JSONValue;
@@ -107,7 +108,7 @@ class SymbolTool : Tool
         private static immutable string[] _compilerConfigPaths;
     }
 
-    private Task!(byLine, string)* _macrosTask;
+    private Task!(byLine, string)*[] _macroTasks;
     private ModuleCache*[string] _workspaceCaches;
     private ModuleCache*[string] _libraryCaches;
 
@@ -115,7 +116,6 @@ class SymbolTool : Tool
     {
         import std.algorithm : each;
         import std.file : FileException, exists;
-        import std.range : replace;
         import std.regex : matchAll;
 
         string[] paths;
@@ -159,10 +159,16 @@ class SymbolTool : Tool
 
     this()
     {
+        import std.format : format;
         import std.parallelism : task;
 
-        _macrosTask = task!byLine(macrosUrl);
-        _macrosTask.executeInNewThread();
+        foreach (macroFile; macroFiles)
+        {
+            auto t = task!byLine(format!macroUrl(macroFile));
+            _macroTasks ~= t;
+            t.executeInNewThread();
+        }
+
         importDirectories!true("", defaultImportPaths);
     }
 
@@ -519,18 +525,21 @@ class SymbolTool : Tool
         import arsd.htmltotext : htmlToText;
         import ddoc : Lexer, expand;
         import dls.protocol.definitions : MarkupContent, MarkupKind;
-        import std.array : replace;
+        import std.algorithm : all;
         import std.regex : split;
 
-        if (macros.keys.length == 0 && _macrosTask.done)
+        if (macros.keys.length == 0 && _macroTasks.all!q{a.done})
         {
-            foreach (line; _macrosTask.yieldForce())
+            foreach (macroTask; _macroTasks)
             {
-                auto result = matchFirst(line, ctRegex!`(\w+)\s*=\s*(.*)`);
-
-                if (result.length > 0)
+                foreach (line; macroTask.yieldForce())
                 {
-                    macros[result[1].to!string] = result[2].to!string;
+                    auto result = matchFirst(line, ctRegex!`(\w+)\s*=\s*(.*)`);
+
+                    if (result.length > 0)
+                    {
+                        macros[result[1].to!string] = result[2].to!string;
+                    }
                 }
             }
         }
@@ -572,7 +581,9 @@ class SymbolTool : Tool
                 }
                 else
                 {
-                    result ~= htmlToText(expand(Lexer(chunk), macros));
+                    auto html = expand(Lexer(chunk), macros).replace(`<i>`, ``)
+                        .replace(`</i>`, ``).replace(`*`, `\*`).replace(`_`, `\_`);
+                    result ~= htmlToText(html);
                     result ~= '\n';
                 }
 
