@@ -99,12 +99,20 @@ void update()
 
     if (success)
     {
-        latestDlsPath = linkDls(pack.path.toString(), executable);
-        requestParams.message = format!" DLS updated to %s [%s]"(latestVersion, latestDlsPath);
-        requestParams.actions[0].title = "See what's new";
-        id = Server.send("window/showMessageRequest", requestParams);
-        send(ownerTid(), Util.ThreadMessageData(id,
-                Util.ShowMessageRequestType.showChangelog, changelogUrl));
+        try
+        {
+            latestDlsPath = linkDls(pack.path.toString(), executable);
+            requestParams.message = format!" DLS updated to %s [%s]"(latestVersion, latestDlsPath);
+            requestParams.actions[0].title = "See what's new";
+            id = Server.send("window/showMessageRequest", requestParams);
+            send(ownerTid(), Util.ThreadMessageData(id,
+                    Util.ShowMessageRequestType.showChangelog, changelogUrl));
+        }
+        catch (FileException e)
+        {
+            Server.send("window/showMessage",
+                    new ShowMessageParams(MessageType.error, "DLS could not be linked"));
+        }
     }
     else
     {
