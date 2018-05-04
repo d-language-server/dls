@@ -152,7 +152,7 @@ abstract class Server
                     }
                     else
                     {
-                        sendError(ErrorCodes.serverNotInitialized, request);
+                        sendError(ErrorCodes.serverNotInitialized, request, JSONValue());
                     }
                 }
                 else
@@ -182,25 +182,25 @@ abstract class Server
         catch (JSONException e)
         {
             logger.errorf("%s: %s", ErrorCodes.parseError[0], e);
-            sendError(ErrorCodes.parseError, request);
+            sendError(ErrorCodes.parseError, request, JSONValue(e.toString()));
         }
         catch (HandlerNotFoundException e)
         {
             logger.errorf("%s: %s", ErrorCodes.methodNotFound[0], e);
-            sendError(ErrorCodes.methodNotFound, request);
+            sendError(ErrorCodes.methodNotFound, request, JSONValue(e.toString()));
         }
         catch (Exception e)
         {
             logger.errorf("%s: %s", ErrorCodes.unknownErrorCode[0], e);
-            sendError(ErrorCodes.unknownErrorCode, request);
+            sendError(ErrorCodes.unknownErrorCode, request, JSONValue(e.toString()));
         }
     }
 
-    private static void sendError(ErrorCodes error, RequestMessage request)
+    private static void sendError(ErrorCodes error, RequestMessage request, JSONValue data)
     {
         if (request !is null)
         {
-            send(request.id, Nullable!JSONValue(), ResponseError.fromErrorCode(error).nullable);
+            send(request.id, Nullable!JSONValue(), ResponseError.fromErrorCode(error, data).nullable);
         }
     }
 
