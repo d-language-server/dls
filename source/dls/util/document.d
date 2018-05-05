@@ -17,12 +17,6 @@ class Document
         return uri.path in _documents ? _documents[uri.path] : null;
     }
 
-    static auto opIndex(string uri)
-    {
-        auto path = Uri.getPath(uri);
-        return path in _documents ? _documents[path] : null;
-    }
-
     @property static auto uris()
     {
         import std.algorithm : map;
@@ -160,11 +154,11 @@ class Document
     {
         import std.algorithm : endsWith;
         import std.array : array;
-        import std.string : lineSplitter;
+        import std.string : splitLines;
         import std.typecons : Yes;
         import std.utf : toUTF16;
 
-        auto lines = lineSplitter!(Yes.keepTerminator)(text.toUTF16()).array;
+        auto lines = text.toUTF16().splitLines(Yes.keepTerminator);
 
         if (!lines.length || lines[$ - 1].endsWith('\r', '\n'))
         {

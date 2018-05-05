@@ -267,7 +267,6 @@ class SymbolTool : Tool
 
     auto symbols(string query, Uri uri = null)
     {
-        import dls.protocol.definitions : TextDocumentIdentifier;
         import dls.protocol.interfaces : SymbolInformation;
         import dsymbol.string_interning : internString;
         import dsymbol.symbol : DSymbol;
@@ -278,33 +277,7 @@ class SymbolTool : Tool
                 ? "workspace" : uri.path, query);
 
         const queryRegex = regex(query);
-        auto result = new RedBlackTree!(SymbolInformation, q{a.name > b.name});
-
-        bool openDocument(Uri docUri)
-        {
-            auto closed = Document[docUri] is null;
-
-            if (closed)
-            {
-                auto doc = new TextDocumentItem();
-                doc.uri = docUri;
-                doc.languageId = "d";
-                doc.text = readText(docUri.path);
-                Document.open(doc);
-            }
-
-            return closed;
-        }
-
-        void closeDocument(Uri docUri, bool wasClosed)
-        {
-            if (wasClosed)
-            {
-                auto docIdentifier = new TextDocumentIdentifier();
-                docIdentifier.uri = docUri;
-                Document.close(docIdentifier);
-            }
-        }
+        auto result = new RedBlackTree!(SymbolInformation, q{a.name > b.name}, true);
 
         void collectSymbolInformations(Uri symbolUri, const(DSymbol)* symbol,
                 string containerName = "")
@@ -451,20 +424,16 @@ class SymbolTool : Tool
 
         auto resultPath = results[0].symbolFilePath == "stdin" ? uri.path
             : results[0].symbolFilePath;
-        const externalDocument = Document[resultPath] is null;
+        auto resultUri = Uri.fromPath(resultPath);
+        const externalDocument = Document[resultUri] is null;
 
         if (externalDocument)
         {
-            auto doc = new TextDocumentItem();
-            doc.uri = resultPath;
-            doc.languageId = "d";
-            doc.text = readText(resultPath);
-            Document.open(doc);
+            openDocument(resultUri);
         }
 
-        auto resultUri = Uri.fromPath(resultPath);
         return new Location(resultUri,
-                Document[resultPath].wordRangeAtByte(results[0].symbolLocation));
+                Document[resultUri].wordRangeAtByte(results[0].symbolLocation));
     }
 
     auto highlight(Uri uri, Position position)
@@ -625,5 +594,37 @@ class SymbolTool : Tool
         auto d = new Dub(isFile(uri.path) ? dirName(uri.path) : uri.path);
         d.loadPackage();
         return d;
+    }
+
+    private static bool openDocument(Uri docUri)
+    {
+        import std.array : replaceFirst;
+        import std.encoding : getBOM;
+
+        auto closed = Document[docUri] is null;
+
+        if (closed)
+        {
+            auto doc = new TextDocumentItem();
+            doc.uri = docUri;
+            doc.languageId = "d";
+            auto text = readText(docUri.path);
+            doc.text = text.replaceFirst(cast(string) getBOM(cast(ubyte[]) text).sequence, "");
+            Document.open(doc);
+        }
+
+        return closed;
+    }
+
+    private static void closeDocument(Uri docUri, bool wasClosed)
+    {
+        import dls.protocol.definitions : TextDocumentIdentifier;
+
+        if (wasClosed)
+        {
+            auto docIdentifier = new TextDocumentIdentifier();
+            docIdentifier.uri = docUri;
+            Document.close(docIdentifier);
+        }
     }
 }
