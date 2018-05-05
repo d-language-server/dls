@@ -14,10 +14,9 @@ void update()
     import dub.dub : Dub, FetchOptions;
     import dub.package_ : Package;
     import std.concurrency : ownerTid, receiveOnly, register, send, thisTid;
-    import std.file : FileException, exists, remove, thisExePath;
+    import std.file : FileException, remove, thisExePath;
     import std.format : format;
-    import std.path : buildNormalizedPath, dirName;
-    import std.process : Config, execute;
+    import std.path : dirName;
 
     auto currentDlsPath = thisExePath();
     auto dub = new Dub(dirName(currentDlsPath));
