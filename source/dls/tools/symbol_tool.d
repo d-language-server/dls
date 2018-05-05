@@ -5,7 +5,7 @@ import dls.tools.tool : Tool;
 import dsymbol.symbol : CompletionKind;
 import std.path : asNormalizedPath, buildNormalizedPath, dirName;
 
-private enum macroUrl = "http://raw.githubusercontent.com/dlang/dlang.org/stable/%s.ddoc";
+private enum macroUrl = "raw.githubusercontent.com/dlang/dlang.org/stable/%s.ddoc";
 private immutable macroFiles = ["html", "macros", "std", "std_consolidated", "std-ddox"];
 private string[string] macros;
 private immutable CompletionItemKind[CompletionKind] completionKinds;
@@ -526,22 +526,31 @@ class SymbolTool : Tool
         import ddoc : Lexer, expand;
         import dls.protocol.definitions : MarkupContent, MarkupKind;
         import std.algorithm : all;
+        import std.net.curl : CurlException;
         import std.regex : split;
 
-        if (macros.keys.length == 0 && _macroTasks.all!q{a.done})
+        try
         {
-            foreach (macroTask; _macroTasks)
+            if (macros.keys.length == 0 && _macroTasks.all!q{a.done})
             {
-                foreach (line; macroTask.yieldForce())
+                foreach (macroTask; _macroTasks)
                 {
-                    auto result = matchFirst(line, ctRegex!`(\w+)\s*=\s*(.*)`);
-
-                    if (result.length > 0)
+                    foreach (line; macroTask.yieldForce())
                     {
-                        macros[result[1].to!string] = result[2].to!string;
+                        auto result = matchFirst(line, ctRegex!`(\w+)\s*=\s*(.*)`);
+
+                        if (result.length > 0)
+                        {
+                            macros[result[1].to!string] = result[2].to!string;
+                        }
                     }
                 }
             }
+        }
+        catch (CurlException e)
+        {
+            logger.error("Could not fetch macros");
+            macros["_"] = "";
         }
 
         auto result = appender!string;
