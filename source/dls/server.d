@@ -51,7 +51,7 @@ abstract class Server
     private static bool _exit = false;
     private static InitializeParams _initState;
 
-    @property static auto initState()
+    @property static InitializeParams initState()
     {
         return _initState;
     }
@@ -200,12 +200,12 @@ abstract class Server
     {
         if (request !is null)
         {
-            send(request.id, Nullable!JSONValue(), ResponseError.fromErrorCode(error));
+            send(request.id, Nullable!JSONValue(), ResponseError.fromErrorCode(error).nullable);
         }
     }
 
     /++ Sends a request or a notification message. +/
-    static auto send(string method, Nullable!JSONValue params)
+    static string send(string method, Nullable!JSONValue params)
     {
         import dls.protocol.handlers : hasRegisteredHandler, pushHandler;
         import std.uuid : randomUUID;
@@ -222,7 +222,7 @@ abstract class Server
         return null;
     }
 
-    static auto send(T)(string method, T params) if (!is(T : Nullable!JSONValue))
+    static string send(T)(string method, T params) if (!is(T : Nullable!JSONValue))
     {
         import dls.util.json : convertToJSON;
         import std.typecons : nullable;

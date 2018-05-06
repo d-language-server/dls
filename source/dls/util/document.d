@@ -4,7 +4,7 @@ import dls.util.uri : Uri;
 
 class Document
 {
-    import dls.protocol.definitions : Position, TextDocumentIdentifier,
+    import dls.protocol.definitions : Position, Range, TextDocumentIdentifier,
         TextDocumentItem, VersionedTextDocumentIdentifier;
     import dls.protocol.interfaces : TextDocumentContentChangeEvent;
     import std.utf : codeLength, toUTF8;
@@ -12,7 +12,7 @@ class Document
     private static Document[string] _documents;
     private wstring[] _lines;
 
-    static auto opIndex(Uri uri)
+    static Document opIndex(in Uri uri)
     {
         return uri.path in _documents ? _documents[uri.path] : null;
     }
@@ -24,7 +24,7 @@ class Document
         return _documents.keys.map!(path => Uri.fromPath(path));
     }
 
-    static void open(TextDocumentItem textDocument)
+    static void open(in TextDocumentItem textDocument)
     {
         auto path = Uri.getPath(textDocument.uri);
 
@@ -36,7 +36,7 @@ class Document
         _documents[path] = new Document(textDocument);
     }
 
-    static void close(TextDocumentIdentifier textDocument)
+    static void close(in TextDocumentIdentifier textDocument)
     {
         auto path = Uri.getPath(textDocument.uri);
 
@@ -46,7 +46,7 @@ class Document
         }
     }
 
-    static void change(VersionedTextDocumentIdentifier textDocument,
+    static void change(in VersionedTextDocumentIdentifier textDocument,
             TextDocumentContentChangeEvent[] events)
     {
         auto path = Uri.getPath(textDocument.uri);
@@ -57,12 +57,12 @@ class Document
         }
     }
 
-    @property auto lines() const
+    @property const(wstring[]) lines() const
     {
         return _lines;
     }
 
-    this(TextDocumentItem textDocument)
+    this(in TextDocumentItem textDocument)
     {
         _lines = getText(textDocument.text);
     }
@@ -74,7 +74,7 @@ class Document
         return _lines.join().toUTF8();
     }
 
-    auto byteAtPosition(Position position)
+    size_t byteAtPosition(in Position position)
     {
         import std.algorithm : reduce;
         import std.range : iota;
@@ -85,7 +85,7 @@ class Document
         return linesBytes + characterBytes;
     }
 
-    auto wordRangeAtByte(size_t bytePosition)
+    Range wordRangeAtByte(size_t bytePosition)
     {
         size_t i;
         size_t bytes;
@@ -101,20 +101,19 @@ class Document
         return wordRangeAtLineAndByte(lineNumber, bytePosition - bytes);
     }
 
-    auto wordRangeAtLineAndByte(size_t lineNumber, size_t bytePosition)
+    Range wordRangeAtLineAndByte(size_t lineNumber, size_t bytePosition)
     {
-        import dls.protocol.definitions : Range;
-        import std.regex : ctRegex, matchAll;
+        import std.regex : matchAll, regex;
         import std.utf : toUCSindex;
 
         const line = _lines[lineNumber];
         const startCharacter = toUCSindex(line.toUTF8(), bytePosition);
-        auto word = matchAll(line[startCharacter .. $], ctRegex!`\w+|.`w);
+        auto word = matchAll(line[startCharacter .. $], regex(`\w+|.`w));
         return new Range(new Position(lineNumber, startCharacter),
                 new Position(lineNumber, startCharacter + word.hit.length));
     }
 
-    private void change(TextDocumentContentChangeEvent[] events)
+    private void change(in TextDocumentContentChangeEvent[] events)
     {
         foreach (event; events)
         {
@@ -150,7 +149,7 @@ class Document
         }
     }
 
-    private auto getText(string text) const
+    private wstring[] getText(in string text) const
     {
         import std.algorithm : endsWith;
         import std.array : array;

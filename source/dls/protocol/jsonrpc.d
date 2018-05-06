@@ -53,7 +53,7 @@ class ResponseError
     string message;
     Nullable!JSONValue data;
 
-    static auto fromErrorCode(ErrorCodes errorCode)
+    static ResponseError fromErrorCode(ErrorCodes errorCode)
     {
         auto response = new ResponseError();
         response.code = errorCode[0];

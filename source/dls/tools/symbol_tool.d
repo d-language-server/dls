@@ -59,12 +59,15 @@ shared static this()
 class SymbolTool : Tool
 {
     import logger = std.experimental.logger;
-    import dcd.common.messages : RequestKind;
-    import dls.protocol.definitions : Location, Position, TextDocumentItem;
-    import dls.protocol.interfaces : CompletionItem;
+    import dcd.common.messages : AutocompleteRequest, RequestKind;
+    import dls.protocol.definitions : Location, MarkupContent, Position,
+        TextDocumentItem;
+    import dls.protocol.interfaces : CompletionItem, DocumentHighlight, Hover,
+        SymbolInformation;
     import dls.util.document : Document;
     import dls.util.uri : Uri;
     import dsymbol.modulecache : ModuleCache;
+    import dub.dub : Dub;
     import dub.platform : BuildPlatform;
     import std.algorithm : map, reduce, sort, uniq;
     import std.array : appender, array, replace;
@@ -74,7 +77,7 @@ class SymbolTool : Tool
     import std.net.curl : byLine;
     import std.parallelism : Task;
     import std.range : chain;
-    import std.regex : ctRegex, matchFirst;
+    import std.regex : matchFirst, regex;
     import std.typecons : nullable;
 
     version (Windows)
@@ -112,7 +115,7 @@ class SymbolTool : Tool
     private ModuleCache*[string] _workspaceCaches;
     private ModuleCache*[string] _libraryCaches;
 
-    @property private auto defaultImportPaths()
+    @property private string[] defaultImportPaths()
     {
         import std.algorithm : each;
         import std.file : FileException, exists;
@@ -126,7 +129,7 @@ class SymbolTool : Tool
             {
                 try
                 {
-                    readText(confPath).matchAll(ctRegex!`-I[^\s"]+`)
+                    readText(confPath).matchAll(regex(`-I[^\s"]+`))
                         .each!(m => paths ~= m.hit[2 .. $].replace("%@P%",
                                 confPath.dirName).asNormalizedPath().to!string);
                     break;
@@ -172,7 +175,7 @@ class SymbolTool : Tool
         importDirectories!true("", defaultImportPaths);
     }
 
-    auto getRelevantCaches(Uri uri)
+    ModuleCache*[] getRelevantCaches(Uri uri)
     {
         auto result = appender([getWorkspaceCache(uri)]);
 
@@ -186,7 +189,7 @@ class SymbolTool : Tool
         return result.data;
     }
 
-    auto getWorkspaceCache(Uri uri)
+    ModuleCache* getWorkspaceCache(Uri uri)
     {
         import std.algorithm : startsWith;
         import std.path : pathSplitter;
@@ -265,13 +268,11 @@ class SymbolTool : Tool
         }, uri.toString());
     }
 
-    auto symbols(string query, Uri uri = null)
+    SymbolInformation[] symbols(string query, Uri uri = null)
     {
-        import dls.protocol.interfaces : SymbolInformation;
         import dsymbol.string_interning : internString;
         import dsymbol.symbol : DSymbol;
         import std.container : RedBlackTree;
-        import std.regex : regex;
 
         logger.logf(`Fetching symbols from %s with query "%s"`, uri is null
                 ? "workspace" : uri.path, query);
@@ -282,8 +283,6 @@ class SymbolTool : Tool
         void collectSymbolInformations(Uri symbolUri, const(DSymbol)* symbol,
                 string containerName = "")
         {
-            import std.regex : matchFirst;
-
             if (symbol.symbolFile != symbolUri.path)
             {
                 return;
@@ -297,7 +296,7 @@ class SymbolTool : Tool
                         symbolKinds[symbol.kind], location, containerName.nullable));
             }
 
-            foreach (s; symbol.getPartsByName(internString("")))
+            foreach (s; symbol.getPartsByName(internString(null)))
             {
                 collectSymbolInformations(symbolUri, s, symbol.name);
             }
@@ -312,7 +311,7 @@ class SymbolTool : Tool
                     auto symbolUri = Uri.fromPath(cacheEntry.symbol.symbolFile);
                     const closed = openDocument(symbolUri);
 
-                    foreach (symbol; cacheEntry.symbol.getPartsByName(internString("")))
+                    foreach (symbol; cacheEntry.symbol.getPartsByName(internString(null)))
                     {
                         collectSymbolInformations(symbolUri, symbol);
                     }
@@ -325,7 +324,7 @@ class SymbolTool : Tool
         return result.array;
     }
 
-    auto complete(Uri uri, Position position)
+    CompletionItem[] complete(Uri uri, Position position)
     {
         import dcd.server.autocomplete : complete;
         import std.algorithm : chunkBy;
@@ -365,7 +364,7 @@ class SymbolTool : Tool
             }).array;
     }
 
-    auto completeResolve(CompletionItem item)
+    CompletionItem completeResolve(CompletionItem item)
     {
         if (!item.data.isNull)
         {
@@ -377,10 +376,9 @@ class SymbolTool : Tool
         return item;
     }
 
-    auto hover(Uri uri, Position position)
+    Hover hover(Uri uri, Position position)
     {
         import dcd.server.autocomplete : getDoc;
-        import dls.protocol.interfaces : Hover;
         import std.algorithm : filter;
 
         logger.logf("Getting documentation for %s at position %s,%s", uri.path,
@@ -422,25 +420,18 @@ class SymbolTool : Tool
             return null;
         }
 
-        auto resultPath = results[0].symbolFilePath == "stdin" ? uri.path
-            : results[0].symbolFilePath;
-        auto resultUri = Uri.fromPath(resultPath);
-        const externalDocument = Document[resultUri] is null;
-
-        if (externalDocument)
-        {
-            openDocument(resultUri);
-        }
+        auto resultUri = results[0].symbolFilePath == "stdin" ? uri
+            : Uri.fromPath(results[0].symbolFilePath);
+        openDocument(resultUri);
 
         return new Location(resultUri,
                 Document[resultUri].wordRangeAtByte(results[0].symbolLocation));
     }
 
-    auto highlight(Uri uri, Position position)
+    DocumentHighlight[] highlight(Uri uri, Position position)
     {
         import dcd.server.autocomplete.localuse : findLocalUse;
-        import dls.protocol.interfaces : DocumentHighlight,
-            DocumentHighlightKind;
+        import dls.protocol.interfaces : DocumentHighlightKind;
 
         logger.logf("Highlighting usages for %s at position %s,%s", uri.path,
                 position.line, position.character);
@@ -489,11 +480,11 @@ class SymbolTool : Tool
         }
     }
 
-    private auto getDocumentation(string[][] detailsAndDocumentations)
+    private MarkupContent getDocumentation(string[][] detailsAndDocumentations)
     {
         import arsd.htmltotext : htmlToText;
         import ddoc : Lexer, expand;
-        import dls.protocol.definitions : MarkupContent, MarkupKind;
+        import dls.protocol.definitions : MarkupKind;
         import std.algorithm : all;
         import std.net.curl : CurlException;
         import std.regex : split;
@@ -506,7 +497,7 @@ class SymbolTool : Tool
                 {
                     foreach (line; macroTask.yieldForce())
                     {
-                        auto result = matchFirst(line, ctRegex!`(\w+)\s*=\s*(.*)`);
+                        auto result = matchFirst(line, regex(`(\w+)\s*=\s*(.*)`));
 
                         if (result.length > 0)
                         {
@@ -538,7 +529,7 @@ class SymbolTool : Tool
 
             auto detail = dad[0];
             auto documentation = dad[1];
-            auto content = documentation.split(ctRegex!`\n-+(\n|$)`)
+            auto content = documentation.split(regex(`\n-+(\n|$)`))
                 .map!(chunk => chunk.replace(`\n`, " "));
             bool isExample;
 
@@ -572,10 +563,8 @@ class SymbolTool : Tool
         return new MarkupContent(MarkupKind.markdown, result.data);
     }
 
-    private static auto getPreparedRequest(Uri uri, Position position)
+    private static AutocompleteRequest getPreparedRequest(Uri uri, Position position)
     {
-        import dcd.common.messages : AutocompleteRequest;
-
         auto request = AutocompleteRequest();
         auto document = Document[uri];
 
@@ -586,9 +575,8 @@ class SymbolTool : Tool
         return request;
     }
 
-    private static auto getDub(Uri uri)
+    private static Dub getDub(Uri uri)
     {
-        import dub.dub : Dub;
         import std.file : isFile;
 
         auto d = new Dub(isFile(uri.path) ? dirName(uri.path) : uri.path);

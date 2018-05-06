@@ -7,6 +7,7 @@ private enum diagnosticSource = "D-Scanner";
 class AnalysisTool : Tool
 {
     import logger = std.experimental.logger;
+    import dls.protocol.definitions : Diagnostic;
     import dls.util.uri : Uri;
     import dscanner.analysis.config : StaticAnalysisConfig,
         defaultStaticAnalysisConfig;
@@ -54,9 +55,9 @@ class AnalysisTool : Tool
         }
     }
 
-    auto scan(Uri uri)
+    Diagnostic[] scan(Uri uri)
     {
-        import dls.protocol.definitions : Diagnostic, DiagnosticSeverity;
+        import dls.protocol.definitions : DiagnosticSeverity;
         import dls.tools.tools : Tools;
         import dls.util.document : Document;
         import dparse.lexer : LexerConfig, StringBehavior, StringCache,
@@ -101,7 +102,7 @@ class AnalysisTool : Tool
         return diagnostics.data;
     }
 
-    private auto getConfig(Uri uri)
+    private StaticAnalysisConfig getConfig(Uri uri)
     {
         import std.algorithm : startsWith;
         import std.array : array;

@@ -499,7 +499,7 @@ unittest
 Removes underscores from names. Some protocol variable names can be reserved names (like `version`) and thus have an
 added underscore in their protocol definition.
 +/
-private auto normalizeMemberName(string name)
+private string normalizeMemberName(string name)
 {
     import std.string : endsWith;
 

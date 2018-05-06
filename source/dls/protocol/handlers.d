@@ -107,7 +107,7 @@ void pushHandler(string id, string method)
 Returns the `RequestHandler`/`NotificationHandler`/`ResponseHandler`
 corresponding to a specific LSP method.
 +/
-auto handler(T)(string methodOrId)
+T handler(T)(string methodOrId)
         if (is(T == RequestHandler) || is(T == NotificationHandler) || is(T == ResponseHandler))
 {
     static if (is(T == RequestHandler))

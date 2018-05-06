@@ -9,7 +9,7 @@ private immutable EOL[Configuration.FormatConfiguration.EndOfLine] eolMap;
 private immutable BraceStyle[Configuration.FormatConfiguration.BraceStyle] braceStyleMap;
 private immutable TemplateConstraintStyle[Configuration.FormatConfiguration.TemplateConstraintStyle] templateConstraintStyleMap;
 
-static this()
+shared static this()
 {
     //dfmt off
     eolMap = [
@@ -35,15 +35,16 @@ static this()
 
 class FormatTool : Tool
 {
+    import dls.protocol.definitions : TextEdit;
     import dls.protocol.interfaces : FormattingOptions;
     import dls.util.uri : Uri;
 
-    auto format(Uri uri, FormattingOptions options)
+    TextEdit[] format(Uri uri, FormattingOptions options)
     {
         import dfmt.config : Config;
         import dfmt.editorconfig : IndentStyle, OptionalBoolean;
         import dfmt.formatter : format;
-        import dls.protocol.definitions : Position, Range, TextEdit;
+        import dls.protocol.definitions : Position, Range;
         import dls.util.document : Document;
         import std.outbuffer : OutBuffer;
 
@@ -51,7 +52,7 @@ class FormatTool : Tool
         auto contents = cast(ubyte[]) document.toString();
         auto config = Config();
 
-        auto toOptBool(bool b)
+        OptionalBoolean toOptBool(bool b)
         {
             return b ? OptionalBoolean.t : OptionalBoolean.f;
         }

@@ -3,9 +3,10 @@ module dls.util.uri;
 class Uri
 {
     import dls.protocol.definitions : DocumentUri;
-    import std.regex : ctRegex;
+    import std.regex : regex;
 
-    private static enum _reg = ctRegex!`(?:([\w-]+)://)?([\w.]+(?::\d+)?)?([^\?#]+)(?:\?([\w=&]+))?(?:#([\w-]+))?`;
+    private static enum _reg = regex(
+                `(?:([\w-]+)://)?([\w.]+(?::\d+)?)?([^\?#]+)(?:\?([\w=&]+))?(?:#([\w-]+))?`);
     private string _uri;
     private string _scheme;
     private string _authority;
@@ -13,7 +14,7 @@ class Uri
     private string _query;
     private string _fragment;
 
-    @property auto path() const
+    @property string path() const
     {
         return _path;
     }
@@ -53,12 +54,12 @@ class Uri
         return _uri;
     }
 
-    static auto getPath(DocumentUri uri)
+    static string getPath(DocumentUri uri)
     {
         return new Uri(uri).path;
     }
 
-    static auto fromPath(string path)
+    static Uri fromPath(string path)
     {
         import std.algorithm : startsWith;
         import std.format : format;
