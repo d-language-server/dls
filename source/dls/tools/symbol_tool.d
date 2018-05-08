@@ -326,6 +326,7 @@ class SymbolTool : Tool
 
     CompletionItem[] complete(Uri uri, Position position)
     {
+        import dcd.common.messages : AutocompleteResponse;
         import dcd.server.autocomplete : complete;
         import std.algorithm : chunkBy;
 
@@ -335,10 +336,27 @@ class SymbolTool : Tool
         auto request = getPreparedRequest(uri, position);
         request.kind = RequestKind.autocomplete;
 
-        return chain(_workspaceCaches.byValue, _libraryCaches.byValue).map!(
-                cache => complete(request, *cache).completions)
-            .reduce!q{a ~ b}.sort!q{a.identifier < b.identifier}.chunkBy!q{a.identifier == b.identifier}.map!(
-                    (resGroup) {
+        bool compareCompletionsLess(AutocompleteResponse.Completion a,
+                AutocompleteResponse.Completion b)
+        {
+            //dfmt off
+            return a.identifier < b.identifier ? true
+                : a.identifier > b.identifier ? false
+                : a.symbolFilePath < b.symbolFilePath ? true
+                : a.symbolFilePath > b.symbolFilePath ? false
+                : a.symbolLocation < b.symbolLocation;
+            //dfmt on
+        }
+
+        bool compareCompletionsEqual(AutocompleteResponse.Completion a,
+                AutocompleteResponse.Completion b)
+        {
+            return a.symbolFilePath == b.symbolFilePath && a.symbolLocation == b.symbolLocation;
+        }
+
+        return chain(_workspaceCaches.byValue, _libraryCaches.byValue).map!(cache => complete(request,
+                *cache).completions).reduce!q{a ~ b}.sort!compareCompletionsLess
+            .uniq!compareCompletionsEqual.chunkBy!q{a.identifier == b.identifier}.map!((resGroup) {
                 import std.uni : toLower;
 
                 auto item = new CompletionItem(resGroup.front.identifier);

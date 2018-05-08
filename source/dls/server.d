@@ -43,8 +43,8 @@ abstract class Server
     import dls.protocol.interfaces : InitializeParams;
     import std.algorithm : find, findSplit;
     import std.json : JSONValue;
-    import std.typecons : Nullable;
     import std.string : strip, stripRight;
+    import std.typecons : Nullable, nullable;
 
     private static bool _initialized = false;
     private static bool _shutdown = false;
@@ -225,7 +225,6 @@ abstract class Server
     static string send(T)(string method, T params) if (!is(T : Nullable!JSONValue))
     {
         import dls.util.json : convertToJSON;
-        import std.typecons : nullable;
 
         return send(method, convertToJSON(params).nullable);
     }
