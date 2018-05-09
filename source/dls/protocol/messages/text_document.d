@@ -59,13 +59,13 @@ void didClose(DidCloseTextDocumentParams params)
 
 CompletionItem[] completion(CompletionParams params)
 {
-    return Tools.symbolTool.complete(new Uri(params.textDocument.uri), params.position);
+    return Tools.symbolTool.completion(new Uri(params.textDocument.uri), params.position);
 }
 
 @("completionItem", "resolve")
 CompletionItem completionItem_resolve(CompletionItem item)
 {
-    return Tools.symbolTool.completeResolve(item);
+    return Tools.symbolTool.completionResolve(item);
 }
 
 Hover hover(TextDocumentPositionParams params)
@@ -80,7 +80,7 @@ SignatureHelp signatureHelp(TextDocumentPositionParams params)
 
 Location definition(TextDocumentPositionParams params)
 {
-    return Tools.symbolTool.find(new Uri(params.textDocument.uri), params.position);
+    return Tools.symbolTool.definition(new Uri(params.textDocument.uri), params.position);
 }
 
 Nullable!Location typeDefinition(TextDocumentPositionParams params)
@@ -105,7 +105,7 @@ DocumentHighlight[] documentHighlight(TextDocumentPositionParams params)
 
 SymbolInformation[] documentSymbol(DocumentSymbolParams params)
 {
-    return Tools.symbolTool.symbols("", new Uri(params.textDocument.uri));
+    return Tools.symbolTool.symbol("", new Uri(params.textDocument.uri));
 }
 
 Command[] codeAction(CodeActionParams params)
@@ -149,7 +149,7 @@ TextEdit[] formatting(DocumentFormattingParams params)
 {
     auto uri = new Uri(params.textDocument.uri);
     logger.logf("Formatting %s", uri.path);
-    return Tools.formatTool.format(uri, params.options);
+    return Tools.formatTool.formatting(uri, params.options);
 }
 
 TextEdit[] rangeFormatting(DocumentRangeFormattingParams params)

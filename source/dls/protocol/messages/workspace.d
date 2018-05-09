@@ -94,7 +94,7 @@ void didChangeWatchedFiles(DidChangeWatchedFilesParams params)
 
 SymbolInformation[] symbol(WorkspaceSymbolParams params)
 {
-    return Tools.symbolTool.symbols(params.query);
+    return Tools.symbolTool.symbol(params.query);
 }
 
 JSONValue executeCommand(ExecuteCommandParams params)

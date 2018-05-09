@@ -179,9 +179,12 @@ class SymbolTool : Tool
     {
         auto result = appender([getWorkspaceCache(uri)]);
 
-        foreach (cache; _workspaceCaches.byValue)
+        foreach (path; _libraryCaches.byKey)
         {
-            result ~= cache;
+            if (path.length > 0)
+            {
+                result ~= _libraryCaches[path];
+            }
         }
 
         result ~= _libraryCaches[""];
@@ -268,7 +271,7 @@ class SymbolTool : Tool
         }, uri.toString());
     }
 
-    SymbolInformation[] symbols(string query, Uri uri = null)
+    SymbolInformation[] symbol(string query, Uri uri = null)
     {
         import dsymbol.string_interning : internString;
         import dsymbol.symbol : DSymbol;
@@ -324,7 +327,7 @@ class SymbolTool : Tool
         return result.array;
     }
 
-    CompletionItem[] complete(Uri uri, Position position)
+    CompletionItem[] completion(Uri uri, Position position)
     {
         import dcd.common.messages : AutocompleteResponse;
         import dcd.server.autocomplete : complete;
@@ -382,7 +385,7 @@ class SymbolTool : Tool
             }).array;
     }
 
-    CompletionItem completeResolve(CompletionItem item)
+    CompletionItem completionResolve(CompletionItem item)
     {
         if (!item.data.isNull)
         {
@@ -412,7 +415,7 @@ class SymbolTool : Tool
             : new Hover(getDocumentation(completions.map!q{ ["", a] }.array));
     }
 
-    auto find(Uri uri, Position position)
+    Location definition(Uri uri, Position position)
     {
         import dcd.common.messages : AutocompleteResponse;
         import dcd.server.autocomplete : findDeclaration;
