@@ -87,6 +87,8 @@ class Document
 
     Range wordRangeAtByte(size_t bytePosition)
     {
+        import std.algorithm : min;
+
         size_t i;
         size_t bytes;
 
@@ -97,20 +99,33 @@ class Document
         }
 
         const lineNumber = i - 1;
-        bytes -= codeLength!char(_lines[lineNumber]);
-        return wordRangeAtLineAndByte(lineNumber, bytePosition - bytes);
+        const line = _lines[lineNumber];
+        bytes -= codeLength!char(line);
+        return wordRangeAtLineAndByte(lineNumber, min(bytePosition - bytes, line.length));
     }
 
     Range wordRangeAtLineAndByte(size_t lineNumber, size_t bytePosition)
     {
         import std.regex : matchAll, regex;
-        import std.utf : toUCSindex;
+        import std.utf : UTFException, validate;
 
         const line = _lines[lineNumber];
-        const startCharacter = toUCSindex(line.toUTF8(), bytePosition);
+        size_t startCharacter;
+        const lineSlice = line.toUTF8()[0 .. bytePosition];
+
+        try
+        {
+            validate(lineSlice);
+            startCharacter = codeLength!wchar(lineSlice);
+        }
+        catch (UTFException e)
+        {
+            // TODO: properly use document buffers instead of on-disc files
+        }
+
         auto word = matchAll(line[startCharacter .. $], regex(`\w+|.`w));
         return new Range(new Position(lineNumber, startCharacter),
-                new Position(lineNumber, startCharacter + word.hit.length));
+                new Position(lineNumber, startCharacter + (word ? word.hit.length : 0)));
     }
 
     private void change(in TextDocumentContentChangeEvent[] events)
