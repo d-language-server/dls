@@ -191,8 +191,8 @@ abstract class Server
         }
         catch (Exception e)
         {
-            logger.errorf("%s: %s", ErrorCodes.unknownErrorCode[0], e);
-            sendError(ErrorCodes.unknownErrorCode, request, JSONValue(e.toString()));
+            logger.errorf("%s: %s", ErrorCodes.internalError[0], e);
+            sendError(ErrorCodes.internalError, request, JSONValue(e.toString()));
         }
     }
 
