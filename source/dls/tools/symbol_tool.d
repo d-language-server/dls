@@ -71,6 +71,7 @@ class SymbolTool : Tool
     import dub.platform : BuildPlatform;
     import std.algorithm : map, reduce, sort, uniq;
     import std.array : appender, array, replace;
+    import std.container : RedBlackTree;
     import std.conv : to;
     import std.file : readText;
     import std.json : JSONValue;
@@ -275,7 +276,6 @@ class SymbolTool : Tool
     {
         import dsymbol.string_interning : internString;
         import dsymbol.symbol : DSymbol;
-        import std.container : RedBlackTree;
 
         logger.logf(`Fetching symbols from %s with query "%s"`, uri is null
                 ? "workspace" : uri.path, query);
@@ -407,7 +407,6 @@ class SymbolTool : Tool
 
         auto request = getPreparedRequest(uri, position);
         request.kind = RequestKind.doc;
-
         auto completions = getRelevantCaches(uri).map!(cache => getDoc(request, *cache).completions)
             .reduce!q{a ~ b}.map!q{a.documentation}.filter!q{a.length > 0}.array.sort().uniq();
 
@@ -426,7 +425,6 @@ class SymbolTool : Tool
 
         auto request = getPreparedRequest(uri, position);
         request.kind = RequestKind.symbolLocation;
-
         AutocompleteResponse[] results;
 
         foreach (cache; getRelevantCaches(uri))
@@ -459,11 +457,18 @@ class SymbolTool : Tool
 
         auto request = getPreparedRequest(uri, position);
         request.kind = RequestKind.localUse;
-        auto result = findLocalUse(request, *getWorkspaceCache(uri));
+        auto result = new RedBlackTree!(DocumentHighlight,
+                q{a.range.start.line > b.range.start.line}, false);
 
-        return result.completions.map!((res) => new DocumentHighlight(
-                Document[uri].wordRangeAtByte(res.symbolLocation), (res.symbolLocation == result.symbolLocation
-                ? DocumentHighlightKind.write : DocumentHighlightKind.text).nullable)).array;
+        foreach (cache; getRelevantCaches(uri))
+        {
+            auto localUse = findLocalUse(request, *cache);
+            result.insert(localUse.completions.map!((res) => new DocumentHighlight(
+                    Document[uri].wordRangeAtByte(res.symbolLocation), (res.symbolLocation == localUse.symbolLocation
+                    ? DocumentHighlightKind.write : DocumentHighlightKind.text).nullable)));
+        }
+
+        return result.array;
     }
 
     package void importDirectories(bool isLibrary)(string root, string[] paths, bool refresh = false)

@@ -71,12 +71,9 @@ class AnalysisTool : Tool
 
         logger.logf("Scanning document %s", uri.path);
 
-        LexerConfig lexerConfig;
-        lexerConfig.fileName = uri.path;
-        lexerConfig.stringBehavior = StringBehavior.source;
-
         auto stringCache = StringCache(StringCache.defaultBucketCount);
-        auto tokens = getTokensForParser(Document[uri].toString(), lexerConfig, &stringCache);
+        auto tokens = getTokensForParser(Document[uri].toString(),
+                LexerConfig(uri.path, StringBehavior.source), &stringCache);
         RollbackAllocator ra;
         auto document = Document[uri];
         auto diagnostics = appender!(Diagnostic[]);
