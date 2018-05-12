@@ -9,8 +9,8 @@
 	"dependencies": {
 		"dls:bootstrap": "*",
 		"dub": "1.9.0",
-		"dcd": "0.9.2",
-		"dscanner": "0.5.1",
+		"dcd": "0.9.6",
+		"dscanner": "0.5.3",
 		"dfmt": "0.7.0",
 		"arsd-official:email": "2.0.0",
 		"arsd-official:color_base": "2.0.0"

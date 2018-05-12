@@ -305,21 +305,41 @@ class SymbolTool : Tool
             }
         }
 
+        Uri[] getModuleUris(ModuleCache* cache)
+        {
+            import std.file : SpanMode, dirEntries;
+
+            auto result = appender!(Uri[]);
+
+            foreach (rootPath; cache.getImportPaths())
+            {
+                foreach (entry; dirEntries(rootPath, "*.{d,di}", SpanMode.breadth))
+                {
+                    result ~= Uri.fromPath(entry.name);
+                }
+            }
+
+            return result.data;
+        }
+
         foreach (cache; _workspaceCaches.byValue)
         {
-            foreach (cacheEntry; cache.getAllSymbols())
-            {
-                if (uri is null || uri.path == cacheEntry.symbol.symbolFile)
-                {
-                    auto symbolUri = Uri.fromPath(cacheEntry.symbol.symbolFile);
-                    const closed = openDocument(symbolUri);
+            auto moduleUris = uri is null ? getModuleUris(cache) : [uri];
 
-                    foreach (symbol; cacheEntry.symbol.getPartsByName(internString(null)))
+            foreach (moduleUri; moduleUris)
+            {
+                auto moduleSymbol = cache.cacheModule(moduleUri.path);
+
+                if (moduleSymbol !is null)
+                {
+                    const closed = openDocument(moduleUri);
+
+                    foreach (symbol; moduleSymbol.getPartsByName(internString(null)))
                     {
-                        collectSymbolInformations(symbolUri, symbol);
+                        collectSymbolInformations(moduleUri, symbol);
                     }
 
-                    closeDocument(symbolUri, closed);
+                    closeDocument(moduleUri, closed);
                 }
             }
         }
