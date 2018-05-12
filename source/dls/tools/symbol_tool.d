@@ -359,18 +359,20 @@ class SymbolTool : Tool
 
         return chain(_workspaceCaches.byValue, _libraryCaches.byValue).map!(cache => complete(request,
                 *cache).completions).reduce!q{a ~ b}.sort!compareCompletionsLess
-            .uniq!compareCompletionsEqual.chunkBy!q{a.identifier == b.identifier}.map!((resGroup) {
+            .uniq!compareCompletionsEqual.chunkBy!q{a.identifier == b.identifier}.map!(
+                    (resultGroup) {
                 import std.uni : toLower;
 
-                auto item = new CompletionItem(resGroup.front.identifier);
-                item.kind = completionKinds[resGroup.front.kind.to!CompletionKind];
-                item.detail = resGroup.front.definition;
+                auto firstResult = resultGroup.front;
+                auto item = new CompletionItem(firstResult.identifier);
+                item.kind = completionKinds[firstResult.kind.to!CompletionKind];
+                item.detail = firstResult.definition;
 
                 string[][] data;
 
-                foreach (res; resGroup)
+                foreach (res; resultGroup)
                 {
-                    if (res.documentation.toLower() != "ditto")
+                    if (res.documentation.length > 0 && res.documentation.toLower() != "ditto")
                     {
                         data ~= [res.definition, res.documentation];
                     }
