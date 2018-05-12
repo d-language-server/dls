@@ -1,9 +1,0 @@
-{
-    "name": "find",
-    "authors": [
-        "Laurent Tréguier"
-    ],
-    "description": "D Language Server",
-    "copyright": "Copyright © 2017, Laurent Tréguier",
-    "license": "MIT"
-}

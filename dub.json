@@ -16,7 +16,6 @@
 		"arsd-official:color_base": "2.0.0"
 	},
 	"subPackages": [
-		"find",
 		"bootstrap"
 	]
 }
