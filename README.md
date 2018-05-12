@@ -2,14 +2,38 @@
 
 ### LSP compliance: `3.7.0`
 
-_This is a work in progress..._
+_This is a work in progress. There ~~might~~ will be bugs and crashes..._
 
-DLS implements the server side of the [Language Server Protocol (LSP)](https://microsoft.github.io/language-server-protocol/) for the [D programming language](https://dlang.org). It does not contain any language feature itself (yet), but uses existing components and provides an interface to work with the LSP.
-It currently provides:
-- Code completion using [DCD](https://github.com/dlang-community/DCD)
-- Go to definition using [DCD](https://github.com/dlang-community/DCD)
-- Error checking using [D-Scanner](https://github.com/dlang-community/D-Scanner)
-- Formatting using [DFMT](https://github.com/dlang-community/dfmt)
+DLS implements the server side of the [Language Server Protocol (LSP)](https://microsoft.github.io/language-server-protocol/) for the [D programming language](https://dlang.org).
+It does not contain any language feature itself (yet), but uses already available components, and provides an interface to work with the LSP.
+Current features include:
+- Code completion
+- Go to definition
+- Error checking
+- Formatting
+- Symbol searching
+- Symbol highlighting
+- Documentation on hover
+- Random crashes
+
+Libraries used (the stuff doing the actual hard work):
+- [arsd](http://arsd.dub.pm)
+- [DCD](http://dcd.dub.pm)
+- [DFMT](http://dfmt.dub.pm)
+- [D-Scanner](http://dscanner.dub.pm)
+- [DSymbol](http://dsymbol.dub.pm)
+- [Dub](http://dub.dub.pm)
+- [emsi_containers](http://emsi_containers.dub.pm)
+- [inifiled](http://inifiled.dub.pm)
+- [libddoc](http://libddoc.dub.pm)
+- [libdparse](http://libdparse.dub.pm)
+- [msgpack-d](http://msgpack-d.dub.pm)
+- [stdx-allocator](http://stdx-allocator.dub.pm)
+
+## Installing
+You can run `dub fetch dls` and then `dub run dls:bootstrap` to install dls.
+The second command will output a path to a symbolic link that will always point to the latest DLS executable.
+DLS will propose updates as they come, and update the symbolic link upon upgrading.
 
 ## Client side configuration
 
@@ -40,21 +64,15 @@ All these keys should be formatted as `d.dls.[section].[key]` (e.g. `d.dls.forma
 |`dfmtTemplateConstraintStyle`       |`"conditionalNewlineIndent"` or `"conditionalNewline"` or `"alwaysNewline"` or `"alwaysNewlineIndent"`|`"conditionalNewlineIndent"`|
 |`dfmtSingleTemplateConstraintIndent`|`boolean`                               |`false`      |
 
-## The `find` subpackage and the update system
+## The `bootstrap` subpackage and the update system
 
 In order to simplify the process of updating DLS, an update system is implemented.
-However, the extension will need to locate a first version of DLS; this is where `dls:find` comes in.
+However, the extension will need to locate a first version of DLS; this is where `dls:bootstrap` comes in.
 The steps are:
 - `dub fetch dls` will fetch the latest version of DLS
-- `dub run --quiet dls:find` will output the directory to its parent DLS package
-- `dub build --build=release` launched in the just acquired DLS directory will build DLS (notifying the user before and after the build might be a good idea, as it can take several minutes)
-- The `dls` executable will now be right under the same directory
+- `dub run --quiet dls:bootstrap` will output the path to a symlink pointing to the latest DLS executable
 
-__IMPORTANT__: when building DLS on Windows, `--arch=x86_mscoff` must be added to the arguments for the build to succeed.
-
-After this, the Language Client has to listen to the `dls/updatedPath` notification.
-This notification, sent by the server after every update, will be the path to the new DLS executable.
-Otherwise nothing specific is required on the client's part regarding updates: the server will send notifications to the user when an update is available, and build its next version in parallel to responding to requests.
+Nothing specific is required on the client's part regarding updates: the server will send notifications to the user when an update is available, and build its next version (in parallel to responding to requests).
 
 ## Caveats
 
@@ -75,6 +93,6 @@ As support for messages regarding workspace folders are not yet supported in Vis
 
 ## Example usage
 
-I made a VSCode extension and an atom package using DLS:
+I made a VSCode extension and an Atom package using DLS:
 - https://github.com/LaurentTreguier/vscode-dls
 - https://github.com/LaurentTreguier/ide-dlang

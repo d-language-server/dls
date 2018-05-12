@@ -4,6 +4,15 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+### 0.4.0
+- Added symbol highlighting support
+- Added completion documentation support
+- Added workspace and document symbols searching support
+- Added documentation on hover support
+- Added dls:bootstrap to supercede dls:find
+- Enhanced resilience on server exceptions (dls will only crash on errors and never on exceptions)
+- Fixed (really, for good this time) the updater by pining dependency versions
+
 #### 0.3.1
 - Added missing DFMT options
 - Fixed (hopefully for good this time) the updater by using the system installed dub to build next versions of DLS
