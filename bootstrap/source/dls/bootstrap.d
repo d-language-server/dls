@@ -16,7 +16,7 @@ auto buildDls(const(string) dlsDir, const(string[]) additionalArgs = [])
         const executable = "dls";
     }
 
-    auto result = execute(cmdLine, null, Config.suppressConsole, size_t.max, dlsDir);
+    auto result = execute(cmdLine, null, Config.none, size_t.max, dlsDir);
 
     if (result.status != 0)
     {
@@ -51,8 +51,7 @@ auto linkDls(const(string) dlsDir, const(string) executable)
         import std.format : format;
         import std.process : Config, executeShell;
 
-        const result = executeShell(format!"MKLINK %s %s"(linkPath, dlsPath),
-                null, Config.suppressConsole);
+        const result = executeShell(format!"MKLINK %s %s"(linkPath, dlsPath));
 
         if (result.status != 0)
         {
