@@ -268,7 +268,7 @@ class SymbolTool : Tool
         spawn((string uriString) {
             import dub.dub : UpgradeOptions;
 
-            getDub(new Uri(uriString)).upgrade(UpgradeOptions.select);
+            getDub(new Uri(uriString)).upgrade(UpgradeOptions.upgrade | UpgradeOptions.select);
         }, uri.toString());
     }
 
