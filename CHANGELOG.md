@@ -4,6 +4,10 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.4.1
+- __Removed dls:find subpackage__
+- Attempt to work around problems in updating on Windows
+
 ### 0.4.0
 - Added symbol highlighting support
 - Added completion documentation support
