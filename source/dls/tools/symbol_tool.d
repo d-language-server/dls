@@ -477,10 +477,16 @@ class SymbolTool : Tool
         logger.logf("Highlighting usages for %s at position %s,%s", uri.path,
                 position.line, position.character);
 
+        bool highlightLess(in DocumentHighlight a, in DocumentHighlight b)
+        {
+            return a.range.start.line < b.range.start.line
+                || (a.range.start.line == b.range.start.line
+                        && a.range.start.character < b.range.start.character);
+        }
+
         auto request = getPreparedRequest(uri, position);
         request.kind = RequestKind.localUse;
-        auto result = new RedBlackTree!(DocumentHighlight,
-                q{a.range.start.line > b.range.start.line}, false);
+        auto result = new RedBlackTree!(DocumentHighlight, highlightLess, false);
 
         foreach (cache; getRelevantCaches(uri))
         {
