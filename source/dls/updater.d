@@ -1,5 +1,6 @@
 module dls.updater;
 
+private enum currentVersion = "0.4.1";
 private enum changelogUrl = "https://github.com/LaurentTreguier/dls/blob/master/CHANGELOG.md";
 private immutable additionalArgs = [[], ["--force"]];
 
@@ -18,13 +19,10 @@ void update()
     import std.format : format;
     import std.path : dirName;
 
-    auto currentDlsPath = thisExePath();
-    auto dub = new Dub(dirName(currentDlsPath));
-    dub.loadPackage();
-    const currentDls = dub.project.rootPackage;
+    auto dub = new Dub();
+    auto latestDlsPath = thisExePath();
     Package[] toRemove;
 
-    auto latestDlsPath = currentDlsPath;
     scope (exit)
     {
         Server.send("dls/didUpdatePath", latestDlsPath);
@@ -32,7 +30,7 @@ void update()
 
     foreach (dls; dub.packageManager.getPackageIterator("dls"))
     {
-        if (dls.version_ < currentDls.version_)
+        if (dls.version_.toString() < currentVersion)
         {
             toRemove ~= dls;
         }
@@ -52,13 +50,13 @@ void update()
 
     const latestVersion = dub.getLatestVersion("dls");
 
-    if (latestVersion.isUnknown() || currentDls.version_ >= latestVersion)
+    if (latestVersion.isUnknown() || currentVersion >= latestVersion.toString())
     {
         return;
     }
 
     auto requestParams = new ShowMessageRequestParams(MessageType.info,
-            format!"DLS version %s is available"(latestVersion));
+            format!"DLS version %s is available (current: %s)"(latestVersion, currentVersion));
     requestParams.actions = [new MessageActionItem("Upgrade")];
 
     auto id = Server.send("window/showMessageRequest", requestParams);
