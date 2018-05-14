@@ -1,8 +1,7 @@
 module dls.updater;
 
-private enum currentVersion = "0.4.1";
 private enum changelogUrl = "https://github.com/LaurentTreguier/dls/blob/master/CHANGELOG.md";
-private immutable additionalArgs = [[], ["--force"]];
+private enum currentDescription = import("description.json");
 
 void update()
 {
@@ -14,11 +13,16 @@ void update()
     import dub.dependency : Dependency;
     import dub.dub : Dub, FetchOptions;
     import dub.package_ : Package;
+    import std.algorithm : find;
     import std.concurrency : ownerTid, receiveOnly, register, send, thisTid;
     import std.file : FileException, remove, thisExePath;
     import std.format : format;
+    import std.json : parseJSON;
     import std.path : dirName;
 
+    const desc = parseJSON(currentDescription);
+    const currentVersion = desc["packages"].array.find!(
+            p => p["name"] == desc["rootPackage"])[0]["version"].str;
     auto dub = new Dub();
     auto latestDlsPath = thisExePath();
     Package[] toRemove;
@@ -79,6 +83,7 @@ void update()
     int i;
     bool success;
     string executable;
+    const additionalArgs = [[], ["--force"]];
 
     do
     {

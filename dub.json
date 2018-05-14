@@ -6,6 +6,9 @@
 	"description": "D Language Server",
 	"copyright": "Copyright © 2017, Laurent Tréguier",
 	"license": "MIT",
+	"stringImportPaths": [
+		"."
+	],
 	"dependencies": {
 		"dls:bootstrap": "*",
 		"dub": "1.9.0",
@@ -15,6 +18,9 @@
 		"arsd-official:email": "2.0.0",
 		"arsd-official:color_base": "2.0.0"
 	},
+	"preGenerateCommands": [
+		"dub describe --quiet > description.json"
+	],
 	"subPackages": [
 		"bootstrap"
 	]
