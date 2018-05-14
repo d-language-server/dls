@@ -6,11 +6,11 @@ private enum diagnosticSource = "D-Scanner";
 
 class AnalysisTool : Tool
 {
-    import logger = std.experimental.logger;
     import dls.protocol.definitions : Diagnostic;
     import dls.util.uri : Uri;
     import dscanner.analysis.config : StaticAnalysisConfig,
         defaultStaticAnalysisConfig;
+    import std.experimental.logger : logf;
     import std.path : buildNormalizedPath;
 
     private StaticAnalysisConfig[string] _analysisConfigs;
@@ -41,7 +41,7 @@ class AnalysisTool : Tool
 
         if (configPath.exists())
         {
-            logger.logf("Updating config from file %s", configPath);
+            logf("Updating config from file %s", configPath);
             auto conf = uri.path in _analysisConfigs ? _analysisConfigs[uri.path]
                 : defaultStaticAnalysisConfig();
             readINIFile(conf, configPath);
@@ -69,7 +69,7 @@ class AnalysisTool : Tool
         import std.json : JSONValue;
         import std.typecons : Nullable, nullable;
 
-        logger.logf("Scanning document %s", uri.path);
+        logf("Scanning document %s", uri.path);
 
         auto stringCache = StringCache(StringCache.defaultBucketCount);
         auto tokens = getTokensForParser(Document[uri].toString(),

@@ -1,12 +1,12 @@
 module dls.protocol.messages.text_document;
 
-import logger = std.experimental.logger;
 import dls.protocol.definitions;
 import dls.protocol.interfaces.text_document;
 import dls.server : Server;
 import dls.tools.tools : Tools;
 import dls.util.document : Document;
 import dls.util.uri : Uri;
+import std.experimental.logger : logf;
 import std.typecons : Nullable;
 
 void didOpen(DidOpenTextDocumentParams params)
@@ -14,7 +14,7 @@ void didOpen(DidOpenTextDocumentParams params)
     if (params.textDocument.languageId == "d")
     {
         auto uri = new Uri(params.textDocument.uri);
-        logger.logf("Document opened: %s", uri.path);
+        logf("Document opened: %s", uri.path);
         Document.open(params.textDocument);
         Server.send("textDocument/publishDiagnostics",
                 new PublishDiagnosticsParams(uri, Tools.analysisTool.scan(uri)));
@@ -24,7 +24,7 @@ void didOpen(DidOpenTextDocumentParams params)
 void didChange(DidChangeTextDocumentParams params)
 {
     auto uri = new Uri(params.textDocument.uri);
-    logger.logf("Document changed: %s", uri.path);
+    logf("Document changed: %s", uri.path);
     Document.change(params.textDocument, params.contentChanges);
 }
 
@@ -43,7 +43,7 @@ void didSave(DidSaveTextDocumentParams params)
 
     if (Document[uri])
     {
-        logger.logf("Document saved: %s", uri.path);
+        logf("Document saved: %s", uri.path);
         Server.send("textDocument/publishDiagnostics",
                 new PublishDiagnosticsParams(uri, Tools.analysisTool.scan(uri)));
     }
@@ -52,7 +52,7 @@ void didSave(DidSaveTextDocumentParams params)
 void didClose(DidCloseTextDocumentParams params)
 {
     auto uri = new Uri(params.textDocument.uri);
-    logger.logf("Document closed: %s", uri.path);
+    logf("Document closed: %s", uri.path);
     Document.close(params.textDocument);
     Server.send("textDocument/publishDiagnostics", new PublishDiagnosticsParams(uri, []));
 }
@@ -148,7 +148,7 @@ ColorPresentation[] colorPresentation(ColorPresentationParams params)
 TextEdit[] formatting(DocumentFormattingParams params)
 {
     auto uri = new Uri(params.textDocument.uri);
-    logger.logf("Formatting %s", uri.path);
+    logf("Formatting %s", uri.path);
     return Tools.formatTool.formatting(uri, params.options);
 }
 

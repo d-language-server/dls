@@ -1,8 +1,8 @@
 module dls.protocol.messages.general;
 
-import logger = std.experimental.logger;
 import dls.protocol.interfaces.general;
 import dls.server : Server;
+import std.experimental.logger : log;
 import std.json : JSONValue;
 import std.typecons : nullable;
 
@@ -18,7 +18,7 @@ InitializeResult initialize(InitializeParams params)
 
     Server.initialized = true;
     Server.initState = params;
-    logger.log("Initializing server");
+    log("Initializing server");
     Tools.initialize();
 
     Uri[] uris;
@@ -84,7 +84,7 @@ void initialized(JSONValue nothing)
 
     if (!didChangeWatchedFiles.isNull && didChangeWatchedFiles.dynamicRegistration)
     {
-        logger.log("Registering watchers");
+        log("Registering watchers");
         auto watchers = [
             new FileSystemWatcher("**/dub.selections.json"),
             new FileSystemWatcher("**/dub.{json,sdl}"), new FileSystemWatcher("**/*.ini")
@@ -101,7 +101,7 @@ void initialized(JSONValue nothing)
 @("")
 JSONValue shutdown(JSONValue nothing)
 {
-    logger.log("Shutting down server");
+    log("Shutting down server");
     Server.shutdown = true;
     return JSONValue(null);
 }
@@ -109,7 +109,7 @@ JSONValue shutdown(JSONValue nothing)
 @("")
 void exit(JSONValue nothing)
 {
-    logger.log("Exiting server");
+    log("Exiting server");
     Server.exit = true;
 }
 

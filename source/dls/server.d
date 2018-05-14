@@ -39,9 +39,9 @@ shared static this()
 abstract class Server
 {
 
-    import logger = std.experimental.logger;
     import dls.protocol.interfaces : InitializeParams;
     import std.algorithm : find, findSplit;
+    import std.experimental.logger : error;
     import std.json : JSONValue;
     import std.string : strip, stripRight;
     import std.typecons : Nullable, nullable;
@@ -58,22 +58,24 @@ abstract class Server
 
     @property static void initState(InitializeParams params)
     {
+        import std.experimental.logger : LogLevel, globalLogLevel;
+
         _initState = params;
 
         debug
         {
-            logger.globalLogLevel = logger.LogLevel.all;
+            globalLogLevel = LogLevel.all;
         }
         else
         {
             //dfmt off
             immutable map = [
-                InitializeParams.Trace.off : logger.LogLevel.off,
-                InitializeParams.Trace.messages : logger.LogLevel.info,
-                InitializeParams.Trace.verbose : logger.LogLevel.all
+                InitializeParams.Trace.off : LogLevel.off,
+                InitializeParams.Trace.messages : LogLevel.info,
+                InitializeParams.Trace.verbose : LogLevel.all
             ];
             //dfmt on
-            logger.globalLogLevel = params.trace.isNull ? logger.LogLevel.off : map[params.trace];
+            globalLogLevel = params.trace.isNull ? LogLevel.off : map[params.trace];
         }
     }
 
@@ -114,7 +116,7 @@ abstract class Server
 
             if (contentLengthResult.length == 0)
             {
-                logger.error("No valid Content-Length section in header");
+                error("No valid Content-Length section in header");
                 continue;
             }
 
@@ -132,6 +134,7 @@ abstract class Server
     {
         import dls.util.json : convertFromJSON;
         import std.algorithm : canFind;
+        import std.experimental.logger : errorf;
         import std.json : JSONException, parseJSON;
 
         RequestMessage request;
@@ -175,23 +178,23 @@ abstract class Server
                 }
                 else
                 {
-                    logger.error(response.error.message);
+                    error(response.error.message);
                 }
             }
         }
         catch (JSONException e)
         {
-            logger.errorf("%s: %s", ErrorCodes.parseError[0], e);
+            errorf("%s: %s", ErrorCodes.parseError[0], e);
             sendError(ErrorCodes.parseError, request, JSONValue(e.toString()));
         }
         catch (HandlerNotFoundException e)
         {
-            logger.errorf("%s: %s", ErrorCodes.methodNotFound[0], e);
+            errorf("%s: %s", ErrorCodes.methodNotFound[0], e);
             sendError(ErrorCodes.methodNotFound, request, JSONValue(e.toString()));
         }
         catch (Exception e)
         {
-            logger.errorf("%s: %s", ErrorCodes.internalError[0], e);
+            errorf("%s: %s", ErrorCodes.internalError[0], e);
             sendError(ErrorCodes.internalError, request, JSONValue(e.toString()));
         }
     }
@@ -200,7 +203,8 @@ abstract class Server
     {
         if (request !is null)
         {
-            send(request.id, Nullable!JSONValue(), ResponseError.fromErrorCode(error, data).nullable);
+            send(request.id, Nullable!JSONValue(),
+                    ResponseError.fromErrorCode(error, data).nullable);
         }
     }
 

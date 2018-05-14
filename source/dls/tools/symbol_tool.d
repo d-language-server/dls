@@ -58,7 +58,6 @@ shared static this()
 
 class SymbolTool : Tool
 {
-    import logger = std.experimental.logger;
     import dcd.common.messages : AutocompleteRequest, RequestKind;
     import dls.protocol.definitions : Location, MarkupContent, Position,
         TextDocumentItem;
@@ -73,6 +72,7 @@ class SymbolTool : Tool
     import std.array : appender, array, replace;
     import std.container : RedBlackTree;
     import std.conv : to;
+    import std.experimental.logger : logf;
     import std.file : readText;
     import std.json : JSONValue;
     import std.net.curl : byLine;
@@ -247,7 +247,7 @@ class SymbolTool : Tool
 
     void clearPath(Uri uri)
     {
-        logger.logf("Clearing imports from %s", uri.path);
+        logf("Clearing imports from %s", uri.path);
 
         if (uri.path in _workspaceCaches)
         {
@@ -263,7 +263,7 @@ class SymbolTool : Tool
     {
         import std.concurrency : spawn;
 
-        logger.logf("Upgrading dependencies from %s", dirName(uri.path));
+        logf("Upgrading dependencies from %s", dirName(uri.path));
 
         spawn((string uriString) {
             import dub.dub : UpgradeOptions;
@@ -277,7 +277,7 @@ class SymbolTool : Tool
         import dsymbol.string_interning : internString;
         import dsymbol.symbol : DSymbol;
 
-        logger.logf(`Fetching symbols from %s with query "%s"`, uri is null
+        logf(`Fetching symbols from %s with query "%s"`, uri is null
                 ? "workspace" : uri.path, query);
 
         auto queryRegex = regex(query);
@@ -353,7 +353,7 @@ class SymbolTool : Tool
         import dcd.server.autocomplete : complete;
         import std.algorithm : chunkBy;
 
-        logger.logf("Getting completions for %s at position %s,%s", uri.path,
+        logf("Getting completions for %s at position %s,%s", uri.path,
                 position.line, position.character);
 
         auto request = getPreparedRequest(uri, position);
@@ -424,7 +424,7 @@ class SymbolTool : Tool
         import dcd.server.autocomplete : getDoc;
         import std.algorithm : filter;
 
-        logger.logf("Getting documentation for %s at position %s,%s", uri.path,
+        logf("Getting documentation for %s at position %s,%s", uri.path,
                 position.line, position.character);
 
         auto request = getPreparedRequest(uri, position);
@@ -442,7 +442,7 @@ class SymbolTool : Tool
         import dcd.server.autocomplete : findDeclaration;
         import std.algorithm : find;
 
-        logger.logf("Finding declaration for %s at position %s,%s", uri.path,
+        logf("Finding declaration for %s at position %s,%s", uri.path,
                 position.line, position.character);
 
         auto request = getPreparedRequest(uri, position);
@@ -474,7 +474,7 @@ class SymbolTool : Tool
         import dcd.server.autocomplete.localuse : findLocalUse;
         import dls.protocol.interfaces : DocumentHighlightKind;
 
-        logger.logf("Highlighting usages for %s at position %s,%s", uri.path,
+        logf("Highlighting usages for %s at position %s,%s", uri.path,
                 position.line, position.character);
 
         static bool highlightLess(in DocumentHighlight a, in DocumentHighlight b)
@@ -504,7 +504,7 @@ class SymbolTool : Tool
         import dsymbol.modulecache : ASTAllocator;
         import std.algorithm : canFind;
 
-        logger.logf(`Importing into cache "%s": %s`, root, paths);
+        logf(`Importing into cache "%s": %s`, root, paths);
 
         static if (isLibrary)
         {
@@ -540,6 +540,7 @@ class SymbolTool : Tool
         import ddoc : Lexer, expand;
         import dls.protocol.definitions : MarkupKind;
         import std.algorithm : all;
+        import std.experimental.logger : error;
         import std.net.curl : CurlException;
         import std.regex : split;
 
@@ -563,7 +564,7 @@ class SymbolTool : Tool
         }
         catch (CurlException e)
         {
-            logger.error("Could not fetch macros");
+            error("Could not fetch macros");
             macros["_"] = "";
         }
 

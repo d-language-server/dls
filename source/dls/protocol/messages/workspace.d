@@ -1,6 +1,5 @@
 module dls.protocol.messages.workspace;
 
-import logger = std.experimental.logger;
 import dls.protocol.interfaces : SymbolInformation;
 import dls.protocol.interfaces.workspace;
 import dls.tools.tools : Tools;
@@ -44,12 +43,13 @@ void didChangeConfiguration(DidChangeConfigurationParams params)
 {
     import dls.tools.configuration : Configuration;
     import dls.util.json : convertFromJSON;
+    import std.experimental.logger : log;
 
-    logger.log("Configuration changed");
+    log("Configuration changed");
 
     if ("d" in params.settings && "dls" in params.settings["d"])
     {
-        logger.log("Applying new configuration");
+        log("Applying new configuration");
         Tools.setConfiguration(convertFromJSON!Configuration(params.settings["d"]["dls"]));
     }
 }
@@ -61,6 +61,7 @@ void didChangeWatchedFiles(DidChangeWatchedFilesParams params)
         ShowMessageRequestParams;
     import dls.protocol.messages.window : Util;
     import std.algorithm : canFind;
+    import std.experimental.logger : logf;
     import std.path : baseName, dirName;
 
     foreach (event; params.changes)
@@ -68,7 +69,7 @@ void didChangeWatchedFiles(DidChangeWatchedFilesParams params)
         auto uri = new Uri(event.uri);
         const fileName = baseName(uri.path);
 
-        logger.logf("File changed: %s", uri.path);
+        logf("File changed: %s", uri.path);
 
         switch (fileName)
         {

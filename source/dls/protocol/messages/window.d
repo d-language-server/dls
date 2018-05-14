@@ -4,7 +4,6 @@ import dls.protocol.interfaces : MessageActionItem;
 
 void showMessageRequest(string id, MessageActionItem item)
 {
-    import logger = std.experimental.logger;
     import dls.tools.tools : Tools;
     import dls.util.uri : Uri;
     import std.concurrency : locate, receiveOnly, send;
