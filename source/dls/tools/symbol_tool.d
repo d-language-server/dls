@@ -280,7 +280,7 @@ class SymbolTool : Tool
         logger.logf(`Fetching symbols from %s with query "%s"`, uri is null
                 ? "workspace" : uri.path, query);
 
-        const queryRegex = regex(query);
+        auto queryRegex = regex(query);
         auto result = new RedBlackTree!(SymbolInformation, q{a.name > b.name}, true);
 
         void collectSymbolInformations(Uri symbolUri, const(DSymbol)* symbol,
@@ -305,7 +305,7 @@ class SymbolTool : Tool
             }
         }
 
-        Uri[] getModuleUris(ModuleCache* cache)
+        static Uri[] getModuleUris(ModuleCache* cache)
         {
             import std.file : SpanMode, dirEntries;
 
@@ -359,7 +359,7 @@ class SymbolTool : Tool
         auto request = getPreparedRequest(uri, position);
         request.kind = RequestKind.autocomplete;
 
-        bool compareCompletionsLess(AutocompleteResponse.Completion a,
+        static bool compareCompletionsLess(AutocompleteResponse.Completion a,
                 AutocompleteResponse.Completion b)
         {
             //dfmt off
@@ -371,7 +371,7 @@ class SymbolTool : Tool
             //dfmt on
         }
 
-        bool compareCompletionsEqual(AutocompleteResponse.Completion a,
+        static bool compareCompletionsEqual(AutocompleteResponse.Completion a,
                 AutocompleteResponse.Completion b)
         {
             return a.symbolFilePath == b.symbolFilePath && a.symbolLocation == b.symbolLocation;
@@ -477,7 +477,7 @@ class SymbolTool : Tool
         logger.logf("Highlighting usages for %s at position %s,%s", uri.path,
                 position.line, position.character);
 
-        bool highlightLess(in DocumentHighlight a, in DocumentHighlight b)
+        static bool highlightLess(in DocumentHighlight a, in DocumentHighlight b)
         {
             return a.range.start.line < b.range.start.line
                 || (a.range.start.line == b.range.start.line
