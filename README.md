@@ -1,5 +1,8 @@
 # D Language Server
 
+[![Build Status](https://travis-ci.org/LaurentTreguier/dls.svg?branch=master)](https://travis-ci.org/LaurentTreguier/dls)
+[![Build status](https://ci.appveyor.com/api/projects/status/apmr87v3yvkxb5dm/branch/master?svg=true)](https://ci.appveyor.com/project/LaurentTreguier/dls)
+
 ### LSP compliance: `3.7.0`
 
 _This is a work in progress. There ~~might~~ will be bugs and crashes..._
