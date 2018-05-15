@@ -1,0 +1,37 @@
+platform: x64
+image: Visual Studio 2015
+environment:
+  matrix:
+    - ARCH: x86
+      BUILD_ARCH: x86_mscoff
+      VC_ARCH: x86
+    - ARCH: x86_64
+      BUILD_ARCH: x86_64
+      VC_ARCH: amd64
+install:
+  - ps: function extractCompiler
+        {
+          pushd c:\\;
+          7z x dmd.7z > $null;
+          popd;
+        }
+  - ps: $latest = (Invoke-WebRequest "http://downloads.dlang.org/releases/LATEST").toString()
+  - ps: $url = "http://downloads.dlang.org/releases/2.x/$latest/dmd.$latest.windows.7z"
+  - ps: Invoke-WebRequest $url -OutFile "c:\dmd.7z"
+  - ps: extractCompiler
+  - ps: $env:PATH += ';C:\dmd2\windows\bin;'
+  - ps: $env:VCVARS = 'C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat'
+  - '"%VCVARS%" %VC_ARCH%'
+build_script:
+  - dub build --build=release --arch=%BUILD_ARCH%
+after_build:
+  - move dls.exe dls.windows.%ARCH%.exe
+test_script:
+  - dub test --arch=%BUILD_ARCH%
+artifacts:
+  - path: dls.windows.*
+deploy:
+  - provider: Github
+    artifact: dls.windows.*
+    on:
+      appveyor_repo_tag: true
