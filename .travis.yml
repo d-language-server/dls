@@ -1,0 +1,19 @@
+language: d
+d: dmd
+os:
+  - linux
+  - osx
+env:
+  - ARCH=x86
+  - ARCH=x86_64
+before_deploy:
+  - dub build --build=release --arch=$ARCH
+  - mv dls dls.$TRAVIS_OS_NAME.$ARCH
+deploy:
+  provider: releases
+  api_key:
+    secure: $SECURE_API_KEY
+  file: dls.$TRAVIS_OS_NAME.$ARCH
+  on:
+    repo: LaurentTreguier/dls
+    tags: true
