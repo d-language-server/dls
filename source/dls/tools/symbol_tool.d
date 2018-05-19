@@ -78,7 +78,7 @@ class SymbolTool : Tool
     import std.net.curl : byLine;
     import std.parallelism : Task;
     import std.range : chain;
-    import std.regex : matchFirst, regex;
+    import std.regex : matchFirst;
     import std.typecons : nullable;
 
     version (Windows)
@@ -130,7 +130,7 @@ class SymbolTool : Tool
             {
                 try
                 {
-                    readText(confPath).matchAll(regex(`-I[^\s"]+`))
+                    readText(confPath).matchAll(`-I[^\s"]+`)
                         .each!(m => paths ~= m.hit[2 .. $].replace("%@P%",
                                 confPath.dirName).asNormalizedPath().to!string);
                     break;
@@ -277,10 +277,9 @@ class SymbolTool : Tool
         import dsymbol.string_interning : internString;
         import dsymbol.symbol : DSymbol;
 
-        logf(`Fetching symbols from %s with query "%s"`, uri is null
-                ? "workspace" : uri.path, query);
+        logf(`Fetching symbols from %s with query "%s"`, uri is null ? "workspace" : uri.path,
+                query);
 
-        auto queryRegex = regex(query);
         auto result = new RedBlackTree!(SymbolInformation, q{a.name > b.name}, true);
 
         void collectSymbolInformations(Uri symbolUri, const(DSymbol)* symbol,
@@ -291,7 +290,7 @@ class SymbolTool : Tool
                 return;
             }
 
-            if (symbol.name.data.matchFirst(queryRegex))
+            if (symbol.name.data.matchFirst(query))
             {
                 auto location = new Location(symbolUri,
                         Document[symbolUri].wordRangeAtByte(symbol.location));
@@ -542,7 +541,7 @@ class SymbolTool : Tool
         import std.algorithm : all;
         import std.experimental.logger : error;
         import std.net.curl : CurlException;
-        import std.regex : split;
+        import std.regex : regex, split;
 
         try
         {
@@ -552,7 +551,7 @@ class SymbolTool : Tool
                 {
                     foreach (line; macroTask.yieldForce())
                     {
-                        auto result = matchFirst(line, regex(`(\w+)\s*=\s*(.*)`));
+                        auto result = matchFirst(line, `(\w+)\s*=\s*(.*)`);
 
                         if (result.length > 0)
                         {

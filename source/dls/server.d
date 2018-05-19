@@ -185,17 +185,17 @@ abstract class Server
         catch (JSONException e)
         {
             errorf("%s: %s", ErrorCodes.parseError[0], e);
-            sendError(ErrorCodes.parseError, request, JSONValue(e.toString()));
+            sendError(ErrorCodes.parseError, request, JSONValue(e.message));
         }
         catch (HandlerNotFoundException e)
         {
             errorf("%s: %s", ErrorCodes.methodNotFound[0], e);
-            sendError(ErrorCodes.methodNotFound, request, JSONValue(e.toString()));
+            sendError(ErrorCodes.methodNotFound, request, JSONValue(e.message));
         }
         catch (Exception e)
         {
             errorf("%s: %s", ErrorCodes.internalError[0], e);
-            sendError(ErrorCodes.internalError, request, JSONValue(e.toString()));
+            sendError(ErrorCodes.internalError, request, JSONValue(e.message));
         }
     }
 
