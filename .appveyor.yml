@@ -1,5 +1,5 @@
 platform: x64
-image: Visual Studio 2015
+image: Visual Studio 2017
 environment:
   matrix:
     - ARCH: x86
@@ -20,8 +20,6 @@ install:
   - ps: Invoke-WebRequest $url -OutFile "c:\dmd.7z"
   - ps: extractCompiler
   - ps: $env:PATH += ';C:\dmd2\windows\bin;'
-  - ps: $env:VCVARS = 'C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat'
-  - '"%VCVARS%" %VC_ARCH%'
 build_script:
   - dub build --build=release --arch=%BUILD_ARCH%
 after_build:
