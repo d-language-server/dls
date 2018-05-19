@@ -1,7 +1,7 @@
 module dls.updater;
 
 private enum changelogUrl = "https://github.com/LaurentTreguier/dls/blob/master/CHANGELOG.md";
-private enum currentDescription = import("description.json");
+private enum descriptionJson = import("description.json");
 
 void update()
 {
@@ -20,7 +20,7 @@ void update()
     import std.json : parseJSON;
     import std.path : dirName;
 
-    const desc = parseJSON(currentDescription);
+    const desc = parseJSON(descriptionJson);
     const currentVersion = desc["packages"].array.find!(
             p => p["name"] == desc["rootPackage"])[0]["version"].str;
     auto dub = new Dub();
@@ -59,11 +59,8 @@ void update()
         return;
     }
 
-    auto requestParams = new ShowMessageRequestParams(MessageType.info,
-            format!"DLS version %s is available (current: %s)"(latestVersion, currentVersion));
-    requestParams.actions = [new MessageActionItem("Upgrade")];
-
-    auto id = Server.send("window/showMessageRequest", requestParams);
+    auto id = Util.sendMessageRequest(Util.ShowMessageRequestType.upgradeDls,
+            [latestVersion.toString(), currentVersion]);
     const threadName = "updater";
     register(threadName, thisTid());
     send(ownerTid(), Util.ThreadMessageData(id,
@@ -104,21 +101,18 @@ void update()
         try
         {
             latestDlsPath = linkDls(pack.path.toString(), executable);
-            requestParams.message = format!" DLS updated to %s [%s]"(latestVersion, latestDlsPath);
-            requestParams.actions[0].title = "See what's new";
-            id = Server.send("window/showMessageRequest", requestParams);
+            id = Util.sendMessageRequest(Util.ShowMessageRequestType.showChangelog,
+                    [latestVersion.toString(), latestDlsPath]);
             send(ownerTid(), Util.ThreadMessageData(id,
                     Util.ShowMessageRequestType.showChangelog, changelogUrl));
         }
         catch (FileException e)
         {
-            Server.send("window/showMessage",
-                    new ShowMessageParams(MessageType.error, "DLS could not be linked"));
+            Util.sendMessage(Util.ShowMessageType.dlsLinkError);
         }
     }
     else
     {
-        Server.send("window/showMessage",
-                new ShowMessageParams(MessageType.error, "DLS could not be built"));
+        Util.sendMessage(Util.ShowMessageType.dlsBuildError);
     }
 }

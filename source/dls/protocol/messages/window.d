@@ -45,19 +45,78 @@ void showMessageRequest(string id, MessageActionItem item)
 
 abstract class Util
 {
-    import std.json : JSONValue;
+    import dls.protocol.interfaces : MessageType;
+    import dls.server : Server;
+    import std.array : array, replace;
+    import std.algorithm : map;
+    import std.conv : to;
+    import std.json : JSONValue, parseJSON;
     import std.typecons : Tuple, tuple;
 
-    enum ShowMessageRequestType
+    static enum ShowMessageType
     {
-        upgradeSelections,
-        upgradeDls,
-        showChangelog
+        dlsBuildError = "dlsBuildError",
+        dlsLinkError = "dlsLinkError"
+    }
+
+    static enum ShowMessageRequestType
+    {
+        upgradeSelections = "upgradeSelections",
+        upgradeDls = "upgradeDls",
+        showChangelog = "showChangelog"
     }
 
     shared alias ThreadMessageData = Tuple!(string, ShowMessageRequestType, string);
 
+    private enum translationsJson = import("translations.json");
+    private static JSONValue translations;
+    private static string locale;
     private static Tuple!(ShowMessageRequestType, string)[string] messageRequestInfo;
+
+    static this()
+    {
+        translations = parseJSON(translationsJson);
+        locale = "en"; // TODO: add more locales and auto-detect system locale
+    }
+
+    static void sendMessage(ShowMessageType which, string[] args = [])
+    {
+        import dls.protocol.interfaces : ShowMessageParams;
+
+        JSONValue tr = translations[which];
+        auto title = tr["title"][locale].str;
+
+        foreach (i; 0 .. args.length)
+        {
+            title = title.replace('$' ~ i.to!string, args[i]);
+        }
+
+        Server.send("window/showMessage",
+                new ShowMessageParams(tr["messageType"].integer.to!MessageType, title));
+    }
+
+    static string sendMessageRequest(ShowMessageRequestType which, string[] args = [])
+    {
+        import dls.protocol.interfaces : ShowMessageRequestParams;
+        import std.typecons : nullable;
+
+        JSONValue tr = translations[which];
+        auto title = tr["title"][locale].str;
+
+        foreach (i; 0 .. args.length)
+        {
+            title = title.replace('$' ~ (i + 1).to!string, args[i]);
+        }
+
+        return Server.send("window/showMessageRequest", new ShowMessageRequestParams(
+                tr["messageType"].integer.to!MessageType, title,
+                tr["actions"].array.map!(a => new MessageActionItem(a[locale].str)).array.nullable));
+    }
+
+    static string[] getActions(ShowMessageRequestType which)
+    {
+        return translations[which]["actions"].array.map!(a => a[locale].str).array;
+    }
 
     static void addMessageRequestType(string id, ShowMessageRequestType type, string data = null)
     {

@@ -5,7 +5,7 @@ import dls.tools.tool : Tool;
 import dsymbol.symbol : CompletionKind;
 import std.path : asNormalizedPath, buildNormalizedPath, dirName;
 
-private enum macroUrl = "raw.githubusercontent.com/dlang/dlang.org/stable/%s.ddoc";
+private enum macroUrl = "https://raw.githubusercontent.com/dlang/dlang.org/stable/%s.ddoc";
 private immutable macroFiles = ["html", "macros", "std", "std_consolidated", "std-ddox"];
 private string[string] macros;
 private immutable CompletionItemKind[CompletionKind] completionKinds;

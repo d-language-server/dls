@@ -7,7 +7,7 @@
 	"copyright": "Copyright © 2017, Laurent Tréguier",
 	"license": "MIT",
 	"stringImportPaths": [
-		"."
+		"data"
 	],
 	"dependencies": {
 		"dls:bootstrap": "*",
@@ -19,7 +19,7 @@
 		"arsd-official:color_base": "2.0.0"
 	},
 	"preGenerateCommands": [
-		"dub describe --quiet > description.json"
+		"dub describe --quiet > data/description.json"
 	],
 	"subPackages": [
 		"bootstrap"
