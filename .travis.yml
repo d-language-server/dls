@@ -6,6 +6,10 @@ os:
 env:
   - ARCH=x86
   - ARCH=x86_64
+addons:
+  apt:
+    packages:
+      - gcc-multilib
 script:
   - dub test --arch=$ARCH
 before_deploy:
