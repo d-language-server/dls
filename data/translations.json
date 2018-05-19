@@ -1,4 +1,10 @@
 {
+    "dlsDownloadError": {
+        "messageType": 1,
+        "title": {
+            "en": "DLS could not be downloaded"
+        }
+    },
     "dlsBuildError": {
         "messageType": 1,
         "title": {
@@ -18,7 +24,10 @@
         },
         "actions": [
             {
-                "en": "Upgrade dependencies"
+                "id": "upgrade",
+                "title": {
+                    "en": "Upgrade dependencies"
+                }
             }
         ]
     },
@@ -29,7 +38,16 @@
         },
         "actions": [
             {
-                "en": "Upgrade"
+                "id": "download",
+                "title": {
+                    "en": "Download"
+                }
+            },
+            {
+                "id": "build",
+                "title": {
+                    "en": "Build"
+                }
             }
         ]
     },
@@ -40,7 +58,10 @@
         },
         "actions": [
             {
-                "en": "See what's new"
+                "id": "show",
+                "title": {
+                    "en": "See what's new"
+                }
             }
         ]
     }

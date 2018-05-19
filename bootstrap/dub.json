@@ -6,6 +6,9 @@
 	"description": "DLS bootstrap utility",
 	"copyright": "Copyright © 2018, Laurent Tréguier",
 	"license": "MIT",
+	"stringImportPaths": [
+		"data"
+	],
 	"dependencies": {
 		"dub": "1.9.0"
 	}

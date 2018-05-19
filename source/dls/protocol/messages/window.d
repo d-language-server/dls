@@ -5,6 +5,7 @@ import dls.protocol.interfaces : MessageActionItem;
 void showMessageRequest(string id, MessageActionItem item)
 {
     import dls.tools.tools : Tools;
+    import dls.updater : UpgradeType;
     import dls.util.uri : Uri;
     import std.concurrency : locate, receiveOnly, send;
     import std.path : dirName;
@@ -28,7 +29,10 @@ void showMessageRequest(string id, MessageActionItem item)
         break;
 
     case Util.ShowMessageRequestType.upgradeDls:
-        send(locate(Util.messageRequestInfo[id][1]), item.title.length > 0);
+        const actions = Util.getActions(Util.ShowMessageRequestType.upgradeDls);
+        send(locate(Util.messageRequestInfo[id][1]), item.title.length == 0
+                ? UpgradeType.pass : item.title == actions[0]
+                ? UpgradeType.download : UpgradeType.build);
         break;
 
     case Util.ShowMessageRequestType.showChangelog:
@@ -55,6 +59,7 @@ abstract class Util
 
     static enum ShowMessageType
     {
+        dlsDownloadError = "dlsDownloadError",
         dlsBuildError = "dlsBuildError",
         dlsLinkError = "dlsLinkError"
     }
@@ -95,13 +100,17 @@ abstract class Util
                 new ShowMessageParams(tr["messageType"].integer.to!MessageType, title));
     }
 
-    static string sendMessageRequest(ShowMessageRequestType which, string[] args = [])
+    static string sendMessageRequest(ShowMessageRequestType which,
+            string[] args = [], string[] hiddenItems = [])
     {
         import dls.protocol.interfaces : ShowMessageRequestParams;
+        import std.algorithm : canFind, filter;
         import std.typecons : nullable;
 
         JSONValue tr = translations[which];
         auto title = tr["title"][locale].str;
+        auto actions = tr["actions"].array.filter!(a => !hiddenItems.canFind(a["id"].str))
+            .map!(a => new MessageActionItem(a["title"][locale].str));
 
         foreach (i; 0 .. args.length)
         {
@@ -109,13 +118,12 @@ abstract class Util
         }
 
         return Server.send("window/showMessageRequest", new ShowMessageRequestParams(
-                tr["messageType"].integer.to!MessageType, title,
-                tr["actions"].array.map!(a => new MessageActionItem(a[locale].str)).array.nullable));
+                tr["messageType"].integer.to!MessageType, title, actions.array.nullable));
     }
 
     static string[] getActions(ShowMessageRequestType which)
     {
-        return translations[which]["actions"].array.map!(a => a[locale].str).array;
+        return translations[which]["actions"].array.map!(a => a["title"][locale].str).array;
     }
 
     static void addMessageRequestType(string id, ShowMessageRequestType type, string data = null)
