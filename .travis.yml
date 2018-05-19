@@ -6,6 +6,8 @@ os:
 env:
   - ARCH=x86
   - ARCH=x86_64
+script:
+  - dub test --arch=$ARCH
 before_deploy:
   - dub build --build=release --arch=$ARCH
   - mv dls dls-$TRAVIS_TAG.$TRAVIS_OS_NAME.$ARCH.run

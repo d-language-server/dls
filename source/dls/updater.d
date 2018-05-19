@@ -3,8 +3,8 @@ module dls.updater;
 import dls.bootstrap : repoBase;
 import std.format : format;
 
-private enum changelogUrl = format!"https://github.com/%s/dls/blob/master/CHANGELOG.md"(repoBase);
 private enum descriptionJson = import("description.json");
+private immutable changelogUrl = format!"https://github.com/%s/dls/blob/master/CHANGELOG.md"(repoBase);
 
 enum UpgradeType
 {

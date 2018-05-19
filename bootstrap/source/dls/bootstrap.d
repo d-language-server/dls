@@ -3,56 +3,67 @@ module dls.bootstrap;
 import std.format : format;
 import std.path : buildNormalizedPath;
 
-enum repoBase = import("repo.txt");
-enum apiEndpoint = format!"https://api.github.com/repos/%s/dls/%%s"(repoBase);
+immutable repoBase = import("repo.txt");
+immutable apiEndpoint = format!"https://api.github.com/repos/%s/dls/%%s"(repoBase);
 
 version (Windows)
 {
-    enum os = "windows";
+    immutable os = "windows";
 }
 else version (OSX)
 {
-    enum os = "osx";
+    immutable os = "osx";
 }
 else version (linux)
 {
-    enum os = "linux";
+    immutable os = "linux";
 }
 else
 {
-    enum os = "none";
+    immutable os = "none";
 }
 
 version (X86_64)
 {
-    enum arch = "x86_64";
+    immutable arch = "x86_64";
 }
 else version (X86)
 {
-    import core.cpuid : isX86_64;
-
-    enum arch = isX86_64 ? "x86_64" : "x86";
+    immutable string arch;
 }
 else
 {
-    enum arch = "none";
+    immutable arch = "none";
 }
 
 version (Windows)
 {
-    enum suffix = "exe";
-    enum dlsExecutable = "dls.exe";
+    immutable suffix = "exe";
+    immutable dlsExecutable = "dls.exe";
 }
 else
 {
-    enum suffix = "run";
-    enum dlsExecutable = "dls";
+    immutable suffix = "run";
+    immutable dlsExecutable = "dls";
 }
 
-private enum dlsBinName = format!"dls-%%s.%s.%s.%s"(os, arch, suffix);
-private enum dlsBinShortName = format!"dls-%%s.%s"(suffix);
+private immutable string dlsBinName;
+private immutable string dlsBinShortName;
 private string downloadUrl;
 private string downloadVersion;
+
+shared static this()
+{
+    version (X86)
+    {
+        import core.cpuid : isX86_64;
+
+        arch = isX86_64 ? "x86_64" : "x86";
+    }
+
+    dlsBinName = format("dls-%%s.%s.%s.%s", os, arch, suffix);
+    dlsBinShortName = format("dls-%%s.%s", suffix);
+}
 
 @property bool canDownloadDls()
 {
@@ -65,7 +76,7 @@ private string downloadVersion;
 
         foreach (asset; latestRelease["assets"].array)
         {
-            if (asset["name"].str == format!dlsBinName(latestRelease["name"].str))
+            if (asset["name"].str == format(dlsBinName, latestRelease["name"].str))
             {
                 downloadUrl = asset["browser_download_url"].str;
                 downloadVersion = latestRelease["name"].str;
@@ -88,7 +99,7 @@ string downloadDls(bool progress = false)
 
     if (downloadUrl.length > 0 || canDownloadDls)
     {
-        const dlsPath = buildNormalizedPath(dubBinDir, format!dlsBinShortName(downloadVersion));
+        const dlsPath = buildNormalizedPath(dubBinDir, format(dlsBinShortName, downloadVersion));
         auto request = HTTP(downloadUrl);
 
         if (exists(dlsPath))

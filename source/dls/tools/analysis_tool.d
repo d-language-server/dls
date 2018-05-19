@@ -2,7 +2,7 @@ module dls.tools.analysis_tool;
 
 import dls.tools.tool : Tool;
 
-private enum diagnosticSource = "D-Scanner";
+private immutable diagnosticSource = "D-Scanner";
 
 class AnalysisTool : Tool
 {
