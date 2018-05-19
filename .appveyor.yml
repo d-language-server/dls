@@ -23,13 +23,14 @@ install:
 build_script:
   - dub build --build=release --arch=%BUILD_ARCH%
 after_build:
-  - move dls.exe dls.windows.%ARCH%.exe
+  - if not defined APPVEYOR_REPO_TAG_NAME (set TAG_NAME=untagged)
+  - move dls.exe dls-%TAG_NAME%.windows.%ARCH%.exe
 test_script:
   - dub test --arch=%BUILD_ARCH%
 artifacts:
-  - path: dls.windows.*
+  - path: dls-*.windows.*.exe
 deploy:
   - provider: Github
-    artifact: dls.windows.*
+    artifact: dls-*.windows.*.exe
     on:
       appveyor_repo_tag: true
