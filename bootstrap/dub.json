@@ -8,8 +8,5 @@
 	"license": "MIT",
 	"stringImportPaths": [
 		"data"
-	],
-	"dependencies": {
-		"dub": "1.9.0"
-	}
+	]
 }

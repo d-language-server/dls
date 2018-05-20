@@ -58,7 +58,10 @@ int main(string[] args)
     {
         const dlsDir = thisExePath().dirName.dirName;
         output = (method == Method.download || (method == Method.auto_ && canDownloadDls)) ? downloadDls(
-                progress => stderr.rawWrite(progress.to!string ~ '\n')) : buildDls(dlsDir);
+                (progress) {
+            stderr.rawWrite(progress.to!string ~ '\n');
+            stderr.flush();
+        }) : buildDls(dlsDir);
         output = linkDls(output);
     }
     else

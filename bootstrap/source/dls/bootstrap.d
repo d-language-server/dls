@@ -208,9 +208,20 @@ string linkDls(in string dlsPath)
 
 @property string dubBinDir()
 {
-    import dub.dub : Dub;
+    import std.process : environment;
 
-    return buildNormalizedPath((new Dub()).packageManager.completeSearchPath[0].toString(), ".bin");
+    version (Windows)
+    {
+        const dubDirPath = environment["LOCALAPPDATA"];
+        const dubDirName = "dub";
+    }
+    else
+    {
+        const dubDirPath = environment["HOME"];
+        const dubDirName = ".dub";
+    }
+
+    return buildNormalizedPath(dubDirPath, dubDirName, "packages", ".bin");
 }
 
 class UpgradeFailedException : Exception
