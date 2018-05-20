@@ -52,6 +52,7 @@ int main(string[] args)
     }
 
     string output;
+    int status;
 
     if (!check)
     {
@@ -63,9 +64,10 @@ int main(string[] args)
     else
     {
         output = (method == Method.download ? canDownloadDls : true).to!string;
+        status = (method != Method.download || canDownloadDls) ? 0 : 1;
     }
 
     stdout.rawWrite(output);
 
-    return 0;
+    return status;
 }
