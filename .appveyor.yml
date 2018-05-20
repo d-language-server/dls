@@ -4,10 +4,8 @@ environment:
   matrix:
     - ARCH: x86
       BUILD_ARCH: x86_mscoff
-      VC_ARCH: x86
     - ARCH: x86_64
       BUILD_ARCH: x86_64
-      VC_ARCH: amd64
 install:
   - ps: function extractCompiler
         {

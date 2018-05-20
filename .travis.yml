@@ -11,15 +11,16 @@ addons:
     packages:
       - gcc-multilib
 script:
-  - dub test --arch=$ARCH
+  - dub test --arch=$ARCH --compiler=$DC
 before_deploy:
-  - dub build --build=release --arch=$ARCH
+  - dub build --build=release --arch=$ARCH --compiler=$DC
   - mv dls dls-$TRAVIS_TAG.$TRAVIS_OS_NAME.$ARCH.run
 deploy:
   provider: releases
   api_key:
     secure: $SECURE_API_KEY
   file: dls-$TRAVIS_TAG.$TRAVIS_OS_NAME.$ARCH.run
+  skip_cleanup: true
   on:
     repo: LaurentTreguier/dls
     tags: true
