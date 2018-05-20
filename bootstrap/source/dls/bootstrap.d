@@ -92,7 +92,7 @@ shared static this()
     return false;
 }
 
-string downloadDls(bool progress = false)
+string downloadDls(in void function(size_t progress) progressCallback = null)
 {
     import std.net.curl : HTTP;
     import std.file : exists, remove;
@@ -114,11 +114,10 @@ string downloadDls(bool progress = false)
             return data.length;
         };
 
-        if (progress)
+        if (progressCallback !is null)
         {
             request.onProgress = (size_t dlTotal, size_t dlNow, size_t ulTotal, size_t ulNow) {
                 import std.conv : to;
-                import std.stdio : stderr;
 
                 static size_t percentage;
                 const newPercentage = (dlTotal == 0) ? 0 : (100 * dlNow / dlTotal);
@@ -126,7 +125,7 @@ string downloadDls(bool progress = false)
                 if (newPercentage > percentage)
                 {
                     percentage = newPercentage;
-                    stderr.rawWrite(percentage.to!string ~ '\n');
+                    progressCallback(percentage);
                 }
 
                 return 0;

@@ -21,10 +21,15 @@ class InitializeParams
         verbose = "verbose"
     }
 
+    static class InitializationOptions
+    {
+        bool upgradeProgress;
+    }
+
     Nullable!ulong processId;
     Nullable!string rootPath;
     Nullable!DocumentUri rootUri;
-    Nullable!JSONValue initializationOptions;
+    Nullable!InitializationOptions initializationOptions;
     ClientCapabilities capabilities;
     Nullable!Trace trace;
     Nullable!(WorkspaceFolder[]) workspaceFolders;

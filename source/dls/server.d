@@ -46,9 +46,9 @@ abstract class Server
     import std.string : strip, stripRight;
     import std.typecons : Nullable, nullable;
 
-    private static bool _initialized = false;
-    private static bool _shutdown = false;
-    private static bool _exit = false;
+    static bool initialized = false;
+    static bool shutdown = false;
+    static bool exit = false;
     private static InitializeParams _initState;
 
     @property static InitializeParams initState()
@@ -79,9 +79,10 @@ abstract class Server
         }
     }
 
-    @property static void opDispatch(string name, T)(T arg)
+    @property static InitializeParams.InitializationOptions initOptions()
     {
-        mixin("_" ~ name ~ " = arg;");
+        return _initState.initializationOptions.isNull
+            ? new InitializeParams.InitializationOptions() : _initState.initializationOptions;
     }
 
     static void loop()
@@ -89,7 +90,7 @@ abstract class Server
         import std.conv : to;
         import std.stdio : stdin;
 
-        while (!stdin.eof && !_exit)
+        while (!stdin.eof && !exit)
         {
             string[][] headers;
             string line;
@@ -149,7 +150,7 @@ abstract class Server
                 {
                     request = convertFromJSON!RequestMessage(json);
 
-                    if (!_shutdown && (_initialized || ["initialize"].canFind(request.method)))
+                    if (!shutdown && (initialized || ["initialize"].canFind(request.method)))
                     {
                         send(request.id, handler!RequestHandler(request.method)(request.params));
                     }
@@ -162,7 +163,7 @@ abstract class Server
                 {
                     auto notification = convertFromJSON!NotificationMessage(json);
 
-                    if (_initialized)
+                    if (initialized)
                     {
                         handler!NotificationHandler(notification.method)(notification.params);
                     }
@@ -209,7 +210,7 @@ abstract class Server
     }
 
     /++ Sends a request or a notification message. +/
-    static string send(string method, Nullable!JSONValue params)
+    static string send(string method, Nullable!JSONValue params = Nullable!JSONValue())
     {
         import dls.protocol.handlers : hasRegisteredHandler, pushHandler;
         import std.uuid : randomUUID;

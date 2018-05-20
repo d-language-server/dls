@@ -4,7 +4,8 @@ import dls.bootstrap : repoBase;
 import std.format : format;
 
 private enum descriptionJson = import("description.json");
-private immutable changelogUrl = format!"https://github.com/%s/dls/blob/master/CHANGELOG.md"(repoBase);
+private immutable changelogUrl = format!"https://github.com/%s/dls/blob/master/CHANGELOG.md"(
+        repoBase);
 
 enum UpgradeType
 {
@@ -92,9 +93,14 @@ void update()
     const upgradeType = receiveOnly!UpgradeType();
     string dlsPath;
 
-    if (upgradeType == UpgradeType.pass)
+    if (Server.initOptions.upgradeProgress && upgradeType != UpgradeType.pass)
     {
-        return;
+        Server.send("$/dls.upgradeStart");
+
+        scope (exit)
+        {
+            Server.send("$/dls.upgradeStop");
+        }
     }
 
     final switch (upgradeType)
@@ -105,7 +111,9 @@ void update()
     case UpgradeType.download:
         try
         {
-            dlsPath = downloadDls();
+            dlsPath = downloadDls(Server.initOptions.upgradeProgress ? (size_t progress) {
+                Server.send("$/dls.upgradeProgress", progress);
+            } : null);
         }
         catch (Exception e)
         {
