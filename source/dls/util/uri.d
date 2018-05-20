@@ -3,6 +3,7 @@ module dls.util.uri;
 class Uri
 {
     import dls.protocol.definitions : DocumentUri;
+    import dls.util.path : normalized;
     import std.regex : regex;
 
     private static enum _reg = regex(
@@ -33,20 +34,10 @@ class Uri
         _uri        = uri;
         _scheme     = matches.front[1];
         _authority  = matches.front[2];
-        _path       = matches.front[3].asNormalizedPath().to!string;
+        _path       = matches.front[3].asNormalizedPath().to!string.normalized;
         _query      = matches.front[4];
         _fragment   = matches.front[5];
         //dfmt on
-
-        version (Windows)
-        {
-            import std.algorithm : startsWith;
-
-            if (_path.startsWith('/') || _path.startsWith(`\`))
-            {
-                _path = _path[1 .. $];
-            }
-        }
     }
 
     override string toString() const

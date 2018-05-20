@@ -10,6 +10,7 @@ addons:
   apt:
     packages:
       - gcc-multilib
+      - libcurl4-openssl-dev
 script:
   - dub test --arch=$ARCH --compiler=$DC
 before_deploy:

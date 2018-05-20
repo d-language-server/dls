@@ -1,37 +1,30 @@
 module dls.updater;
 
 import dls.bootstrap : repoBase;
+import dls.protocol.interfaces : InitializeParams;
 import std.format : format;
 
 private enum descriptionJson = import("description.json");
 private immutable changelogUrl = format!"https://github.com/%s/dls/blob/master/CHANGELOG.md"(
         repoBase);
 
-enum UpgradeType
-{
-    pass,
-    download,
-    build
-}
-
-void update()
+void update(shared(InitializeParams.InitializationOptions) initOptions)
 {
     import dls.bootstrap : UpgradeFailedException, buildDls, canDownloadDls,
         downloadDls, dubBinDir, linkDls, suffix;
-    import dls.protocol.interfaces : MessageActionItem, MessageType,
-        ShowMessageParams, ShowMessageRequestParams;
     import dls.protocol.messages.window : Util;
     import dls.server : Server;
+    import dls.util.path : normalized;
     import dub.dependency : Dependency;
     import dub.dub : Dub, FetchOptions;
     import dub.package_ : Package;
     import std.regex : matchFirst;
     import std.algorithm : find;
     import std.concurrency : ownerTid, receiveOnly, register, send, thisTid;
+    import std.experimental.logger : warningf;
     import std.file : FileException, SpanMode, dirEntries, remove;
     import std.json : parseJSON;
-    import std.net.curl : CurlException;
-    import std.path : baseName, dirName;
+    import std.path : baseName;
 
     const desc = parseJSON(descriptionJson);
     const currentVersion = desc["packages"].array.find!(
@@ -84,60 +77,60 @@ void update()
     }
 
     auto id = Util.sendMessageRequest(Util.ShowMessageRequestType.upgradeDls,
-            [latestVersion.toString(), currentVersion], canDownloadDls ? [] : ["download"]);
+            [latestVersion.toString(), currentVersion]);
     const threadName = "updater";
     register(threadName, thisTid());
     send(ownerTid(), Util.ThreadMessageData(id,
             Util.ShowMessageRequestType.upgradeDls, threadName));
 
-    const upgradeType = receiveOnly!UpgradeType();
+    const shouldUpgrade = receiveOnly!bool();
     string dlsPath;
 
-    if (Server.initOptions.upgradeProgress && upgradeType != UpgradeType.pass)
-    {
-        Server.send("$/dls.upgradeStart");
 
-        scope (exit)
-        {
-            Server.send("$/dls.upgradeStop");
-        }
+    if (!shouldUpgrade)
+    {
+        return;
     }
 
-    final switch (upgradeType)
-    {
-    case UpgradeType.pass:
-        return;
+    Server.send("$/dls.upgradeStart");
 
-    case UpgradeType.download:
+    scope (exit)
+    {
+        Server.send("$/dls.upgradeStop");
+    }
+
+    bool success;
+
+    if (canDownloadDls)
+    {
         try
         {
-            dlsPath = downloadDls(Server.initOptions.upgradeProgress ? (size_t progress) {
+            dlsPath = downloadDls(initOptions.upgradeProgress ? (size_t progress) {
                 Server.send("$/dls.upgradeProgress", progress);
             } : null);
+            success = true;
         }
         catch (Exception e)
         {
-            Util.sendMessage(Util.ShowMessageType.dlsDownloadError);
-            return;
+            warningf("Could not download DLS: %s", e.message);
         }
+    }
 
-        break;
-
-    case UpgradeType.build:
+    if (!success)
+    {
         FetchOptions fetchOpts;
         fetchOpts |= FetchOptions.forceBranchUpgrade;
         const pack = dub.fetch("dls", Dependency(">=0.0.0"),
                 dub.defaultPlacementLocation, fetchOpts);
 
         int i;
-        bool success;
         const additionalArgs = [[], ["--force"]];
 
         do
         {
             try
             {
-                dlsPath = buildDls(pack.path.toString(), additionalArgs[i]);
+                dlsPath = buildDls(pack.path.toString().normalized, additionalArgs[i]);
                 success = true;
             }
             catch (UpgradeFailedException e)
@@ -152,15 +145,13 @@ void update()
             Util.sendMessage(Util.ShowMessageType.dlsBuildError);
             return;
         }
-
-        break;
     }
 
     try
     {
-        const latestDlsPath = linkDls(dlsPath);
+        linkDls(dlsPath);
         id = Util.sendMessageRequest(Util.ShowMessageRequestType.showChangelog,
-                [latestVersion.toString(), latestDlsPath]);
+                [latestVersion.toString()]);
         send(ownerTid(), Util.ThreadMessageData(id,
                 Util.ShowMessageRequestType.showChangelog, changelogUrl));
     }

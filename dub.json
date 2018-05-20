@@ -16,7 +16,12 @@
 		"dscanner": "0.5.3",
 		"dfmt": "0.7.0",
 		"arsd-official:email": "2.0.0",
-		"arsd-official:color_base": "2.0.0"
+		"arsd-official:color_base": "2.0.0",
+		"vibe-d": "0.8.3"
+	},
+	"subConfigurations": {
+		"dub": "library-nonet",
+		"vibe-d": "libasync"
 	},
 	"preGenerateCommands": [
 		"dub describe --quiet > data/description.json"

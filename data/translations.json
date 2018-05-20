@@ -1,10 +1,4 @@
 {
-    "dlsDownloadError": {
-        "messageType": 1,
-        "title": {
-            "en": "DLS could not be downloaded"
-        }
-    },
     "dlsBuildError": {
         "messageType": 1,
         "title": {
@@ -38,15 +32,9 @@
         },
         "actions": [
             {
-                "id": "download",
+                "id": "upgrade",
                 "title": {
-                    "en": "Download"
-                }
-            },
-            {
-                "id": "build",
-                "title": {
-                    "en": "Build"
+                    "en": "Upgrade"
                 }
             }
         ]
@@ -54,7 +42,7 @@
     "showChangelog": {
         "messageType": 3,
         "title": {
-            "en": "DLS updated to $1 [$2]"
+            "en": "DLS upgraded to $1"
         },
         "actions": [
             {

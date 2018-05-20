@@ -5,7 +5,6 @@ import dls.protocol.interfaces : MessageActionItem;
 void showMessageRequest(string id, MessageActionItem item)
 {
     import dls.tools.tools : Tools;
-    import dls.updater : UpgradeType;
     import dls.util.uri : Uri;
     import std.concurrency : locate, receiveOnly, send;
     import std.path : dirName;
@@ -20,7 +19,7 @@ void showMessageRequest(string id, MessageActionItem item)
     final switch (Util.messageRequestInfo[id][0])
     {
     case Util.ShowMessageRequestType.upgradeSelections:
-        if (item.title.length)
+        if (item.title.length > 0)
         {
             auto uri = new Uri(Util.messageRequestInfo[id][1]);
             Tools.symbolTool.upgradeSelections(uri);
@@ -29,14 +28,11 @@ void showMessageRequest(string id, MessageActionItem item)
         break;
 
     case Util.ShowMessageRequestType.upgradeDls:
-        const actions = Util.getActions(Util.ShowMessageRequestType.upgradeDls);
-        send(locate(Util.messageRequestInfo[id][1]), item.title.length == 0
-                ? UpgradeType.pass : item.title == actions[0]
-                ? UpgradeType.download : UpgradeType.build);
+        send(locate(Util.messageRequestInfo[id][1]), item.title.length > 0);
         break;
 
     case Util.ShowMessageRequestType.showChangelog:
-        if (item.title.length)
+        if (item.title.length > 0)
         {
             browse(Util.messageRequestInfo[id][1]);
         }
@@ -59,7 +55,6 @@ abstract class Util
 
     static enum ShowMessageType
     {
-        dlsDownloadError = "dlsDownloadError",
         dlsBuildError = "dlsBuildError",
         dlsLinkError = "dlsLinkError"
     }
