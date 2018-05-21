@@ -13,7 +13,7 @@ private immutable SymbolKind[CompletionKind] symbolKinds;
 
 shared static this()
 {
-    import vibe.core.log : LogLevel, setLogLevel;
+    import dub.internal.vibecompat.core.log : LogLevel, setLogLevel;
 
     //dfmt off
     completionKinds = [

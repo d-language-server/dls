@@ -16,65 +16,10 @@
 		"dscanner": "0.5.4",
 		"dfmt": "0.7.0",
 		"arsd-official:email": "2.0.0",
-		"arsd-official:color_base": "2.0.0",
-		"vibe-d:core": "0.8.3",
-		"vibe-d:http": "0.8.3",
-		"vibe-d:tls": "0.8.3"
-	},
-	"subConfigurations": {
-		"dub": "library-nonet",
-		"vibe-d:tls": "notls"
+		"arsd-official:color_base": "2.0.0"
 	},
 	"preGenerateCommands": [
 		"dub describe --quiet > data/description.json"
-	],
-	"configurations": [
-		{
-			"name": "application-windows",
-			"targetType": "executable",
-			"platforms": [
-				"windows"
-			],
-			"subConfigurations": {
-				"vibe-d:core": "win32"
-			}
-		},
-		{
-			"name": "library-windows",
-			"targetType": "library",
-			"platforms": [
-				"windows"
-			],
-			"excludedSourceFiles": [
-				"source/main.d"
-			],
-			"subConfigurations": {
-				"vibe-d:core": "win32"
-			}
-		},
-		{
-			"name": "application-posix",
-			"targetType": "executable",
-			"platforms": [
-				"posix"
-			],
-			"subConfigurations": {
-				"vibe-d:core": "vibe-core"
-			}
-		},
-		{
-			"name": "library-posix",
-			"targetType": "library",
-			"platforms": [
-				"posix"
-			],
-			"excludedSourceFiles": [
-				"source/main.d"
-			],
-			"subConfigurations": {
-				"vibe-d:core": "vibe-core"
-			}
-		}
 	],
 	"subPackages": [
 		"bootstrap"
