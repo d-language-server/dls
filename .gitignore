@@ -38,6 +38,6 @@ docs/
 # End of https://www.gitignore.io/api/d,visualstudiocode
 
 /dls
-/dls-test-library
+/dls-test-library*
 /bootstrap/dls_bootstrap
 /data/description.json
