@@ -11,7 +11,7 @@ private immutable changelogUrl = format!"https://github.com/%s/dls/blob/master/C
 void update(shared(InitializeParams.InitializationOptions) initOptions)
 {
     import dls.bootstrap : UpgradeFailedException, buildDls, canDownloadDls,
-        downloadDls, dubBinDir, linkDls, suffix;
+        downloadDls, dubBinDir, linkDls;
     import dls.protocol.messages.window : Util;
     import dls.server : Server;
     import dls.util.path : normalized;
@@ -22,7 +22,8 @@ void update(shared(InitializeParams.InitializationOptions) initOptions)
     import std.algorithm : find;
     import std.concurrency : ownerTid, receiveOnly, register, send, thisTid;
     import std.experimental.logger : warningf;
-    import std.file : FileException, SpanMode, dirEntries, remove;
+    import std.file : FileException, SpanMode, dirEntries, isFile, remove,
+        rmdirRecurse;
     import std.json : parseJSON;
     import std.path : baseName;
 
@@ -54,13 +55,20 @@ void update(shared(InitializeParams.InitializationOptions) initOptions)
 
     foreach (entry; dirEntries(dubBinDir, SpanMode.shallow))
     {
-        const match = entry.name.baseName.matchFirst(`dls-v([\d.]+)\.` ~ suffix);
+        const match = entry.name.baseName.matchFirst(`dls-v([\d.]+)\.zip`);
 
         if (match && match[1] < currentVersion)
         {
             try
             {
-                remove(entry.name);
+                if (isFile(entry.name))
+                {
+                    remove(entry.name);
+                }
+                else
+                {
+                    rmdirRecurse(entry.name);
+                }
             }
             catch (FileException e)
             {

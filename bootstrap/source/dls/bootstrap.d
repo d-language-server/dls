@@ -1,5 +1,6 @@
 module dls.bootstrap;
 
+import std.file : exists, isFile, mkdirRecurse, remove;
 import std.format : format;
 import std.path : buildNormalizedPath;
 
@@ -38,17 +39,15 @@ else
 
 version (Windows)
 {
-    immutable suffix = "exe";
     immutable dlsExecutable = "dls.exe";
 }
 else
 {
-    immutable suffix = "run";
     immutable dlsExecutable = "dls";
 }
 
-private immutable string dlsBinName;
-private immutable string dlsBinShortName;
+private immutable string dlsArchiveName;
+private immutable string dlsDirName = "dls-%s";
 private string downloadUrl;
 private string downloadVersion;
 
@@ -61,8 +60,7 @@ shared static this()
         arch = isX86_64 ? "x86_64" : "x86";
     }
 
-    dlsBinName = format("dls-%%s.%s.%s.%s", os, arch, suffix);
-    dlsBinShortName = format("dls-%%s.%s", suffix);
+    dlsArchiveName = format("dls-%%s.%s.%s.zip", os, arch);
 }
 
 @property bool canDownloadDls()
@@ -76,7 +74,7 @@ shared static this()
 
         foreach (asset; latestRelease["assets"].array)
         {
-            if (asset["name"].str == format(dlsBinName, latestRelease["name"].str))
+            if (asset["name"].str == format(dlsArchiveName, latestRelease["name"].str))
             {
                 downloadUrl = asset["browser_download_url"].str;
                 downloadVersion = latestRelease["name"].str;
@@ -94,23 +92,33 @@ shared static this()
 
 string downloadDls(in void function(size_t progress) progressCallback = null)
 {
+    import std.array : appender;
     import std.net.curl : HTTP;
-    import std.file : exists, remove;
+    import std.file : rmdirRecurse, write;
+    import std.zip : ZipArchive;
 
     if (downloadUrl.length > 0 || canDownloadDls)
     {
-        const dlsPath = buildNormalizedPath(dubBinDir, format(dlsBinShortName, downloadVersion));
+        const dlsDir = buildNormalizedPath(dubBinDir, format(dlsDirName, downloadVersion));
         auto request = HTTP(downloadUrl);
+        auto archiveData = appender!(ubyte[]);
 
-        if (exists(dlsPath))
+        if (exists(dlsDir))
         {
-            remove(dlsPath);
+            if (isFile(dlsDir))
+            {
+                remove(dlsDir);
+            }
+            else
+            {
+                rmdirRecurse(dlsDir);
+            }
         }
 
-        request.onReceive = (in ubyte[] data) {
-            import std.file : append;
+        mkdirRecurse(dlsDir);
 
-            append(dlsPath, data);
+        request.onReceive = (in ubyte[] data) {
+            archiveData ~= data;
             return data.length;
         };
 
@@ -120,12 +128,12 @@ string downloadDls(in void function(size_t progress) progressCallback = null)
                 import std.conv : to;
 
                 static size_t percentage;
-                const newPercentage = (dlTotal == 0) ? 0 : (100 * dlNow / dlTotal);
+                const newPercentage = (dlTotal == 0) ? 0 : 10 * (10 * dlNow / dlTotal);
 
                 if (newPercentage > percentage)
                 {
+                    progressCallback(newPercentage - percentage);
                     percentage = newPercentage;
-                    progressCallback(percentage);
                 }
 
                 return 0;
@@ -134,7 +142,14 @@ string downloadDls(in void function(size_t progress) progressCallback = null)
 
         request.perform();
 
-        return dlsPath;
+        auto archive = new ZipArchive(archiveData.data);
+
+        foreach (name, member; archive.directory)
+        {
+            write(buildNormalizedPath(dlsDir, name), member.expandedData);
+        }
+
+        return buildNormalizedPath(dlsDir, dlsExecutable);
     }
 
     throw new UpgradeFailedException("Cannot download DLS");
@@ -163,7 +178,7 @@ string buildDls(in string dlsDir, in string[] additionalArgs = [])
 
 string linkDls(in string dlsPath)
 {
-    import std.file : FileException, exists, isFile, mkdirRecurse, remove;
+    import std.file : FileException;
 
     if (!isFile(dlsPath))
     {

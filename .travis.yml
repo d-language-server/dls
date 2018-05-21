@@ -10,17 +10,20 @@ addons:
   apt:
     packages:
       - gcc-multilib
-      - libcurl4-openssl-dev
+before_script:
+  - ln -s /usr/bin/ld.gold ~/ld
 script:
+  - export PATH="$HOME:$PATH"
   - dub test --arch=$ARCH --compiler=$DC
-before_deploy:
   - dub build --build=release --arch=$ARCH --compiler=$DC
-  - mv dls dls-$TRAVIS_TAG.$TRAVIS_OS_NAME.$ARCH.run
+before_deploy:
+  - strip dls
+  - zip dls-${TRAVIS_TAG:-untagged}.$TRAVIS_OS_NAME.$ARCH.zip dls
 deploy:
   provider: releases
   api_key:
     secure: $SECURE_API_KEY
-  file: dls-$TRAVIS_TAG.$TRAVIS_OS_NAME.$ARCH.run
+  file: dls-*.zip
   skip_cleanup: true
   on:
     repo: LaurentTreguier/dls
