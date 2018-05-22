@@ -10,22 +10,25 @@ private immutable changelogUrl = format!"https://github.com/%s/dls/blob/master/C
 
 void update(shared(InitializeParams.InitializationOptions) initOptions)
 {
-    import dls.bootstrap : UpgradeFailedException, buildDls, canDownloadDls,
-        downloadDls, dubBinDir, linkDls;
+    import core.time : hours;
+    import dls.bootstrap : UpgradeFailedException, apiEndpoint, buildDls,
+        canDownloadDls, downloadDls, dubBinDir, linkDls;
     import dls.protocol.messages.window : Util;
     import dls.server : Server;
     import dls.util.path : normalized;
     import dub.dependency : Dependency;
     import dub.dub : Dub, FetchOptions;
     import dub.package_ : Package;
-    import std.regex : matchFirst;
     import std.algorithm : find;
     import std.concurrency : ownerTid, receiveOnly, register, send, thisTid;
+    import std.datetime : Clock, SysTime;
     import std.experimental.logger : warningf;
     import std.file : FileException, SpanMode, dirEntries, isFile, remove,
         rmdirRecurse;
     import std.json : parseJSON;
+    import std.net.curl : get;
     import std.path : baseName;
+    import std.regex : matchFirst;
 
     const desc = parseJSON(descriptionJson);
     const currentVersion = desc["packages"].array.find!(
@@ -77,15 +80,18 @@ void update(shared(InitializeParams.InitializationOptions) initOptions)
         }
     }
 
-    const latestVersion = dub.getLatestVersion("dls");
+    const latestRelease = parseJSON(get(apiEndpoint));
+    const latestVersion = latestRelease["tag_name"].str;
+    const releaseDate = SysTime.fromISOExtString(latestRelease["published_at"].str);
 
-    if (latestVersion.isUnknown() || currentVersion >= latestVersion.toString())
+    if (latestVersion.length == 0 || currentVersion >= latestVersion
+            || (Clock.currTime - releaseDate < 1.hours))
     {
         return;
     }
 
     auto id = Util.sendMessageRequest(Util.ShowMessageRequestType.upgradeDls,
-            [latestVersion.toString(), currentVersion]);
+            [latestVersion, currentVersion]);
     const threadName = "updater";
     register(threadName, thisTid());
     send(ownerTid(), Util.ThreadMessageData(id,
@@ -157,8 +163,7 @@ void update(shared(InitializeParams.InitializationOptions) initOptions)
     try
     {
         linkDls(dlsPath);
-        id = Util.sendMessageRequest(Util.ShowMessageRequestType.showChangelog,
-                [latestVersion.toString()]);
+        id = Util.sendMessageRequest(Util.ShowMessageRequestType.showChangelog, [latestVersion]);
         send(ownerTid(), Util.ThreadMessageData(id,
                 Util.ShowMessageRequestType.showChangelog, changelogUrl));
     }

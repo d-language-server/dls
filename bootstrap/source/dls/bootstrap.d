@@ -5,7 +5,7 @@ import std.format : format;
 import std.path : buildNormalizedPath;
 
 immutable repoBase = import("repo.txt");
-immutable apiEndpoint = format!"https://api.github.com/repos/%s/dls/%%s"(repoBase);
+immutable apiEndpoint = format!"https://api.github.com/repos/%s/dls/releases/latest"(repoBase);
 
 version (Windows)
 {
@@ -70,7 +70,7 @@ shared static this()
 
     try
     {
-        const latestRelease = parseJSON(get(format!apiEndpoint("releases/latest")));
+        const latestRelease = parseJSON(get(apiEndpoint));
 
         foreach (asset; latestRelease["assets"].array)
         {
