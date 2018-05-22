@@ -100,12 +100,12 @@ abstract class Server
                 line = stdin.readln().stripRight();
                 auto parts = line.findSplit(":");
 
-                if (parts[1].length)
+                if (parts[1].length > 0)
                 {
                     headers ~= [parts[0], parts[2]];
                 }
             }
-            while (line.length);
+            while (line.length > 0);
 
             if (headers.length == 0)
             {
@@ -113,7 +113,7 @@ abstract class Server
             }
 
             auto contentLengthResult = headers.find!((parts,
-                    name) => parts.length && parts[0] == name)("Content-Length");
+                    name) => parts.length > 0 && parts[0] == name)("Content-Length");
 
             if (contentLengthResult.length == 0)
             {
@@ -122,16 +122,15 @@ abstract class Server
             }
 
             static char[] buffer;
-            immutable contentLength = contentLengthResult[0][1].strip().to!size_t;
+            const contentLength = contentLengthResult[0][1].strip().to!size_t;
             buffer.length = contentLength;
-            immutable content = stdin.rawRead(buffer).idup;
-            // TODO: support UTF-16/32 according to Content-Type when it's supported
+            const content = stdin.rawRead(buffer);
 
             handleJSON(content);
         }
     }
 
-    private static void handleJSON(T)(immutable(T[]) content)
+    private static void handleJSON(in char[] content)
     {
         import dls.util.json : convertFromJSON;
         import std.algorithm : canFind;
@@ -142,7 +141,7 @@ abstract class Server
 
         try
         {
-            immutable json = parseJSON(content);
+            const json = parseJSON(content);
 
             if ("method" in json)
             {
