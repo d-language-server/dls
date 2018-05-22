@@ -94,17 +94,16 @@ void update(shared(InitializeParams.InitializationOptions) initOptions)
     const shouldUpgrade = receiveOnly!bool();
     string dlsPath;
 
-
     if (!shouldUpgrade)
     {
         return;
     }
 
-    Server.send("$/dls.upgradeStart");
+    Server.send("$/dls.upgradeDls.start");
 
     scope (exit)
     {
-        Server.send("$/dls.upgradeStop");
+        Server.send("$/dls.upgradeDls.stop");
     }
 
     bool success;
@@ -113,8 +112,8 @@ void update(shared(InitializeParams.InitializationOptions) initOptions)
     {
         try
         {
-            dlsPath = downloadDls(initOptions.upgradeProgress ? (size_t progress) {
-                Server.send("$/dls.upgradeProgress", progress);
+            dlsPath = downloadDls(initOptions.lspExtensions.upgradeDls ? (size_t progress) {
+                Server.send("$/dls.upgradeDls.progress", progress);
             } : null);
             success = true;
         }

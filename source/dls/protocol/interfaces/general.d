@@ -23,7 +23,15 @@ class InitializeParams
 
     static class InitializationOptions
     {
-        bool upgradeProgress;
+        static class LSPExtensions
+        {
+            bool upgradeSelections;
+            bool upgradeDls;
+        }
+
+        LSPExtensions lspExtensions;
+
+        mixin Constructor!InitializationOptions;
     }
 
     Nullable!ulong processId;
