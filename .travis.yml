@@ -17,8 +17,8 @@ script:
   - dub test --arch=$ARCH --compiler=$DC
   - dub build --build=release --arch=$ARCH --compiler=$DC
 before_deploy:
-  - strip dls
-  - zip dls-${TRAVIS_TAG:-untagged}.$TRAVIS_OS_NAME.$ARCH.zip dls
+  - if [[ "$TRAVIS_OS_NAME" == 'linux' ]]; then strip dls; fi
+  - zip -9 dls-${TRAVIS_TAG:-untagged}.$TRAVIS_OS_NAME.$ARCH.zip dls
 deploy:
   provider: releases
   api_key:

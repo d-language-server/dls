@@ -22,7 +22,7 @@ build_script:
   - dub build --build=release --arch=%BUILD_ARCH%
 after_build:
   - if not defined APPVEYOR_REPO_TAG_NAME (set TAG_NAME=untagged)
-  - 7z a dls-%TAG_NAME%.windows.%ARCH%.zip dls.exe
+  - 7z -mx=9 a dls-%TAG_NAME%.windows.%ARCH%.zip dls.exe
 test_script:
   - dub test --arch=%BUILD_ARCH%
 artifacts:
