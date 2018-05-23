@@ -146,7 +146,7 @@ string downloadDls(in void function(size_t progress) progressCallback = null)
 
         foreach (name, member; archive.directory)
         {
-            write(buildNormalizedPath(dlsDir, name), member.expandedData);
+            write(buildNormalizedPath(dlsDir, name), archive.expand(member));
         }
 
         return buildNormalizedPath(dlsDir, dlsExecutable);
