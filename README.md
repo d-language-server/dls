@@ -75,7 +75,8 @@ The steps are:
 - `dub fetch dls` will fetch the latest version of DLS
 - `dub run --quiet dls:bootstrap` will output the path to a symlink pointing to the latest DLS executable
 
-Nothing specific is required on the client's part regarding updates: the server will send notifications to the user when an update is available, and build its next version (in parallel to responding to requests).
+Nothing specific is required on the client's part regarding updates: the server will send notifications to the user when an update is available, and download/build the new version (in parallel to responding to requests).
+Binary downloads are available and should be picked up automatically for Windows, macOS and Linux in both x86 and x86_64 flavors.
 
 ## Caveats
 
