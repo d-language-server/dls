@@ -90,7 +90,9 @@ shared static this()
     return false;
 }
 
-string downloadDls(in void function(size_t progress) progressCallback = null)
+string downloadDls(in void function(size_t size) totalSizeCallback = null,
+        in void function(size_t size) chunkSizeCallback = null,
+        in void function() extractCallback = null)
 {
     import std.array : appender;
     import std.net.curl : HTTP;
@@ -122,25 +124,33 @@ string downloadDls(in void function(size_t progress) progressCallback = null)
             return data.length;
         };
 
-        if (progressCallback !is null)
-        {
-            request.onProgress = (size_t dlTotal, size_t dlNow, size_t ulTotal, size_t ulNow) {
-                import std.conv : to;
+        request.onProgress = (size_t dlTotal, size_t dlNow, size_t ulTotal, size_t ulNow) {
+            static bool started;
 
-                static size_t percentage;
-                const newPercentage = (dlTotal == 0) ? 0 : 10 * (10 * dlNow / dlTotal);
+            if (!started && dlTotal > 0)
+            {
+                started = true;
 
-                if (newPercentage > percentage)
+                if (totalSizeCallback !is null)
                 {
-                    progressCallback(newPercentage - percentage);
-                    percentage = newPercentage;
+                    totalSizeCallback(dlTotal);
                 }
+            }
 
-                return 0;
-            };
-        }
+            if (chunkSizeCallback !is null && dlNow > 0)
+            {
+                chunkSizeCallback(dlNow);
+            }
+
+            return 0;
+        };
 
         request.perform();
+
+        if (extractCallback !is null)
+        {
+            extractCallback();
+        }
 
         auto archive = new ZipArchive(archiveData.data);
 

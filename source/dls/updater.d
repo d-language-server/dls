@@ -118,9 +118,18 @@ void update(shared(InitializeParams.InitializationOptions) initOptions)
     {
         try
         {
-            dlsPath = downloadDls(initOptions.lspExtensions.upgradeDls ? (size_t progress) {
-                Server.send("$/dls.upgradeDls.progress", progress);
-            } : null);
+            enum totalSizeCallback = (size_t size) {
+                Server.send("$/dls.upgradeDls.totalSize", size);
+            };
+            enum chunkSizeCallback = (size_t size) {
+                Server.send("$/dls.upgradeDls.currentSize", size);
+            };
+            enum extractCallback = () { Server.send("$/dls.upgradeDls.extract"); };
+
+            dlsPath = downloadDls(initOptions.lspExtensions.upgradeDls
+                    ? totalSizeCallback : null, initOptions.lspExtensions.upgradeDls
+                    ? chunkSizeCallback : null,
+                    initOptions.lspExtensions.upgradeDls ? extractCallback : null);
             success = true;
         }
         catch (Exception e)

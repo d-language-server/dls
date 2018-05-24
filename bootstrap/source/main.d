@@ -57,11 +57,14 @@ int main(string[] args)
     if (!check)
     {
         const dlsDir = thisExePath().dirName.dirName;
-        output = (method == Method.download || (method == Method.auto_ && canDownloadDls)) ? downloadDls(
-                (progress) {
-            stderr.rawWrite(progress.to!string ~ '\n');
+        enum printSize = (size_t size) {
+            stderr.rawWrite(size.to!string ~ '\n');
             stderr.flush();
-        }) : buildDls(dlsDir);
+        };
+        enum printExtract = () { stderr.rawWrite("extract\n"); stderr.flush(); };
+
+        output = (method == Method.download || (method == Method.auto_ && canDownloadDls)) ? downloadDls(printSize,
+                printSize, printExtract) : buildDls(dlsDir);
         output = linkDls(output);
     }
     else
