@@ -29,6 +29,7 @@ artifacts:
   - path: dls-*.zip
 deploy:
   - provider: Github
+    auth_token: $(GITHUB_API_KEY)
     artifact: dls-*.zip
     on:
       appveyor_repo_tag: true

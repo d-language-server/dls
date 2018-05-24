@@ -21,8 +21,8 @@ before_deploy:
   - zip -9 dls-${TRAVIS_TAG:-untagged}.$TRAVIS_OS_NAME.$ARCH.zip dls
 deploy:
   provider: releases
-  api_key:
-    secure: $SECURE_API_KEY
+  api_key: $GITHUB_API_KEY
+  file_glob: true
   file: dls-*.zip
   skip_cleanup: true
   on:
