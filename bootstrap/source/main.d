@@ -57,11 +57,14 @@ int main(string[] args)
     if (!check)
     {
         const dlsDir = thisExePath().dirName.dirName;
-        enum printSize = (size_t size) {
+        enum printSize = progress ? (size_t size) {
             stderr.rawWrite(size.to!string ~ '\n');
             stderr.flush();
-        };
-        enum printExtract = () { stderr.rawWrite("extract\n"); stderr.flush(); };
+        } : null;
+        enum printExtract = progress ? () {
+            stderr.rawWrite("extract\n");
+            stderr.flush();
+        } : null;
 
         output = (method == Method.download || (method == Method.auto_ && canDownloadDls)) ? downloadDls(printSize,
                 printSize, printExtract) : buildDls(dlsDir);
