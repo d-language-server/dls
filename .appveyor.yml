@@ -21,6 +21,7 @@ install:
 build_script:
   - dub build --build=release --arch=%BUILD_ARCH%
 after_build:
+  - if defined APPVEYOR_REPO_TAG_NAME (set TAG_NAME=%APPVEYOR_REPO_TAG_NAME%)
   - if not defined APPVEYOR_REPO_TAG_NAME (set TAG_NAME=untagged)
   - 7z -mx=9 a dls-%TAG_NAME%.windows.%ARCH%.zip dls.exe
 test_script:
@@ -28,7 +29,7 @@ test_script:
 artifacts:
   - path: dls-*.zip
 deploy:
-  - provider: Github
+  - provider: GitHub
     auth_token: $(GITHUB_API_KEY)
     artifact: dls-*.zip
     on:
