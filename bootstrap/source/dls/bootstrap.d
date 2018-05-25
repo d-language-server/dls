@@ -77,7 +77,7 @@ shared static this()
             if (asset["name"].str == format(dlsArchiveName, latestRelease["tag_name"].str))
             {
                 downloadUrl = asset["browser_download_url"].str;
-                downloadVersion = latestRelease["name"].str;
+                downloadVersion = latestRelease["tag_name"].str;
                 return true;
             }
         }
