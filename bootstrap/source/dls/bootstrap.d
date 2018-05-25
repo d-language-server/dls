@@ -156,7 +156,20 @@ string downloadDls(in void function(size_t size) totalSizeCallback = null,
 
         foreach (name, member; archive.directory)
         {
-            write(buildNormalizedPath(dlsDir, name), archive.expand(member));
+            const memberPath = buildNormalizedPath(dlsDir, name);
+            write(memberPath, archive.expand(member));
+
+            version (Posix)
+            {
+                import core.sys.posix.sys.stat : chmod;
+                import std.conv : octal;
+                import std.string : toStringz;
+
+                if (name == dlsExecutable)
+                {
+                    chmod(memberPath.toStringz(), octal!755);
+                }
+            }
         }
 
         return buildNormalizedPath(dlsDir, dlsExecutable);
