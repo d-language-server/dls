@@ -57,11 +57,11 @@ int main(string[] args)
     if (!check)
     {
         const dlsDir = thisExePath().dirName.dirName;
-        enum printSize = progress ? (size_t size) {
+        const printSize = progress ? (size_t size) {
             stderr.rawWrite(size.to!string ~ '\n');
             stderr.flush();
         } : null;
-        enum printExtract = progress ? () {
+        const printExtract = progress ? () {
             stderr.rawWrite("extract\n");
             stderr.flush();
         } : null;
