@@ -4,6 +4,9 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.5.1
+- Fixed constant update nagging when DLS is already at the latest version
+
 ### 0.5.0
 - __Removed `telemetry/event` notification usage__
 - Added support for upgrades using automatic binary builds
