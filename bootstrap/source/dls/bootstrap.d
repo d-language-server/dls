@@ -221,9 +221,14 @@ string linkDls(in string dlsPath)
     {
         import std.file : FileException;
         import std.format : format;
-        import std.process : Config, executeShell;
+        import std.process : Config, execute;
 
-        const result = executeShell(format!"MKLINK %s %s"(linkPath, dlsPath));
+        const command = [
+            "powershell.exe",
+            format!"Start-Process -FilePath cmd.exe -ArgumentList '/c mklink %s %s' -Verb runas"(linkPath,
+                dlsPath)
+        ];
+        const result = execute(command);
 
         if (result.status != 0)
         {
