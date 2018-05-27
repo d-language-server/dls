@@ -4,6 +4,9 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.5.2
+- Fixed symlinks not being created on Windows 
+
 #### 0.5.1
 - Fixed constant update nagging when DLS is already at the latest version
 
