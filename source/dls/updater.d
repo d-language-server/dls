@@ -84,14 +84,14 @@ void update(shared(InitializeParams.InitializationOptions) initOptions)
     const latestVersion = latestRelease["tag_name"].str;
     const releaseDate = SysTime.fromISOExtString(latestRelease["published_at"].str);
 
-    if (latestVersion.length == 0 || currentVersion >= latestVersion
+    if (latestVersion.length == 0 || ('v' ~ currentVersion) >= latestVersion
             || (Clock.currTime - releaseDate < 1.hours))
     {
         return;
     }
 
     auto id = Util.sendMessageRequest(Util.ShowMessageRequestType.upgradeDls,
-            [latestVersion, currentVersion]);
+            [latestVersion, ('v' ~ currentVersion)]);
     const threadName = "updater";
     register(threadName, thisTid());
     send(ownerTid(), Util.ThreadMessageData(id,
