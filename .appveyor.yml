@@ -4,8 +4,10 @@ environment:
   matrix:
     - ARCH: x86
       BUILD_ARCH: x86_mscoff
+      CURL_BIN_DIR: bin
     - ARCH: x86_64
       BUILD_ARCH: x86_64
+      CURL_BIN_DIR: bin64
 install:
   - ps: function extractCompiler
         {
@@ -14,16 +16,18 @@ install:
           popd;
         }
   - ps: $latest = (Invoke-WebRequest "http://downloads.dlang.org/releases/LATEST").toString()
-  - ps: $url = "http://downloads.dlang.org/releases/2.x/$latest/dmd.$latest.windows.7z"
+  - ps: $url = "http://downloads.dlang.org/releases/2.x/$($latest)/dmd.$($latest).windows.7z"
   - ps: Invoke-WebRequest $url -OutFile "c:\dmd.7z"
   - ps: extractCompiler
   - ps: $env:PATH += ';C:\dmd2\windows\bin;'
 build_script:
   - dub build --build=release --arch=%BUILD_ARCH%
 after_build:
+  - ps: Remove-Item *.dll
+  - ps: Copy-Item "C:\dmd2\windows\$($env:CURL_BIN_DIR)\libcurl.dll" .
   - if defined APPVEYOR_REPO_TAG_NAME (set TAG_NAME=%APPVEYOR_REPO_TAG_NAME%)
   - if not defined APPVEYOR_REPO_TAG_NAME (set TAG_NAME=untagged)
-  - 7z -mx=9 a dls-%TAG_NAME%.windows.%ARCH%.zip dls.exe
+  - 7z -mx=9 a dls-%TAG_NAME%.windows.%ARCH%.zip dls.exe libcurl.dll
 test_script:
   - dub test --arch=%BUILD_ARCH%
 artifacts:
