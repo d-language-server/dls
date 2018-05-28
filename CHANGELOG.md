@@ -4,6 +4,9 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.5.3
+- Added libcurl.dll to the Windows zip archive
+
 #### 0.5.2
 - Fixed symlinks not being created on Windows 
 
