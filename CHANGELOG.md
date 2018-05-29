@@ -4,6 +4,10 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.5.4
+- Added symlink to libcurl.dll in `.bin` directory
+- Added custom notifications documentation in README
+
 #### 0.5.3
 - Added libcurl.dll to the Windows zip archive
 

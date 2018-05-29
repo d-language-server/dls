@@ -93,7 +93,17 @@ The server needs to know at least when `dub.selections.json` files change to pro
 If `dub.json` and `dub.sdl` are also watched, `dub.selections.json` will automatically be regenerated and then it will be used for completion support.
 Watching `*.ini` allows DLS to monitor D-Scanner config files, even if the name is changed in the config and isn't precisly `dscanner.ini`.
 
-As support for messages regarding workspace folders are not yet supported in Visual Studio Code (used for testing the server), dls also lacks support for multiple workspace folders for now.
+## Custom messages
+The LSP defines messages with methods starting in `$/` to be implementation dependant.
+DLS uses `$/dls` as a prefix for some custom messages.
+
+|Message                     |Type        |Parameter|Description                                                                |
+|----------------------------|------------|---------|---------------------------------------------------------------------------|
+|`$/dls.upgradeDls.start`    |Notification|`null`   |Sent when the upgrade process starts                                       |
+|`$/dls.upgradeDls.stop`     |Notification|`null`   |Sent when the upgrade process stops                                        |
+|`$/dls.upgradeDls.totalSize`|Notification|`number` |Sent during the download, with the total size of the upgrade download      |
+|`$/dls.upgradeDls.chunkSize`|Notification|`number` |Sent during the download, with the size of a chunk that was just downloaded|
+|`$/dls.upgradeDls.extract`  |Notification|`null`   |Sent when the download is finished and the contents are written on the disk|
 
 ## Example usage
 
