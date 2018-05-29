@@ -1,5 +1,6 @@
 # D Language Server
 
+[![DUB Package](https://img.shields.io/dub/v/dls.svg)](https://code.dlang.org/packages/dls)
 [![Build Status](https://travis-ci.org/LaurentTreguier/dls.svg?branch=master)](https://travis-ci.org/LaurentTreguier/dls)
 [![Build status](https://ci.appveyor.com/api/projects/status/apmr87v3yvkxb5dm/branch/master?svg=true)](https://ci.appveyor.com/project/LaurentTreguier/dls)
 
