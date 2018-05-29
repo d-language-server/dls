@@ -50,6 +50,7 @@ private immutable string dlsArchiveName;
 private immutable string dlsDirName = "dls-%s";
 private string downloadUrl;
 private string downloadVersion;
+private string[] archiveMemberPaths;
 
 shared static this()
 {
@@ -90,7 +91,7 @@ shared static this()
     return false;
 }
 
-string downloadDls(in void function(size_t size) totalSizeCallback = null,
+void downloadDls(in void function(size_t size) totalSizeCallback = null,
         in void function(size_t size) chunkSizeCallback = null,
         in void function() extractCallback = null)
 {
@@ -153,11 +154,13 @@ string downloadDls(in void function(size_t size) totalSizeCallback = null,
         }
 
         auto archive = new ZipArchive(archiveData.data);
+        archiveMemberPaths = [];
 
         foreach (name, member; archive.directory)
         {
             const memberPath = buildNormalizedPath(dlsDir, name);
             write(memberPath, archive.expand(member));
+            archiveMemberPaths ~= memberPath;
 
             version (Posix)
             {
@@ -171,14 +174,14 @@ string downloadDls(in void function(size_t size) totalSizeCallback = null,
                 }
             }
         }
-
-        return buildNormalizedPath(dlsDir, dlsExecutable);
     }
-
-    throw new UpgradeFailedException("Cannot download DLS");
+    else
+    {
+        throw new UpgradeFailedException("Cannot download DLS");
+    }
 }
 
-string buildDls(in string dlsDir, in string[] additionalArgs = [])
+void buildDls(in string dlsDir, in string[] additionalArgs = [])
 {
     import std.process : Config, execute;
 
@@ -196,37 +199,60 @@ string buildDls(in string dlsDir, in string[] additionalArgs = [])
         throw new UpgradeFailedException("Build failed: " ~ result.output);
     }
 
-    return buildNormalizedPath(dlsDir, dlsExecutable);
+    archiveMemberPaths = [buildNormalizedPath(dlsDir, dlsExecutable)];
 }
 
-string linkDls(in string dlsPath)
+string linkDls()
 {
     import std.file : FileException;
+    import std.path : baseName;
+    import std.string : endsWith;
 
-    if (!isFile(dlsPath))
+    string dlsLinkPath;
+
+    foreach (memberPath; archiveMemberPaths)
     {
-        throw new FileException(format!"%s doesn't exist"(dlsPath));
-    }
+        if (!isFile(memberPath))
+        {
+            throw new FileException(format!"%s doesn't exist"(memberPath));
+        }
 
-    const linkPath = buildNormalizedPath(dubBinDir, dlsExecutable);
+        const linkPath = buildNormalizedPath(dubBinDir, baseName(memberPath));
 
-    mkdirRecurse(dubBinDir);
+        mkdirRecurse(dubBinDir);
 
-    if (exists(linkPath))
-    {
-        remove(linkPath);
+        if (exists(linkPath))
+        {
+            remove(linkPath);
+        }
+
+        if (memberPath.endsWith(dlsExecutable))
+        {
+            dlsLinkPath = linkPath;
+        }
     }
 
     version (Windows)
     {
+        import std.algorithm : joiner, map;
+        import std.conv : to;
         import std.file : FileException;
         import std.format : format;
         import std.process : Config, execute;
 
+        string[] mklinks;
+
+        foreach (memberPath; archiveMemberPaths)
+        {
+            mklinks ~= format("mklink %s %s", buildNormalizedPath(dubBinDir,
+                    baseName(memberPath)), memberPath);
+        }
+
+        const mklinkCommand = mklinks.joiner(" & ").to!string;
         const command = [
             "powershell.exe",
-            format!"Start-Process -FilePath cmd.exe -ArgumentList '/c mklink %s %s' -Verb runas"(linkPath,
-                dlsPath)
+            format!"Start-Process -FilePath cmd.exe -ArgumentList '/c %s' -Verb runas"(
+                mklinkCommand)
         ];
         const result = execute(command);
 
@@ -239,14 +265,18 @@ string linkDls(in string dlsPath)
     {
         import std.file : symlink;
 
-        symlink(dlsPath, linkPath);
+        foreach (memberPath; archiveMemberPaths)
+        {
+            const linkPath = buildNormalizedPath(dubBinDir, baseName(memberPath));
+            symlink(memberPath, linkPath);
+        }
     }
     else
     {
         static assert(false, "Platform not suported");
     }
 
-    return linkPath;
+    return dlsLinkPath;
 }
 
 @property string dubBinDir()

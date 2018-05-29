@@ -66,9 +66,9 @@ int main(string[] args)
             stderr.flush();
         } : null;
 
-        output = (method == Method.download || (method == Method.auto_ && canDownloadDls)) ? downloadDls(printSize,
+        (method == Method.download || (method == Method.auto_ && canDownloadDls)) ? downloadDls(printSize,
                 printSize, printExtract) : buildDls(dlsDir);
-        output = linkDls(output);
+        output = linkDls();
     }
     else
     {

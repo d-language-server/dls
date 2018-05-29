@@ -98,7 +98,6 @@ void update(shared(InitializeParams.InitializationOptions) initOptions)
             Util.ShowMessageRequestType.upgradeDls, threadName));
 
     const shouldUpgrade = receiveOnly!bool();
-    string dlsPath;
 
     if (!shouldUpgrade)
     {
@@ -126,7 +125,7 @@ void update(shared(InitializeParams.InitializationOptions) initOptions)
             };
             enum extractCallback = () { Server.send("$/dls.upgradeDls.extract"); };
 
-            dlsPath = downloadDls(initOptions.lspExtensions.upgradeDls
+            downloadDls(initOptions.lspExtensions.upgradeDls
                     ? totalSizeCallback : null, initOptions.lspExtensions.upgradeDls
                     ? chunkSizeCallback : null,
                     initOptions.lspExtensions.upgradeDls ? extractCallback : null);
@@ -152,7 +151,7 @@ void update(shared(InitializeParams.InitializationOptions) initOptions)
         {
             try
             {
-                dlsPath = buildDls(pack.path.toString().normalized, additionalArgs[i]);
+                buildDls(pack.path.toString().normalized, additionalArgs[i]);
                 success = true;
             }
             catch (UpgradeFailedException e)
@@ -171,7 +170,7 @@ void update(shared(InitializeParams.InitializationOptions) initOptions)
 
     try
     {
-        linkDls(dlsPath);
+        linkDls();
         id = Util.sendMessageRequest(Util.ShowMessageRequestType.showChangelog, [latestVersion]);
         send(ownerTid(), Util.ThreadMessageData(id,
                 Util.ShowMessageRequestType.showChangelog, changelogUrl));
