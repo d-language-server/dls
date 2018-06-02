@@ -5,7 +5,7 @@ import std.format : format;
 import std.path : buildNormalizedPath;
 
 immutable repoBase = import("repo.txt");
-immutable apiEndpoint = format!"https://api.github.com/repos/%s/dls/releases/latest"(repoBase);
+immutable apiEndpoint = format!"https://api.github.com/repos/%s/dls/%%s"(repoBase);
 
 version (Windows)
 {
@@ -66,20 +66,24 @@ shared static this()
 
 @property bool canDownloadDls()
 {
+    import std.algorithm : min;
     import std.json : JSONException, parseJSON;
     import std.net.curl : get;
 
     try
     {
-        const latestRelease = parseJSON(get(apiEndpoint));
+        const releases = parseJSON(get(format!apiEndpoint("releases"))).array;
 
-        foreach (asset; latestRelease["assets"].array)
+        foreach (release; releases[0 .. min($, 2)])
         {
-            if (asset["name"].str == format(dlsArchiveName, latestRelease["tag_name"].str))
+            foreach (asset; release["assets"].array)
             {
-                downloadUrl = asset["browser_download_url"].str;
-                downloadVersion = latestRelease["tag_name"].str;
-                return true;
+                if (asset["name"].str == format(dlsArchiveName, release["tag_name"].str))
+                {
+                    downloadUrl = asset["browser_download_url"].str;
+                    downloadVersion = release["tag_name"].str;
+                    return true;
+                }
             }
         }
     }

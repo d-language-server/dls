@@ -80,7 +80,7 @@ void update(shared(InitializeParams.InitializationOptions) initOptions)
         }
     }
 
-    const latestRelease = parseJSON(get(apiEndpoint));
+    const latestRelease = parseJSON(get(format!apiEndpoint("releases/latest")));
     const latestVersion = latestRelease["tag_name"].str;
     const releaseDate = SysTime.fromISOExtString(latestRelease["published_at"].str);
 

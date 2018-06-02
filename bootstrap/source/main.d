@@ -72,8 +72,9 @@ int main(string[] args)
     }
     else
     {
-        output = (method == Method.download ? canDownloadDls : true).to!string;
-        status = (method != Method.download || canDownloadDls) ? 0 : 1;
+        const canDownload = canDownloadDls;
+        output = (method == Method.download ? canDownload : true).to!string;
+        status = (method != Method.download || canDownload) ? 0 : 1;
     }
 
     stdout.rawWrite(output);
