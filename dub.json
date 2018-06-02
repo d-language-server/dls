@@ -13,7 +13,7 @@
 		"dls:bootstrap": "*",
 		"dub": "1.9.0",
 		"dcd": "0.9.8",
-		"dscanner": "0.5.5",
+		"dscanner": "0.5.6",
 		"dfmt": "0.8.0",
 		"arsd-official:email": "2.0.0",
 		"arsd-official:color_base": "2.0.0"
