@@ -376,10 +376,13 @@ class SymbolTool : Tool
             return a.symbolFilePath == b.symbolFilePath && a.symbolLocation == b.symbolLocation;
         }
 
-        return chain(_workspaceCaches.byValue, _libraryCaches.byValue).map!(cache => complete(request,
-                *cache).completions).reduce!q{a ~ b}.sort!compareCompletionsLess
-            .uniq!compareCompletionsEqual.chunkBy!q{a.identifier == b.identifier}.map!(
-                    (resultGroup) {
+        return chain(_workspaceCaches.byValue, _libraryCaches.byValue).map!(
+                cache => complete(request, *cache).completions)
+            .reduce!q{a ~ b}
+            .sort!compareCompletionsLess
+            .uniq!compareCompletionsEqual
+            .chunkBy!q{a.identifier == b.identifier}
+            .map!((resultGroup) {
                 import std.uni : toLower;
 
                 auto firstResult = resultGroup.front;
@@ -403,7 +406,8 @@ class SymbolTool : Tool
                 }
 
                 return item;
-            }).array;
+            })
+            .array;
     }
 
     CompletionItem completionResolve(CompletionItem item)
@@ -428,8 +432,13 @@ class SymbolTool : Tool
 
         auto request = getPreparedRequest(uri, position);
         request.kind = RequestKind.doc;
-        auto completions = getRelevantCaches(uri).map!(cache => getDoc(request, *cache).completions)
-            .reduce!q{a ~ b}.map!q{a.documentation}.filter!q{a.length > 0}.array.sort().uniq();
+        auto completions = getRelevantCaches(uri).map!(cache => getDoc(request,
+                *cache).completions)
+            .reduce!q{a ~ b}
+            .map!q{a.documentation}
+            .filter!q{a.length > 0}
+            .array
+            .sort().uniq();
 
         return completions.empty ? null
             : new Hover(getDocumentation(completions.map!q{ ["", a] }.array));

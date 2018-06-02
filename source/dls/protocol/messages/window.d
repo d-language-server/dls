@@ -104,7 +104,8 @@ abstract class Util
 
         JSONValue tr = translations[which];
         auto title = tr["title"][locale].str;
-        auto actions = tr["actions"].array.filter!(a => !hiddenItems.canFind(a["id"].str))
+        auto actions = tr["actions"].array
+            .filter!(a => !hiddenItems.canFind(a["id"].str))
             .map!(a => new MessageActionItem(a["title"][locale].str));
 
         foreach (i; 0 .. args.length)

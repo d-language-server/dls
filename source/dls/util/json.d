@@ -291,7 +291,10 @@ T convertFromJSON(T : U[], U)(JSONValue json)
             return [convertFromJSON!U(json)];
 
     case JSON_TYPE.ARRAY:
-        return json.array.map!(value => convertFromJSON!U(value)).array.to!T;
+        return json.array
+            .map!(value => convertFromJSON!U(value))
+            .array
+            .to!T;
 
     default:
         throw new JSONException(json.toString() ~ " is not a string type");
