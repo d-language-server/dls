@@ -10,18 +10,18 @@ class AnalysisTool : Tool
     import dls.util.uri : Uri;
     import dscanner.analysis.config : StaticAnalysisConfig,
         defaultStaticAnalysisConfig;
-    import std.experimental.logger : logf;
+    import dls.util.logger : logger;
     import std.path : buildNormalizedPath;
 
     private StaticAnalysisConfig[string] _analysisConfigs;
 
-    void addAnalysisConfigPath(Uri uri)
+    @trusted void addAnalysisConfigPath(Uri uri)
     {
         _analysisConfigs[uri.path] = defaultStaticAnalysisConfig();
         updateAnalysisConfigPath(uri);
     }
 
-    void removeAnalysisConfigPath(Uri uri)
+    @safe void removeAnalysisConfigPath(Uri uri)
     {
         if (uri.path in _analysisConfigs)
         {
@@ -29,10 +29,10 @@ class AnalysisTool : Tool
         }
     }
 
-    void updateAnalysisConfigPath(Uri uri)
+    @trusted void updateAnalysisConfigPath(Uri uri)
     {
         import dls.protocol.interfaces : PublishDiagnosticsParams;
-        import dls.server : Server;
+        import dls.protocol.jsonrpc : send;
         import dls.util.document : Document;
         import inifiled : readINIFile;
         import std.file : exists;
@@ -41,7 +41,7 @@ class AnalysisTool : Tool
 
         if (configPath.exists())
         {
-            logf("Updating config from file %s", configPath);
+            logger.logf("Updating config from file %s", configPath);
             auto conf = uri.path in _analysisConfigs ? _analysisConfigs[uri.path]
                 : defaultStaticAnalysisConfig();
             readINIFile(conf, configPath);
@@ -49,13 +49,13 @@ class AnalysisTool : Tool
 
             foreach (documentUri; Document.uris)
             {
-                Server.send("textDocument/publishDiagnostics",
+                send("textDocument/publishDiagnostics",
                         new PublishDiagnosticsParams(documentUri, scan(documentUri)));
             }
         }
     }
 
-    Diagnostic[] scan(Uri uri)
+    @trusted Diagnostic[] scan(Uri uri)
     {
         import dls.protocol.definitions : DiagnosticSeverity;
         import dls.tools.tools : Tools;
@@ -69,7 +69,7 @@ class AnalysisTool : Tool
         import std.json : JSONValue;
         import std.typecons : Nullable, nullable;
 
-        logf("Scanning document %s", uri.path);
+        logger.logf("Scanning document %s", uri.path);
 
         auto stringCache = StringCache(StringCache.defaultBucketCount);
         auto tokens = getTokensForParser(Document[uri].toString(),
@@ -99,7 +99,7 @@ class AnalysisTool : Tool
         return diagnostics.data;
     }
 
-    private StaticAnalysisConfig getConfig(Uri uri)
+    @trusted private StaticAnalysisConfig getConfig(Uri uri)
     {
         import std.algorithm : startsWith;
         import std.array : array;

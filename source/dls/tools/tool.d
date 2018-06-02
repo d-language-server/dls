@@ -6,7 +6,7 @@ abstract class Tool
 
     package static Configuration _configuration;
 
-    static this()
+    @safe static this()
     {
         _configuration = new Configuration();
     }

@@ -2,7 +2,7 @@ module dls.protocol.messages.general;
 
 import dls.protocol.interfaces.general;
 import dls.server : Server;
-import std.experimental.logger : log;
+import dls.util.logger : logger;
 import std.json : JSONValue;
 import std.typecons : nullable;
 
@@ -18,7 +18,7 @@ InitializeResult initialize(InitializeParams params)
 
     Server.initialized = true;
     Server.initState = params;
-    log("Initializing server");
+    logger.log("Initializing server");
     Tools.initialize();
 
     Uri[] uris;
@@ -67,6 +67,7 @@ InitializeResult initialize(InitializeParams params)
 @("")
 void initialized(JSONValue nothing)
 {
+    import dls.protocol.jsonrpc : send;
     import dls.protocol.interfaces : DidChangeWatchedFilesRegistrationOptions,
         FileSystemWatcher, Registration, RegistrationParams;
 
@@ -85,7 +86,7 @@ void initialized(JSONValue nothing)
 
     if (!didChangeWatchedFiles.isNull && didChangeWatchedFiles.dynamicRegistration)
     {
-        log("Registering watchers");
+        logger.log("Registering watchers");
         auto watchers = [
             new FileSystemWatcher("**/dub.selections.json"),
             new FileSystemWatcher("**/dub.{json,sdl}"), new FileSystemWatcher("**/*.ini")
@@ -94,7 +95,7 @@ void initialized(JSONValue nothing)
         auto registration = new Registration!DidChangeWatchedFilesRegistrationOptions(
                 "dls-registration-watch-dub-files",
                 "workspace/didChangeWatchedFiles", registrationOptions.nullable);
-        Server.send("client/registerCapability",
+        send("client/registerCapability",
                 new RegistrationParams!DidChangeWatchedFilesRegistrationOptions([registration]));
     }
 }
@@ -102,7 +103,7 @@ void initialized(JSONValue nothing)
 @("")
 JSONValue shutdown(JSONValue nothing)
 {
-    log("Shutting down server");
+    logger.log("Shutting down server");
     Server.shutdown = true;
     return JSONValue(null);
 }
@@ -110,7 +111,7 @@ JSONValue shutdown(JSONValue nothing)
 @("")
 void exit(JSONValue nothing)
 {
-    log("Exiting server");
+    logger.log("Exiting server");
     Server.exit = true;
 }
 

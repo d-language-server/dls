@@ -10,7 +10,7 @@ import std.typecons : Nullable, nullable;
 /++
 Converts a `JSONValue` to an object of type `T` by filling its fields with the JSON's fields.
 +/
-T convertFromJSON(T)(JSONValue json)
+@trusted T convertFromJSON(T)(JSONValue json)
         if ((is(T == class) || is(T == struct)) && !is(T == JSONValue))
 {
     static if (is(T == class))
@@ -103,7 +103,7 @@ unittest
     assert(testClass.testStruct.json["key"].str == "value");
 }
 
-N convertFromJSON(N : Nullable!T, T)(JSONValue json)
+@trusted N convertFromJSON(N : Nullable!T, T)(JSONValue json)
 {
     return (json.type == JSON_TYPE.NULL) ? N() : convertFromJSON!T(json).nullable;
 }
@@ -118,7 +118,7 @@ unittest
     assert(convertFromJSON!(Nullable!int)(json).isNull);
 }
 
-T convertFromJSON(T : JSONValue)(JSONValue json)
+@trusted T convertFromJSON(T : JSONValue)(JSONValue json)
 {
     return json.nullable;
 }
@@ -128,7 +128,7 @@ unittest
     assert(convertFromJSON!JSONValue(JSONValue(42)) == JSONValue(42));
 }
 
-T convertFromJSON(T)(JSONValue json) if (isNumeric!T)
+@trusted T convertFromJSON(T)(JSONValue json) if (isNumeric!T)
 {
     switch (json.type)
     {
@@ -169,7 +169,7 @@ unittest
     assert(convertFromJSON!int(JSONValue("42")) == 42);
 }
 
-T convertFromJSON(T)(JSONValue json) if (isBoolean!T)
+@trusted T convertFromJSON(T)(JSONValue json) if (isBoolean!T)
 {
     switch (json.type)
     {
@@ -208,7 +208,7 @@ unittest
     assert(convertFromJSON!bool(JSONValue(42U)) == true);
 }
 
-T convertFromJSON(T)(JSONValue json)
+@trusted T convertFromJSON(T)(JSONValue json)
         if (isSomeChar!T || isSomeString!T || is(T : string) || is(T : wstring) || is(T : dstring))
 {
     switch (json.type)
@@ -278,7 +278,7 @@ unittest
     assert(convertFromJSON!string(JSONValue(true)) == "true");
 }
 
-T convertFromJSON(T : U[], U)(JSONValue json)
+@trusted T convertFromJSON(T : U[], U)(JSONValue json)
         if (isArray!T && !isSomeString!T && !is(T : string) && !is(T : wstring) && !is(T : dstring))
 {
     switch (json.type)
@@ -316,7 +316,7 @@ unittest
     assert(convertFromJSON!(string[])(JSONValue("Hello")) == ["Hello"]);
 }
 
-T convertFromJSON(T : U[K], U, K)(JSONValue json) if (isAssociativeArray!T)
+@trusted T convertFromJSON(T : U[K], U, K)(JSONValue json) if (isAssociativeArray!T)
 {
     U[K] result;
 
@@ -360,7 +360,7 @@ unittest
     assert(convertFromJSON!(int[string])(JSONValue(null)) == dictionary);
 }
 
-Nullable!JSONValue convertToJSON(T)(T value)
+@trusted Nullable!JSONValue convertToJSON(T)(T value)
         if ((is(T == class) || is(T == struct)) && !is(T == JSONValue))
 {
     static if (is(T == class))
@@ -434,7 +434,7 @@ unittest
     assert(!nullJson.isNull && nullJson.get().isNull);
 }
 
-Nullable!JSONValue convertToJSON(N : Nullable!T, T)(N value)
+@trusted Nullable!JSONValue convertToJSON(N : Nullable!T, T)(N value)
 {
     return value.isNull ? Nullable!JSONValue() : convertToJSON!T(value.get());
 }
@@ -445,7 +445,7 @@ unittest
     assert(convertToJSON(Nullable!int(42)) == JSONValue(42));
 }
 
-Nullable!JSONValue convertToJSON(T)(T value)
+@trusted Nullable!JSONValue convertToJSON(T)(T value)
         if ((!is(T == class) && !is(T == struct)) || is(T == JSONValue))
 {
     return JSONValue(value).nullable;
@@ -463,7 +463,7 @@ unittest
     assert(convertToJSON(JSONValue(42)) == JSONValue(42));
 }
 
-Nullable!JSONValue convertToJSON(T : U[], U)(T value)
+@trusted Nullable!JSONValue convertToJSON(T : U[], U)(T value)
         if (isArray!T && !isSomeString!T && !is(T : string) && !is(T : wstring) && !is(T : dstring))
 {
     return JSONValue(value.map!(item => convertToJSON(item))()
@@ -476,7 +476,7 @@ unittest
     assert(convertToJSON(["hello", "world"]) == JSONValue(["hello", "world"]));
 }
 
-Nullable!JSONValue convertToJSON(T : U[string], U)(T value)
+@trusted Nullable!JSONValue convertToJSON(T : U[string], U)(T value)
         if (isAssociativeArray!T)
 {
     auto result = JSONValue();
@@ -502,7 +502,7 @@ unittest
 Removes underscores from names. Some protocol variable names can be reserved names (like `version`) and thus have an
 added underscore in their protocol definition.
 +/
-private string normalizeMemberName(string name)
+@trusted private string normalizeMemberName(string name)
 {
     import std.string : endsWith;
 

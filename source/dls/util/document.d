@@ -12,19 +12,19 @@ class Document
     private static Document[string] _documents;
     private wstring[] _lines;
 
-    static Document opIndex(in Uri uri)
+    @safe static Document opIndex(in Uri uri)
     {
         return uri.path in _documents ? _documents[uri.path] : null;
     }
 
-    @property static auto uris()
+    @trusted @property static auto uris()
     {
         import std.algorithm : map;
 
         return _documents.keys.map!(path => Uri.fromPath(path));
     }
 
-    static void open(in TextDocumentItem textDocument)
+    @safe static void open(in TextDocumentItem textDocument)
     {
         auto path = Uri.getPath(textDocument.uri);
 
@@ -36,7 +36,7 @@ class Document
         _documents[path] = new Document(textDocument);
     }
 
-    static void close(in TextDocumentIdentifier textDocument)
+    @safe static void close(in TextDocumentIdentifier textDocument)
     {
         auto path = Uri.getPath(textDocument.uri);
 
@@ -46,7 +46,7 @@ class Document
         }
     }
 
-    static void change(in VersionedTextDocumentIdentifier textDocument,
+    @safe static void change(in VersionedTextDocumentIdentifier textDocument,
             TextDocumentContentChangeEvent[] events)
     {
         auto path = Uri.getPath(textDocument.uri);
@@ -57,24 +57,24 @@ class Document
         }
     }
 
-    @property const(wstring[]) lines() const
+    @safe @property const(wstring[]) lines() const
     {
         return _lines;
     }
 
-    this(in TextDocumentItem textDocument)
+    @safe this(in TextDocumentItem textDocument)
     {
         _lines = getText(textDocument.text);
     }
 
-    override string toString() const
+    @safe override string toString() const
     {
         import std.range : join;
 
         return _lines.join().toUTF8();
     }
 
-    size_t byteAtPosition(in Position position)
+    @safe size_t byteAtPosition(in Position position)
     {
         import std.algorithm : reduce;
         import std.range : iota;
@@ -85,7 +85,7 @@ class Document
         return linesBytes + characterBytes;
     }
 
-    Range wordRangeAtByte(size_t bytePosition)
+    @safe Range wordRangeAtByte(size_t bytePosition)
     {
         import std.algorithm : min;
 
@@ -104,7 +104,7 @@ class Document
         return wordRangeAtLineAndByte(lineNumber, min(bytePosition - bytes, line.length));
     }
 
-    Range wordRangeAtLineAndByte(size_t lineNumber, size_t bytePosition)
+    @safe Range wordRangeAtLineAndByte(size_t lineNumber, size_t bytePosition)
     {
         import std.regex : matchAll, regex;
         import std.utf : UTFException, validate;
@@ -128,7 +128,7 @@ class Document
                 new Position(lineNumber, startCharacter + (word ? word.hit.length : 0)));
     }
 
-    private void change(in TextDocumentContentChangeEvent[] events)
+    @safe private void change(in TextDocumentContentChangeEvent[] events)
     {
         foreach (event; events)
         {
@@ -164,7 +164,7 @@ class Document
         }
     }
 
-    private wstring[] getText(in string text) const
+    @safe private wstring[] getText(in string text) const
     {
         import std.algorithm : endsWith;
         import std.array : array;

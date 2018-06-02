@@ -2,11 +2,11 @@ module dls.protocol.messages.text_document;
 
 import dls.protocol.definitions;
 import dls.protocol.interfaces.text_document;
-import dls.server : Server;
+import dls.protocol.jsonrpc : send;
 import dls.tools.tools : Tools;
 import dls.util.document : Document;
+import dls.util.logger : logger;
 import dls.util.uri : Uri;
-import std.experimental.logger : logf;
 import std.typecons : Nullable;
 
 void didOpen(DidOpenTextDocumentParams params)
@@ -14,9 +14,9 @@ void didOpen(DidOpenTextDocumentParams params)
     if (params.textDocument.languageId == "d")
     {
         auto uri = new Uri(params.textDocument.uri);
-        logf("Document opened: %s", uri.path);
+        logger.logf("Document opened: %s", uri.path);
         Document.open(params.textDocument);
-        Server.send("textDocument/publishDiagnostics",
+        send("textDocument/publishDiagnostics",
                 new PublishDiagnosticsParams(uri, Tools.analysisTool.scan(uri)));
     }
 }
@@ -24,7 +24,7 @@ void didOpen(DidOpenTextDocumentParams params)
 void didChange(DidChangeTextDocumentParams params)
 {
     auto uri = new Uri(params.textDocument.uri);
-    logf("Document changed: %s", uri.path);
+    logger.logf("Document changed: %s", uri.path);
     Document.change(params.textDocument, params.contentChanges);
 }
 
@@ -43,8 +43,8 @@ void didSave(DidSaveTextDocumentParams params)
 
     if (Document[uri])
     {
-        logf("Document saved: %s", uri.path);
-        Server.send("textDocument/publishDiagnostics",
+        logger.logf("Document saved: %s", uri.path);
+        send("textDocument/publishDiagnostics",
                 new PublishDiagnosticsParams(uri, Tools.analysisTool.scan(uri)));
     }
 }
@@ -52,9 +52,9 @@ void didSave(DidSaveTextDocumentParams params)
 void didClose(DidCloseTextDocumentParams params)
 {
     auto uri = new Uri(params.textDocument.uri);
-    logf("Document closed: %s", uri.path);
+    logger.logf("Document closed: %s", uri.path);
     Document.close(params.textDocument);
-    Server.send("textDocument/publishDiagnostics", new PublishDiagnosticsParams(uri, []));
+    send("textDocument/publishDiagnostics", new PublishDiagnosticsParams(uri, []));
 }
 
 CompletionItem[] completion(CompletionParams params)
@@ -148,7 +148,7 @@ ColorPresentation[] colorPresentation(ColorPresentationParams params)
 TextEdit[] formatting(DocumentFormattingParams params)
 {
     auto uri = new Uri(params.textDocument.uri);
-    logf("Formatting %s", uri.path);
+    logger.logf("Formatting %s", uri.path);
     return Tools.formatTool.formatting(uri, params.options);
 }
 

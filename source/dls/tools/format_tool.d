@@ -39,7 +39,7 @@ class FormatTool : Tool
     import dls.protocol.interfaces : FormattingOptions;
     import dls.util.uri : Uri;
 
-    TextEdit[] formatting(Uri uri, FormattingOptions options)
+    @trusted TextEdit[] formatting(Uri uri, FormattingOptions options)
     {
         import dfmt.config : Config;
         import dfmt.editorconfig : IndentStyle, OptionalBoolean;

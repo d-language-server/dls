@@ -2,7 +2,7 @@ module dls.util.constructor;
 
 mixin template Constructor(T)
 {
-    this()
+    @safe this()
     {
         foreach (member; __traits(derivedMembers, T))
         {

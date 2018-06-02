@@ -11,7 +11,7 @@ class Position
     size_t line;
     size_t character;
 
-    this(size_t line = size_t.init, size_t character = size_t.init)
+    @safe this(size_t line = size_t.init, size_t character = size_t.init)
     {
         this.line = line;
         this.character = character;
@@ -23,7 +23,7 @@ class Range
     Position start;
     Position end;
 
-    this(Position start = new Position(), Position end = new Position())
+    @safe this(Position start = new Position(), Position end = new Position())
     {
         this.start = start;
         this.end = end;
@@ -35,7 +35,7 @@ class Location
     DocumentUri uri;
     Range range;
 
-    this(DocumentUri uri = DocumentUri.init, Range range = new Range())
+    @safe this(DocumentUri uri = DocumentUri.init, Range range = new Range())
     {
         this.uri = uri;
         this.range = range;
@@ -51,7 +51,7 @@ class Diagnostic
     Nullable!string source;
     Nullable!(DiagnosticRelatedInformation[]) relatedInformation;
 
-    this(Range range = new Range(), string message = string.init,
+    @safe this(Range range = new Range(), string message = string.init,
             Nullable!DiagnosticSeverity severity = Nullable!DiagnosticSeverity.init,
             Nullable!JSONValue code = Nullable!JSONValue.init,
             Nullable!string source = Nullable!string.init,
@@ -80,7 +80,7 @@ class DiagnosticRelatedInformation
     Location location;
     string message;
 
-    this(Location location = new Location(), string message = string.init)
+    @safe this(Location location = new Location(), string message = string.init)
     {
         this.location = location;
         this.message = message;
@@ -93,7 +93,7 @@ class Command
     string command;
     Nullable!(JSONValue[]) arguments;
 
-    this(string title = string.init, string command = string.init,
+    @safe this(string title = string.init, string command = string.init,
             Nullable!(JSONValue[]) arguments = Nullable!(JSONValue[]).init)
     {
         this.title = title;
@@ -107,7 +107,7 @@ class TextEdit
     Range range;
     string newText;
 
-    this(Range range = new Range(), string newText = string.init)
+    @safe this(Range range = new Range(), string newText = string.init)
     {
         this.range = range;
         this.newText = newText;
@@ -119,7 +119,7 @@ class TextDocumentEdit
     VersionedTextDocumentIdentifier textDocument;
     TextEdit[] edits;
 
-    this(VersionedTextDocumentIdentifier textDocument = new VersionedTextDocumentIdentifier(),
+    @safe this(VersionedTextDocumentIdentifier textDocument = new VersionedTextDocumentIdentifier(),
             TextEdit[] edits = TextEdit[].init)
     {
         this.textDocument = textDocument;
@@ -132,8 +132,9 @@ class WorkspaceEdit
     Nullable!((TextEdit[])[string]) changes;
     Nullable!(TextDocumentEdit[]) documentChanges;
 
-    this(Nullable!((TextEdit[])[string]) changes = Nullable!((TextEdit[])[string]).init,
-            Nullable!(TextDocumentEdit[]) documentChanges = Nullable!(TextDocumentEdit[]).init)
+    @safe this(Nullable!((TextEdit[])[string]) changes = Nullable!((TextEdit[])[string])
+            .init, Nullable!(TextDocumentEdit[]) documentChanges = Nullable!(
+                TextDocumentEdit[]).init)
     {
         this.changes = changes;
         this.documentChanges = documentChanges;
@@ -172,7 +173,7 @@ class DocumentFilter
     Nullable!string scheme;
     Nullable!string pattern;
 
-    this(Nullable!string languageId = Nullable!string.init,
+    @safe this(Nullable!string languageId = Nullable!string.init,
             Nullable!string scheme = Nullable!string.init,
             Nullable!string pattern = Nullable!string.init)
     {
@@ -195,7 +196,7 @@ class MarkupContent
     MarkupKind kind;
     string value;
 
-    this(MarkupKind kind = MarkupKind.init, string value = string.init)
+    @safe this(MarkupKind kind = MarkupKind.init, string value = string.init)
     {
         this.kind = kind;
         this.value = value;

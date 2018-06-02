@@ -8,13 +8,14 @@ private enum descriptionJson = import("description.json");
 private immutable changelogUrl = format!"https://github.com/%s/dls/blob/master/CHANGELOG.md"(
         repoBase);
 
-void update(shared(InitializeParams.InitializationOptions) initOptions)
+@trusted void update(shared(InitializeParams.InitializationOptions) initOptions)
 {
     import core.time : hours;
     import dls.bootstrap : UpgradeFailedException, apiEndpoint, buildDls,
         canDownloadDls, downloadDls, dubBinDir, linkDls;
+    static import dls.protocol.jsonrpc;
     import dls.protocol.messages.window : Util;
-    import dls.server : Server;
+    import dls.util.logger : logger;
     import dls.util.path : normalized;
     import dub.dependency : Dependency;
     import dub.dub : Dub, FetchOptions;
@@ -22,7 +23,6 @@ void update(shared(InitializeParams.InitializationOptions) initOptions)
     import std.algorithm : find;
     import std.concurrency : ownerTid, receiveOnly, register, send, thisTid;
     import std.datetime : Clock, SysTime;
-    import std.experimental.logger : warningf;
     import std.file : FileException, SpanMode, dirEntries, isFile, remove,
         rmdirRecurse;
     import std.json : parseJSON;
@@ -36,19 +36,19 @@ void update(shared(InitializeParams.InitializationOptions) initOptions)
     auto dub = new Dub();
     Package[] toRemove;
 
-    foreach (dls; dub.packageManager.getPackageIterator("dls"))
+    foreach (dlsPackage; dub.packageManager.getPackageIterator("dls"))
     {
-        if (dls.version_.toString() < currentVersion)
+        if (dlsPackage.version_.toString() < currentVersion)
         {
-            toRemove ~= dls;
+            toRemove ~= dlsPackage;
         }
     }
 
-    foreach (dls; toRemove)
+    foreach (dlsPackage; toRemove)
     {
         try
         {
-            dub.remove(dls);
+            dub.remove(dlsPackage);
         }
         catch (FileException e)
         {
@@ -104,11 +104,11 @@ void update(shared(InitializeParams.InitializationOptions) initOptions)
         return;
     }
 
-    Server.send("$/dls.upgradeDls.start");
+    dls.protocol.jsonrpc.send("$/dls.upgradeDls.start");
 
     scope (exit)
     {
-        Server.send("$/dls.upgradeDls.stop");
+        dls.protocol.jsonrpc.send("$/dls.upgradeDls.stop");
     }
 
     bool success;
@@ -118,12 +118,14 @@ void update(shared(InitializeParams.InitializationOptions) initOptions)
         try
         {
             enum totalSizeCallback = (size_t size) {
-                Server.send("$/dls.upgradeDls.totalSize", size);
+                dls.protocol.jsonrpc.send("$/dls.upgradeDls.totalSize", size);
             };
             enum chunkSizeCallback = (size_t size) {
-                Server.send("$/dls.upgradeDls.currentSize", size);
+                dls.protocol.jsonrpc.send("$/dls.upgradeDls.currentSize", size);
             };
-            enum extractCallback = () { Server.send("$/dls.upgradeDls.extract"); };
+            enum extractCallback = () {
+                dls.protocol.jsonrpc.send("$/dls.upgradeDls.extract");
+            };
 
             downloadDls(initOptions.lspExtensions.upgradeDls
                     ? totalSizeCallback : null, initOptions.lspExtensions.upgradeDls
@@ -133,7 +135,7 @@ void update(shared(InitializeParams.InitializationOptions) initOptions)
         }
         catch (Exception e)
         {
-            warningf("Could not download DLS: %s", e.message);
+            logger.warningf("Could not download DLS: %s", e.message);
         }
     }
 

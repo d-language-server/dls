@@ -46,7 +46,7 @@ void showMessageRequest(string id, MessageActionItem item)
 abstract class Util
 {
     import dls.protocol.interfaces : MessageType;
-    import dls.server : Server;
+    import dls.protocol.jsonrpc : send;
     import std.array : array, replace;
     import std.algorithm : map;
     import std.conv : to;
@@ -91,7 +91,7 @@ abstract class Util
             title = title.replace('$' ~ i.to!string, args[i]);
         }
 
-        Server.send("window/showMessage",
+        send("window/showMessage",
                 new ShowMessageParams(tr["messageType"].integer.to!MessageType, title));
     }
 
@@ -113,7 +113,7 @@ abstract class Util
             title = title.replace('$' ~ (i + 1).to!string, args[i]);
         }
 
-        return Server.send("window/showMessageRequest", new ShowMessageRequestParams(
+        return send("window/showMessageRequest", new ShowMessageRequestParams(
                 tr["messageType"].integer.to!MessageType, title, actions.array.nullable));
     }
 

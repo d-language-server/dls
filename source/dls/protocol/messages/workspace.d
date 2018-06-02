@@ -3,6 +3,7 @@ module dls.protocol.messages.workspace;
 import dls.protocol.interfaces : SymbolInformation;
 import dls.protocol.interfaces.workspace;
 import dls.tools.tools : Tools;
+import dls.util.logger : logger;
 import dls.util.uri : Uri;
 import std.json : JSONValue;
 import std.typecons : Nullable;
@@ -43,25 +44,22 @@ void didChangeConfiguration(DidChangeConfigurationParams params)
 {
     import dls.tools.configuration : Configuration;
     import dls.util.json : convertFromJSON;
-    import std.experimental.logger : log;
 
-    log("Configuration changed");
+    logger.log("Configuration changed");
 
     if ("d" in params.settings && "dls" in params.settings["d"])
     {
-        log("Applying new configuration");
+        logger.log("Applying new configuration");
         Tools.setConfiguration(convertFromJSON!Configuration(params.settings["d"]["dls"]));
     }
 }
 
 void didChangeWatchedFiles(DidChangeWatchedFilesParams params)
 {
-    import dls.server : Server;
     import dls.protocol.interfaces : MessageActionItem, MessageType,
         ShowMessageRequestParams;
     import dls.protocol.messages.window : Util;
     import std.algorithm : canFind;
-    import std.experimental.logger : logf;
     import std.path : baseName, dirName;
 
     foreach (event; params.changes)
@@ -69,7 +67,7 @@ void didChangeWatchedFiles(DidChangeWatchedFilesParams params)
         auto uri = new Uri(event.uri);
         const fileName = baseName(uri.path);
 
-        logf("File changed: %s", uri.path);
+        logger.logf("File changed: %s", uri.path);
 
         switch (fileName)
         {
