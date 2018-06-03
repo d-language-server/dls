@@ -4,6 +4,10 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.5.5
+- Fixed `dls:bootstrap` building DLS if the latest release was still in the process of building binaries
+- Enhanced message logging by using LSP logging instead of stderr
+
 #### 0.5.4
 - Added symlink to libcurl.dll in `.bin` directory
 - Added custom notifications documentation in README
@@ -22,7 +26,7 @@ Breaking changes will be in bold.
 - Added support for upgrades using automatic binary builds
 
 #### 0.4.1
-- __Removed dls:find subpackage__
+- __Removed `dls:find` subpackage__
 - Attempt to work around problems in updating on Windows
 
 ### 0.4.0
@@ -30,7 +34,7 @@ Breaking changes will be in bold.
 - Added completion documentation support
 - Added workspace and document symbols searching support
 - Added documentation on hover support
-- Added dls:bootstrap to supercede dls:find
+- Added `dls:bootstrap` to supercede `dls:find`
 - Enhanced resilience on server exceptions (dls will only crash on errors and never on exceptions)
 - Fixed (really, for good this time) the updater by pining dependency versions
 
