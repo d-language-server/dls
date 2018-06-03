@@ -45,11 +45,11 @@ void didChangeConfiguration(DidChangeConfigurationParams params)
     import dls.tools.configuration : Configuration;
     import dls.util.json : convertFromJSON;
 
-    logger.log("Configuration changed");
+    logger.info("Configuration changed");
 
     if ("d" in params.settings && "dls" in params.settings["d"])
     {
-        logger.log("Applying new configuration");
+        logger.info("Applying new configuration");
         Tools.setConfiguration(convertFromJSON!Configuration(params.settings["d"]["dls"]));
     }
 }
@@ -67,7 +67,7 @@ void didChangeWatchedFiles(DidChangeWatchedFilesParams params)
         auto uri = new Uri(event.uri);
         const fileName = baseName(uri.path);
 
-        logger.logf("File changed: %s", uri.path);
+        logger.infof("File changed: %s", uri.path);
 
         switch (fileName)
         {

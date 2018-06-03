@@ -18,7 +18,7 @@ InitializeResult initialize(InitializeParams params)
 
     Server.initialized = true;
     Server.initState = params;
-    logger.log("Initializing server");
+    logger.info("Initializing server");
     Tools.initialize();
 
     Uri[] uris;
@@ -86,7 +86,7 @@ void initialized(JSONValue nothing)
 
     if (!didChangeWatchedFiles.isNull && didChangeWatchedFiles.dynamicRegistration)
     {
-        logger.log("Registering watchers");
+        logger.info("Registering watchers");
         auto watchers = [
             new FileSystemWatcher("**/dub.selections.json"),
             new FileSystemWatcher("**/dub.{json,sdl}"), new FileSystemWatcher("**/*.ini")
@@ -103,7 +103,7 @@ void initialized(JSONValue nothing)
 @("")
 JSONValue shutdown(JSONValue nothing)
 {
-    logger.log("Shutting down server");
+    logger.info("Shutting down server");
     Server.shutdown = true;
     return JSONValue(null);
 }
@@ -111,7 +111,7 @@ JSONValue shutdown(JSONValue nothing)
 @("")
 void exit(JSONValue nothing)
 {
-    logger.log("Exiting server");
+    logger.info("Exiting server");
     Server.exit = true;
 }
 

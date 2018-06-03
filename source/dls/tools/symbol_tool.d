@@ -247,7 +247,7 @@ class SymbolTool : Tool
 
     @safe void clearPath(Uri uri)
     {
-        logger.logf("Clearing imports from %s", uri.path);
+        logger.infof("Clearing imports from %s", uri.path);
 
         if (uri.path in _workspaceCaches)
         {
@@ -263,7 +263,7 @@ class SymbolTool : Tool
     {
         import std.concurrency : spawn;
 
-        logger.logf("Upgrading dependencies from %s", dirName(uri.path));
+        logger.infof("Upgrading dependencies from %s", dirName(uri.path));
 
         spawn((string uriString) {
             import dub.dub : UpgradeOptions;
@@ -277,7 +277,7 @@ class SymbolTool : Tool
         import dsymbol.string_interning : internString;
         import dsymbol.symbol : DSymbol;
 
-        logger.logf(`Fetching symbols from %s with query "%s"`, uri is null
+        logger.infof(`Fetching symbols from %s with query "%s"`, uri is null
                 ? "workspace" : uri.path, query);
 
         auto result = new RedBlackTree!(SymbolInformation, q{a.name > b.name}, true);
@@ -352,7 +352,7 @@ class SymbolTool : Tool
         import dcd.server.autocomplete : complete;
         import std.algorithm : chunkBy;
 
-        logger.logf("Getting completions for %s at position %s,%s",
+        logger.infof("Getting completions for %s at position %s,%s",
                 uri.path, position.line, position.character);
 
         auto request = getPreparedRequest(uri, position);
@@ -427,7 +427,7 @@ class SymbolTool : Tool
         import dcd.server.autocomplete : getDoc;
         import std.algorithm : filter;
 
-        logger.logf("Getting documentation for %s at position %s,%s",
+        logger.infof("Getting documentation for %s at position %s,%s",
                 uri.path, position.line, position.character);
 
         auto request = getPreparedRequest(uri, position);
@@ -450,7 +450,7 @@ class SymbolTool : Tool
         import dcd.server.autocomplete : findDeclaration;
         import std.algorithm : find;
 
-        logger.logf("Finding declaration for %s at position %s,%s",
+        logger.infof("Finding declaration for %s at position %s,%s",
                 uri.path, position.line, position.character);
 
         auto request = getPreparedRequest(uri, position);
@@ -482,7 +482,7 @@ class SymbolTool : Tool
         import dcd.server.autocomplete.localuse : findLocalUse;
         import dls.protocol.interfaces : DocumentHighlightKind;
 
-        logger.logf("Highlighting usages for %s at position %s,%s",
+        logger.infof("Highlighting usages for %s at position %s,%s",
                 uri.path, position.line, position.character);
 
         static bool highlightLess(in DocumentHighlight a, in DocumentHighlight b)
@@ -513,7 +513,7 @@ class SymbolTool : Tool
         import dsymbol.modulecache : ASTAllocator;
         import std.algorithm : canFind;
 
-        logger.logf(`Importing into cache "%s": %s`, root, paths);
+        logger.infof(`Importing into cache "%s": %s`, root, paths);
 
         static if (isLibrary)
         {

@@ -1,27 +1,45 @@
 module dls.util.logger;
 
-immutable logger = new LspLogger();
+import dls.protocol.interfaces : InitializeParams, MessageType;
+import std.conv : to;
+
+shared auto logger = new shared LspLogger();
+private immutable int[InitializeParams.Trace] traceToType;
 
 @safe shared static this()
 {
     import std.experimental.logger : LogLevel, globalLogLevel;
 
     globalLogLevel = LogLevel.off;
+
+    //dfmt off
+    traceToType = [
+        InitializeParams.Trace.off: 0,
+        InitializeParams.Trace.messages: MessageType.warning.to!int,
+        InitializeParams.Trace.verbose: MessageType.log.to!int
+    ];
+    //dfmt on
 }
 
-private class LspLogger
+private shared class LspLogger
 {
-    import dls.protocol.interfaces : MessageType;
     import std.format : format;
 
-    @safe void log(in string message) const
+    private int _messageType;
+
+    @safe @property void trace(in InitializeParams.Trace t)
     {
-        sendMessage(message, MessageType.log);
+        _messageType = traceToType[t];
     }
 
-    @trusted void logf(Args...)(in string message, Args args) const
+    @safe void info(in string message) const
     {
-        log(format(message, args));
+        sendMessage(message, MessageType.info);
+    }
+
+    @trusted void infof(Args...)(in string message, Args args) const
+    {
+        info(format(message, args));
     }
 
     @safe void warning(in string message) const
@@ -50,7 +68,10 @@ private class LspLogger
         import dls.protocol.jsonrpc : send;
         import std.datetime : Clock;
 
-        send("window/logMessage", new LogMessageParams(type,
-                format!"%s\t%s"(Clock.currTime.toString(), message)));
+        if (type <= _messageType)
+        {
+            send("window/logMessage", new LogMessageParams(type,
+                    format!"%s\t%s"(Clock.currTime.toString(), message)));
+        }
     }
 }

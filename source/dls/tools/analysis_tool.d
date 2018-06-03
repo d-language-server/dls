@@ -41,7 +41,7 @@ class AnalysisTool : Tool
 
         if (configPath.exists())
         {
-            logger.logf("Updating config from file %s", configPath);
+            logger.infof("Updating config from file %s", configPath);
             auto conf = uri.path in _analysisConfigs ? _analysisConfigs[uri.path]
                 : defaultStaticAnalysisConfig();
             readINIFile(conf, configPath);
@@ -69,7 +69,7 @@ class AnalysisTool : Tool
         import std.json : JSONValue;
         import std.typecons : Nullable, nullable;
 
-        logger.logf("Scanning document %s", uri.path);
+        logger.infof("Scanning document %s", uri.path);
 
         auto stringCache = StringCache(StringCache.defaultBucketCount);
         auto tokens = getTokensForParser(Document[uri].toString(),

@@ -58,6 +58,15 @@ abstract class Server
     @safe @property static void initState(InitializeParams params)
     {
         _initState = params;
+
+        debug
+        {
+            logger.trace = InitializeParams.Trace.verbose;
+        }
+        else
+        {
+            logger.trace = params.trace;
+        }
     }
 
     @safe @property static InitializeParams.InitializationOptions initOptions()
