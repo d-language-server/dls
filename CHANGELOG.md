@@ -7,10 +7,16 @@ Breaking changes will be in bold.
 #### 0.5.5
 - Fixed `dls:bootstrap` building DLS if the latest release was still in the process of building binaries
 - Enhanced message logging by using LSP logging instead of stderr
+- Updated libraries:
+    - `dscanner`: `0.5.5` => `0.5.6`
+    - `dsymbol`: `0.3.7` => `0.3.8`
+    - `msgpack-d`: `1.0.0-beta.6` => `1.0.0-beta.7`
 
 #### 0.5.4
 - Added symlink to libcurl.dll in `.bin` directory
 - Added custom notifications documentation in README
+- Updated libraries:
+    - `dfmt`: `0.7.0` => `0.8.0`
 
 #### 0.5.3
 - Added libcurl.dll to the Windows zip archive
@@ -24,6 +30,12 @@ Breaking changes will be in bold.
 ### 0.5.0
 - __Removed `telemetry/event` notification usage__
 - Added support for upgrades using automatic binary builds
+- Updated libraries:
+    - `dcd`: `0.9.6` => `0.9.8`
+    - `dscanner`: `0.5.3` => `0.5.5`
+    - `dsymbol`: `0.3.6` => `0.3.7`
+    - `libdparse`: `0.8.4` => `0.8.6`
+    - `stdx-allocator`: `2.77.1` => `2.77.2`
 
 #### 0.4.1
 - __Removed `dls:find` subpackage__
@@ -37,6 +49,16 @@ Breaking changes will be in bold.
 - Added `dls:bootstrap` to supercede `dls:find`
 - Enhanced resilience on server exceptions (dls will only crash on errors and never on exceptions)
 - Fixed (really, for good this time) the updater by pining dependency versions
+- Updated libraries:
+    - `arsd-official`: `none` => `2.0.0`
+    - `dcd`: `0.9.2` => `0.9.6`
+    - `dscanner`: `0.5.1` => `0.5.3`
+    - `dsymbol`: `0.3.0` => `0.3.6`
+    - `dub`: `1.8.0` => `1.9.0`
+    - `emsi_containers`: `0.6.0` => `0.8.0-alpha.7`
+    - `inifiled`: `1.3.0` => `1.3.1`
+    - `libdparse`: `0.8.0` => `0.8.4`
+    - `stdx-allocator`: `2.77.0` => `2.77.1`
 
 #### 0.3.1
 - Added missing DFMT options
@@ -50,6 +72,11 @@ Breaking changes will be in bold.
     - On Windows, import paths should be detected regardless of DMD's install location
     - On Linux, DLS will now also try to import paths from the DMD snap package
 - Fixed server crash on exit notification
+- Updated libraries:
+    - `dscanner`: `none` => `0.5.1`
+    - `inifiled`: `none` => `1.3.0`
+    - `libddoc`: `none` => `0.3.0-beta.1`
+    - `libdparse`: `0.8.0-beta.5` => `0.8.0`
 
 #### 0.2.1
 - Fixed "See what's new" button being activated even if not clicked
@@ -64,6 +91,8 @@ Breaking changes will be in bold.
 - Added CHANGELOG file
 - Fixed potential issues with object initialization resulting in inpredictable behavior
 - Fixed dependencies imports not actually working
+- Updated libraries:
+    - `dsymbol`: `0.3.0-beta.3` => `0.3.0`
 
 #### 0.1.5
 - Fixed crash if the client didn't send an initial `workspace/didConfigurationChange` notification
@@ -86,3 +115,12 @@ Breaking changes will be in bold.
 - Added the base JSON-RPC messages loop and classes to implement the LSP
 - Added formatting support
 - Added autocompletion support
+- Updated libraries:
+    - `dcd`: `none` => `0.9.2`
+    - `dfmt`: `none` => `0.7.0`
+    - `dsymbol`: `none` => `0.3.0-beta.3`
+    - `dub`: `none` => `1.8.0`
+    - `emsi_containers`: `none` => `0.6.0`
+    - `libdparse`: `none` => `0.8.0-beta.5`
+    - `msgpack-d`: `none` => `1.0.0-beta.6`
+    - `stdx-allocator`: `none` => `2.77.0`
