@@ -130,11 +130,16 @@ void downloadDls(in void function(size_t size) totalSizeCallback = null,
         };
 
         request.onProgress = (size_t dlTotal, size_t dlNow, size_t ulTotal, size_t ulNow) {
+            import core.time : msecs;
+            import std.datetime.stopwatch : StopWatch;
+
             static bool started;
+            static StopWatch watch;
 
             if (!started && dlTotal > 0)
             {
                 started = true;
+                watch.start();
 
                 if (totalSizeCallback !is null)
                 {
@@ -142,8 +147,9 @@ void downloadDls(in void function(size_t size) totalSizeCallback = null,
                 }
             }
 
-            if (chunkSizeCallback !is null && dlNow > 0)
+            if (started && chunkSizeCallback !is null && dlNow > 0 && watch.peek() >= 500.msecs)
             {
+                watch.reset();
                 chunkSizeCallback(dlNow);
             }
 
