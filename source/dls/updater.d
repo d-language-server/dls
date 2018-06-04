@@ -58,20 +58,13 @@ private immutable changelogUrl = format!"https://github.com/%s/dls/blob/master/C
 
     foreach (entry; dirEntries(dubBinDir, SpanMode.shallow))
     {
-        const match = entry.name.baseName.matchFirst(`dls-v([\d.]+)\.zip`);
+        const match = entry.name.baseName.matchFirst(`dls-v([\d.]+)`);
 
         if (match && match[1] < currentVersion)
         {
             try
             {
-                if (isFile(entry.name))
-                {
-                    remove(entry.name);
-                }
-                else
-                {
-                    rmdirRecurse(entry.name);
-                }
+                rmdirRecurse(entry.name);
             }
             catch (FileException e)
             {
