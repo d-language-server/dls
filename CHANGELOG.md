@@ -4,6 +4,11 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.5.6
+- Fixed older dls binaries not being removed when upgrading
+- Fixed `$/dls.upgradeDls.chunkSize` notifications being spammed
+- Fixed `dls:bootstrap` not necessarily using the correct libcurl.dll
+
 #### 0.5.5
 - Fixed `dls:bootstrap` building DLS if the latest release was still in the process of building binaries
 - Enhanced message logging by using LSP logging instead of stderr
