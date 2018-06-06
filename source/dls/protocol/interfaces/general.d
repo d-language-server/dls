@@ -123,7 +123,7 @@ class InitializeResult
 {
     ServerCapabilities capabilities;
 
-    @safe this(ServerCapabilities capabilities = new ServerCapabilities())
+    this(ServerCapabilities capabilities = new ServerCapabilities())
     {
         this.capabilities = capabilities;
     }
@@ -145,7 +145,7 @@ private class OptionsBase
 {
     Nullable!bool resolveProvider;
 
-    @safe this(Nullable!bool resolveProvider = Nullable!bool.init)
+    this(Nullable!bool resolveProvider = Nullable!bool.init)
     {
         this.resolveProvider = resolveProvider;
     }
@@ -155,7 +155,7 @@ class CompletionOptions : OptionsBase
 {
     Nullable!(string[]) triggerCharacters;
 
-    @safe this(Nullable!bool resolveProvider = Nullable!bool.init,
+    this(Nullable!bool resolveProvider = Nullable!bool.init,
             Nullable!(string[]) triggerCharacters = Nullable!(string[]).init)
     {
         super(resolveProvider);
@@ -167,7 +167,7 @@ class SignatureHelpOptions
 {
     Nullable!(string[]) triggerCharacters;
 
-    @safe this(Nullable!(string[]) triggerCharacters = Nullable!(string[]).init)
+    this(Nullable!(string[]) triggerCharacters = Nullable!(string[]).init)
     {
         this.triggerCharacters = triggerCharacters;
     }
@@ -180,7 +180,7 @@ class DocumentOnTypeFormattingOptions
     string firstTriggerCharacter;
     Nullable!(string[]) moreTriggerCharacter;
 
-    @safe this(string firstTriggerCharacter = string.init,
+    this(string firstTriggerCharacter = string.init,
             Nullable!(string[]) moreTriggerCharacter = Nullable!(string[]).init)
     {
         this.firstTriggerCharacter = firstTriggerCharacter;
@@ -194,7 +194,7 @@ class ExecuteCommandOptions
 {
     string[] commands;
 
-    @safe this(string[] commands = string[].init)
+    this(string[] commands = string[].init)
     {
         this.commands = commands;
     }
@@ -204,7 +204,7 @@ class SaveOptions
 {
     Nullable!bool includeText;
 
-    @safe this(Nullable!bool includeText = Nullable!bool.init)
+    this(Nullable!bool includeText = Nullable!bool.init)
     {
         this.includeText = includeText;
     }
@@ -222,7 +222,7 @@ class TextDocumentSyncOptions
     Nullable!bool willSaveWaitUntil;
     Nullable!SaveOptions save;
 
-    @safe this(Nullable!bool openClose = Nullable!bool.init,
+    this(Nullable!bool openClose = Nullable!bool.init,
             Nullable!TextDocumentSyncKind change = Nullable!TextDocumentSyncKind.init,
             Nullable!bool willSave = Nullable!bool.init, Nullable!bool willSaveWaitUntil = Nullable!bool.init,
             Nullable!SaveOptions save = Nullable!SaveOptions.init)
@@ -239,7 +239,7 @@ class StaticRegistrationOptions
 {
     Nullable!string id;
 
-    @safe this(Nullable!string id = Nullable!string.init)
+    this(Nullable!string id = Nullable!string.init)
     {
         this.id = id;
     }
@@ -254,7 +254,7 @@ class ServerCapabilities
             Nullable!bool supported;
             Nullable!JSONValue changeNotifications;
 
-            @safe this(Nullable!bool supported = Nullable!bool.init,
+            this(Nullable!bool supported = Nullable!bool.init,
                     Nullable!JSONValue changeNotifications = Nullable!JSONValue.init)
             {
                 this.supported = supported;
@@ -264,7 +264,7 @@ class ServerCapabilities
 
         Nullable!WorkspaceFolders workspaceFolders;
 
-        @safe this(Nullable!WorkspaceFolders workspaceFolders = Nullable!WorkspaceFolders.init)
+        this(Nullable!WorkspaceFolders workspaceFolders = Nullable!WorkspaceFolders.init)
         {
             this.workspaceFolders = workspaceFolders;
         }

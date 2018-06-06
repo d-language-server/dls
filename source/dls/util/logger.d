@@ -6,7 +6,7 @@ import std.conv : to;
 shared auto logger = new shared LspLogger();
 private immutable int[InitializeParams.Trace] traceToType;
 
-@safe shared static this()
+shared static this()
 {
     import std.experimental.logger : LogLevel, globalLogLevel;
 
@@ -27,42 +27,42 @@ private shared class LspLogger
 
     private int _messageType;
 
-    @safe @property void trace(in InitializeParams.Trace t)
+    @property void trace(in InitializeParams.Trace t)
     {
         _messageType = traceToType[t];
     }
 
-    @safe void info(in string message) const
+    void info(in string message) const
     {
         sendMessage(message, MessageType.info);
     }
 
-    @trusted void infof(Args...)(in string message, Args args) const
+    void infof(Args...)(in string message, Args args) const
     {
         info(format(message, args));
     }
 
-    @safe void warning(in string message) const
+    void warning(in string message) const
     {
         sendMessage(message, MessageType.warning);
     }
 
-    @trusted void warningf(Args...)(in string message, Args args) const
+    void warningf(Args...)(in string message, Args args) const
     {
         warning(format(message, args));
     }
 
-    @safe void error(in string message) const
+    void error(in string message) const
     {
         sendMessage(message, MessageType.error);
     }
 
-    @trusted void errorf(Args...)(in string message, Args args) const
+    void errorf(Args...)(in string message, Args args) const
     {
         error(format(message, args));
     }
 
-    @trusted private void sendMessage(in string message, in MessageType type) const
+    private void sendMessage(in string message, in MessageType type) const
     {
         import dls.protocol.interfaces : LogMessageParams;
         import dls.protocol.jsonrpc : send;

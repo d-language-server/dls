@@ -11,14 +11,14 @@ final class Tools
     static AnalysisTool analysisTool;
     static FormatTool formatTool;
 
-    @safe static void initialize()
+    static void initialize()
     {
         symbolTool = new SymbolTool();
         analysisTool = new AnalysisTool();
         formatTool = new FormatTool();
     }
 
-    @safe static void setConfiguration(Configuration c)
+    static void setConfiguration(Configuration c)
     {
         import dls.tools.tool : Tool;
 

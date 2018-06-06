@@ -8,7 +8,7 @@ private abstract class RegistrationBase
     string id;
     string method;
 
-    @safe private this(string id, string method)
+    private this(string id, string method)
     {
         this.id = id;
         this.method = method;
@@ -23,7 +23,7 @@ class Registration(R : RegistrationOptionsBase) : RegistrationBase
 {
     Nullable!R registerOptions;
 
-    @safe this(string id = string.init, string method = string.init,
+    this(string id = string.init, string method = string.init,
             Nullable!R registerOptions = Nullable!R.init)
     {
         super(id, method);
@@ -35,7 +35,7 @@ class TextDocumentRegistrationOptions : RegistrationOptionsBase
 {
     Nullable!DocumentSelector documentSelector;
 
-    @safe this(Nullable!DocumentSelector documentSelector = Nullable!DocumentSelector.init)
+    this(Nullable!DocumentSelector documentSelector = Nullable!DocumentSelector.init)
     {
         this.documentSelector = documentSelector;
     }
@@ -45,7 +45,7 @@ class RegistrationParams(R)
 {
     Registration!R[] registrations;
 
-    @safe this(Registration!R[] registrations = Registration!R[].init)
+    this(Registration!R[] registrations = Registration!R[].init)
     {
         this.registrations = registrations;
     }
@@ -53,7 +53,7 @@ class RegistrationParams(R)
 
 class Unregistration : RegistrationBase
 {
-    @safe this(string id = string.init, string method = string.init)
+    this(string id = string.init, string method = string.init)
     {
         super(id, method);
     }
@@ -63,7 +63,7 @@ class UnregistrationParams
 {
     Unregistration[] unregistrations;
 
-    @safe this(Unregistration[] unregistrations = Unregistration[].init)
+    this(Unregistration[] unregistrations = Unregistration[].init)
     {
         this.unregistrations = unregistrations;
     }

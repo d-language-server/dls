@@ -11,7 +11,7 @@ private string[string] macros;
 private immutable CompletionItemKind[CompletionKind] completionKinds;
 private immutable SymbolKind[CompletionKind] symbolKinds;
 
-@trusted shared static this()
+shared static this()
 {
     import dub.internal.vibecompat.core.log : LogLevel, setLogLevel;
 
@@ -83,7 +83,7 @@ class SymbolTool : Tool
 
     version (Windows)
     {
-        @safe @property private static string[] _compilerConfigPaths()
+        @property private static string[] _compilerConfigPaths()
         {
             import std.algorithm : splitter;
             import std.file : exists;
@@ -116,7 +116,7 @@ class SymbolTool : Tool
     private ModuleCache*[string] _workspaceCaches;
     private ModuleCache*[string] _libraryCaches;
 
-    @safe @property private string[] defaultImportPaths()
+    @property private string[] defaultImportPaths()
     {
         import std.algorithm : each;
         import std.file : FileException, exists;
@@ -161,7 +161,7 @@ class SymbolTool : Tool
         return paths.sort().uniq().array;
     }
 
-    @safe this()
+    this()
     {
         import std.format : format;
         import std.parallelism : task;
@@ -176,7 +176,7 @@ class SymbolTool : Tool
         importDirectories!true("", defaultImportPaths);
     }
 
-    @safe ModuleCache*[] getRelevantCaches(Uri uri)
+    ModuleCache*[] getRelevantCaches(Uri uri)
     {
         auto result = appender([getWorkspaceCache(uri)]);
 
@@ -193,7 +193,7 @@ class SymbolTool : Tool
         return result.data;
     }
 
-    @safe ModuleCache* getWorkspaceCache(Uri uri)
+    ModuleCache* getWorkspaceCache(Uri uri)
     {
         import std.algorithm : startsWith;
         import std.path : pathSplitter;
@@ -220,7 +220,7 @@ class SymbolTool : Tool
             : _libraryCaches[cachePath];
     }
 
-    @trusted void importPath(Uri uri)
+    void importPath(Uri uri)
     {
         const d = getDub(uri);
         const desc = d.project.rootPackage.describe(BuildPlatform.any, null, null);
@@ -229,7 +229,7 @@ class SymbolTool : Tool
                     importPath)).array);
     }
 
-    @trusted void importSelections(Uri uri)
+    void importSelections(Uri uri)
     {
         const d = getDub(uri);
         const project = d.project;
@@ -245,7 +245,7 @@ class SymbolTool : Tool
         }
     }
 
-    @safe void clearPath(Uri uri)
+    void clearPath(Uri uri)
     {
         logger.infof("Clearing imports from %s", uri.path);
 
@@ -259,7 +259,7 @@ class SymbolTool : Tool
         }
     }
 
-    @trusted void upgradeSelections(Uri uri)
+    void upgradeSelections(Uri uri)
     {
         import std.concurrency : spawn;
 
@@ -272,7 +272,7 @@ class SymbolTool : Tool
         }, uri.toString());
     }
 
-    @trusted SymbolInformation[] symbol(string query, Uri uri = null)
+    SymbolInformation[] symbol(string query, Uri uri = null)
     {
         import dsymbol.string_interning : internString;
         import dsymbol.symbol : DSymbol;
@@ -282,8 +282,8 @@ class SymbolTool : Tool
 
         auto result = new RedBlackTree!(SymbolInformation, q{a.name > b.name}, true);
 
-        @trusted void collectSymbolInformations(Uri symbolUri,
-                const(DSymbol)* symbol, string containerName = "")
+        void collectSymbolInformations(Uri symbolUri, const(DSymbol)* symbol,
+                string containerName = "")
         {
             if (symbol.symbolFile != symbolUri.path)
             {
@@ -304,7 +304,7 @@ class SymbolTool : Tool
             }
         }
 
-        @trusted static Uri[] getModuleUris(ModuleCache* cache)
+        static Uri[] getModuleUris(ModuleCache* cache)
         {
             import std.file : SpanMode, dirEntries;
 
@@ -346,19 +346,19 @@ class SymbolTool : Tool
         return result.array;
     }
 
-    @trusted CompletionItem[] completion(Uri uri, Position position)
+    CompletionItem[] completion(Uri uri, Position position)
     {
         import dcd.common.messages : AutocompleteResponse;
         import dcd.server.autocomplete : complete;
         import std.algorithm : chunkBy;
 
-        logger.infof("Getting completions for %s at position %s,%s",
-                uri.path, position.line, position.character);
+        logger.infof("Getting completions for %s at position %s,%s", uri.path,
+                position.line, position.character);
 
         auto request = getPreparedRequest(uri, position);
         request.kind = RequestKind.autocomplete;
 
-        @safe static bool compareCompletionsLess(AutocompleteResponse.Completion a,
+        static bool compareCompletionsLess(AutocompleteResponse.Completion a,
                 AutocompleteResponse.Completion b)
         {
             //dfmt off
@@ -370,7 +370,7 @@ class SymbolTool : Tool
             //dfmt on
         }
 
-        @safe static bool compareCompletionsEqual(AutocompleteResponse.Completion a,
+        static bool compareCompletionsEqual(AutocompleteResponse.Completion a,
                 AutocompleteResponse.Completion b)
         {
             return a.symbolFilePath == b.symbolFilePath && a.symbolLocation == b.symbolLocation;
@@ -410,7 +410,7 @@ class SymbolTool : Tool
             .array;
     }
 
-    @trusted CompletionItem completionResolve(CompletionItem item)
+    CompletionItem completionResolve(CompletionItem item)
     {
         if (!item.data.isNull)
         {
@@ -422,7 +422,7 @@ class SymbolTool : Tool
         return item;
     }
 
-    @trusted Hover hover(Uri uri, Position position)
+    Hover hover(Uri uri, Position position)
     {
         import dcd.server.autocomplete : getDoc;
         import std.algorithm : filter;
@@ -444,14 +444,14 @@ class SymbolTool : Tool
             : new Hover(getDocumentation(completions.map!q{ ["", a] }.array));
     }
 
-    @trusted Location definition(Uri uri, Position position)
+    Location definition(Uri uri, Position position)
     {
         import dcd.common.messages : AutocompleteResponse;
         import dcd.server.autocomplete : findDeclaration;
         import std.algorithm : find;
 
-        logger.infof("Finding declaration for %s at position %s,%s",
-                uri.path, position.line, position.character);
+        logger.infof("Finding declaration for %s at position %s,%s", uri.path,
+                position.line, position.character);
 
         auto request = getPreparedRequest(uri, position);
         request.kind = RequestKind.symbolLocation;
@@ -477,13 +477,13 @@ class SymbolTool : Tool
                 Document[resultUri].wordRangeAtByte(results[0].symbolLocation));
     }
 
-    @trusted DocumentHighlight[] highlight(Uri uri, Position position)
+    DocumentHighlight[] highlight(Uri uri, Position position)
     {
         import dcd.server.autocomplete.localuse : findLocalUse;
         import dls.protocol.interfaces : DocumentHighlightKind;
 
-        logger.infof("Highlighting usages for %s at position %s,%s",
-                uri.path, position.line, position.character);
+        logger.infof("Highlighting usages for %s at position %s,%s", uri.path,
+                position.line, position.character);
 
         static bool highlightLess(in DocumentHighlight a, in DocumentHighlight b)
         {
@@ -507,8 +507,7 @@ class SymbolTool : Tool
         return result.array;
     }
 
-    @trusted package void importDirectories(bool isLibrary)(string root,
-            string[] paths, bool refresh = false)
+    package void importDirectories(bool isLibrary)(string root, string[] paths, bool refresh = false)
     {
         import dsymbol.modulecache : ASTAllocator;
         import std.algorithm : canFind;
@@ -543,7 +542,7 @@ class SymbolTool : Tool
         }
     }
 
-    @trusted private MarkupContent getDocumentation(string[][] detailsAndDocumentations)
+    private MarkupContent getDocumentation(string[][] detailsAndDocumentations)
     {
         import arsd.htmltotext : htmlToText;
         import ddoc : Lexer, expand;
@@ -626,7 +625,7 @@ class SymbolTool : Tool
         return new MarkupContent(MarkupKind.markdown, result.data);
     }
 
-    @trusted private static AutocompleteRequest getPreparedRequest(Uri uri, Position position)
+    private static AutocompleteRequest getPreparedRequest(Uri uri, Position position)
     {
         auto request = AutocompleteRequest();
         auto document = Document[uri];
@@ -638,7 +637,7 @@ class SymbolTool : Tool
         return request;
     }
 
-    @trusted private static Dub getDub(Uri uri)
+    private static Dub getDub(Uri uri)
     {
         import std.file : isFile;
 
@@ -647,7 +646,7 @@ class SymbolTool : Tool
         return d;
     }
 
-    @trusted private static bool openDocument(Uri docUri)
+    private static bool openDocument(Uri docUri)
     {
         import std.array : replaceFirst;
         import std.encoding : getBOM;
@@ -667,7 +666,7 @@ class SymbolTool : Tool
         return closed;
     }
 
-    @safe private static void closeDocument(Uri docUri, bool wasClosed)
+    private static void closeDocument(Uri docUri, bool wasClosed)
     {
         import dls.protocol.definitions : TextDocumentIdentifier;
 

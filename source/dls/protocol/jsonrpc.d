@@ -6,7 +6,7 @@ import std.typecons : Nullable, Tuple, nullable, tuple;
 private enum jsonrpcVersion = "2.0";
 private enum eol = "\r\n";
 
-@trusted private void send(T : Message)(T m)
+private void send(T : Message)(T m)
 {
     import dls.util.json : convertToJSON;
     import std.conv : to;
@@ -28,7 +28,7 @@ private enum eol = "\r\n";
     }
 }
 
-@safe static void sendError(ErrorCodes error, RequestMessage request, JSONValue data)
+static void sendError(ErrorCodes error, RequestMessage request, JSONValue data)
 {
     if (request !is null)
     {
@@ -37,7 +37,7 @@ private enum eol = "\r\n";
 }
 
 /++ Sends a request or a notification message. +/
-@safe static string send(string method, Nullable!JSONValue params = Nullable!JSONValue())
+static string send(string method, Nullable!JSONValue params = Nullable!JSONValue())
 {
     import dls.protocol.handlers : hasRegisteredHandler, pushHandler;
     import std.uuid : randomUUID;
@@ -54,8 +54,7 @@ private enum eol = "\r\n";
     return null;
 }
 
-@safe static string send(T)(string method, T params)
-        if (!is(T : Nullable!JSONValue))
+static string send(T)(string method, T params) if (!is(T : Nullable!JSONValue))
 {
     import dls.util.json : convertToJSON;
 
@@ -63,13 +62,13 @@ private enum eol = "\r\n";
 }
 
 /++ Sends a response message. +/
-@safe static void send(JSONValue id, Nullable!JSONValue result,
+static void send(JSONValue id, Nullable!JSONValue result,
         Nullable!ResponseError error = Nullable!ResponseError())
 {
     send!ResponseMessage(id, null, result, error);
 }
 
-@safe private static void send(T : Message)(JSONValue id, string method,
+private static void send(T : Message)(JSONValue id, string method,
         Nullable!JSONValue payload, Nullable!ResponseError error)
 {
     import std.meta : AliasSeq;
@@ -115,7 +114,7 @@ class ResponseError
     string message;
     Nullable!JSONValue data;
 
-    @safe static ResponseError fromErrorCode(ErrorCodes errorCode, JSONValue data)
+    static ResponseError fromErrorCode(ErrorCodes errorCode, JSONValue data)
     {
         auto response = new ResponseError();
         response.code = errorCode[0];

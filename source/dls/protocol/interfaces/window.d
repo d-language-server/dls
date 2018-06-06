@@ -7,7 +7,7 @@ class ShowMessageParams
     MessageType type;
     string message;
 
-    @safe this(MessageType type = MessageType.init, string message = string.init)
+    this(MessageType type = MessageType.init, string message = string.init)
     {
         this.type = type;
         this.message = message;
@@ -26,7 +26,7 @@ class ShowMessageRequestParams : ShowMessageParams
 {
     Nullable!(MessageActionItem[]) actions;
 
-    @safe this(MessageType type = MessageType.init, string message = string.init,
+    this(MessageType type = MessageType.init, string message = string.init,
             Nullable!(MessageActionItem[]) actions = Nullable!(MessageActionItem[]).init)
     {
         super(type, message);
@@ -38,7 +38,7 @@ class MessageActionItem
 {
     string title;
 
-    @safe this(string title = string.init)
+    this(string title = string.init)
     {
         this.title = title;
     }

@@ -8,7 +8,7 @@ private enum descriptionJson = import("description.json");
 private immutable changelogUrl = format!"https://github.com/%s/dls/blob/master/CHANGELOG.md"(
         repoBase);
 
-@trusted void update(shared(InitializeParams.InitializationOptions) initOptions)
+void update(shared(InitializeParams.InitializationOptions) initOptions)
 {
     import core.time : hours;
     import dls.bootstrap : UpgradeFailedException, apiEndpoint, buildDls,

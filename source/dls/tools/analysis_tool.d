@@ -15,13 +15,13 @@ class AnalysisTool : Tool
 
     private StaticAnalysisConfig[string] _analysisConfigs;
 
-    @trusted void addAnalysisConfigPath(Uri uri)
+    void addAnalysisConfigPath(Uri uri)
     {
         _analysisConfigs[uri.path] = defaultStaticAnalysisConfig();
         updateAnalysisConfigPath(uri);
     }
 
-    @safe void removeAnalysisConfigPath(Uri uri)
+    void removeAnalysisConfigPath(Uri uri)
     {
         if (uri.path in _analysisConfigs)
         {
@@ -29,7 +29,7 @@ class AnalysisTool : Tool
         }
     }
 
-    @trusted void updateAnalysisConfigPath(Uri uri)
+    void updateAnalysisConfigPath(Uri uri)
     {
         import dls.protocol.interfaces : PublishDiagnosticsParams;
         import dls.protocol.jsonrpc : send;
@@ -55,7 +55,7 @@ class AnalysisTool : Tool
         }
     }
 
-    @trusted Diagnostic[] scan(Uri uri)
+    Diagnostic[] scan(Uri uri)
     {
         import dls.protocol.definitions : DiagnosticSeverity;
         import dls.tools.tools : Tools;
@@ -99,7 +99,7 @@ class AnalysisTool : Tool
         return diagnostics.data;
     }
 
-    @trusted private StaticAnalysisConfig getConfig(Uri uri)
+    private StaticAnalysisConfig getConfig(Uri uri)
     {
         import std.algorithm : startsWith;
         import std.array : array;

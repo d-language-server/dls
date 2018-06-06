@@ -32,7 +32,7 @@ class ConfigurationParams
 {
     ConfigurationItem[] items;
 
-    @safe this(ConfigurationItem[] items = ConfigurationItem[].init)
+    this(ConfigurationItem[] items = ConfigurationItem[].init)
     {
         this.items = items;
     }
@@ -43,7 +43,7 @@ class ConfigurationItem
     Nullable!string scopeUri;
     Nullable!string section;
 
-    @safe this(Nullable!string scopeUri = Nullable!string.init,
+    this(Nullable!string scopeUri = Nullable!string.init,
             Nullable!string section = Nullable!string.init)
     {
         this.scopeUri = scopeUri;
@@ -73,7 +73,7 @@ class DidChangeWatchedFilesRegistrationOptions : RegistrationOptionsBase
 {
     FileSystemWatcher[] watchers;
 
-    @safe this(FileSystemWatcher[] watchers = FileSystemWatcher[].init)
+    this(FileSystemWatcher[] watchers = FileSystemWatcher[].init)
     {
         this.watchers = watchers;
     }
@@ -84,7 +84,7 @@ class FileSystemWatcher
     string globPattern;
     Nullable!WatchKind kind;
 
-    @safe this(string globPattern = string.init, Nullable!WatchKind kind = Nullable!WatchKind.init)
+    this(string globPattern = string.init, Nullable!WatchKind kind = Nullable!WatchKind.init)
     {
         this.globPattern = globPattern;
         this.kind = kind;
@@ -113,7 +113,7 @@ class ExecuteCommandRegistrationOptions : RegistrationOptionsBase
 {
     string[] commands;
 
-    @safe this(string[] commands = string[].init)
+    this(string[] commands = string[].init)
     {
         this.commands = commands;
     }
@@ -123,7 +123,7 @@ class ApplyWorkspaceEditParams
 {
     WorkspaceEdit edit;
 
-    @safe this(WorkspaceEdit edit = WorkspaceEdit.init)
+    this(WorkspaceEdit edit = WorkspaceEdit.init)
     {
         this.edit = edit;
     }

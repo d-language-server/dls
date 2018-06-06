@@ -3,7 +3,7 @@ module dls.server;
 import dls.protocol.handlers;
 import dls.protocol.jsonrpc;
 
-@safe shared static this()
+shared static this()
 {
     import std.algorithm : map;
     import std.array : join, split;
@@ -50,12 +50,12 @@ abstract class Server
     static bool exit = false;
     private static InitializeParams _initState;
 
-    @safe @property static InitializeParams initState()
+    @property static InitializeParams initState()
     {
         return _initState;
     }
 
-    @safe @property static void initState(InitializeParams params)
+    @property static void initState(InitializeParams params)
     {
         _initState = params;
 
@@ -69,13 +69,13 @@ abstract class Server
         }
     }
 
-    @safe @property static InitializeParams.InitializationOptions initOptions()
+    @property static InitializeParams.InitializationOptions initOptions()
     {
         return _initState.initializationOptions.isNull
             ? new InitializeParams.InitializationOptions() : _initState.initializationOptions;
     }
 
-    @trusted static void loop()
+    static void loop()
     {
         import std.conv : to;
         import std.stdio : stdin;
@@ -120,7 +120,7 @@ abstract class Server
         }
     }
 
-    @trusted private static void handleJSON(in char[] content)
+    private static void handleJSON(in char[] content)
     {
         import dls.protocol.jsonrpc : send, sendError;
         import dls.util.json : convertFromJSON;

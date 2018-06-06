@@ -1,6 +1,6 @@
 module dls.util.path;
 
-@safe @property string normalized(in string path)
+@property string normalized(in string path)
 {
     version (Windows)
     {

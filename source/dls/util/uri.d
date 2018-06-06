@@ -15,12 +15,12 @@ class Uri
     private string _query;
     private string _fragment;
 
-    @safe @property string path() const
+    @property string path() const
     {
         return _path;
     }
 
-    @safe this(DocumentUri uri)
+    this(DocumentUri uri)
     {
         import std.conv : to;
         import std.path : asNormalizedPath;
@@ -40,17 +40,17 @@ class Uri
         //dfmt on
     }
 
-    @safe override string toString() const
+    override string toString() const
     {
         return _uri;
     }
 
-    @safe static string getPath(DocumentUri uri)
+    static string getPath(DocumentUri uri)
     {
         return new Uri(uri).path;
     }
 
-    @safe static Uri fromPath(string path)
+    static Uri fromPath(string path)
     {
         import std.algorithm : startsWith;
         import std.format : format;

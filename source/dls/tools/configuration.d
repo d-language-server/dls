@@ -6,7 +6,7 @@ class Configuration
     AnalysisConfiguration analysis;
     FormatConfiguration format;
 
-    @safe this()
+    this()
     {
         symbol = new SymbolConfiguration();
         analysis = new AnalysisConfiguration();

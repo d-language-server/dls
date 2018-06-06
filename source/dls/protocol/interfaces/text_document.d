@@ -33,7 +33,7 @@ class TextDocumentChangeRegistrationOptions : TextDocumentRegistrationOptions
 {
     TextDocumentSyncKind syncKind;
 
-    @safe this(TextDocumentSyncKind syncKind = TextDocumentSyncKind.init)
+    this(TextDocumentSyncKind syncKind = TextDocumentSyncKind.init)
     {
         this.syncKind = syncKind;
     }
@@ -67,7 +67,7 @@ class TextDocumentSaveRegistrationOptions : TextDocumentRegistrationOptions
 {
     Nullable!bool includeText;
 
-    @safe this(Nullable!bool includeText = Nullable!bool.init)
+    this(Nullable!bool includeText = Nullable!bool.init)
     {
         this.includeText = includeText;
     }
@@ -80,7 +80,7 @@ class PublishDiagnosticsParams
     DocumentUri uri;
     Diagnostic[] diagnostics;
 
-    @safe this(DocumentUri uri = DocumentUri.init, Diagnostic[] diagnostics = Diagnostic[].init)
+    this(DocumentUri uri = DocumentUri.init, Diagnostic[] diagnostics = Diagnostic[].init)
     {
         this.uri = uri;
         this.diagnostics = diagnostics;
@@ -110,7 +110,7 @@ class CompletionList
     bool isIncomplete;
     CompletionItem[] items;
 
-    @safe this(bool isIncomplete = bool.init, CompletionItem[] items = CompletionItem[].init)
+    this(bool isIncomplete = bool.init, CompletionItem[] items = CompletionItem[].init)
     {
         this.isIncomplete = isIncomplete;
         this.items = items;
@@ -139,7 +139,7 @@ class CompletionItem
     Nullable!Command command;
     Nullable!JSONValue data;
 
-    @safe this(string label = string.init, Nullable!CompletionItemKind kind = Nullable!CompletionItemKind.init,
+    this(string label = string.init, Nullable!CompletionItemKind kind = Nullable!CompletionItemKind.init,
             Nullable!string detail = Nullable!string.init,
             Nullable!MarkupContent documentation = Nullable!MarkupContent.init,
             Nullable!string sortText = Nullable!string.init, Nullable!string filterText = Nullable!string.init,
@@ -201,8 +201,8 @@ class CompletionRegistrationOptions : TextDocumentRegistrationOptions
     Nullable!(string[]) triggerCharacters;
     Nullable!bool resolveProvider;
 
-    @safe this(Nullable!(string[]) triggerCharacters = Nullable!(string[])
-            .init, Nullable!bool resolveProvider = Nullable!bool.init)
+    this(Nullable!(string[]) triggerCharacters = Nullable!(string[]).init,
+            Nullable!bool resolveProvider = Nullable!bool.init)
     {
         this.triggerCharacters = triggerCharacters;
         this.resolveProvider = resolveProvider;
@@ -214,8 +214,7 @@ class Hover
     MarkupContent contents;
     Nullable!Range range;
 
-    @safe this(MarkupContent contents = MarkupContent.init,
-            Nullable!Range range = Nullable!Range.init)
+    this(MarkupContent contents = MarkupContent.init, Nullable!Range range = Nullable!Range.init)
     {
         this.contents = contents;
         this.range = range;
@@ -228,7 +227,7 @@ class SignatureHelp
     Nullable!double activeSignature;
     Nullable!double activeParameter;
 
-    @safe this(SignatureInformation[] signatures = SignatureInformation[].init,
+    this(SignatureInformation[] signatures = SignatureInformation[].init,
             Nullable!double activeSignature = Nullable!double.init,
             Nullable!double activeParameter = Nullable!double.init)
     {
@@ -248,8 +247,7 @@ class SignatureInformation : InformationBase
 {
     Nullable!(ParameterInformation[]) parameters;
 
-    @safe this(Nullable!(ParameterInformation[]) parameters = Nullable!(
-            ParameterInformation[]).init)
+    this(Nullable!(ParameterInformation[]) parameters = Nullable!(ParameterInformation[]).init)
     {
         this.parameters = parameters;
     }
@@ -261,7 +259,7 @@ class SignatureHelpRegistrationOptions : TextDocumentRegistrationOptions
 {
     Nullable!(string[]) triggerCharacters;
 
-    @safe this(Nullable!(string[]) triggerCharacters = Nullable!(string[]).init)
+    this(Nullable!(string[]) triggerCharacters = Nullable!(string[]).init)
     {
         this.triggerCharacters = triggerCharacters;
     }
@@ -284,7 +282,7 @@ class DocumentHighlight
     Range range;
     Nullable!DocumentHighlightKind kind;
 
-    @safe this(Range range = new Range(),
+    this(Range range = new Range(),
             Nullable!DocumentHighlightKind kind = Nullable!DocumentHighlightKind.init)
     {
         this.range = range;
@@ -308,7 +306,7 @@ class SymbolInformation
     Location location;
     Nullable!string containerName;
 
-    @safe this(string name = string.init, SymbolKind kind = SymbolKind.init,
+    this(string name = string.init, SymbolKind kind = SymbolKind.init,
             Location location = new Location(),
             Nullable!string containerName = Nullable!string.init)
     {
@@ -370,7 +368,7 @@ class CodeLens
     Nullable!Command command;
     Nullable!JSONValue data;
 
-    @safe this(Range range = new Range(), Nullable!Command command = Nullable!Command.init,
+    this(Range range = new Range(), Nullable!Command command = Nullable!Command.init,
             Nullable!JSONValue data = Nullable!JSONValue.init)
     {
         this.range = range;
@@ -383,7 +381,7 @@ class CodeLensRegistrationOptions : TextDocumentRegistrationOptions
 {
     Nullable!bool resolveProvider;
 
-    @safe this(Nullable!bool resolveProvider = Nullable!bool.init)
+    this(Nullable!bool resolveProvider = Nullable!bool.init)
     {
         this.resolveProvider = resolveProvider;
     }
@@ -396,7 +394,7 @@ class DocumentLink
     Range range;
     Nullable!DocumentUri target;
 
-    @safe this(Range range = new Range(), Nullable!DocumentUri target = Nullable!DocumentUri.init)
+    this(Range range = new Range(), Nullable!DocumentUri target = Nullable!DocumentUri.init)
     {
         this.range = range;
         this.target = target;
@@ -407,7 +405,7 @@ class DocumentLinkRegistrationOptions : TextDocumentRegistrationOptions
 {
     Nullable!bool resolveProvider;
 
-    @safe this(Nullable!bool resolveProvider = Nullable!bool.init)
+    this(Nullable!bool resolveProvider = Nullable!bool.init)
     {
         this.resolveProvider = resolveProvider;
     }
@@ -425,7 +423,7 @@ class ColorInformation
     Range range;
     Color color;
 
-    @safe this(Range range = new Range(), Color color = new Color())
+    this(Range range = new Range(), Color color = new Color())
     {
         this.range = range;
         this.color = color;
@@ -439,7 +437,7 @@ class Color
     float blue;
     float alpha;
 
-    @safe this(float red = 0, float green = 0, float blue = 0, float alpha = 0)
+    this(float red = 0, float green = 0, float blue = 0, float alpha = 0)
     {
         this.red = red;
         this.green = green;
@@ -463,7 +461,7 @@ class ColorPresentation
     Nullable!TextEdit textEdit;
     Nullable!(TextEdit[]) additionalTextEdits;
 
-    @safe this(string label = string.init, Nullable!TextEdit textEdit = Nullable!TextEdit.init,
+    this(string label = string.init, Nullable!TextEdit textEdit = Nullable!TextEdit.init,
             Nullable!(TextEdit[]) additionalTextEdits = Nullable!(TextEdit[]).init)
     {
         this.label = label;
@@ -505,7 +503,7 @@ class DocumentOnTypeFormattingRegistrationOptions : TextDocumentRegistrationOpti
     string firstTriggerCharacter;
     Nullable!(string[]) moreTriggerCharacter;
 
-    @safe this(string firstTriggerCharacter = string.init,
+    this(string firstTriggerCharacter = string.init,
             Nullable!(string[]) moreTriggerCharacter = Nullable!(string[]).init)
     {
         this.firstTriggerCharacter = firstTriggerCharacter;
