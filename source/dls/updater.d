@@ -2,49 +2,35 @@ module dls.updater;
 
 import dls.bootstrap : repoBase;
 import dls.protocol.interfaces : InitializeParams;
+import dub.dub : Dub;
+import std.file : FileException;
 import std.format : format;
+import std.json : parseJSON;
 
 private enum descriptionJson = import("description.json");
 private immutable changelogUrl = format!"https://github.com/%s/dls/blob/master/CHANGELOG.md"(
         repoBase);
 
-void update(shared(InitializeParams.InitializationOptions) initOptions)
+void cleanup()
 {
-    import core.time : hours;
-    import dls.bootstrap : UpgradeFailedException, apiEndpoint, buildDls,
-        canDownloadDls, downloadDls, dubBinDir, linkDls;
-    static import dls.protocol.jsonrpc;
-    import dls.protocol.messages.window : Util;
-    import dls.util.logger : logger;
-    import dls.util.path : normalized;
-    import dub.dependency : Dependency;
-    import dub.dub : Dub, FetchOptions;
+    import dls.bootstrap : dubBinDir;
     import dub.package_ : Package;
-    import std.algorithm : find;
-    import std.concurrency : ownerTid, receiveOnly, register, send, thisTid;
-    import std.datetime : Clock, SysTime;
-    import std.file : FileException, SpanMode, dirEntries, isFile, remove,
-        rmdirRecurse;
-    import std.json : parseJSON;
-    import std.net.curl : get;
+    import std.file : SpanMode, dirEntries, remove, rmdirRecurse;
     import std.path : baseName;
     import std.regex : matchFirst;
 
-    const desc = parseJSON(descriptionJson);
-    const currentVersion = desc["packages"].array.find!(
-            p => p["name"] == desc["rootPackage"])[0]["version"].str;
     auto dub = new Dub();
-    Package[] toRemove;
+    Package[] packagesToRemove;
 
     foreach (dlsPackage; dub.packageManager.getPackageIterator("dls"))
     {
         if (dlsPackage.version_.toString() < currentVersion)
         {
-            toRemove ~= dlsPackage;
+            packagesToRemove ~= dlsPackage;
         }
     }
 
-    foreach (dlsPackage; toRemove)
+    foreach (dlsPackage; packagesToRemove)
     {
         try
         {
@@ -52,26 +38,74 @@ void update(shared(InitializeParams.InitializationOptions) initOptions)
         }
         catch (FileException e)
         {
-            // No big deal if they can't be removed for some reason
         }
     }
+
+    bool[string] entriesToRemove;
 
     foreach (entry; dirEntries(dubBinDir, SpanMode.shallow))
     {
         const match = entry.name.baseName.matchFirst(`dls-v([\d.]+)`);
 
-        if (match && match[1] < currentVersion)
+        if (match)
         {
-            try
+            if (match[1] < currentVersion)
             {
-                rmdirRecurse(entry.name);
+                foreach (subEntry; dirEntries(entry.name, SpanMode.shallow))
+                {
+                    if (subEntry.baseName !in entriesToRemove)
+                    {
+                        entriesToRemove[subEntry.name.baseName] = true;
+                    }
+                }
+
+                try
+                {
+                    rmdirRecurse(entry.name);
+                }
+                catch (FileException e)
+                {
+                }
             }
-            catch (FileException e)
+            else
             {
-                // No big deal if they can't be removed for some reason
+                foreach (subEntry; dirEntries(entry.name, SpanMode.shallow))
+                {
+                    entriesToRemove[subEntry.name.baseName] = false;
+                }
             }
         }
     }
+
+    foreach (entry; dirEntries(dubBinDir, SpanMode.shallow))
+    {
+        if (entry.name.baseName in entriesToRemove && entriesToRemove[entry.name.baseName])
+        {
+            try
+            {
+                remove(entry.name);
+            }
+            catch (FileException e)
+            {
+            }
+        }
+    }
+}
+
+@trusted void update(shared(InitializeParams.InitializationOptions) initOptions)
+{
+    import core.time : hours;
+    import dls.bootstrap : UpgradeFailedException, apiEndpoint, buildDls,
+        canDownloadDls, downloadDls, linkDls;
+    static import dls.protocol.jsonrpc;
+    import dls.protocol.messages.window : Util;
+    import dls.util.logger : logger;
+    import dls.util.path : normalized;
+    import dub.dependency : Dependency;
+    import dub.dub : FetchOptions;
+    import std.concurrency : ownerTid, receiveOnly, register, send, thisTid;
+    import std.datetime : Clock, SysTime;
+    import std.net.curl : get;
 
     const latestRelease = parseJSON(get(format!apiEndpoint("releases/latest")));
     const latestVersion = latestRelease["tag_name"].str;
@@ -134,6 +168,7 @@ void update(shared(InitializeParams.InitializationOptions) initOptions)
 
     if (!success)
     {
+        auto dub = new Dub();
         FetchOptions fetchOpts;
         fetchOpts |= FetchOptions.forceBranchUpgrade;
         const pack = dub.fetch("dls", Dependency(">=0.0.0"),
@@ -174,4 +209,12 @@ void update(shared(InitializeParams.InitializationOptions) initOptions)
     {
         Util.sendMessage(Util.ShowMessageType.dlsLinkError);
     }
+}
+
+@property private string currentVersion()
+{
+    import std.algorithm : find;
+
+    const desc = parseJSON(descriptionJson);
+    return desc["packages"].array.find!(p => p["name"] == desc["rootPackage"])[0]["version"].str;
 }

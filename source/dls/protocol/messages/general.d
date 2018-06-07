@@ -14,13 +14,21 @@ InitializeResult initialize(InitializeParams params)
     import std.algorithm : map, sort, uniq;
     import std.array : array;
 
-    auto result = new InitializeResult();
-
+    logger.info("Initializing server");
     Server.initialized = true;
     Server.initState = params;
-    logger.info("Initializing server");
-    Tools.initialize();
 
+    debug
+    {
+    }
+    else
+    {
+        import dls.updater : cleanup;
+
+        cleanup();
+    }
+
+    Tools.initialize();
     Uri[] uris;
 
     if (!params.rootUri.isNull)
@@ -44,6 +52,8 @@ InitializeResult initialize(InitializeParams params)
         Tools.symbolTool.importSelections(uri);
         Tools.analysisTool.addAnalysisConfigPath(uri);
     }
+
+    auto result = new InitializeResult();
 
     with (result.capabilities)
     {
