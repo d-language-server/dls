@@ -5,6 +5,13 @@ private enum Method
     build = "build"
 }
 
+shared static this()
+{
+    import dls.util.setup : initialSetup;
+
+    initialSetup();
+}
+
 int main(string[] args)
 {
     import dls.bootstrap : canDownloadDls, buildDls, downloadDls, linkDls;
@@ -18,32 +25,6 @@ int main(string[] args)
     Method method;
     bool check;
     bool progress;
-
-    version (Windows)
-    {
-        import std.algorithm : splitter;
-        import std.file : exists;
-        import std.path : buildNormalizedPath;
-        import std.process : environment;
-
-        version (X86_64)
-        {
-            enum binDir = "bin64";
-        }
-        else version (X86)
-        {
-            enum binDir = "bin";
-        }
-
-        foreach (path; splitter(environment["PATH"], ';'))
-        {
-            if (buildNormalizedPath(path, "dmd.exe").exists())
-            {
-                environment["PATH"] = buildNormalizedPath(dirName(path), binDir)
-                    ~ ';' ~ environment["PATH"];
-            }
-        }
-    }
 
     try
     {
