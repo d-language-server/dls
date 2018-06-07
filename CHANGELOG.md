@@ -4,6 +4,9 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.5.7
+- Removed libcurl.dll from the Windows archive, DMD's libcurl.dll is now used
+
 #### 0.5.6
 - Fixed older dls binaries not being removed when upgrading
 - Fixed `$/dls.upgradeDls.chunkSize` notifications being spammed
