@@ -4,6 +4,9 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.5.8
+- Added `$/dls.upgradeSelections.*` custom notifications
+
 #### 0.5.7
 - Removed libcurl.dll from the Windows archive, DMD's libcurl.dll is now used
 
@@ -36,8 +39,10 @@ Breaking changes will be in bold.
 - Fixed constant update nagging when DLS is already at the latest version
 
 ### 0.5.0
+- __Removed `dls/didUpdatePath` notification usage__
 - __Removed `telemetry/event` notification usage__
 - Added support for upgrades using automatic binary builds
+- Added custom `$/dls.upgradeDls.*` notifications
 - Updated libraries:
     - `dcd`: `0.9.6` => `0.9.8`
     - `dscanner`: `0.5.3` => `0.5.5`
