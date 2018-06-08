@@ -266,9 +266,12 @@ class SymbolTool : Tool
         logger.infof("Upgrading dependencies from %s", dirName(uri.path));
 
         spawn((string uriString) {
+            import dls.protocol.jsonrpc : send;
             import dub.dub : UpgradeOptions;
 
+            send("$/dls.upgradeSelections.start");
             getDub(new Uri(uriString)).upgrade(UpgradeOptions.upgrade | UpgradeOptions.select);
+            send("$/dls.upgradeSelections.stop");
         }, uri.toString());
     }
 
