@@ -79,6 +79,7 @@ class TextDocumentClientCapabilities
             Nullable!bool snippetSupport;
             Nullable!bool commitCharactersSupport;
             Nullable!(MarkupKind[]) documentationFormat;
+            Nullable!bool deprecatedSupport;
         }
 
         static class CompletionItemKind

@@ -129,6 +129,7 @@ class CompletionItem
     Nullable!CompletionItemKind kind;
     Nullable!string detail;
     Nullable!MarkupContent documentation;
+    Nullable!bool deprecated_;
     Nullable!string sortText;
     Nullable!string filterText;
     Nullable!string insertText;
@@ -142,12 +143,12 @@ class CompletionItem
     this(string label = string.init, Nullable!CompletionItemKind kind = Nullable!CompletionItemKind.init,
             Nullable!string detail = Nullable!string.init,
             Nullable!MarkupContent documentation = Nullable!MarkupContent.init,
-            Nullable!string sortText = Nullable!string.init, Nullable!string filterText = Nullable!string.init,
-            Nullable!string insertText = Nullable!string.init,
+            Nullable!bool deprecated_ = Nullable!bool.init, Nullable!string sortText = Nullable!string.init,
+            Nullable!string filterText = Nullable!string.init, Nullable!string insertText = Nullable!string.init,
             Nullable!InsertTextFormat insertTextFormat = Nullable!InsertTextFormat.init,
             Nullable!TextEdit textEdit = Nullable!TextEdit.init,
-            Nullable!(TextEdit[]) additionalTextEdits = Nullable!(TextEdit[]).init,
-            Nullable!(string[]) commitCharacters = Nullable!(string[])
+            Nullable!(TextEdit[]) additionalTextEdits = Nullable!(TextEdit[])
+            .init, Nullable!(string[]) commitCharacters = Nullable!(string[])
             .init, Nullable!Command command = Nullable!Command.init,
             Nullable!JSONValue data = Nullable!JSONValue.init)
     {
@@ -155,6 +156,7 @@ class CompletionItem
         this.kind = kind;
         this.detail = detail;
         this.documentation = documentation;
+        this.deprecated_ = deprecated_;
         this.sortText = sortText;
         this.filterText = filterText;
         this.insertText = insertText;
