@@ -92,7 +92,7 @@ void cleanup()
     }
 }
 
-@trusted void update(shared(InitializeParams.InitializationOptions) initOptions)
+@trusted void update()
 {
     import core.time : hours;
     import dls.bootstrap : UpgradeFailedException, apiEndpoint, buildDls,
@@ -154,10 +154,7 @@ void cleanup()
                 dls.protocol.jsonrpc.send("$/dls.upgradeDls.extract");
             };
 
-            downloadDls(initOptions.lspExtensions.upgradeDls
-                    ? totalSizeCallback : null, initOptions.lspExtensions.upgradeDls
-                    ? chunkSizeCallback : null,
-                    initOptions.lspExtensions.upgradeDls ? extractCallback : null);
+            downloadDls(totalSizeCallback, chunkSizeCallback, extractCallback);
             success = true;
         }
         catch (Exception e)

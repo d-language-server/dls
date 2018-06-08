@@ -89,7 +89,7 @@ void initialized(JSONValue nothing)
         import dls.updater : update;
         import std.concurrency : spawn;
 
-        spawn(&update, cast(shared(InitializeParams.InitializationOptions)) Server.initOptions);
+        spawn(&update);
     }
 
     const didChangeWatchedFiles = Server.initState.capabilities.workspace.didChangeWatchedFiles;

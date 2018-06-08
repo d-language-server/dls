@@ -25,8 +25,6 @@ class InitializeParams
     {
         static class LSPExtensions
         {
-            bool upgradeSelections;
-            bool upgradeDls;
         }
 
         LSPExtensions lspExtensions;
