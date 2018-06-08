@@ -3,7 +3,7 @@
 	"versions": {
 		"arsd-official": "2.0.0",
 		"dcd": "0.9.8",
-		"dfmt": "0.8.0",
+		"dfmt": "0.8.1",
 		"dscanner": "0.5.6",
 		"dsymbol": "0.3.8",
 		"dub": "1.9.0",
