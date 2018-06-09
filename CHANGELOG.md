@@ -4,6 +4,9 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.5.9
+- Fixed issues with files containing an UTF BOM
+
 #### 0.5.8
 - Added `$/dls.upgradeSelections.*` custom notifications
 
