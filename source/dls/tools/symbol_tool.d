@@ -651,9 +651,6 @@ class SymbolTool : Tool
 
     private static bool openDocument(Uri docUri)
     {
-        import std.array : replaceFirst;
-        import std.encoding : getBOM;
-
         auto closed = Document[docUri] is null;
 
         if (closed)
@@ -661,8 +658,7 @@ class SymbolTool : Tool
             auto doc = new TextDocumentItem();
             doc.uri = docUri;
             doc.languageId = "d";
-            auto text = readText(docUri.path);
-            doc.text = text.replaceFirst(cast(string) getBOM(cast(ubyte[]) text).sequence, "");
+            doc.text = readText(docUri.path);
             Document.open(doc);
         }
 

@@ -167,12 +167,14 @@ class Document
     private wstring[] getText(in string text) const
     {
         import std.algorithm : endsWith;
-        import std.array : array;
+        import std.array : array, replaceFirst;
+        import std.encoding : getBOM;
         import std.string : splitLines;
         import std.typecons : Yes;
         import std.utf : toUTF16;
 
-        auto lines = text.toUTF16().splitLines(Yes.keepTerminator);
+        auto lines = text.replaceFirst(cast(string) getBOM(cast(ubyte[]) text)
+                .sequence, "").toUTF16().splitLines(Yes.keepTerminator);
 
         if (!lines.length || lines[$ - 1].endsWith('\r', '\n'))
         {
