@@ -355,7 +355,7 @@ class SymbolTool : Tool
         import dcd.server.autocomplete : complete;
         import std.algorithm : chunkBy;
 
-        logger.infof("Getting completions for %s at position %s,%s", uri.path,
+        logger.infof("Fetching completions for %s at position %s,%s", uri.path,
                 position.line, position.character);
 
         auto request = getPreparedRequest(uri, position);
@@ -430,7 +430,7 @@ class SymbolTool : Tool
         import dcd.server.autocomplete : getDoc;
         import std.algorithm : filter;
 
-        logger.infof("Getting documentation for %s at position %s,%s",
+        logger.infof("Fetching documentation for %s at position %s,%s",
                 uri.path, position.line, position.character);
 
         auto request = getPreparedRequest(uri, position);
