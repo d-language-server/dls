@@ -42,7 +42,6 @@ abstract class Server
     import dls.util.logger : logger;
     import std.algorithm : find, findSplit;
     import std.json : JSONValue;
-    import std.string : strip, stripRight;
     import std.typecons : Nullable, nullable;
 
     static bool initialized = false;
@@ -77,22 +76,45 @@ abstract class Server
 
     static void loop()
     {
+        import std.array : appender;
         import std.conv : to;
         import std.stdio : stdin;
+        import std.string : strip, stripRight;
 
         while (!stdin.eof && !exit)
         {
-            string[][] headers;
+            string[string] headers;
             string line;
 
             do
             {
-                line = stdin.readln().stripRight();
+                auto lineAppender = appender!(char[]);
+                auto charBuffer = new char[1];
+                bool cr;
+                bool lf;
+
+                lineAppender.clear();
+
+                do
+                {
+                    auto c = stdin.rawRead(charBuffer)[0];
+                    lineAppender ~= c;
+
+                    if (cr)
+                    {
+                        lf = c == '\n';
+                    }
+
+                    cr = c == '\r';
+                }
+                while (!lf);
+
+                line = lineAppender.data.stripRight().to!string;
                 auto parts = line.findSplit(":");
 
                 if (parts[1].length > 0)
                 {
-                    headers ~= [parts[0], parts[2]];
+                    headers[parts[0].to!string] = parts[2].to!string;
                 }
             }
             while (line.length > 0);
@@ -102,17 +124,15 @@ abstract class Server
                 continue;
             }
 
-            auto contentLengthResult = headers.find!((parts,
-                    name) => parts.length > 0 && parts[0] == name)("Content-Length");
-
-            if (contentLengthResult.length == 0)
+            if ("Content-Length" !in headers)
             {
                 logger.error("No valid Content-Length section in header");
                 continue;
             }
 
+            auto contentLengthResult = headers["Content-Length"];
             static char[] buffer;
-            const contentLength = contentLengthResult[0][1].strip().to!size_t;
+            const contentLength = contentLengthResult.strip().to!size_t;
             buffer.length = contentLength;
             const content = stdin.rawRead(buffer);
 
