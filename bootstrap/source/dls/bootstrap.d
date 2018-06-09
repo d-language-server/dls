@@ -147,7 +147,8 @@ void downloadDls(in void function(size_t size) totalSizeCallback = null,
                 }
             }
 
-            if (started && chunkSizeCallback !is null && dlNow > 0 && watch.peek() >= 500.msecs)
+            if (started && chunkSizeCallback !is null && dlNow > 0
+                    && (watch.peek() >= 500.msecs || dlNow == dlTotal))
             {
                 watch.reset();
                 chunkSizeCallback(dlNow);
