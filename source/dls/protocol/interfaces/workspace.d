@@ -1,6 +1,5 @@
 module dls.protocol.interfaces.workspace;
 
-import dls.protocol.definitions : DocumentUri, MarkupKind, WorkspaceEdit;
 import dls.protocol.interfaces.client : RegistrationOptionsBase;
 import dls.util.constructor : Constructor;
 import std.json : JSONValue;
@@ -58,6 +57,8 @@ class DidChangeWatchedFilesParams
 
 class FileEvent
 {
+    import dls.protocol.definitions : DocumentUri;
+
     DocumentUri uri;
     FileChangeType type;
 }
@@ -121,6 +122,8 @@ class ExecuteCommandRegistrationOptions : RegistrationOptionsBase
 
 class ApplyWorkspaceEditParams
 {
+    import dls.protocol.definitions : WorkspaceEdit;
+
     WorkspaceEdit edit;
 
     this(WorkspaceEdit edit = WorkspaceEdit.init)

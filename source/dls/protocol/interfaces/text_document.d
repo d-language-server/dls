@@ -2,7 +2,6 @@ module dls.protocol.interfaces.text_document;
 
 import dls.protocol.definitions;
 import dls.protocol.interfaces.client : TextDocumentRegistrationOptions;
-import dls.protocol.interfaces.general : TextDocumentSyncKind;
 import dls.util.constructor : Constructor;
 import std.json : JSONValue;
 import std.typecons : Nullable;
@@ -31,6 +30,8 @@ class TextDocumentContentChangeEvent
 
 class TextDocumentChangeRegistrationOptions : TextDocumentRegistrationOptions
 {
+    import dls.protocol.interfaces.general : TextDocumentSyncKind;
+
     TextDocumentSyncKind syncKind;
 
     this(TextDocumentSyncKind syncKind = TextDocumentSyncKind.init)

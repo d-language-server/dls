@@ -1,7 +1,6 @@
 module dls.protocol.interfaces.general;
 
-import dls.protocol.definitions : DocumentUri, MarkupKind;
-import dls.protocol.interfaces.text_document : CompletionItemKind;
+import dls.protocol.definitions : MarkupKind;
 import dls.protocol.interfaces.workspace : WorkspaceFolder;
 import dls.util.constructor : Constructor;
 import std.json : JSONValue;
@@ -14,6 +13,9 @@ private class WithDynamicRegistration
 
 class InitializeParams
 {
+    import dls.protocol.definitions : DocumentUri;
+    import dls.protocol.interfaces.workspace : WorkspaceFolder;
+
     static enum Trace : string
     {
         off = "off",
@@ -82,7 +84,9 @@ class TextDocumentClientCapabilities
 
         static class CompletionItemKind
         {
-            Nullable!(dls.protocol.interfaces.text_document.CompletionItemKind[]) valueSet;
+            import dls.protocol.interfaces.text_document : CompletionItemKind;
+
+            Nullable!(CompletionItemKind[]) valueSet;
         }
 
         Nullable!bool dynamicRegistration;
@@ -91,13 +95,40 @@ class TextDocumentClientCapabilities
         Nullable!bool contextSupport;
     }
 
+    static class Hover : WithDynamicRegistration
+    {
+        Nullable!(MarkupKind[]) contentFormat;
+    }
+
+    static class SignatureHelp : WithDynamicRegistration
+    {
+        static class SignatureInformation
+        {
+            Nullable!(MarkupKind[]) documentationFormat;
+        }
+
+        Nullable!SignatureInformation signatureHelp;
+    }
+
+    static class DocumentSymbol : WithDynamicRegistration
+    {
+        static class SymbolKind
+        {
+            import dls.protocol.interfaces.text_document : SymbolKind;
+
+            Nullable!(SymbolKind[]) valueSet;
+        }
+
+        Nullable!SymbolKind symbolKind;
+    }
+
     Nullable!Synchronisation synchronisation;
     Nullable!Completion completion;
-    Nullable!WithDynamicRegistration hover;
-    Nullable!WithDynamicRegistration signatureHelp;
+    Nullable!Hover hover;
+    Nullable!SignatureHelp signatureHelp;
     Nullable!WithDynamicRegistration references;
     Nullable!WithDynamicRegistration documentHighlight;
-    Nullable!WithDynamicRegistration documentSymbol;
+    Nullable!DocumentSymbol documentSymbol;
     Nullable!WithDynamicRegistration formatting;
     Nullable!WithDynamicRegistration rangeFormatting;
     Nullable!WithDynamicRegistration onTypeFormatting;

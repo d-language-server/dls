@@ -1,6 +1,5 @@
 module dls.protocol.interfaces.client;
 
-import dls.protocol.definitions : DocumentSelector;
 import std.typecons : Nullable;
 
 private abstract class RegistrationBase
@@ -33,6 +32,8 @@ class Registration(R : RegistrationOptionsBase) : RegistrationBase
 
 class TextDocumentRegistrationOptions : RegistrationOptionsBase
 {
+    import dls.protocol.definitions : DocumentSelector;
+
     Nullable!DocumentSelector documentSelector;
 
     this(Nullable!DocumentSelector documentSelector = Nullable!DocumentSelector.init)
