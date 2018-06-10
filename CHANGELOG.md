@@ -4,6 +4,11 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.5.10
+- Added ability for clients to disable features with server init options
+- Fixed symbol searching being case sensitive
+- Fixed server crashing with Intellij Idea
+
 #### 0.5.9
 - Fixed issues with files containing an UTF BOM
 
@@ -19,8 +24,8 @@ Breaking changes will be in bold.
 - Fixed `dls:bootstrap` not necessarily using the correct libcurl.dll
 
 #### 0.5.5
-- Fixed `dls:bootstrap` building DLS if the latest release was still in the process of building binaries
 - Enhanced message logging by using LSP logging instead of stderr
+- Fixed `dls:bootstrap` building DLS if the latest release was still in the process of building binaries
 - Updated libraries:
     - `dscanner`: `0.5.5` => `0.5.6`
     - `dsymbol`: `0.3.7` => `0.3.8`

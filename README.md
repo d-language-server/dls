@@ -68,6 +68,23 @@ All these keys should be formatted as `d.dls.[section].[key]` (e.g. `d.dls.forma
 |`dfmtTemplateConstraintStyle`       |`"conditionalNewlineIndent"` or `"conditionalNewline"` or `"alwaysNewline"` or `"alwaysNewlineIndent"`|`"conditionalNewlineIndent"`|
 |`dfmtSingleTemplateConstraintIndent`|`boolean`                               |`false`      |
 
+## Server initialization options
+
+DLS supports a few custom initialization options in the `InitializeParams` object sent with the `initialize` request:
+```typescript
+initializationOptions: {
+    capabilities: {
+        completion: true;
+        hover: true;
+        documentFormatting: true;
+        definition: true;
+        documentHighlight: true;
+        documentSymbol: true;
+        workspaceSymbol: true;
+    }
+}
+```
+
 ## The `bootstrap` subpackage and the update system
 
 In order to simplify the process of updating DLS, an update system is implemented.
