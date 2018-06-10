@@ -149,13 +149,13 @@ class TextDocumentItem
 {
     DocumentUri uri;
     string languageId;
-    ulong version_;
+    long version_;
     string text;
 }
 
 class VersionedTextDocumentIdentifier : TextDocumentIdentifier
 {
-    ulong version_;
+    long version_;
 }
 
 class TextDocumentPositionParams
