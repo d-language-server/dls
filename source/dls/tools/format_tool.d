@@ -86,7 +86,7 @@ class FormatTool : Tool
         auto buffer = new OutBuffer();
         format(uri, contents, buffer, &config);
         auto range = new Range(new Position(0, 0),
-                new Position(document.lines.length, document.lines[$ - 1].length));
+                new Position(document.lines.length - 1, document.lines[$ - 1].length));
         return [new TextEdit(range, buffer.toString())];
     }
 }
