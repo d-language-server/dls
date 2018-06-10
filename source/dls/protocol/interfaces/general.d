@@ -25,11 +25,18 @@ class InitializeParams
 
     static class InitializationOptions
     {
-        static class LSPExtensions
+        static class Capabilities
         {
+            bool completion = true;
+            bool hover = true;
+            bool documentFormatting = true;
+            bool definition = true;
+            bool documentHighlight = true;
+            bool documentSymbol = true;
+            bool workspaceSymbol = true;
         }
 
-        LSPExtensions lspExtensions;
+        Capabilities capabilities;
 
         mixin Constructor!InitializationOptions;
     }

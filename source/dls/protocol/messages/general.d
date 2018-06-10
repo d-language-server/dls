@@ -4,7 +4,7 @@ import dls.protocol.interfaces.general;
 import dls.server : Server;
 import dls.util.logger : logger;
 import std.json : JSONValue;
-import std.typecons : nullable;
+import std.typecons : Nullable, nullable;
 
 @("")
 InitializeResult initialize(InitializeParams params)
@@ -60,13 +60,14 @@ InitializeResult initialize(InitializeParams params)
         textDocumentSync = new TextDocumentSyncOptions(true.nullable,
                 TextDocumentSyncKind.incremental.nullable);
         textDocumentSync.save = new SaveOptions(false.nullable);
-        completionProvider = new CompletionOptions(true.nullable, ["."].nullable);
-        hoverProvider = true;
-        documentFormattingProvider = true;
-        definitionProvider = true;
-        documentHighlightProvider = true;
-        documentSymbolProvider = true;
-        workspaceSymbolProvider = true;
+        completionProvider = Server.initOptions.capabilities.completion
+            ? new CompletionOptions(true.nullable, ["."].nullable) : Nullable!CompletionOptions();
+        hoverProvider = Server.initOptions.capabilities.hover;
+        documentFormattingProvider = Server.initOptions.capabilities.documentFormatting;
+        definitionProvider = Server.initOptions.capabilities.definition;
+        documentHighlightProvider = Server.initOptions.capabilities.documentHighlight;
+        documentSymbolProvider = Server.initOptions.capabilities.documentSymbol;
+        workspaceSymbolProvider = Server.initOptions.capabilities.workspaceSymbol;
         workspace = new ServerCapabilities.Workspace(new ServerCapabilities.Workspace.WorkspaceFolders(true.nullable,
                 JSONValue(true).nullable).nullable);
     }
