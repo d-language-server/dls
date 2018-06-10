@@ -279,10 +279,12 @@ class SymbolTool : Tool
     {
         import dsymbol.string_interning : internString;
         import dsymbol.symbol : DSymbol;
+        import std.uni : toUpper;
 
         logger.infof(`Fetching symbols from %s with query "%s"`, uri is null
                 ? "workspace" : uri.path, query);
 
+        const simpleQuery = query.toUpper();
         auto result = new RedBlackTree!(SymbolInformation, q{a.name > b.name}, true);
 
         void collectSymbolInformations(Uri symbolUri, const(DSymbol)* symbol,
@@ -293,7 +295,7 @@ class SymbolTool : Tool
                 return;
             }
 
-            if (symbol.name.data.matchFirst(query))
+            if (symbol.name.data.toUpper().matchFirst(simpleQuery))
             {
                 auto location = new Location(symbolUri,
                         Document[symbolUri].wordRangeAtByte(symbol.location));
