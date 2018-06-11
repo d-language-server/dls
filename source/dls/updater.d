@@ -92,7 +92,7 @@ void cleanup()
     }
 }
 
-@trusted void update()
+void update()
 {
     import core.time : hours;
     import dls.bootstrap : UpgradeFailedException, apiEndpoint, buildDls,
@@ -103,22 +103,24 @@ void cleanup()
     import dls.util.path : normalized;
     import dub.dependency : Dependency;
     import dub.dub : FetchOptions;
+    import dub.semver : compareVersions;
+    import std.algorithm : stripLeft;
     import std.concurrency : ownerTid, receiveOnly, register, send, thisTid;
     import std.datetime : Clock, SysTime;
     import std.net.curl : get;
 
     const latestRelease = parseJSON(get(format!apiEndpoint("releases/latest")));
-    const latestVersion = latestRelease["tag_name"].str;
+    const latestVersion = latestRelease["tag_name"].str.stripLeft('v');
     const releaseDate = SysTime.fromISOExtString(latestRelease["published_at"].str);
 
-    if (latestVersion.length == 0 || ('v' ~ currentVersion) >= latestVersion
-            || (Clock.currTime - releaseDate < 1.hours))
+    if (latestVersion.length == 0 || compareVersions(currentVersion,
+            latestVersion) >= 0 || (Clock.currTime - releaseDate < 1.hours))
     {
         return;
     }
 
     auto id = Util.sendMessageRequest(Util.ShowMessageRequestType.upgradeDls,
-            [latestVersion, ('v' ~ currentVersion)]);
+            [latestVersion, currentVersion]);
     const threadName = "updater";
     register(threadName, thisTid());
     send(ownerTid(), Util.ThreadMessageData(id,
