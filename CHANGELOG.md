@@ -4,6 +4,11 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+### 0.6.0
+- Fixed updater detecting `v0.5.9` as superior to `v0.5.10`
+- Updated libraries:
+    - `dsymbol`: `0.3.8` => `0.3.9`
+
 #### 0.5.10
 - Added ability for clients to disable features with server init options
 - Fixed symbol searching being case sensitive
