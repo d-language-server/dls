@@ -4,6 +4,13 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.6.1
+- Fixed error when trying to fetch completions right after a parenthesis
+- Updated libraries:
+    - `dcd`: `0.9.8` => `0.9.9`
+    - `dscanner`: `0.5.6` => `0.5.7`
+    - `dsymbol`: `0.3.9` => `0.3.10`
+
 ### 0.6.0
 - Fixed updater detecting `v0.5.9` as superior to `v0.5.10`
 - Updated libraries:
