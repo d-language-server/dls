@@ -69,7 +69,7 @@ class SymbolTool : Tool
     import dsymbol.modulecache : ModuleCache;
     import dub.dub : Dub;
     import dub.platform : BuildPlatform;
-    import std.algorithm : map, reduce, sort, uniq;
+    import std.algorithm : filter, map, reduce, sort, uniq;
     import std.array : appender, array, replace;
     import std.container : RedBlackTree;
     import std.conv : to;
@@ -353,7 +353,7 @@ class SymbolTool : Tool
 
     CompletionItem[] completion(Uri uri, Position position)
     {
-        import dcd.common.messages : AutocompleteResponse;
+        import dcd.common.messages : AutocompleteResponse, CompletionType;
         import dcd.server.autocomplete : complete;
         import std.algorithm : chunkBy;
 
@@ -381,9 +381,17 @@ class SymbolTool : Tool
             return a.symbolFilePath == b.symbolFilePath && a.symbolLocation == b.symbolLocation;
         }
 
-        return chain(_workspaceCaches.byValue, _libraryCaches.byValue).map!(
-                cache => complete(request, *cache).completions)
-            .reduce!q{a ~ b}
+        auto completionsList = chain(_workspaceCaches.byValue, _libraryCaches.byValue).map!(
+                cache => complete(request, *cache))
+            .filter!(a => a.completionType == CompletionType.identifiers)
+            .map!q{a.completions};
+
+        if (completionsList.empty)
+        {
+            return [];
+        }
+
+        return completionsList.reduce!q{a ~ b}
             .sort!compareCompletionsLess
             .uniq!compareCompletionsEqual
             .chunkBy!q{a.identifier == b.identifier}
@@ -430,7 +438,6 @@ class SymbolTool : Tool
     Hover hover(Uri uri, Position position)
     {
         import dcd.server.autocomplete : getDoc;
-        import std.algorithm : filter;
 
         logger.infof("Fetching documentation for %s at position %s,%s",
                 uri.path, position.line, position.character);
