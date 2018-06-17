@@ -4,6 +4,9 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.6.2
+- Fixed issue with subpackages importing other subpackages
+
 #### 0.6.1
 - Fixed error when trying to fetch completions right after a parenthesis
 - Updated libraries:
