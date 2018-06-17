@@ -222,26 +222,36 @@ class SymbolTool : Tool
 
     void importPath(Uri uri)
     {
-        const d = getDub(uri);
-        const desc = d.project.rootPackage.describe(BuildPlatform.any, null, null);
-        importDirectories!false(uri.path,
-                desc.importPaths.map!(importPath => buildNormalizedPath(uri.path,
-                    importPath)).array);
+        auto d = getDub(uri);
+        auto packages = [d.project.rootPackage];
+
+        foreach (sub; d.project.rootPackage.subPackages)
+        {
+            packages ~= d.project.packageManager.getSubPackage(d.project.rootPackage,
+                    sub.path, true);
+        }
+
+        foreach (p; packages)
+        {
+            const desc = p.describe(BuildPlatform.any, null, null);
+            importDirectories!false(uri.path,
+                    desc.importPaths.map!(path => buildNormalizedPath(p.path.toString(),
+                        path)).array);
+        }
     }
 
     void importSelections(Uri uri)
     {
         const d = getDub(uri);
-        const project = d.project;
 
-        foreach (dep; project.dependencies)
+        foreach (dep; d.project.dependencies)
         {
             const desc = dep.describe(BuildPlatform.any, null,
-                    dep.name in project.rootPackage.recipe.buildSettings.subConfigurations
-                    ? project.rootPackage.recipe.buildSettings.subConfigurations[dep.name] : null);
+                    dep.name in d.project.rootPackage.recipe.buildSettings.subConfigurations
+                    ? d.project.rootPackage.recipe.buildSettings.subConfigurations[dep.name] : null);
             importDirectories!true(dep.name,
-                    desc.importPaths.map!(importPath => buildNormalizedPath(dep.path.toString(),
-                        importPath)).array, true);
+                    desc.importPaths.map!(path => buildNormalizedPath(dep.path.toString(),
+                        path)).array, true);
         }
     }
 
