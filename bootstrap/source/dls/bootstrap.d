@@ -66,7 +66,9 @@ shared static this()
 
 @property bool canDownloadDls()
 {
+    import core.time : hours;
     import std.algorithm : min;
+    import std.datetime : Clock, SysTime;
     import std.json : JSONException, parseJSON;
     import std.net.curl : get;
 
@@ -74,15 +76,20 @@ shared static this()
     {
         const releases = parseJSON(get(format!apiEndpoint("releases"))).array;
 
-        foreach (release; releases[0 .. min($, 2)])
+        foreach (release; releases[0 .. min($, 5)])
         {
-            foreach (asset; release["assets"].array)
+            const releaseDate = SysTime.fromISOExtString(release["published_at"].str);
+
+            if (Clock.currTime - releaseDate > 1.hours)
             {
-                if (asset["name"].str == format(dlsArchiveName, release["tag_name"].str))
+                foreach (asset; release["assets"].array)
                 {
-                    downloadUrl = asset["browser_download_url"].str;
-                    downloadVersion = release["tag_name"].str;
-                    return true;
+                    if (asset["name"].str == format(dlsArchiveName, release["tag_name"].str))
+                    {
+                        downloadUrl = asset["browser_download_url"].str;
+                        downloadVersion = release["tag_name"].str;
+                        return true;
+                    }
                 }
             }
         }
