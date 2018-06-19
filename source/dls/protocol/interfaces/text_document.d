@@ -358,9 +358,29 @@ class CodeActionParams : ParamsBase
     mixin Constructor!CodeActionParams;
 }
 
+enum CodeActionKind
+{
+    quickfix = "quickfix",
+    refactor = "refactor",
+    refactorExtract = "refactor.extract",
+    refactorInline = "refactor.inline",
+    source = "source",
+    sourceOrganizeImports = "source.organizeImports"
+}
+
 class CodeActionContext
 {
     Diagnostic[] diagnostics;
+    Nullable!(CodeActionKind[]) only;
+}
+
+class CodeAction
+{
+    string title;
+    Nullable!CodeActionKind kind;
+    Nullable!(Diagnostic[]) diagnostics;
+    Nullable!WorkspaceEdit edit;
+    Nullable!Command command;
 }
 
 alias CodeLensParams = ParamsBase;
@@ -452,7 +472,7 @@ class Color
 class ColorPresentationParams
 {
     TextDocumentIdentifier textDocument;
-    Color colorInfo;
+    Color color;
     Range range;
 
     mixin Constructor!ColorPresentationParams;

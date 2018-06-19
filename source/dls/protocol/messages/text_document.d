@@ -108,7 +108,7 @@ SymbolInformation[] documentSymbol(DocumentSymbolParams params)
     return Tools.symbolTool.symbol("", new Uri(params.textDocument.uri));
 }
 
-Command[] codeAction(CodeActionParams params)
+CodeAction[] codeAction(CodeActionParams params)
 {
     return [];
 }
