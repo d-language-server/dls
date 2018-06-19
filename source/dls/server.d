@@ -97,15 +97,21 @@ abstract class Server
 
                 do
                 {
-                    auto c = stdin.rawRead(charBuffer)[0];
-                    lineAppender ~= c;
+                    auto res = stdin.rawRead(charBuffer);
+
+                    if (res.length == 0)
+                    {
+                        break;
+                    }
+
+                    lineAppender ~= res[0];
 
                     if (cr)
                     {
-                        lf = c == '\n';
+                        lf = res[0] == '\n';
                     }
 
-                    cr = c == '\r';
+                    cr = res[0] == '\r';
                 }
                 while (!lf);
 
