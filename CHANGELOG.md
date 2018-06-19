@@ -4,11 +4,17 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.6.3
+- `dls:bootstrap` should now apply the same more-than-an-hour policy regarding the version it's installing as the update system
+- Updated libraries:
+    - `dfmt`: `0.8.1` => `0.8.2`
+    - `libdparse`: `0.8.6` => `0.8.7`
+
 #### 0.6.2
 - Fixed issue with subpackages importing other subpackages
 
 #### 0.6.1
-- Fixed error when trying to fetch completions right after a parenthesis
+- Fixed error when trying to fetch completions right after a parenthesis (#2)
 - Updated libraries:
     - `dcd`: `0.9.8` => `0.9.9`
     - `dscanner`: `0.5.6` => `0.5.7`
@@ -29,6 +35,8 @@ Breaking changes will be in bold.
 
 #### 0.5.8
 - Added `$/dls.upgradeSelections.*` custom notifications
+- Updated libraries:
+    - `dfmt`: `0.8.0` => `0.8.1`
 
 #### 0.5.7
 - Removed libcurl.dll from the Windows archive, DMD's libcurl.dll is now used
