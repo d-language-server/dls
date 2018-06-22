@@ -4,7 +4,7 @@
 [![Build Status](https://travis-ci.org/LaurentTreguier/dls.svg?branch=master)](https://travis-ci.org/LaurentTreguier/dls)
 [![Build status](https://ci.appveyor.com/api/projects/status/apmr87v3yvkxb5dm/branch/master?svg=true)](https://ci.appveyor.com/project/LaurentTreguier/dls)
 
-### LSP compliance: `3.7.0`
+### LSP compliance: `3.8.0`
 
 _This is a work in progress. There ~~might~~ will be bugs and crashes..._
 
@@ -18,9 +18,9 @@ Current features include:
 - Symbol searching
 - Symbol highlighting
 - Documentation on hover
-- Random crashes
+- Random, frustrating crashes
 
-Libraries used (the stuff doing the actual hard work):
+Dub packages used (the stuff doing the actual hard work):
 - [arsd](http://arsd.dub.pm)
 - [DCD](http://dcd.dub.pm)
 - [DFMT](http://dfmt.dub.pm)
@@ -34,10 +34,44 @@ Libraries used (the stuff doing the actual hard work):
 - [msgpack-d](http://msgpack-d.dub.pm)
 - [stdx-allocator](http://stdx-allocator.dub.pm)
 
+## Usage
+
+Some editors may need DLS to be [installed manually](#Installing) (don't worry it's easy).
+
+- Visual Studio Code: [install the extension](https://marketplace.visualstudio.com/items?itemName=LaurentTreguier.vscode-dls)
+- Atom: [install the package](https://atom.io/packages/ide-dlang)
+- Sublime Text (using [tomv654's LSP client](https://github.com/tomv564/LSP)):
+    ```json
+    "clients":
+	{
+		"dls":
+		{
+			"command":
+			[
+				"[path to dls executable]"
+			],
+			"enabled": true,
+			"languageId": "d",
+			"scopes":
+			[
+				"source.d"
+			],
+			"syntaxes":
+			[
+				"Packages/D/D.sublime-syntax"
+			]
+		}
+	}
+    ```
+
+DLS may or may not work with other editors.
+Given the nature of the LSP, it should work, but given the nature of DLS, it should have some weird quirks.
+If it's not working with your editor of choice, [submit an issue](https://github.com/LaurentTreguier/dls/issues/new) !
+
 ## Installing
 You can run `dub fetch dls` and then `dub run dls:bootstrap` to install dls.
 The second command will output a path to a symbolic link that will always point to the latest DLS executable.
-DLS will propose updates as they come, and update the symbolic link upon upgrading.
+DLS will propose updates as they come, and update the symbolic link accordingly.
 
 ## Client side configuration
 
@@ -124,9 +158,3 @@ DLS uses `$/dls` as a prefix for some custom messages.
 |`$/dls.upgradeDls.extract`     |Notification|`null`   |Sent when the download is finished and the contents are written on the disk|
 |`$/dls.upgradeSelections.start`|Notification|`number` |Sent when DLS starts upgrading dub.selections.json                         |
 |`$/dls.upgradeSelections.stop` |Notification|`null`   |Sent when DLS has finished upgrading dub.selections.json                   |
-
-## Example usage
-
-I made a VSCode extension and an Atom package using DLS:
-- https://github.com/LaurentTreguier/vscode-dls
-- https://github.com/LaurentTreguier/ide-dlang

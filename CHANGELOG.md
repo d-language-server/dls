@@ -4,6 +4,11 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.6.4
+- Fixed compatibility with Sublime Text
+- Updated libraries:
+    - `emsi_containers`: `0.8.0-alpha.7` => `0.8.0-alpha.9`
+
 #### 0.6.3
 - `dls:bootstrap` should now apply the same more-than-an-hour policy regarding the version it's installing as the update system
 - Updated libraries:
