@@ -59,11 +59,23 @@ class WorkspaceClientCapabilities
         Nullable!bool documentChanges;
     }
 
+    static class Symbol : WithDynamicRegistration
+    {
+        static class SymbolKind
+        {
+            import dls.protocol.interfaces.text_document : SymbolKind;
+
+            Nullable!(SymbolKind[]) valueSet;
+        }
+
+        Nullable!SymbolKind symbolKind;
+    }
+
     Nullable!bool applyEdit;
     Nullable!WorkspaceEdit workspaceEdit;
     Nullable!WithDynamicRegistration didChangeConfiguration;
     Nullable!WithDynamicRegistration didChangeWatchedFiles;
-    Nullable!WithDynamicRegistration symbol;
+    Nullable!Symbol symbol;
     Nullable!WithDynamicRegistration executeCommand;
     Nullable!bool workspaceFolders;
     Nullable!bool configuration;
@@ -129,6 +141,23 @@ class TextDocumentClientCapabilities
         Nullable!SymbolKind symbolKind;
     }
 
+    static class CodeAction : WithDynamicRegistration
+    {
+        static class CodeActionLiteralSupport
+        {
+            static class CodeActionKind
+            {
+                import dls.protocol.interfaces.text_document : CodeActionKind;
+
+                CodeActionKind[] valueSet;
+            }
+
+            CodeActionKind codeActionKind;
+        }
+
+        Nullable!CodeActionLiteralSupport codeActionLiteralSupport;
+    }
+
     Nullable!Synchronisation synchronisation;
     Nullable!Completion completion;
     Nullable!Hover hover;
@@ -142,7 +171,7 @@ class TextDocumentClientCapabilities
     Nullable!WithDynamicRegistration definition;
     Nullable!WithDynamicRegistration typeDefinition;
     Nullable!WithDynamicRegistration implementation;
-    Nullable!WithDynamicRegistration codeAction;
+    Nullable!CodeAction codeAction;
     Nullable!WithDynamicRegistration codeLens;
     Nullable!WithDynamicRegistration documentLink;
     Nullable!WithDynamicRegistration colorProvider;
