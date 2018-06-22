@@ -171,7 +171,7 @@ class TextDocumentClientCapabilities
     Nullable!WithDynamicRegistration definition;
     Nullable!WithDynamicRegistration typeDefinition;
     Nullable!WithDynamicRegistration implementation;
-    Nullable!CodeAction codeAction;
+    Nullable!WithDynamicRegistration codeAction; // don't use CodeAction yet
     Nullable!WithDynamicRegistration codeLens;
     Nullable!WithDynamicRegistration documentLink;
     Nullable!WithDynamicRegistration colorProvider;
