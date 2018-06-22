@@ -3,13 +3,14 @@ module dls.tools.symbol_tool;
 import dls.protocol.interfaces : CompletionItemKind, SymbolKind;
 import dls.tools.tool : Tool;
 import dsymbol.symbol : CompletionKind;
+import std.algorithm : canFind;
 import std.path : asNormalizedPath, buildNormalizedPath, dirName;
 
 private immutable macroUrl = "https://raw.githubusercontent.com/dlang/dlang.org/stable/%s.ddoc";
 private immutable macroFiles = ["html", "macros", "std", "std_consolidated", "std-ddox"];
 private string[string] macros;
-private immutable CompletionItemKind[CompletionKind] completionKinds;
-private immutable SymbolKind[CompletionKind] symbolKinds;
+private CompletionItemKind[CompletionKind] completionKinds;
+private SymbolKind[CompletionKind] symbolKinds;
 
 shared static this()
 {
@@ -54,6 +55,43 @@ shared static this()
     //dfmt on
 
     setLogLevel(LogLevel.none);
+}
+
+void useCompatCompletionItemKinds(CompletionItemKind[] items = [])
+{
+    //dfmt off
+    enum map = [
+        CompletionKind.structName  : CompletionItemKind.class_,
+        CompletionKind.enumMember  : CompletionItemKind.field,
+        CompletionKind.packageName : CompletionItemKind.module_
+    ];
+    //dfmt on
+
+    foreach (ck, cik; map)
+    {
+        if (!items.canFind(completionKinds[ck]))
+        {
+            completionKinds[ck] = cik;
+        }
+    }
+}
+
+void useCompatSymbolKinds(SymbolKind[] symbols = [])
+{
+    //dfmt off
+    enum map = [
+        CompletionKind.structName : SymbolKind.class_,
+        CompletionKind.enumMember : SymbolKind.field
+    ];
+    //dfmt on
+
+    foreach (ck, sk; map)
+    {
+        if (!symbols.canFind(symbolKinds[ck]))
+        {
+            symbolKinds[ck] = sk;
+        }
+    }
 }
 
 class SymbolTool : Tool

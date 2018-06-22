@@ -9,6 +9,8 @@ import std.typecons : Nullable, nullable;
 @("")
 InitializeResult initialize(InitializeParams params)
 {
+    import dls.tools.symbol_tool : useCompatCompletionItemKinds,
+        useCompatSymbolKinds;
     import dls.tools.tools : Tools;
     import dls.util.uri : Uri;
     import std.algorithm : map, sort, uniq;
@@ -29,6 +31,40 @@ InitializeResult initialize(InitializeParams params)
     }
 
     Tools.initialize();
+
+    if (params.capabilities.textDocument.completion.isNull
+            || params.capabilities.textDocument.completion.completionItemKind.isNull
+            || params.capabilities.textDocument.completion.completionItemKind.valueSet.isNull)
+    {
+        useCompatCompletionItemKinds();
+    }
+    else
+    {
+        useCompatCompletionItemKinds(
+                params.capabilities.textDocument.completion.completionItemKind.valueSet);
+    }
+
+    if (params.capabilities.workspace.symbol.isNull || params.capabilities.workspace.symbol.symbolKind.isNull
+            || params.capabilities.workspace.symbol.symbolKind.valueSet.isNull)
+    {
+        useCompatSymbolKinds();
+    }
+    else
+    {
+        useCompatSymbolKinds(params.capabilities.workspace.symbol.symbolKind.valueSet);
+    }
+
+    if (params.capabilities.textDocument.documentSymbol.isNull
+            || params.capabilities.textDocument.documentSymbol.symbolKind.isNull
+            || params.capabilities.textDocument.documentSymbol.symbolKind.valueSet.isNull)
+    {
+        useCompatSymbolKinds();
+    }
+    else
+    {
+        useCompatSymbolKinds(params.capabilities.textDocument.documentSymbol.symbolKind.valueSet);
+    }
+
     Uri[] uris;
 
     if (!params.rootUri.isNull)
