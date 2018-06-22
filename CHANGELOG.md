@@ -4,6 +4,9 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.6.5
+- Fixed instant crash at server startup
+
 #### 0.6.4
 - Fixed compatibility with Sublime Text
 - Updated libraries:
