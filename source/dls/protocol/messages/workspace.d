@@ -56,25 +56,25 @@ void didChangeConfiguration(DidChangeConfigurationParams params)
 
 void didChangeWatchedFiles(DidChangeWatchedFilesParams params)
 {
-    import dls.protocol.interfaces : MessageActionItem, MessageType,
-        ShowMessageRequestParams;
     import dls.protocol.messages.window : Util;
-    import std.algorithm : canFind;
     import std.path : baseName, dirName;
 
     foreach (event; params.changes)
     {
         auto uri = new Uri(event.uri);
-        const fileName = baseName(uri.path);
 
         logger.infof("File changed: %s", uri.path);
 
-        switch (fileName)
+        switch (baseName(uri.path))
         {
         case "dub.json", "dub.sdl":
-            auto id = Util.sendMessageRequest(
-                    Util.ShowMessageRequestType.upgradeSelections, [uri.path]);
-            Util.addMessageRequestType(id, Util.ShowMessageRequestType.upgradeSelections, uri);
+            if (baseName(dirName(uri.path)) != ".dub")
+            {
+                auto id = Util.sendMessageRequest(Util.ShowMessageRequestType.upgradeSelections,
+                        [uri.path]);
+                Util.addMessageRequestType(id, Util.ShowMessageRequestType.upgradeSelections, uri);
+            }
+
             break;
 
         case "dub.selections.json":
