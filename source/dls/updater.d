@@ -2,7 +2,6 @@ module dls.updater;
 
 import dls.bootstrap : repoBase;
 import dls.protocol.interfaces : InitializeParams;
-import dub.dub : Dub;
 import std.file : FileException;
 import std.format : format;
 import std.json : parseJSON;
@@ -14,32 +13,9 @@ private immutable changelogUrl = format!"https://github.com/%s/dls/blob/master/C
 void cleanup()
 {
     import dls.bootstrap : dubBinDir;
-    import dub.package_ : Package;
     import std.file : SpanMode, dirEntries, remove, rmdirRecurse;
     import std.path : baseName;
     import std.regex : matchFirst;
-
-    auto dub = new Dub();
-    Package[] packagesToRemove;
-
-    foreach (dlsPackage; dub.packageManager.getPackageIterator("dls"))
-    {
-        if (dlsPackage.version_.toString() < currentVersion)
-        {
-            packagesToRemove ~= dlsPackage;
-        }
-    }
-
-    foreach (dlsPackage; packagesToRemove)
-    {
-        try
-        {
-            dub.remove(dlsPackage);
-        }
-        catch (FileException e)
-        {
-        }
-    }
 
     bool[string] entriesToRemove;
 
@@ -102,7 +78,7 @@ void update()
     import dls.util.logger : logger;
     import dls.util.path : normalized;
     import dub.dependency : Dependency;
-    import dub.dub : FetchOptions;
+    import dub.dub : Dub, FetchOptions;
     import dub.semver : compareVersions;
     import std.algorithm : stripLeft;
     import std.concurrency : ownerTid, receiveOnly, register, send, thisTid;
