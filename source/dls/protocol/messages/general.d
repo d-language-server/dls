@@ -85,7 +85,6 @@ InitializeResult initialize(InitializeParams params)
             .uniq!q{a.path == b.path})
     {
         Tools.symbolTool.importPath(uri);
-        Tools.symbolTool.importSelections(uri);
         Tools.analysisTool.addAnalysisConfigPath(uri);
     }
 

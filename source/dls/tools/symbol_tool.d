@@ -275,6 +275,7 @@ class SymbolTool : Tool
             importDirectories!false(uri.path,
                     desc.importPaths.map!(path => buildNormalizedPath(p.path.toString(),
                         path)).array);
+            importSelections(Uri.fromPath(desc.path));
         }
     }
 

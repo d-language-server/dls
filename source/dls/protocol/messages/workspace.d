@@ -16,7 +16,6 @@ void workspaceFolders(string id, Nullable!(WorkspaceFolder[]) folders)
         {
             auto uri = new Uri(workspaceFolder.uri);
             Tools.symbolTool.importPath(uri);
-            Tools.symbolTool.importSelections(uri);
             Tools.analysisTool.addAnalysisConfigPath(uri);
         }
     }
