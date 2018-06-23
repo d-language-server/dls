@@ -90,7 +90,7 @@ void update()
     const releaseDate = SysTime.fromISOExtString(latestRelease["published_at"].str);
 
     if (latestVersion.length == 0 || compareVersions(currentVersion,
-            latestVersion) >= 0 || (Clock.currTime - releaseDate < 1.hours))
+            latestVersion) >= 0 || (Clock.currTime.toUTC() - releaseDate < 1.hours))
     {
         return;
     }

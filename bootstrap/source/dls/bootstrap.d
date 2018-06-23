@@ -80,7 +80,7 @@ shared static this()
         {
             const releaseDate = SysTime.fromISOExtString(release["published_at"].str);
 
-            if (Clock.currTime - releaseDate > 1.hours)
+            if (Clock.currTime.toUTC() - releaseDate > 1.hours)
             {
                 foreach (asset; release["assets"].array)
                 {
