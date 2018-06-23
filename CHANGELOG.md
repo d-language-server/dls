@@ -4,6 +4,11 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.6.6
+- Stopped removing older `dls` dub packages as binaries are now used
+- Fixed `Upgrade selections` popup appearing when building
+- Fixed subpackages missing completions from libraries
+
 #### 0.6.5
 - Fixed instant crash at server startup
 
