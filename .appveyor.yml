@@ -3,29 +3,27 @@ image: Visual Studio 2017
 environment:
   matrix:
     - ARCH: x86
-      BUILD_ARCH: x86_mscoff
     - ARCH: x86_64
-      BUILD_ARCH: x86_64
 install:
   - ps: function extractCompiler
         {
           pushd c:\\;
-          7z x dmd.7z > $null;
+          7z x ldc.7z > $null;
           popd;
         }
-  - ps: $latest = (Invoke-WebRequest "http://downloads.dlang.org/releases/LATEST").toString()
-  - ps: $url = "http://downloads.dlang.org/releases/2.x/$($latest)/dmd.$($latest).windows.7z"
-  - ps: Invoke-WebRequest $url -OutFile "c:\dmd.7z"
+  - ps: $latest = (Invoke-WebRequest "https://ldc-developers.github.io/LATEST").toString().replace("`n","").replace("`r","")
+  - ps: $url = "https://github.com/ldc-developers/ldc/releases/download/v$($latest)/ldc2-$($latest)-windows-multilib.7z";
+  - ps: Invoke-WebRequest $url -OutFile "c:\ldc.7z"
   - ps: extractCompiler
-  - ps: $env:PATH += ';C:\dmd2\windows\bin;'
+  - ps: $env:PATH += ";C:\ldc2-$($latest)-windows-multilib\bin;"
 build_script:
-  - dub build --build=release --arch=%BUILD_ARCH%
+  - dub build --arch=%ARCH% --compiler=ldc2 --build=release
 after_build:
   - if defined APPVEYOR_REPO_TAG_NAME (set TAG_NAME=%APPVEYOR_REPO_TAG_NAME%)
   - if not defined APPVEYOR_REPO_TAG_NAME (set TAG_NAME=untagged)
   - 7z -mx=9 a dls-%TAG_NAME%.windows.%ARCH%.zip dls.exe
 test_script:
-  - dub test --arch=%BUILD_ARCH%
+  - dub test --arch=%ARCH% --compiler=ldc2
 artifacts:
   - path: dls-*.zip
 deploy:

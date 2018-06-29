@@ -1,21 +1,31 @@
 language: d
-d: dmd
+d: ldc
 os:
   - linux
   - osx
 env:
   - ARCH=x86
   - ARCH=x86_64
+matrix: # ldc on 32bit linux needs libcurl4-openssl-dev:i386 which cannot be installed
+  exclude:
+    - d: ldc
+      os: linux
+      env: ARCH=x86
+  include:
+    - d: dmd
+      os: linux
+      env: ARCH=x86
 addons:
   apt:
     packages:
       - gcc-multilib
+      - libcurl4-openssl-dev
 before_script:
   - ln -s /usr/bin/ld.gold ~/ld
 script:
   - export PATH="$HOME:$PATH"
   - dub test --arch=$ARCH --compiler=$DC
-  - dub build --build=release --arch=$ARCH --compiler=$DC
+  - dub build --arch=$ARCH --compiler=$DC --build=release
 before_deploy:
   - if [[ "$TRAVIS_OS_NAME" == 'linux' ]]; then strip dls; fi
   - zip -9 dls-${TRAVIS_TAG:-untagged}.$TRAVIS_OS_NAME.$ARCH.zip dls
