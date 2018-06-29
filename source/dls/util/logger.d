@@ -71,7 +71,7 @@ private shared class LspLogger
         if (type <= _messageType)
         {
             send("window/logMessage", new LogMessageParams(type,
-                    format!"%s\t%s"(Clock.currTime.toString(), message)));
+                    format!"[%.24s] %s"(Clock.currTime.toString(), message)));
         }
     }
 }

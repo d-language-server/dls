@@ -14,8 +14,6 @@ private SymbolKind[CompletionKind] symbolKinds;
 
 shared static this()
 {
-    import dub.internal.vibecompat.core.log : LogLevel, setLogLevel;
-
     //dfmt off
     completionKinds = [
         CompletionKind.className            : CompletionItemKind.class_,
@@ -53,8 +51,6 @@ shared static this()
         CompletionKind.mixinTemplateName    : SymbolKind.function_
     ];
     //dfmt on
-
-    setLogLevel(LogLevel.none);
 }
 
 void useCompatCompletionItemKinds(CompletionItemKind[] items = [])

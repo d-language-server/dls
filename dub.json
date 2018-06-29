@@ -18,6 +18,9 @@
 		"arsd-official:email": "2.0.0",
 		"arsd-official:color_base": "2.0.0"
 	},
+	"versions": [
+		"StdLoggerDisableFatal"
+	],
 	"preGenerateCommands": [
 		"dub describe --quiet > data/description.json"
 	],
