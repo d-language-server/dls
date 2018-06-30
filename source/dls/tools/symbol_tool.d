@@ -14,6 +14,8 @@ private SymbolKind[CompletionKind] symbolKinds;
 
 shared static this()
 {
+    import dub.internal.vibecompat.core.log : LogLevel, setLogLevel;
+
     //dfmt off
     completionKinds = [
         CompletionKind.className            : CompletionItemKind.class_,
@@ -51,6 +53,8 @@ shared static this()
         CompletionKind.mixinTemplateName    : SymbolKind.function_
     ];
     //dfmt on
+
+    setLogLevel(LogLevel.none);
 }
 
 void useCompatCompletionItemKinds(CompletionItemKind[] items = [])
@@ -268,9 +272,9 @@ class SymbolTool : Tool
         foreach (p; packages)
         {
             const desc = p.describe(BuildPlatform.any, null, null);
-            importDirectories!false(uri.path,
-                    desc.importPaths.map!(path => buildNormalizedPath(p.path.toString(),
-                        path)).array);
+            importDirectories!false(uri.path, desc.importPaths.length > 0
+                    ? desc.importPaths.map!(path => buildNormalizedPath(p.path.toString(),
+                        path)).array : [uri.path]);
             importSelections(Uri.fromPath(desc.path));
         }
     }
