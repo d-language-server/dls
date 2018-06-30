@@ -67,7 +67,7 @@ class Diagnostic
     }
 }
 
-enum DiagnosticSeverity
+enum DiagnosticSeverity : uint
 {
     error = 1,
     warning = 2,
@@ -184,7 +184,7 @@ class DocumentFilter
 
 alias DocumentSelector = DocumentFilter[];
 
-enum MarkupKind
+enum MarkupKind : string
 {
     plaintext = "plaintext",
     markdown = "markdown"

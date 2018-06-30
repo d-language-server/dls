@@ -63,7 +63,7 @@ class FileEvent
     FileChangeType type;
 }
 
-enum FileChangeType
+enum FileChangeType : uint
 {
     created = 1,
     changed = 2,
@@ -92,7 +92,7 @@ class FileSystemWatcher
     }
 }
 
-enum WatchKind
+enum WatchKind : uint
 {
     create = 1,
     change = 2,

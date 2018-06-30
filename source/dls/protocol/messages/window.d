@@ -53,13 +53,13 @@ abstract class Util
     import std.json : JSONValue, parseJSON;
     import std.typecons : Tuple, tuple;
 
-    static enum ShowMessageType
+    static enum ShowMessageType : string
     {
         dlsBuildError = "dlsBuildError",
         dlsLinkError = "dlsLinkError"
     }
 
-    static enum ShowMessageRequestType
+    static enum ShowMessageRequestType : string
     {
         upgradeSelections = "upgradeSelections",
         upgradeDls = "upgradeDls",

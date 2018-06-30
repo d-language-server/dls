@@ -200,7 +200,7 @@ class InitializeErrorData
     bool retry;
 }
 
-enum TextDocumentSyncKind
+enum TextDocumentSyncKind : uint
 {
     none = 0,
     full = 1,

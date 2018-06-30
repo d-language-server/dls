@@ -25,21 +25,21 @@ class Configuration
 
     static class FormatConfiguration
     {
-        static enum BraceStyle
+        static enum BraceStyle : string
         {
             allman = "allman",
             otbs = "otbs",
             stroustrup = "stroustrup"
         }
 
-        static enum EndOfLine
+        static enum EndOfLine : string
         {
             lf = "lf",
             cr = "cr",
             crlf = "crlf"
         }
 
-        static enum TemplateConstraintStyle
+        static enum TemplateConstraintStyle : string
         {
             conditionalNewlineIndent = "conditionalNewlineIndent",
             conditionalNewline = "conditionalNewline",

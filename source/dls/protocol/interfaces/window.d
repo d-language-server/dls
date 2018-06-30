@@ -14,7 +14,7 @@ class ShowMessageParams
     }
 }
 
-enum MessageType
+enum MessageType : uint
 {
     error = 1,
     warning = 2,

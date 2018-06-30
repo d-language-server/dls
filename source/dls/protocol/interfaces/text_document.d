@@ -52,7 +52,7 @@ class WillSaveTextDocumentParams : ParamsBase
     TextDocumentSaveReason reason;
 }
 
-enum TextDocumentSaveReason
+enum TextDocumentSaveReason : uint
 {
     manual = 1,
     afterDelay = 2,
@@ -99,7 +99,7 @@ class CompletionContext
     Nullable!string triggerCharacter;
 }
 
-enum CompletionTriggerKind
+enum CompletionTriggerKind : uint
 {
     invoked = 1,
     triggerCharacter = 2,
@@ -118,7 +118,7 @@ class CompletionList
     }
 }
 
-enum InsertTextFormat
+enum InsertTextFormat : uint
 {
     plainText = 1,
     snippet = 2
@@ -170,7 +170,7 @@ class CompletionItem
     }
 }
 
-enum CompletionItemKind
+enum CompletionItemKind : uint
 {
     text = 1,
     method = 2,
@@ -293,7 +293,7 @@ class DocumentHighlight
     }
 }
 
-enum DocumentHighlightKind
+enum DocumentHighlightKind : uint
 {
     text = 1,
     read = 2,
@@ -320,7 +320,7 @@ class SymbolInformation
     }
 }
 
-enum SymbolKind
+enum SymbolKind : uint
 {
     file = 1,
     module_ = 2,
@@ -358,7 +358,7 @@ class CodeActionParams : ParamsBase
     mixin Constructor!CodeActionParams;
 }
 
-enum CodeActionKind
+enum CodeActionKind : string
 {
     quickfix = "quickfix",
     refactor = "refactor",

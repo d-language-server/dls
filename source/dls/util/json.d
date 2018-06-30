@@ -263,7 +263,7 @@ unittest
     assert(convertFromJSON!char(JSONValue('a')) == 'a');
     assert(convertFromJSON!char(JSONValue("a")) == 'a');
 
-    enum TestEnum
+    enum TestEnum : string
     {
         hello = "hello",
         world = "world"

@@ -1,4 +1,4 @@
-private enum Method
+private enum Method : string
 {
     auto_ = "auto",
     download = "download",

@@ -293,15 +293,7 @@ class SymbolTool : Tool
     void clearPath(Uri uri)
     {
         logger.infof("Clearing imports from %s", uri.path);
-
-        if (uri.path in _workspaceCaches)
-        {
-            _workspaceCaches.remove(uri.path);
-        }
-        else
-        {
-            _libraryCaches.remove(uri.path);
-        }
+        (uri.path in _workspaceCaches ? _workspaceCaches : _libraryCaches).remove(uri.path);
     }
 
     void upgradeSelections(Uri uri)
