@@ -4,6 +4,11 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.6.8
+- Enhanced binary releases by using LDC for most builds
+- Enhanced non-dub project handling
+- Fixed log messages not being properly aligned
+
 #### 0.6.7
 - Fixed 1 hour margin handling problems with UTC offsets
 
