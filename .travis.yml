@@ -20,6 +20,9 @@ addons:
     packages:
       - gcc-multilib
       - libcurl4-openssl-dev
+      - upx-ucl
+before_install:
+  - if [[ $TRAVIS_OS_NAME = osx ]]; then brew update && brew install upx; fi
 before_script:
   - ln -s /usr/bin/ld.gold ~/ld
 script:
@@ -27,8 +30,9 @@ script:
   - dub test --arch=$ARCH --compiler=$DC
   - dub build --arch=$ARCH --compiler=$DC --build=release
 before_deploy:
-  - if [[ "$TRAVIS_OS_NAME" == 'linux' ]]; then strip dls; fi
-  - zip -9 dls-${TRAVIS_TAG:-untagged}.$TRAVIS_OS_NAME.$ARCH.zip dls
+  - strip dls
+  - upx --best --ultra-brute dls
+  - zip -0 dls-${TRAVIS_TAG:-untagged}.$TRAVIS_OS_NAME.$ARCH.zip dls
 deploy:
   provider: releases
   api_key: $GITHUB_API_KEY
