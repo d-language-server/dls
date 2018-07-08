@@ -22,11 +22,11 @@ Current features include:
 
 Dub packages used (the stuff doing the actual hard work):
 - [arsd](http://arsd.dub.pm)
-- [DCD](http://dcd.dub.pm)
-- [DFMT](http://dfmt.dub.pm)
-- [D-Scanner](http://dscanner.dub.pm)
-- [DSymbol](http://dsymbol.dub.pm)
-- [Dub](http://dub.dub.pm)
+- [dcd](http://dcd.dub.pm)
+- [dfmt](http://dfmt.dub.pm)
+- [dscanner](http://dscanner.dub.pm)
+- [dsymbol](http://dsymbol.dub.pm)
+- [dub](http://dub.dub.pm)
 - [emsi_containers](http://emsi_containers.dub.pm)
 - [inifiled](http://inifiled.dub.pm)
 - [libddoc](http://libddoc.dub.pm)

@@ -4,6 +4,12 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.6.9
+- Enhanced binary releases by compressing them with UPX on Posix platforms
+- Fixed issues with dependency handling (#5)
+- Updated libraries:
+    - `dub`: `1.9.0` => `1.10.0`
+
 #### 0.6.8
 - Enhanced binary releases by using LDC for most builds
 - Enhanced non-dub project handling

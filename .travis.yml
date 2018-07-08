@@ -30,7 +30,7 @@ script:
   - dub test --arch=$ARCH --compiler=$DC
   - dub build --arch=$ARCH --compiler=$DC --build=release
 before_deploy:
-  - strip dls
+  - if which strip; then strip dls; fi
   - upx --best --ultra-brute dls
   - zip -0 dls-${TRAVIS_TAG:-untagged}.$TRAVIS_OS_NAME.$ARCH.zip dls
 deploy:

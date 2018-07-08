@@ -11,7 +11,7 @@
 	],
 	"dependencies": {
 		"dls:bootstrap": "*",
-		"dub": "1.9.0",
+		"dub": "1.10.0",
 		"dcd": "0.9.9",
 		"dscanner": "0.5.7",
 		"dfmt": "0.8.2",
