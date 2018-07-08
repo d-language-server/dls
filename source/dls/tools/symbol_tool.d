@@ -260,13 +260,20 @@ class SymbolTool : Tool
 
     void importPath(Uri uri)
     {
+        import std.path : baseName;
+
         auto d = getDub(uri);
         auto packages = [d.project.rootPackage];
 
         foreach (sub; d.project.rootPackage.subPackages)
         {
-            packages ~= d.project.packageManager.getSubPackage(d.project.rootPackage,
-                    sub.path, true);
+            auto p = d.project.packageManager.getSubPackage(d.project.rootPackage,
+                    baseName(sub.path), true);
+
+            if (p !is null)
+            {
+                packages ~= p;
+            }
         }
 
         foreach (p; packages)
@@ -285,12 +292,13 @@ class SymbolTool : Tool
 
         foreach (dep; d.project.dependencies)
         {
-            const desc = dep.describe(BuildPlatform.any, null,
-                    dep.name in d.project.rootPackage.recipe.buildSettings.subConfigurations
-                    ? d.project.rootPackage.recipe.buildSettings.subConfigurations[dep.name] : null);
-            importDirectories!true(dep.name,
-                    desc.importPaths.map!(path => buildNormalizedPath(dep.path.toString(),
-                        path)).array, true);
+            importDirectories!true(dep.name, dep.recipe
+                    .buildSettings
+                    .sourcePaths
+                    .values
+                    .reduce!q{a ~ b}
+                    .map!(path => buildNormalizedPath(dep.path.toString(), path))
+                    .array, true);
         }
     }
 
