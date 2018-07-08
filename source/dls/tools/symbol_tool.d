@@ -292,13 +292,10 @@ class SymbolTool : Tool
 
         foreach (dep; d.project.dependencies)
         {
-            importDirectories!true(dep.name, dep.recipe
-                    .buildSettings
-                    .sourcePaths
-                    .values
-                    .reduce!q{a ~ b}
-                    .map!(path => buildNormalizedPath(dep.path.toString(), path))
-                    .array, true);
+            auto pathsList = dep.recipe.buildSettings.sourcePaths.values;
+            auto paths = pathsList.length > 0 ? reduce!q{a ~ b}(pathsList) : [];
+            importDirectories!true(dep.name,
+                    paths.map!(path => buildNormalizedPath(dep.path.toString(), path)).array, true);
         }
     }
 
