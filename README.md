@@ -1,8 +1,8 @@
 # D Language Server
 
-[![DUB Package](https://img.shields.io/dub/v/dls.svg)](https://code.dlang.org/packages/dls)
-[![Build Status](https://travis-ci.org/LaurentTreguier/dls.svg?branch=master)](https://travis-ci.org/LaurentTreguier/dls)
-[![Build status](https://ci.appveyor.com/api/projects/status/apmr87v3yvkxb5dm/branch/master?svg=true)](https://ci.appveyor.com/project/LaurentTreguier/dls)
+|DUB|Travis|AppVeyor|
+|---|------|--------|
+|[![DUB](https://img.shields.io/dub/v/dls.svg?style=flat-square)](https://code.dlang.org/packages/dls)|[![Travis](https://img.shields.io/travis/LaurentTreguier/dls.svg?style=flat-square)](https://travis-ci.org/LaurentTreguier/dls)|[![AppVeyor](https://img.shields.io/appveyor/ci/LaurentTreguier/dls.svg?style=flat-square)](https://ci.appveyor.com/project/LaurentTreguier/dls)
 
 ### LSP compliance: `3.8.0`
 
@@ -36,42 +36,42 @@ Dub packages used (the stuff doing the actual hard work):
 
 ## Usage
 
-Some editors may need DLS to be [installed manually](#Installing) (don't worry it's easy).
+Some editors may need DLS to be [installed manually](#installing) (don't worry it's easy).
 
 - Visual Studio Code: [install the extension](https://marketplace.visualstudio.com/items?itemName=LaurentTreguier.vscode-dls)
 - Atom: [install the package](https://atom.io/packages/ide-dlang)
 - Sublime Text (using [tomv654's LSP client](https://github.com/tomv564/LSP)):
     ```json
     "clients":
-	{
-		"dls":
-		{
-			"command":
-			[
-				"[path to dls executable]"
-			],
-			"enabled": true,
-			"languageId": "d",
-			"scopes":
-			[
-				"source.d"
-			],
-			"syntaxes":
-			[
-				"Packages/D/D.sublime-syntax"
-			]
-		}
-	}
+    {
+        "dls":
+        {
+            "command":
+            [
+                "[path to dls executable]"
+            ],
+            "enabled": true,
+            "languageId": "d",
+            "scopes":
+            [
+                "source.d"
+            ],
+            "syntaxes":
+            [
+                "Packages/D/D.sublime-syntax"
+            ]
+        }
+    }
     ```
 
 DLS may or may not work with other editors.
-Given the nature of the LSP, it should work, but given the nature of DLS, it should have some weird quirks.
-If it's not working with your editor of choice, [submit an issue](https://github.com/LaurentTreguier/dls/issues/new) !
+Given the editor-neutral nature of the LSP, it should work, but given the nature of DLS, it should have some weird quirks.
+If it's not working with your editor of choice, [submit an issue](https://github.com/LaurentTreguier/dls/issues/new)!
 
 ## Installing
 You can run `dub fetch dls` and then `dub run dls:bootstrap` to install dls.
 The second command will output a path to a symbolic link that will always point to the latest DLS executable.
-DLS will propose updates as they come, and update the symbolic link accordingly.
+DLS will offer updates as they come, and update the symbolic link accordingly.
 
 ## Client side configuration
 
@@ -147,7 +147,7 @@ Watching `*.ini` allows DLS to monitor D-Scanner config files, even if the name 
 
 ## Custom messages
 The LSP defines messages with methods starting in `$/` to be implementation dependant.
-DLS uses `$/dls` as a prefix for some custom messages.
+DLS uses `$/dls` as a prefix for custom messages.
 
 |Message                        |Type        |Parameter|Description                                                                |
 |-------------------------------|------------|---------|---------------------------------------------------------------------------|
