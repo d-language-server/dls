@@ -4,6 +4,9 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.6.10
+- Fixed crash when importing dependencies
+
 #### 0.6.9
 - Enhanced binary releases by compressing them with UPX on Posix platforms
 - Fixed issues with dependency handling (#5)
