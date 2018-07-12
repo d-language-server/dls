@@ -155,7 +155,7 @@ class TextDocumentItem
 
 class VersionedTextDocumentIdentifier : TextDocumentIdentifier
 {
-    long version_;
+    JSONValue version_;
 }
 
 class TextDocumentPositionParams
