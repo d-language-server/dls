@@ -116,6 +116,7 @@ void initialized(JSONValue nothing)
     import dls.protocol.jsonrpc : send;
     import dls.protocol.interfaces : DidChangeWatchedFilesRegistrationOptions,
         FileSystemWatcher, Registration, RegistrationParams;
+    import dls.protocol.messages.methods : Client;
 
     debug
     {
@@ -141,7 +142,7 @@ void initialized(JSONValue nothing)
         auto registration = new Registration!DidChangeWatchedFilesRegistrationOptions(
                 "dls-registration-watch-dub-files",
                 "workspace/didChangeWatchedFiles", registrationOptions.nullable);
-        send("client/registerCapability",
+        send(Client.registerCapability,
                 new RegistrationParams!DidChangeWatchedFilesRegistrationOptions([registration]));
     }
 }

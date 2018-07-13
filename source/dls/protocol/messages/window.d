@@ -47,6 +47,7 @@ abstract class Util
 {
     import dls.protocol.interfaces : MessageType;
     import dls.protocol.jsonrpc : send;
+    import dls.protocol.messages.methods : Window;
     import std.array : array, replace;
     import std.algorithm : map;
     import std.conv : to;
@@ -91,7 +92,7 @@ abstract class Util
             title = title.replace('$' ~ i.to!string, args[i]);
         }
 
-        send("window/showMessage",
+        send(Window.showMessage,
                 new ShowMessageParams(tr["messageType"].integer.to!MessageType, title));
     }
 
@@ -113,7 +114,7 @@ abstract class Util
             title = title.replace('$' ~ (i + 1).to!string, args[i]);
         }
 
-        return send("window/showMessageRequest", new ShowMessageRequestParams(
+        return send(Window.showMessageRequest, new ShowMessageRequestParams(
                 tr["messageType"].integer.to!MessageType, title, actions.array.nullable));
     }
 

@@ -3,6 +3,7 @@ module dls.protocol.messages.text_document;
 import dls.protocol.definitions;
 import dls.protocol.interfaces.text_document;
 import dls.protocol.jsonrpc : send;
+import dls.protocol.messages.methods : TextDocument;
 import dls.tools.tools : Tools;
 import dls.util.document : Document;
 import dls.util.logger : logger;
@@ -16,8 +17,8 @@ void didOpen(DidOpenTextDocumentParams params)
         auto uri = new Uri(params.textDocument.uri);
         logger.infof("Document opened: %s", uri.path);
         Document.open(params.textDocument);
-        send("textDocument/publishDiagnostics",
-                new PublishDiagnosticsParams(uri, Tools.analysisTool.scan(uri)));
+        send(TextDocument.publishDiagnostics, new PublishDiagnosticsParams(uri,
+                Tools.analysisTool.scan(uri)));
     }
 }
 
@@ -44,8 +45,8 @@ void didSave(DidSaveTextDocumentParams params)
     if (Document[uri])
     {
         logger.infof("Document saved: %s", uri.path);
-        send("textDocument/publishDiagnostics",
-                new PublishDiagnosticsParams(uri, Tools.analysisTool.scan(uri)));
+        send(TextDocument.publishDiagnostics, new PublishDiagnosticsParams(uri,
+                Tools.analysisTool.scan(uri)));
     }
 }
 
@@ -54,7 +55,7 @@ void didClose(DidCloseTextDocumentParams params)
     auto uri = new Uri(params.textDocument.uri);
     logger.infof("Document closed: %s", uri.path);
     Document.close(params.textDocument);
-    send("textDocument/publishDiagnostics", new PublishDiagnosticsParams(uri, []));
+    send(TextDocument.publishDiagnostics, new PublishDiagnosticsParams(uri, []));
 }
 
 CompletionItem[] completion(CompletionParams params)

@@ -66,11 +66,12 @@ private shared class LspLogger
     {
         import dls.protocol.interfaces : LogMessageParams;
         import dls.protocol.jsonrpc : send;
+        import dls.protocol.messages.methods : Window;
         import std.datetime : Clock;
 
         if (type <= _messageType)
         {
-            send("window/logMessage", new LogMessageParams(type,
+            send(Window.logMessage, new LogMessageParams(type,
                     format!"[%.24s] %s"(Clock.currTime.toString(), message)));
         }
     }

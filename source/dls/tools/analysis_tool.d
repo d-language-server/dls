@@ -33,6 +33,7 @@ class AnalysisTool : Tool
     {
         import dls.protocol.interfaces : PublishDiagnosticsParams;
         import dls.protocol.jsonrpc : send;
+        import dls.protocol.messages.methods : TextDocument;
         import dls.util.document : Document;
         import inifiled : readINIFile;
         import std.file : exists;
@@ -49,7 +50,7 @@ class AnalysisTool : Tool
 
             foreach (documentUri; Document.uris)
             {
-                send("textDocument/publishDiagnostics",
+                send(TextDocument.publishDiagnostics,
                         new PublishDiagnosticsParams(documentUri, scan(documentUri)));
             }
         }
