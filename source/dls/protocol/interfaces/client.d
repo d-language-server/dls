@@ -14,7 +14,7 @@ private abstract class RegistrationBase
     }
 }
 
-package abstract class RegistrationOptionsBase
+package interface RegistrationOptionsBase
 {
 }
 

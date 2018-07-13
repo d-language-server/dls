@@ -131,6 +131,7 @@ class CompletionItem
     Nullable!string detail;
     Nullable!MarkupContent documentation;
     Nullable!bool deprecated_;
+    Nullable!bool preselect;
     Nullable!string sortText;
     Nullable!string filterText;
     Nullable!string insertText;

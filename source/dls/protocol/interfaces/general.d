@@ -99,6 +99,7 @@ class TextDocumentClientCapabilities
             Nullable!bool commitCharactersSupport;
             Nullable!(MarkupKind[]) documentationFormat;
             Nullable!bool deprecatedSupport;
+            Nullable!bool preselectSupport;
         }
 
         static class CompletionItemKind
