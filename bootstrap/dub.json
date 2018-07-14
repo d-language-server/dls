@@ -5,7 +5,7 @@
 	],
 	"description": "DLS bootstrap utility",
 	"copyright": "Copyright © 2018, Laurent Tréguier",
-	"license": "MIT",
+	"license": "GPL-3.0",
 	"stringImportPaths": [
 		"data"
 	]
