@@ -22,7 +22,8 @@
 		"StdLoggerDisableFatal"
 	],
 	"preGenerateCommands": [
-		"dub describe --quiet > data/description.json"
+		"dub describe --quiet > data/description.json",
+		"rdmd constants"
 	],
 	"subPackages": [
 		"bootstrap"

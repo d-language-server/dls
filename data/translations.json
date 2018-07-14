@@ -1,11 +1,11 @@
 {
-    "dlsBuildError": {
+    "buildError": {
         "messageType": 1,
         "title": {
             "en": "DLS could not be built"
         }
     },
-    "dlsLinkError": {
+    "linkError": {
         "messageType": 1,
         "title": {
             "en": "DLS could not be linked"
@@ -15,42 +15,33 @@
         "messageType": 3,
         "title": {
             "en": "$1 was updated"
-        },
-        "actions": [
-            {
-                "id": "upgrade",
-                "title": {
-                    "en": "Upgrade dependencies"
-                }
-            }
-        ]
+        }
+    },
+    "upgradeSelections.upgrade": {
+        "title": {
+            "en": "Upgrade dependencies"
+        }
     },
     "upgradeDls": {
         "messageType": 3,
         "title": {
             "en": "DLS version $1 is available (current: $2)"
-        },
-        "actions": [
-            {
-                "id": "upgrade",
-                "title": {
-                    "en": "Upgrade"
-                }
-            }
-        ]
+        }
+    },
+    "upgradeDls.upgrade": {
+        "title": {
+            "en": "Upgrade"
+        }
     },
     "showChangelog": {
         "messageType": 3,
         "title": {
             "en": "DLS upgraded to $1"
-        },
-        "actions": [
-            {
-                "id": "show",
-                "title": {
-                    "en": "See what's new"
-                }
-            }
-        ]
+        }
+    },
+    "showChangelog.show": {
+        "title": {
+            "en": "See what's new"
+        }
     }
 }

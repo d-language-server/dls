@@ -76,6 +76,7 @@ void update()
     static import dls.protocol.jsonrpc;
     import dls.protocol.messages.methods : Dls;
     import dls.protocol.messages.window : Util;
+    import dls.constants : Tr;
     import dls.util.logger : logger;
     import dls.util.path : normalized;
     import dub.dependency : Dependency;
@@ -96,12 +97,11 @@ void update()
         return;
     }
 
-    auto id = Util.sendMessageRequest(Util.ShowMessageRequestType.upgradeDls,
+    auto id = Util.sendMessageRequest(Tr.upgradeDls, [Tr.upgradeDls_upgrade],
             [latestVersion, currentVersion]);
     const threadName = "updater";
     register(threadName, thisTid());
-    send(ownerTid(), Util.ThreadMessageData(id,
-            Util.ShowMessageRequestType.upgradeDls, threadName));
+    send(ownerTid(), Util.ThreadMessageData(id, Tr.upgradeDls, threadName));
 
     const shouldUpgrade = receiveOnly!bool();
 
@@ -169,7 +169,7 @@ void update()
 
         if (!success)
         {
-            Util.sendMessage(Util.ShowMessageType.dlsBuildError);
+            Util.sendMessage(Tr.buildError);
             return;
         }
     }
@@ -177,13 +177,12 @@ void update()
     try
     {
         linkDls();
-        id = Util.sendMessageRequest(Util.ShowMessageRequestType.showChangelog, [latestVersion]);
-        send(ownerTid(), Util.ThreadMessageData(id,
-                Util.ShowMessageRequestType.showChangelog, changelogUrl));
+        id = Util.sendMessageRequest(Tr.showChangelog, [Tr.showChangelog_show], [latestVersion]);
+        send(ownerTid(), Util.ThreadMessageData(id, Tr.showChangelog, changelogUrl));
     }
     catch (FileException e)
     {
-        Util.sendMessage(Util.ShowMessageType.dlsLinkError);
+        Util.sendMessage(Tr.linkError);
     }
 }
 

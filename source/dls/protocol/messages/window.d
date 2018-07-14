@@ -1,6 +1,8 @@
 module dls.protocol.messages.window;
 
+import dls.constants : Tr;
 import dls.protocol.interfaces : MessageActionItem;
+import dls.util.i18n : tr;
 
 void showMessageRequest(string id, MessageActionItem item)
 {
@@ -10,16 +12,16 @@ void showMessageRequest(string id, MessageActionItem item)
     import std.path : dirName;
     import std.process : browse;
 
-    while (!(id in Util.messageRequestInfo))
+    while (id !in Util.messageRequestInfo)
     {
         auto data = receiveOnly!(Util.ThreadMessageData)();
-        Util.addMessageRequestType(data[0], data[1], data[2]);
+        Util.bindMessageToRequestId(data[0], data[1], data[2]);
     }
 
-    final switch (Util.messageRequestInfo[id][0])
+    switch (Util.messageRequestInfo[id][0])
     {
-    case Util.ShowMessageRequestType.upgradeSelections:
-        if (item.title.length > 0)
+    case Tr.upgradeSelections:
+        if (item.title == tr(Tr.upgradeSelections_upgrade))
         {
             auto uri = new Uri(Util.messageRequestInfo[id][1]);
             Tools.symbolTool.upgradeSelections(uri);
@@ -27,17 +29,21 @@ void showMessageRequest(string id, MessageActionItem item)
 
         break;
 
-    case Util.ShowMessageRequestType.upgradeDls:
-        send(locate(Util.messageRequestInfo[id][1]), item.title.length > 0);
+    case Tr.upgradeDls:
+        send(locate(Util.messageRequestInfo[id][1]),
+                item.title == tr(Tr.upgradeDls_upgrade));
         break;
 
-    case Util.ShowMessageRequestType.showChangelog:
-        if (item.title.length > 0)
+    case Tr.showChangelog:
+        if (item.title == Tr.showChangelog_show)
         {
             browse(Util.messageRequestInfo[id][1]);
         }
 
         break;
+
+    default:
+        assert(false, Util.messageRequestInfo[id][0] ~ " cannot be handled as requests");
     }
 
     Util.messageRequestInfo.remove(id);
@@ -48,83 +54,36 @@ abstract class Util
     import dls.protocol.interfaces : MessageType;
     import dls.protocol.jsonrpc : send;
     import dls.protocol.messages.methods : Window;
+    import dls.util.i18n : trType;
     import std.array : array, replace;
     import std.algorithm : map;
     import std.conv : to;
     import std.json : JSONValue, parseJSON;
     import std.typecons : Tuple, tuple;
 
-    static enum ShowMessageType : string
-    {
-        dlsBuildError = "dlsBuildError",
-        dlsLinkError = "dlsLinkError"
-    }
+    shared alias ThreadMessageData = Tuple!(string, Tr, string);
 
-    static enum ShowMessageRequestType : string
-    {
-        upgradeSelections = "upgradeSelections",
-        upgradeDls = "upgradeDls",
-        showChangelog = "showChangelog"
-    }
+    private static Tuple!(Tr, string)[string] messageRequestInfo;
 
-    shared alias ThreadMessageData = Tuple!(string, ShowMessageRequestType, string);
-
-    private enum translationsJson = import("translations.json");
-    private static JSONValue translations;
-    private static string locale;
-    private static Tuple!(ShowMessageRequestType, string)[string] messageRequestInfo;
-
-    static this()
-    {
-        translations = parseJSON(translationsJson);
-        locale = "en"; // TODO: add more locales and auto-detect system locale
-    }
-
-    static void sendMessage(ShowMessageType which, string[] args = [])
+    static void sendMessage(Tr message, string[] args = [])
     {
         import dls.protocol.interfaces : ShowMessageParams;
 
-        JSONValue tr = translations[which];
-        auto title = tr["title"][locale].str;
-
-        foreach (i; 0 .. args.length)
-        {
-            title = title.replace('$' ~ i.to!string, args[i]);
-        }
-
-        send(Window.showMessage,
-                new ShowMessageParams(tr["messageType"].integer.to!MessageType, title));
+        send(Window.showMessage, new ShowMessageParams(trType(message), tr(message, args)));
     }
 
-    static string sendMessageRequest(ShowMessageRequestType which,
-            string[] args = [], string[] hiddenItems = [])
+    static string sendMessageRequest(Tr message, Tr[] actions, string[] args = [])
     {
         import dls.protocol.interfaces : ShowMessageRequestParams;
-        import std.algorithm : canFind, filter;
         import std.typecons : nullable;
 
-        JSONValue tr = translations[which];
-        auto title = tr["title"][locale].str;
-        auto actions = tr["actions"].array
-            .filter!(a => !hiddenItems.canFind(a["id"].str))
-            .map!(a => new MessageActionItem(a["title"][locale].str));
-
-        foreach (i; 0 .. args.length)
-        {
-            title = title.replace('$' ~ (i + 1).to!string, args[i]);
-        }
-
-        return send(Window.showMessageRequest, new ShowMessageRequestParams(
-                tr["messageType"].integer.to!MessageType, title, actions.array.nullable));
+        return send(Window.showMessageRequest, new ShowMessageRequestParams(trType(message),
+                tr(message, args), actions.map!(a => new MessageActionItem(tr(a,
+                args))).array.nullable));
     }
 
-    static string[] getActions(ShowMessageRequestType which)
+    static void bindMessageToRequestId(string id, Tr message, string data = null)
     {
-        return translations[which]["actions"].array.map!(a => a["title"][locale].str).array;
-    }
-
-    static void addMessageRequestType(string id, ShowMessageRequestType type, string data = null)
-    {
-        messageRequestInfo[id] = tuple(type, data);
+        messageRequestInfo[id] = tuple(message, data);
     }
 }
