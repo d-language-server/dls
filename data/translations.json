@@ -2,46 +2,54 @@
     "buildError": {
         "messageType": 1,
         "title": {
-            "en": "DLS could not be built"
+            "en": "DLS could not be built",
+            "fr": "DLS n'a pas pu être compilé"
         }
     },
     "linkError": {
         "messageType": 1,
         "title": {
-            "en": "DLS could not be linked"
+            "en": "DLS could not be linked",
+            "fr": "DLS n'a pas pu être lié"
         }
     },
     "upgradeSelections": {
         "messageType": 3,
         "title": {
-            "en": "$1 was updated"
+            "en": "$1 was updated",
+            "fr": "$1 a été mis à jour"
         }
     },
     "upgradeSelections.upgrade": {
         "title": {
-            "en": "Upgrade dependencies"
+            "en": "Upgrade dependencies",
+            "fr": "Mettre à jour les dépendances"
         }
     },
     "upgradeDls": {
         "messageType": 3,
         "title": {
-            "en": "DLS version $1 is available (current: $2)"
+            "en": "DLS version $1 is available (current: $2)",
+            "fr": "DLS version $1 est disponible (actuel: $2)"
         }
     },
     "upgradeDls.upgrade": {
         "title": {
-            "en": "Upgrade"
+            "en": "Upgrade",
+            "fr": "Mettre à jour"
         }
     },
     "showChangelog": {
         "messageType": 3,
         "title": {
-            "en": "DLS upgraded to $1"
+            "en": "DLS upgraded to version $1",
+            "fr": "DLS mis à jour vers la version $1"
         }
     },
     "showChangelog.show": {
         "title": {
-            "en": "See what's new"
+            "en": "See what's new",
+            "fr": "Voir les nouveautés"
         }
     }
 }
