@@ -11,6 +11,7 @@ _This is a work in progress. There ~~might~~ will be bugs and crashes..._
 DLS implements the server side of the [Language Server Protocol (LSP)](https://microsoft.github.io/language-server-protocol/) for the [D programming language](https://dlang.org).
 It does not contain any language feature itself (yet), but uses already available components, and provides an interface to work with the LSP.
 Current features include:
+
 - Code completion
 - Go to definition
 - Error checking
@@ -21,6 +22,7 @@ Current features include:
 - Random, frustrating crashes
 
 Dub packages used (the stuff doing the actual hard work):
+
 - [arsd](http://arsd.dub.pm)
 - [dcd](http://dcd.dub.pm)
 - [dfmt](http://dfmt.dub.pm)
@@ -69,6 +71,7 @@ Given the editor-neutral nature of the LSP, it should work, but given the nature
 If it's not working with your editor of choice, [submit an issue](https://github.com/LaurentTreguier/dls/issues/new)!
 
 ## Installing
+
 You can run `dub fetch dls` and then `dub run dls:bootstrap` to install dls.
 The second command will output a path to a symbolic link that will always point to the latest DLS executable.
 DLS will offer updates as they come, and update the symbolic link accordingly.
@@ -105,6 +108,7 @@ All these keys should be formatted as `d.dls.[section].[key]` (e.g. `d.dls.forma
 ## Server initialization options
 
 DLS supports a few custom initialization options in the `InitializeParams` object sent with the `initialize` request:
+
 ```typescript
 initializationOptions: {
     capabilities: {
@@ -124,6 +128,7 @@ initializationOptions: {
 In order to simplify the process of updating DLS, an update system is implemented.
 However, the extension will need to locate a first version of DLS; this is where `dls:bootstrap` comes in.
 The steps are:
+
 - `dub fetch dls` will fetch the latest version of DLS
 - `dub run --quiet dls:bootstrap` will output the path to a symlink pointing to the latest DLS executable
 
@@ -134,6 +139,7 @@ Binary downloads are available and should be picked up automatically for Windows
 
 The server may delegate a few operations to the client-side extension depending on the language client's capabilities.
 The client should watch these files for the server to work properly:
+
 - `dub.selections.json`
 - `dub.json`
 - `dub.sdl`
@@ -146,6 +152,7 @@ If `dub.json` and `dub.sdl` are also watched, `dub.selections.json` will automat
 Watching `*.ini` allows DLS to monitor D-Scanner config files, even if the name is changed in the config and isn't precisly `dscanner.ini`.
 
 ## Custom messages
+
 The LSP defines messages with methods starting in `$/` to be implementation dependant.
 DLS uses `$/dls` as a prefix for custom messages.
 
@@ -154,7 +161,7 @@ DLS uses `$/dls` as a prefix for custom messages.
 |`$/dls.upgradeDls.start`       |Notification|`null`   |Sent when the upgrade process starts                                       |
 |`$/dls.upgradeDls.stop`        |Notification|`null`   |Sent when the upgrade process stops                                        |
 |`$/dls.upgradeDls.totalSize`   |Notification|`number` |Sent during the download, with the total size of the upgrade download      |
-|`$/dls.upgradeDls.chunkSize`   |Notification|`number` |Sent during the download, with the size of a chunk that was just downloaded|
+|`$/dls.upgradeDls.currentSize` |Notification|`number` |Sent during the download, with the current size of the upgrade download    |
 |`$/dls.upgradeDls.extract`     |Notification|`null`   |Sent when the download is finished and the contents are written on the disk|
 |`$/dls.upgradeSelections.start`|Notification|`number` |Sent when DLS starts upgrading dub.selections.json                         |
 |`$/dls.upgradeSelections.stop` |Notification|`null`   |Sent when DLS has finished upgrading dub.selections.json                   |

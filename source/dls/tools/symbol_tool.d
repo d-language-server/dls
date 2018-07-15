@@ -60,7 +60,7 @@ shared static this()
 void useCompatCompletionItemKinds(CompletionItemKind[] items = [])
 {
     //dfmt off
-    enum map = [
+    immutable map = [
         CompletionKind.structName  : CompletionItemKind.class_,
         CompletionKind.enumMember  : CompletionItemKind.field,
         CompletionKind.packageName : CompletionItemKind.module_
@@ -79,7 +79,7 @@ void useCompatCompletionItemKinds(CompletionItemKind[] items = [])
 void useCompatSymbolKinds(SymbolKind[] symbols = [])
 {
     //dfmt off
-    enum map = [
+    immutable map = [
         CompletionKind.structName : SymbolKind.class_,
         CompletionKind.enumMember : SymbolKind.field
     ];
@@ -111,7 +111,7 @@ class SymbolTool : Tool
     import std.array : appender, array, replace;
     import std.container : RedBlackTree;
     import std.conv : to;
-    import std.file : readText;
+    import std.file : exists, readText;
     import std.json : JSONValue;
     import std.net.curl : byLine;
     import std.parallelism : Task;
@@ -124,12 +124,11 @@ class SymbolTool : Tool
         @property private static string[] _compilerConfigPaths()
         {
             import std.algorithm : splitter;
-            import std.file : exists;
             import std.process : environment;
 
             foreach (path; splitter(environment["PATH"], ';'))
             {
-                if (buildNormalizedPath(path, "dmd.exe").exists())
+                if (exists(buildNormalizedPath(path, "dmd.exe")))
                 {
                     return [buildNormalizedPath(path, "sc.ini")];
                 }
@@ -157,14 +156,14 @@ class SymbolTool : Tool
     @property private string[] defaultImportPaths()
     {
         import std.algorithm : each;
-        import std.file : FileException, exists;
+        import std.file : FileException;
         import std.regex : matchAll;
 
         string[] paths;
 
         foreach (confPath; _compilerConfigPaths)
         {
-            if (confPath.exists())
+            if (exists(confPath))
             {
                 try
                 {
@@ -186,7 +185,7 @@ class SymbolTool : Tool
             {
                 foreach (path; ["/snap", "/var/lib/snapd/snap"])
                 {
-                    if (buildNormalizedPath(path, "dmd").exists())
+                    if (exists(buildNormalizedPath(path, "dmd")))
                     {
                         paths = ["druntime", "phobos"].map!(end => buildNormalizedPath(path,
                                 "dmd", "current", "import", end)).array;
