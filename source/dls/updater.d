@@ -76,7 +76,7 @@ void update()
     static import dls.protocol.jsonrpc;
     import dls.protocol.messages.methods : Dls;
     import dls.protocol.messages.window : Util;
-    import dls.constants : Tr;
+    import dls.util.constants : Tr;
     import dls.util.logger : logger;
     import dls.util.path : normalized;
     import dub.dependency : Dependency;

@@ -1,6 +1,6 @@
 module dls.util.i18n;
 
-import dls.constants : Tr;
+import dls.util.constants : Tr;
 import dls.protocol.interfaces : MessageType;
 import std.conv : to;
 import std.json : JSONValue;

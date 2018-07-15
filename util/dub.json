@@ -1,0 +1,18 @@
+{
+	"name": "util",
+	"authors": [
+		"Laurent Tréguier"
+	],
+	"description": "DLS utilities",
+	"copyright": "Copyright © 2018, Laurent Tréguier",
+	"license": "GPL-3.0",
+	"stringImportPaths": [
+		"data"
+	],
+	"dependencies": {
+		"dls:protocol": "*"
+	},
+	"preGenerateCommands": [
+		"dub run dls:gen"
+	]
+}

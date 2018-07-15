@@ -1,6 +1,6 @@
 module dls.protocol.messages.window;
 
-import dls.constants : Tr;
+import dls.util.constants : Tr;
 import dls.protocol.interfaces : MessageActionItem;
 import dls.util.i18n : tr;
 

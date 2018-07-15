@@ -39,7 +39,5 @@ docs/
 
 /dls
 /dls-test-library*
-/bootstrap/dls_bootstrap
 /data/description.json
 /resources/icon.png
-/source/dls/constants.d

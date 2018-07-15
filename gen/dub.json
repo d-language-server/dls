@@ -1,0 +1,9 @@
+{
+	"name": "gen",
+	"authors": [
+		"Laurent Tréguier"
+	],
+	"description": "DLS translations generator",
+	"copyright": "Copyright © 2018, Laurent Tréguier",
+	"license": "GPL-3.0"
+}

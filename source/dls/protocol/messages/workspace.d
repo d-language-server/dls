@@ -55,7 +55,7 @@ void didChangeConfiguration(DidChangeConfigurationParams params)
 
 void didChangeWatchedFiles(DidChangeWatchedFilesParams params)
 {
-    import dls.constants : Tr;
+    import dls.util.constants : Tr;
     import dls.protocol.messages.window : Util;
     import std.path : baseName, dirName;
 

@@ -1,0 +1,9 @@
+{
+	"name": "protocol",
+	"authors": [
+		"Laurent Tréguier"
+	],
+	"description": "LSP interfaces implementation",
+	"copyright": "Copyright © 2018, Laurent Tréguier",
+	"license": "GPL-3.0"
+}
