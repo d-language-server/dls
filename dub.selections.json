@@ -1,7 +1,7 @@
 {
 	"fileVersion": 1,
 	"versions": {
-		"arsd-official": "2.0.0",
+		"arsd-official": "2.1.1",
 		"dcd": "0.9.9",
 		"dfmt": "0.8.2",
 		"dscanner": "0.5.7",

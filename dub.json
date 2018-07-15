@@ -17,8 +17,7 @@
 		"dcd": "0.9.9",
 		"dscanner": "0.5.7",
 		"dfmt": "0.8.2",
-		"arsd-official:email": "2.0.0",
-		"arsd-official:color_base": "2.0.0"
+		"arsd-official:htmltotext": "2.1.1"
 	},
 	"versions": [
 		"StdLoggerDisableFatal"
