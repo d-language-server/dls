@@ -27,7 +27,7 @@ before_script:
   - ln -s /usr/bin/ld.gold ~/ld
 script:
   - export PATH="$HOME:$PATH"
-  - dub test --arch=$ARCH --compiler=$DC
+  - dub test --arch=$ARCH --compiler=$DC || dub test --arch=$ARCH --compiler=$DC # work around link error
   - dub build --arch=$ARCH --compiler=$DC --build=release
 before_deploy:
   - if which strip; then strip dls; fi
