@@ -6,8 +6,6 @@ import dsymbol.symbol : CompletionKind;
 import std.algorithm : canFind;
 import std.path : asNormalizedPath, buildNormalizedPath, dirName;
 
-private immutable macroUrl = "https://raw.githubusercontent.com/dlang/dlang.org/stable/%s.ddoc";
-private immutable macroFiles = ["html", "macros", "std", "std_consolidated", "std-ddox"];
 private string[string] macros;
 private CompletionItemKind[CompletionKind] completionKinds;
 private SymbolKind[CompletionKind] symbolKinds;
@@ -16,7 +14,61 @@ shared static this()
 {
     import dub.internal.vibecompat.core.log : LogLevel, setLogLevel;
 
+    setLogLevel(LogLevel.none);
+}
+
+static this()
+{
     //dfmt off
+    macros = [
+        "_"             : "",
+        "B"             : "**$0**",
+        "I"             : "_$0_",
+        "U"             : "$0",
+        "P"             : "\n\n$0",
+        "DL"            : "$0",
+        "DT"            : "$0",
+        "DD"            : "$0",
+        "TABLE"         : "$0",
+        "TR"            : "$0",
+        "TH"            : "$0",
+        "TD"            : "$0",
+        "OL"            : "\n\n$0",
+        "UL"            : "\n\n$0",
+        "LI"            : "- $0",
+        "BIG"           : "$0",
+        "SMALL"         : "$0",
+        "BR"            : "\n\n$0",
+        "LINK"          : "[$0]($0)",
+        "LINK2"         : "[$1]($+)",
+        "RED"           : "$0",
+        "BLUE"          : "$0",
+        "GREEN"         : "$0",
+        "YELLOW"        : "$0",
+        "BLACK"         : "$0",
+        "WHITE"         : "$0",
+        "D_CODE"        : "$0",
+        "D_INLINE_CODE" : "$0",
+        "LF"            : "\n",
+        "LPAREN"        : "(",
+        "RPAREN"        : ")",
+        "BACKTICK"      : "`",
+        "DOLLAR"        : "$",
+        "DDOC"          : "$0",
+        "BIGOH"         : "O($0)",
+        "D"             : "$0",
+        "D_COMMENT"     : "$0",
+        "D_STRING"      : "\"$0\"",
+        "D_KEYWORD"     : "$0",
+        "D_PSYMBOL"     : "$0",
+        "D_PARAM"       : "$0",
+        "LREF"          : "$0",
+        "REF"           : "$0",
+        "REF1"          : "$0",
+        "MREF"          : "$0",
+        "MREF1"         : "$0"
+    ];
+
     completionKinds = [
         CompletionKind.className            : CompletionItemKind.class_,
         CompletionKind.interfaceName        : CompletionItemKind.interface_,
@@ -53,8 +105,6 @@ shared static this()
         CompletionKind.mixinTemplateName    : SymbolKind.function_
     ];
     //dfmt on
-
-    setLogLevel(LogLevel.none);
 }
 
 void useCompatCompletionItemKinds(CompletionItemKind[] items = [])
@@ -113,8 +163,6 @@ class SymbolTool : Tool
     import std.conv : to;
     import std.file : exists, readText;
     import std.json : JSONValue;
-    import std.net.curl : byLine;
-    import std.parallelism : Task;
     import std.range : chain;
     import std.regex : matchFirst;
     import std.typecons : nullable;
@@ -149,7 +197,6 @@ class SymbolTool : Tool
         private static immutable string[] _compilerConfigPaths;
     }
 
-    private Task!(byLine, string)*[] _macroTasks;
     private ModuleCache*[string] _workspaceCaches;
     private ModuleCache*[string] _libraryCaches;
 
@@ -200,16 +247,6 @@ class SymbolTool : Tool
 
     this()
     {
-        import std.format : format;
-        import std.parallelism : task;
-
-        foreach (macroFile; macroFiles)
-        {
-            auto t = task!byLine(format!macroUrl(macroFile));
-            _macroTasks ~= t;
-            t.executeInNewThread();
-        }
-
         importDirectories!true("", defaultImportPaths);
     }
 
@@ -602,36 +639,9 @@ class SymbolTool : Tool
 
     private MarkupContent getDocumentation(string[][] detailsAndDocumentations)
     {
-        import arsd.htmltotext : htmlToText;
         import ddoc : Lexer, expand;
         import dls.protocol.definitions : MarkupKind;
-        import std.algorithm : all;
-        import std.net.curl : CurlException;
         import std.regex : regex, split;
-
-        try
-        {
-            if (macros.keys.length == 0 && _macroTasks.all!q{a.done})
-            {
-                foreach (macroTask; _macroTasks)
-                {
-                    foreach (line; macroTask.yieldForce())
-                    {
-                        auto result = matchFirst(line, `(\w+)\s*=\s*(.*)`);
-
-                        if (result.length > 0)
-                        {
-                            macros[result[1].to!string] = result[2].to!string;
-                        }
-                    }
-                }
-            }
-        }
-        catch (CurlException e)
-        {
-            logger.error("Could not fetch macros");
-            macros["_"] = "";
-        }
 
         auto result = appender!string;
         bool putSeparator;
@@ -649,8 +659,7 @@ class SymbolTool : Tool
 
             auto detail = dad[0];
             auto documentation = dad[1];
-            auto content = documentation.split(regex(`\n-+(\n|$)`))
-                .map!(chunk => chunk.replace(`\n`, " "));
+            auto content = documentation.split(regex(`\n-+(\n|$)`));
             bool isExample;
 
             if (detail.length > 0 && detailsAndDocumentations.length > 1)
@@ -670,9 +679,7 @@ class SymbolTool : Tool
                 }
                 else
                 {
-                    auto html = expand(Lexer(chunk), macros).replace(`<i>`, ``)
-                        .replace(`</i>`, ``).replace(`*`, `\*`).replace(`_`, `\_`);
-                    result ~= htmlToText(html);
+                    result ~= expand(Lexer(chunk.replace("\n", " ")), macros);
                     result ~= '\n';
                 }
 
