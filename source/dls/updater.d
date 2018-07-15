@@ -97,11 +97,11 @@ void update()
         return;
     }
 
-    auto id = Util.sendMessageRequest(Tr.upgradeDls, [Tr.upgradeDls_upgrade],
-            [latestVersion, currentVersion]);
+    auto id = Util.sendMessageRequest(Tr.app_upgradeDls,
+            [Tr.app_upgradeDls_upgrade], [latestVersion, currentVersion]);
     const threadName = "updater";
     register(threadName, thisTid());
-    send(ownerTid(), Util.ThreadMessageData(id, Tr.upgradeDls, threadName));
+    send(ownerTid(), Util.ThreadMessageData(id, Tr.app_upgradeDls, threadName));
 
     const shouldUpgrade = receiveOnly!bool();
 
@@ -169,7 +169,7 @@ void update()
 
         if (!success)
         {
-            Util.sendMessage(Tr.buildError);
+            Util.sendMessage(Tr.app_buildError);
             return;
         }
     }
@@ -177,12 +177,13 @@ void update()
     try
     {
         linkDls();
-        id = Util.sendMessageRequest(Tr.showChangelog, [Tr.showChangelog_show], [latestVersion]);
-        send(ownerTid(), Util.ThreadMessageData(id, Tr.showChangelog, changelogUrl));
+        id = Util.sendMessageRequest(Tr.app_showChangelog,
+                [Tr.app_showChangelog_show], [latestVersion]);
+        send(ownerTid(), Util.ThreadMessageData(id, Tr.app_showChangelog, changelogUrl));
     }
     catch (FileException e)
     {
-        Util.sendMessage(Tr.linkError);
+        Util.sendMessage(Tr.app_linkError);
     }
 }
 

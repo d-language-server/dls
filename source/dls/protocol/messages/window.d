@@ -20,8 +20,8 @@ void showMessageRequest(string id, MessageActionItem item)
 
     switch (Util.messageRequestInfo[id][0])
     {
-    case Tr.upgradeSelections:
-        if (item.title == tr(Tr.upgradeSelections_upgrade))
+    case Tr.app_upgradeSelections:
+        if (item.title == tr(Tr.app_upgradeSelections_upgrade))
         {
             auto uri = new Uri(Util.messageRequestInfo[id][1]);
             Tools.symbolTool.upgradeSelections(uri);
@@ -29,13 +29,13 @@ void showMessageRequest(string id, MessageActionItem item)
 
         break;
 
-    case Tr.upgradeDls:
+    case Tr.app_upgradeDls:
         send(locate(Util.messageRequestInfo[id][1]),
-                item.title == tr(Tr.upgradeDls_upgrade));
+                item.title == tr(Tr.app_upgradeDls_upgrade));
         break;
 
-    case Tr.showChangelog:
-        if (item.title == Tr.showChangelog_show)
+    case Tr.app_showChangelog:
+        if (item.title == Tr.app_showChangelog_show)
         {
             browse(Util.messageRequestInfo[id][1]);
         }

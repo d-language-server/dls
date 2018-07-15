@@ -15,6 +15,8 @@ shared static this()
 int main(string[] args)
 {
     import dls.bootstrap : canDownloadDls, buildDls, downloadDls, linkDls;
+    import dls.util.constants : Tr;
+    import dls.util.i18n : tr;
     import std.conv : to;
     import std.file : thisExePath;
     import std.format : format;
@@ -24,6 +26,7 @@ int main(string[] args)
 
     Method method;
     bool check;
+    bool localization;
     bool progress;
 
     try
@@ -31,18 +34,19 @@ int main(string[] args)
         //dfmt off
         auto info = getopt(args,
                 "method|m",
-                format!"%s|%s|%s The bootstrapping method."(cast(string) Method.auto_, Method.download, Method.build)
-                ~ format!"`%s` tries `%s` and falls back to `%s` if unavailable)."
-                    (cast(string) Method.auto_, Method.download, Method.build)
-                ~ format!" [default = %s]"(cast(string) method),
+                format(tr(Tr.bootstrap_help_method), cast(string) Method.auto_, Method.download, Method.build)
+                ~ format(tr(Tr.bootstrap_help_method_auto), cast(string) Method.auto_, Method.download, Method.build)
+                ~ format!" [%s = %s]"(tr(Tr.bootstrap_help_default), cast(string) method),
                 &method,
                 "check|c",
-                "Checks if the selected method is available."
-                ~ format!" [default = %s]"(check),
+                format!"%s [%s = %s]"(tr(Tr.bootstrap_help_check), tr(Tr.bootstrap_help_default), check),
                 &check,
+                "localization|l",
+                format!"%s [%s = %s]"(tr(Tr.bootstrap_help_localization), tr(Tr.bootstrap_help_default), localization),
+                &localization,
                 "progress|p",
-                format!"Show progress (for %s method only)."(Method.download)
-                ~ format!" [default = %s]"(progress),
+                format(tr(Tr.bootstrap_help_progress), Method.download)
+                ~ format!" [%s = %s]"(tr(Tr.bootstrap_help_default), progress),
                 &progress);
         //dfmt on
 

@@ -8,5 +8,8 @@
 	"license": "GPL-3.0",
 	"stringImportPaths": [
 		"data"
-	]
+	],
+	"dependencies": {
+		"dls:util": "*"
+	}
 }

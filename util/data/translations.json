@@ -1,55 +1,91 @@
 {
-    "buildError": {
+    "app.buildError": {
         "messageType": 1,
         "title": {
             "en": "DLS could not be built",
             "fr": "DLS n'a pas pu être compilé"
         }
     },
-    "linkError": {
+    "app.linkError": {
         "messageType": 1,
         "title": {
             "en": "DLS could not be linked",
             "fr": "DLS n'a pas pu être lié"
         }
     },
-    "upgradeSelections": {
+    "app.upgradeSelections": {
         "messageType": 3,
         "title": {
             "en": "$1 was updated",
             "fr": "$1 a été mis à jour"
         }
     },
-    "upgradeSelections.upgrade": {
+    "app.upgradeSelections.upgrade": {
         "title": {
             "en": "Upgrade dependencies",
             "fr": "Mettre à jour les dépendances"
         }
     },
-    "upgradeDls": {
+    "app.upgradeDls": {
         "messageType": 3,
         "title": {
             "en": "DLS version $1 is available (current: $2)",
             "fr": "DLS version $1 est disponible (actuel: $2)"
         }
     },
-    "upgradeDls.upgrade": {
+    "app.upgradeDls.upgrade": {
         "title": {
             "en": "Upgrade",
             "fr": "Mettre à jour"
         }
     },
-    "showChangelog": {
+    "app.showChangelog": {
         "messageType": 3,
         "title": {
             "en": "DLS upgraded to version $1",
             "fr": "DLS mis à jour vers la version $1"
         }
     },
-    "showChangelog.show": {
+    "app.showChangelog.show": {
         "title": {
             "en": "See what's new",
             "fr": "Voir les nouveautés"
+        }
+    },
+    "bootstrap.help.default": {
+        "title": {
+            "en": "default",
+            "fr": "défaut"
+        }
+    },
+    "bootstrap.help.method": {
+        "title": {
+            "en": "%s|%s|%s The installation method.",
+            "fr": "%s|%s|%s La méthode d'installation."
+        }
+    },
+    "bootstrap.help.method.auto": {
+        "title": {
+            "en": "`%s` tries `%s` and falls back to `%s` if it's unavailable).",
+            "fr": "`%s` tente `%s` et retombe sur `%s` s'il n'est pas disponible)."
+        }
+    },
+    "bootstrap.help.check": {
+        "title": {
+            "en": "Checks if the selected method is available.",
+            "fr": "Vérifie si la méthode sélectionnée est disponible."
+        }
+    },
+    "bootstrap.help.localization": {
+        "title": {
+            "en": "Output localized strings.",
+            "fr": "Émettre des chaînes localisées."
+        }
+    },
+    "bootstrap.help.progress": {
+        "title": {
+            "en": "Show progress (only for method `%s`).",
+            "fr": "Montrer le progrès (uniquement pour la méthode `%s`)."
         }
     }
 }

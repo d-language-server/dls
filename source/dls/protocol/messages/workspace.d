@@ -70,9 +70,9 @@ void didChangeWatchedFiles(DidChangeWatchedFilesParams params)
         case "dub.json", "dub.sdl":
             if (baseName(dirName(uri.path)) != ".dub")
             {
-                auto id = Util.sendMessageRequest(Tr.upgradeSelections,
-                        [Tr.upgradeSelections_upgrade], [uri.path]);
-                Util.bindMessageToRequestId(id, Tr.upgradeSelections, uri);
+                auto id = Util.sendMessageRequest(Tr.app_upgradeSelections,
+                        [Tr.app_upgradeSelections_upgrade], [uri.path]);
+                Util.bindMessageToRequestId(id, Tr.app_upgradeSelections, uri);
             }
 
             break;
