@@ -141,6 +141,7 @@ void downloadDls(in void function(size_t size) totalSizeCallback = null,
             import std.datetime.stopwatch : StopWatch;
 
             static bool started;
+            static bool stopped;
             static StopWatch watch;
 
             if (!started && dlTotal > 0)
@@ -154,11 +155,17 @@ void downloadDls(in void function(size_t size) totalSizeCallback = null,
                 }
             }
 
-            if (started && chunkSizeCallback !is null && dlNow > 0
+            if (started && !stopped && chunkSizeCallback !is null && dlNow > 0
                     && (watch.peek() >= 500.msecs || dlNow == dlTotal))
             {
                 watch.reset();
                 chunkSizeCallback(dlNow);
+
+                if (dlNow == dlTotal)
+                {
+                    stopped = true;
+                    watch.stop();
+                }
             }
 
             return 0;
