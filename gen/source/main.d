@@ -7,9 +7,9 @@ void main()
     import std.path : buildNormalizedPath;
     import std.range : replace;
 
-    immutable utilDir = buildNormalizedPath(__FILE__, "..", "..", "..", "util");
-    immutable translationsPath = buildNormalizedPath(utilDir, "data", "translations.json");
-    immutable trModulePath = buildNormalizedPath(utilDir, "source", "dls", "util", "constants.d");
+    immutable i18nDir = buildNormalizedPath(__FILE__, "..", "..", "..", "i18n");
+    immutable translationsPath = buildNormalizedPath(i18nDir, "data", "translations.json");
+    immutable trModulePath = buildNormalizedPath(i18nDir, "source", "dls", "util", "constants.d");
     auto translations = parseJSON(readText(translationsPath));
 
     write(trModulePath, "module dls.util.constants;\n\n");
@@ -19,8 +19,7 @@ void main()
 
     foreach (key; keys)
     {
-        append(trModulePath, format!"%s = \"%s\"%s\n"(key.replace(".", "_"),
-                key, key == keys[$ - 1] ? "" : ","));
+        append(trModulePath, format!"%s = \"%s\"%s\n"(key.replace(".", "_"), key, ","));
     }
 
     append(trModulePath, "}\n");

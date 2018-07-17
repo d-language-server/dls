@@ -11,8 +11,8 @@
 	],
 	"dependencies": {
 		"dls:bootstrap": "*",
+		"dls:i18n": "*",
 		"dls:protocol": "*",
-		"dls:util": "*",
 		"dub": "1.10.0",
 		"dcd": "0.9.9",
 		"dscanner": "0.5.7",
@@ -27,7 +27,7 @@
 	"subPackages": [
 		"bootstrap",
 		"gen",
-		"protocol",
-		"util"
+		"i18n",
+		"protocol"
 	]
 }
