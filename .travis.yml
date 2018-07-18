@@ -15,6 +15,9 @@ matrix: # ldc on 32bit linux needs libcurl4-openssl-dev:i386 which cannot be ins
     - d: dmd
       os: linux
       env: ARCH=x86
+cache:
+  directories:
+    - $HOME/.dub
 addons:
   apt:
     packages:
