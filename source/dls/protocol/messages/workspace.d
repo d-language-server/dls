@@ -67,7 +67,8 @@ void didChangeWatchedFiles(DidChangeWatchedFilesParams params)
         switch (baseName(uri.path))
         {
         case "dub.json", "dub.sdl":
-            if (baseName(dirName(uri.path)) != ".dub")
+            if (baseName(dirName(uri.path)) != ".dub"
+                    && event.type != FileChangeType.deleted)
             {
                 auto id = Util.sendMessageRequest(Util.ShowMessageRequestType.upgradeSelections,
                         [uri.path]);
