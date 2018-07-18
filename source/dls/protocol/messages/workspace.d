@@ -56,6 +56,7 @@ void didChangeConfiguration(DidChangeConfigurationParams params)
 void didChangeWatchedFiles(DidChangeWatchedFilesParams params)
 {
     import dls.util.constants : Tr;
+    import dls.protocol.interfaces : FileChangeType;
     import dls.protocol.messages.window : Util;
     import std.path : baseName, dirName;
 
@@ -68,7 +69,8 @@ void didChangeWatchedFiles(DidChangeWatchedFilesParams params)
         switch (baseName(uri.path))
         {
         case "dub.json", "dub.sdl":
-            if (baseName(dirName(uri.path)) != ".dub")
+            if (baseName(dirName(uri.path)) != ".dub"
+                    && event.type != FileChangeType.deleted)
             {
                 auto id = Util.sendMessageRequest(Tr.app_upgradeSelections,
                         [Tr.app_upgradeSelections_upgrade], [uri.path]);
