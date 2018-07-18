@@ -24,19 +24,6 @@ else
     immutable os = "none";
 }
 
-version (X86_64)
-{
-    immutable arch = "x86_64";
-}
-else version (X86)
-{
-    immutable string arch;
-}
-else
-{
-    immutable arch = "none";
-}
-
 version (Windows)
 {
     immutable dlsExecutable = "dls.exe";
@@ -54,11 +41,19 @@ private string[] archiveMemberPaths;
 
 shared static this()
 {
-    version (X86)
+    version (X86_64)
+    {
+        immutable arch = "x86_64";
+    }
+    else version (X86)
     {
         import core.cpuid : isX86_64;
 
-        arch = isX86_64 ? "x86_64" : "x86";
+        immutable arch = isX86_64 ? "x86_64" : "x86";
+    }
+    else
+    {
+        immutable arch = "none";
     }
 
     dlsArchiveName = format("dls-%%s.%s.%s.zip", os, arch);
@@ -208,13 +203,14 @@ void downloadDls(in void function(size_t size) totalSizeCallback = null,
 
 void buildDls(in string dlsDir, in string[] additionalArgs = [])
 {
+    import core.cpuid : isX86_64;
     import std.process : Config, execute;
 
     auto cmdLine = ["dub", "build", "--build=release"] ~ additionalArgs;
 
     version (Windows)
     {
-        cmdLine ~= ["--compiler=dmd", "--arch=x86_mscoff"];
+        cmdLine ~= ["--compiler=dmd", "--arch=" ~ (isX86_64 ? "x86_64" : "x86_mscoff")];
     }
 
     const result = execute(cmdLine, null, Config.none, size_t.max, dlsDir);
