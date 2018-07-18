@@ -188,8 +188,8 @@ class SymbolTool : Tool
     else version (Posix)
     {
         private static immutable _compilerConfigPaths = [
-            `/etc/dmd.conf`, `/usr/local/etc/dmd.conf`, `/etc/ldc2.conf`,
-            `/usr/local/etc/ldc2.conf`
+            "/etc/dmd.conf", "/usr/local/etc/dmd.conf", "/etc/ldc2.conf",
+            "/usr/local/etc/ldc2.conf", "/home/linuxbrew/.linuxbrew/etc/dmd.conf"
         ];
     }
     else
@@ -232,10 +232,19 @@ class SymbolTool : Tool
             {
                 foreach (path; ["/snap", "/var/lib/snapd/snap"])
                 {
-                    if (exists(buildNormalizedPath(path, "dmd")))
+                    const dmdSnapPath = buildNormalizedPath(path, "dmd");
+                    const ldcSnapIncludePath = buildNormalizedPath(path,
+                            "ldc2", "current", "include", "d");
+
+                    if (exists(dmdSnapPath))
                     {
-                        paths = ["druntime", "phobos"].map!(end => buildNormalizedPath(path,
-                                "dmd", "current", "import", end)).array;
+                        paths = ["druntime", "phobos"].map!(end => buildNormalizedPath(dmdSnapPath,
+                                "current", "import", end)).array;
+                        break;
+                    }
+                    else if (exists(ldcSnapIncludePath))
+                    {
+                        paths = [ldcSnapIncludePath];
                         break;
                     }
                 }
