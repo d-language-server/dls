@@ -226,7 +226,23 @@ class SymbolTool : Tool
             }
         }
 
-        version (linux)
+        version (Windows)
+        {
+            import std.algorithm : splitter;
+            import std.process : environment;
+
+            if (paths.length == 0)
+            {
+                foreach (path; splitter(environment["PATH"], ';'))
+                {
+                    if (exists(buildNormalizedPath(path, "ldc2.exe")))
+                    {
+                        paths = [buildNormalizedPath(path, "..", "import")];
+                    }
+                }
+            }
+        }
+        else version (linux)
         {
             if (paths.length == 0)
             {
