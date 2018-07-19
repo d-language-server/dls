@@ -272,7 +272,7 @@ string linkDls()
         const mklinkCommand = mklinks.joiner(" & ").to!string;
         const command = [
             "powershell.exe",
-            format!"Start-Process -FilePath cmd.exe -ArgumentList '/c %s' -Verb runas"(
+            format!"Start-Process -Wait -FilePath cmd.exe -ArgumentList '/c %s' -Verb runas"(
                 mklinkCommand)
         ];
         const result = execute(command);
