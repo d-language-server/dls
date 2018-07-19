@@ -20,6 +20,7 @@ int main(string[] args)
     import std.conv : to;
     import std.file : thisExePath;
     import std.format : format;
+    import std.json : JSONValue;
     import std.getopt : getopt, defaultGetoptPrinter;
     import std.path : dirName;
     import std.stdio : stderr, stdout;
@@ -65,8 +66,22 @@ int main(string[] args)
     string output;
     int status;
 
-    if (!check)
+    if (check)
     {
+        const ok = method != Method.download || canDownloadDls;
+        output = ok.to!string;
+        status = ok ? 0 : 1;
+    }
+    else
+    {
+        if (localization)
+        {
+            stderr.rawWrite("installing:" ~ tr(Tr.bootstrap_installDls_installing) ~ '\t');
+            stderr.rawWrite("downloading:" ~ tr(Tr.bootstrap_installDls_downloading) ~ '\t');
+            stderr.rawWrite("extracting:" ~ tr(Tr.bootstrap_installDls_extracting) ~ '\n');
+            stderr.flush();
+        }
+
         const dlsDir = thisExePath().dirName.dirName;
         const printSize = progress ? (size_t size) {
             stderr.rawWrite(size.to!string ~ '\n');
@@ -80,12 +95,6 @@ int main(string[] args)
         (method == Method.download || (method == Method.auto_ && canDownloadDls)) ? downloadDls(printSize,
                 printSize, printExtract) : buildDls(dlsDir);
         output = linkDls();
-    }
-    else
-    {
-        const canDownload = canDownloadDls;
-        output = (method == Method.download ? canDownload : true).to!string;
-        status = (method != Method.download || canDownload) ? 0 : 1;
     }
 
     stdout.rawWrite(output);

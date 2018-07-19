@@ -116,5 +116,23 @@
             "en": "Show progress (only for method `%s`).",
             "fr": "Montrer le progrès (uniquement pour la méthode `%s`)."
         }
+    },
+    "bootstrap.installDls.installing": {
+        "title": {
+            "en": "Installing DLS",
+            "fr": "Installation de DLS"
+        }
+    },
+    "bootstrap.installDls.downloading": {
+        "title": {
+            "en": "Downloading",
+            "fr": "Téléchargement"
+        }
+    },
+    "bootstrap.installDls.extracting": {
+        "title": {
+            "en": "Extracting",
+            "fr": "Extraction"
+        }
     }
 }
