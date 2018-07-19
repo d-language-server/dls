@@ -7,6 +7,7 @@ import dls.util.i18n : tr;
 void showMessageRequest(string id, MessageActionItem item)
 {
     import dls.tools.tools : Tools;
+    import dls.util.logger : logger;
     import dls.util.uri : Uri;
     import std.concurrency : locate, receiveOnly, send;
     import std.path : dirName;
@@ -35,8 +36,9 @@ void showMessageRequest(string id, MessageActionItem item)
         break;
 
     case Tr.app_showChangelog:
-        if (item.title == Tr.app_showChangelog_show)
+        if (item.title == tr(Tr.app_showChangelog_show))
         {
+            logger.info("Opening changelog in browser");
             browse(Util.messageRequestInfo[id][1]);
         }
 
