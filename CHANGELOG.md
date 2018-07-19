@@ -4,6 +4,10 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.6.11
+- Fixed `dls:bootstrap` exiting before symlink was created on Windows
+- Fixed selections upgrade message being show upon deleting `dub.selections.json`
+
 #### 0.6.10
 - Fixed crash when importing dependencies
 
