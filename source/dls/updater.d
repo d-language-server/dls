@@ -74,6 +74,8 @@ void update()
     import dls.bootstrap : UpgradeFailedException, apiEndpoint, buildDls,
         canDownloadDls, downloadDls, linkDls;
     static import dls.protocol.jsonrpc;
+    import dls.protocol.interfaces.dls : DlsUpgradeSizeParams,
+        TranslationParams;
     import dls.protocol.messages.methods : Dls;
     import dls.protocol.messages.window : Util;
     import dls.util.constants : Tr;
@@ -110,7 +112,8 @@ void update()
         return;
     }
 
-    dls.protocol.jsonrpc.send(Dls.upgradeDls_start);
+    dls.protocol.jsonrpc.send(Dls.upgradeDls_start,
+            new TranslationParams(Tr.app_upgradeDls_upgrading));
 
     scope (exit)
     {
@@ -124,13 +127,16 @@ void update()
         try
         {
             enum totalSizeCallback = (size_t size) {
-                dls.protocol.jsonrpc.send(Dls.upgradeDls_totalSize, size);
+                dls.protocol.jsonrpc.send(Dls.upgradeDls_totalSize,
+                        new DlsUpgradeSizeParams(Tr.app_upgradeDls_downloading, size));
             };
             enum chunkSizeCallback = (size_t size) {
-                dls.protocol.jsonrpc.send(Dls.upgradeDls_currentSize, size);
+                dls.protocol.jsonrpc.send(Dls.upgradeDls_currentSize,
+                        new DlsUpgradeSizeParams(Tr.app_upgradeDls_downloading, size));
             };
             enum extractCallback = () {
-                dls.protocol.jsonrpc.send(Dls.upgradeDls_extract);
+                dls.protocol.jsonrpc.send(Dls.upgradeDls_extract,
+                        new TranslationParams(Tr.app_upgradeDls_extracting));
             };
 
             downloadDls(totalSizeCallback, chunkSizeCallback, extractCallback);

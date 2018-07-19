@@ -369,7 +369,9 @@ class SymbolTool : Tool
     void upgradeSelections(Uri uri)
     {
         import std.concurrency : spawn;
+        import dls.protocol.interfaces.dls : TranslationParams;
         import dls.protocol.messages.methods : Dls;
+        import dls.util.constants : Tr;
 
         logger.infof("Upgrading dependencies from %s", dirName(uri.path));
 
@@ -377,7 +379,7 @@ class SymbolTool : Tool
             import dls.protocol.jsonrpc : send;
             import dub.dub : UpgradeOptions;
 
-            send(Dls.upgradeSelections_start);
+            send(Dls.upgradeSelections_start, new TranslationParams(Tr.app_upgradeSelections_upgrading));
             getDub(new Uri(uriString)).upgrade(UpgradeOptions.upgrade | UpgradeOptions.select);
             send(Dls.upgradeSelections_stop);
         }, uri.toString());

@@ -1,4 +1,9 @@
 {
+    "_": {
+        "title": {
+            "en": "### BAD TRANSLATION KEY ###"
+        }
+    },
     "app.buildError": {
         "messageType": 1,
         "title": {
@@ -26,6 +31,12 @@
             "fr": "Mettre à jour les dépendances"
         }
     },
+    "app.upgradeSelections.upgrading": {
+        "title": {
+            "en": "Upgrading selections",
+            "fr": "Mise à jour des sélections"
+        }
+    },
     "app.upgradeDls": {
         "messageType": 3,
         "title": {
@@ -37,6 +48,24 @@
         "title": {
             "en": "Upgrade",
             "fr": "Mettre à jour"
+        }
+    },
+    "app.upgradeDls.upgrading": {
+        "title": {
+            "en": "Upgrading DLS",
+            "fr": "Mise à jour de DLS"
+        }
+    },
+    "app.upgradeDls.downloading": {
+        "title": {
+            "en": "Downloading",
+            "fr": "Téléchargement"
+        }
+    },
+    "app.upgradeDls.extracting": {
+        "title": {
+            "en": "Extracting",
+            "fr": "Extraction"
         }
     },
     "app.showChangelog": {
