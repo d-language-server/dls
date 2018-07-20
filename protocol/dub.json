@@ -5,5 +5,5 @@
 	],
 	"description": "LSP interfaces implementation",
 	"copyright": "Copyright © 2018, Laurent Tréguier",
-	"license": "GPL-3.0"
+	"license": "GPL-3.0 or later"
 }
