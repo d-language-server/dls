@@ -28,15 +28,14 @@ class AnalysisTool : Tool
 {
     import dls.protocol.definitions : Diagnostic;
     import dls.util.uri : Uri;
-    import dscanner.analysis.config : StaticAnalysisConfig,
-        defaultStaticAnalysisConfig;
-    import dls.util.logger : logger;
-    import std.path : buildNormalizedPath;
+    import dscanner.analysis.config : StaticAnalysisConfig;
 
     private StaticAnalysisConfig[string] _analysisConfigs;
 
     void addAnalysisConfigPath(Uri uri)
     {
+        import dscanner.analysis.config : defaultStaticAnalysisConfig;
+
         _analysisConfigs[uri.path] = defaultStaticAnalysisConfig();
         updateAnalysisConfigPath(uri);
     }
@@ -55,8 +54,11 @@ class AnalysisTool : Tool
         import dls.protocol.jsonrpc : send;
         import dls.protocol.messages.methods : TextDocument;
         import dls.util.document : Document;
+        import dls.util.logger : logger;
+        import dscanner.analysis.config : defaultStaticAnalysisConfig;
         import inifiled : readINIFile;
         import std.file : exists;
+        import std.path : buildNormalizedPath;
 
         auto configPath = buildNormalizedPath(uri.path, _configuration.analysis.configFile);
 
@@ -81,6 +83,7 @@ class AnalysisTool : Tool
         import dls.protocol.definitions : DiagnosticSeverity;
         import dls.tools.tools : Tools;
         import dls.util.document : Document;
+        import dls.util.logger : logger;
         import dparse.lexer : LexerConfig, StringBehavior, StringCache,
             getTokensForParser;
         import dparse.parser : parseModule;
@@ -122,9 +125,10 @@ class AnalysisTool : Tool
 
     private StaticAnalysisConfig getConfig(Uri uri)
     {
+        import dscanner.analysis.config : defaultStaticAnalysisConfig;
         import std.algorithm : startsWith;
         import std.array : array;
-        import std.path : pathSplitter;
+        import std.path : buildNormalizedPath, pathSplitter;
 
         string[] configPathParts;
 

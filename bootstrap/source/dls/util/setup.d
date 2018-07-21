@@ -40,7 +40,7 @@ void initialSetup()
 
         foreach (path; splitter(environment["PATH"], ';'))
         {
-            if (buildNormalizedPath(path, "dmd.exe").exists())
+            if (exists(buildNormalizedPath(path, "dmd.exe")))
             {
                 environment["PATH"] = buildNormalizedPath(dirName(path), binDir)
                     ~ ';' ~ environment["PATH"];

@@ -22,7 +22,6 @@ module dls.util.i18n;
 
 import dls.util.constants : Tr;
 import dls.protocol.interfaces : MessageType;
-import std.conv : to;
 import std.json : JSONValue;
 
 private enum translationsJson = import("translations.json");
@@ -32,6 +31,7 @@ private immutable defaultLocale = "en";
 
 shared static this()
 {
+    import std.conv : to;
     import std.json : parseJSON;
 
     translations = parseJSON(translationsJson);
@@ -80,6 +80,7 @@ shared static this()
 
 string tr(Tr message, string[] args = [])
 {
+    import std.conv : to;
     import std.range : replace;
 
     auto title = translations[message]["title"];
@@ -95,6 +96,8 @@ string tr(Tr message, string[] args = [])
 
 MessageType trType(Tr message)
 {
+    import std.conv : to;
+
     auto t = translations[message];
     return "messageType" in t ? t["messageType"].integer.to!MessageType : MessageType.info;
 }

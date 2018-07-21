@@ -20,13 +20,13 @@
 
 module dls.protocol.messages.window;
 
-import dls.util.constants : Tr;
 import dls.protocol.interfaces : MessageActionItem;
-import dls.util.i18n : tr;
 
 void showMessageRequest(string id, MessageActionItem item)
 {
     import dls.tools.tools : Tools;
+    import dls.util.constants : Tr;
+    import dls.util.i18n : tr;
     import dls.util.logger : logger;
     import dls.util.uri : Uri;
     import std.concurrency : locate, receiveOnly, send;
@@ -76,7 +76,8 @@ abstract class Util
     import dls.protocol.interfaces : MessageType;
     import dls.protocol.jsonrpc : send;
     import dls.protocol.messages.methods : Window;
-    import dls.util.i18n : trType;
+    import dls.util.constants : Tr;
+    import dls.util.i18n : tr, trType;
     import std.array : array, replace;
     import std.algorithm : map;
     import std.conv : to;

@@ -20,10 +20,6 @@
 
 module dls.protocol.definitions;
 
-import std.json : JSONValue;
-import std.typecons : Nullable, nullable;
-import dls.util.constructor : Constructor;
-
 alias DocumentUri = string;
 
 class Position
@@ -64,6 +60,9 @@ class Location
 
 class Diagnostic
 {
+    import std.json : JSONValue;
+    import std.typecons : Nullable;
+
     Range range;
     string message;
     Nullable!DiagnosticSeverity severity;
@@ -109,6 +108,9 @@ class DiagnosticRelatedInformation
 
 class Command
 {
+    import std.json : JSONValue;
+    import std.typecons : Nullable;
+
     string title;
     string command;
     Nullable!(JSONValue[]) arguments;
@@ -149,6 +151,8 @@ class TextDocumentEdit
 
 class WorkspaceEdit
 {
+    import std.typecons : Nullable;
+
     Nullable!((TextEdit[])[string]) changes;
     Nullable!(TextDocumentEdit[]) documentChanges;
 
@@ -175,11 +179,15 @@ class TextDocumentItem
 
 class VersionedTextDocumentIdentifier : TextDocumentIdentifier
 {
+    import std.json : JSONValue;
+
     JSONValue version_;
 }
 
 class TextDocumentPositionParams
 {
+    import dls.util.constructor : Constructor;
+
     TextDocumentIdentifier textDocument;
     Position position;
 
@@ -188,6 +196,8 @@ class TextDocumentPositionParams
 
 class DocumentFilter
 {
+    import std.typecons : Nullable;
+
     Nullable!string languageId;
     Nullable!string scheme;
     Nullable!string pattern;

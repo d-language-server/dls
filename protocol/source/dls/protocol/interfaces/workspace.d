@@ -21,9 +21,6 @@
 module dls.protocol.interfaces.workspace;
 
 import dls.protocol.interfaces.client : RegistrationOptionsBase;
-import dls.util.constructor : Constructor;
-import std.json : JSONValue;
-import std.typecons : Nullable;
 
 class WorkspaceFolder
 {
@@ -44,6 +41,8 @@ class WorkspaceFoldersChangeEvent
 
 class DidChangeConfigurationParams
 {
+    import std.json : JSONValue;
+
     JSONValue settings;
 }
 
@@ -59,6 +58,8 @@ class ConfigurationParams
 
 class ConfigurationItem
 {
+    import std.typecons : Nullable;
+
     Nullable!string scopeUri;
     Nullable!string section;
 
@@ -102,6 +103,8 @@ class DidChangeWatchedFilesRegistrationOptions : RegistrationOptionsBase
 
 class FileSystemWatcher
 {
+    import std.typecons : Nullable;
+
     string globPattern;
     Nullable!WatchKind kind;
 
@@ -126,6 +129,9 @@ class WorkspaceSymbolParams
 
 class ExecuteCommandParams
 {
+    import std.json : JSONValue;
+    import std.typecons : Nullable;
+
     string command;
     Nullable!(JSONValue[]) arguments;
 }

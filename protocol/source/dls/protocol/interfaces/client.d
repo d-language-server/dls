@@ -20,8 +20,6 @@
 
 module dls.protocol.interfaces.client;
 
-import std.typecons : Nullable;
-
 private abstract class RegistrationBase
 {
     string id;
@@ -40,6 +38,8 @@ package interface RegistrationOptionsBase
 
 class Registration(R : RegistrationOptionsBase) : RegistrationBase
 {
+    import std.typecons : Nullable;
+
     Nullable!R registerOptions;
 
     this(string id = string.init, string method = string.init,
@@ -53,6 +53,7 @@ class Registration(R : RegistrationOptionsBase) : RegistrationBase
 class TextDocumentRegistrationOptions : RegistrationOptionsBase
 {
     import dls.protocol.definitions : DocumentSelector;
+    import std.typecons : Nullable;
 
     Nullable!DocumentSelector documentSelector;
 

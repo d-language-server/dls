@@ -20,8 +20,6 @@
 
 module dls.protocol.interfaces.general;
 
-import dls.protocol.definitions : MarkupKind;
-import dls.protocol.interfaces.workspace : WorkspaceFolder;
 import dls.util.constructor : Constructor;
 import std.json : JSONValue;
 import std.typecons : Nullable;
@@ -115,6 +113,8 @@ class TextDocumentClientCapabilities
     {
         static class CompletionItem
         {
+            import dls.protocol.definitions : MarkupKind;
+
             Nullable!bool snippetSupport;
             Nullable!bool commitCharactersSupport;
             Nullable!(MarkupKind[]) documentationFormat;
@@ -137,6 +137,8 @@ class TextDocumentClientCapabilities
 
     static class Hover : WithDynamicRegistration
     {
+        import dls.protocol.definitions : MarkupKind;
+
         Nullable!(MarkupKind[]) contentFormat;
     }
 
@@ -144,6 +146,8 @@ class TextDocumentClientCapabilities
     {
         static class SignatureInformation
         {
+            import dls.protocol.definitions : MarkupKind;
+
             Nullable!(MarkupKind[]) documentationFormat;
         }
 

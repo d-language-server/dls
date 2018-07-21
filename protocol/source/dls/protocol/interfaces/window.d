@@ -20,8 +20,6 @@
 
 module dls.protocol.interfaces.window;
 
-import std.typecons : Nullable;
-
 class ShowMessageParams
 {
     MessageType type;
@@ -44,6 +42,8 @@ enum MessageType : uint
 
 class ShowMessageRequestParams : ShowMessageParams
 {
+    import std.typecons : Nullable;
+
     Nullable!(MessageActionItem[]) actions;
 
     this(MessageType type = MessageType.init, string message = string.init,

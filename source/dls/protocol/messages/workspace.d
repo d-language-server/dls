@@ -22,14 +22,14 @@ module dls.protocol.messages.workspace;
 
 import dls.protocol.interfaces : SymbolInformation;
 import dls.protocol.interfaces.workspace;
-import dls.tools.tools : Tools;
-import dls.util.logger : logger;
-import dls.util.uri : Uri;
 import std.json : JSONValue;
 import std.typecons : Nullable;
 
 void workspaceFolders(string id, Nullable!(WorkspaceFolder[]) folders)
 {
+    import dls.tools.tools : Tools;
+    import dls.util.uri : Uri;
+
     if (!folders.isNull)
     {
         foreach (workspaceFolder; folders)
@@ -43,6 +43,8 @@ void workspaceFolders(string id, Nullable!(WorkspaceFolder[]) folders)
 
 void didChangeWorkspaceFolders(DidChangeWorkspaceFoldersParams params)
 {
+    import dls.tools.tools : Tools;
+    import dls.util.uri : Uri;
     import std.typecons : nullable;
 
     workspaceFolders(null, params.event.added.nullable);
@@ -62,7 +64,9 @@ void configuration(string id, JSONValue[] config)
 void didChangeConfiguration(DidChangeConfigurationParams params)
 {
     import dls.tools.configuration : Configuration;
+    import dls.tools.tools : Tools;
     import dls.util.json : convertFromJSON;
+    import dls.util.logger : logger;
 
     logger.info("Configuration changed");
 
@@ -78,6 +82,9 @@ void didChangeWatchedFiles(DidChangeWatchedFilesParams params)
     import dls.util.constants : Tr;
     import dls.protocol.interfaces : FileChangeType;
     import dls.protocol.messages.window : Util;
+    import dls.tools.tools : Tools;
+    import dls.util.logger : logger;
+    import dls.util.uri : Uri;
     import std.path : baseName, dirName;
 
     foreach (event; params.changes)
@@ -112,6 +119,8 @@ void didChangeWatchedFiles(DidChangeWatchedFilesParams params)
 
 SymbolInformation[] symbol(WorkspaceSymbolParams params)
 {
+    import dls.tools.tools : Tools;
+
     return Tools.symbolTool.symbol(params.query);
 }
 

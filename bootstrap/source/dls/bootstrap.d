@@ -20,9 +20,7 @@
 
 module dls.bootstrap;
 
-import std.file : exists, isFile, mkdirRecurse, remove;
 import std.format : format;
-import std.path : buildNormalizedPath;
 
 immutable repoBase = import("repo.txt");
 immutable apiEndpoint = format!"https://api.github.com/repos/%s/dls/%%s"(repoBase);
@@ -84,7 +82,7 @@ shared static this()
     import core.time : hours;
     import std.algorithm : min;
     import std.datetime : Clock, SysTime;
-    import std.json : JSONException, parseJSON;
+    import std.json : parseJSON;
     import std.net.curl : get;
 
     try
@@ -123,7 +121,8 @@ void downloadDls(in void function(size_t size) totalSizeCallback = null,
 {
     import std.array : appender;
     import std.net.curl : HTTP;
-    import std.file : rmdirRecurse, write;
+    import std.file : exists, isFile, mkdirRecurse, remove, rmdirRecurse, write;
+    import std.path : buildNormalizedPath;
     import std.zip : ZipArchive;
 
     if (downloadUrl.length > 0 || canDownloadDls)
@@ -224,6 +223,7 @@ void downloadDls(in void function(size_t size) totalSizeCallback = null,
 void buildDls(in string dlsDir, in string[] additionalArgs = [])
 {
     import core.cpuid : isX86_64;
+    import std.path : buildNormalizedPath;
     import std.process : Config, execute;
 
     auto cmdLine = ["dub", "build", "--build=release"] ~ additionalArgs;
@@ -245,8 +245,8 @@ void buildDls(in string dlsDir, in string[] additionalArgs = [])
 
 string linkDls()
 {
-    import std.file : FileException;
-    import std.path : baseName;
+    import std.file : FileException, exists, isFile, mkdirRecurse, remove;
+    import std.path : baseName, buildNormalizedPath;
     import std.string : endsWith;
 
     string dlsLinkPath;
@@ -275,11 +275,12 @@ string linkDls()
 
     version (Windows)
     {
-        import std.algorithm : joiner, map;
+        import std.algorithm : joiner;
         import std.conv : to;
         import std.file : FileException;
         import std.format : format;
-        import std.process : Config, execute;
+        import std.path : buildNormalizedPath;
+        import std.process : execute;
 
         string[] mklinks;
 
@@ -322,6 +323,7 @@ string linkDls()
 
 @property string dubBinDir()
 {
+    import std.path : buildNormalizedPath;
     import std.process : environment;
 
     version (Windows)

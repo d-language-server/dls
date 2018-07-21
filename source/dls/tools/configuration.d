@@ -22,17 +22,6 @@ module dls.tools.configuration;
 
 class Configuration
 {
-    SymbolConfiguration symbol;
-    AnalysisConfiguration analysis;
-    FormatConfiguration format;
-
-    this()
-    {
-        symbol = new SymbolConfiguration();
-        analysis = new AnalysisConfiguration();
-        format = new FormatConfiguration();
-    }
-
     static class SymbolConfiguration
     {
         string[] importPaths;
@@ -82,5 +71,16 @@ class Configuration
         TemplateConstraintStyle dfmtTemplateConstraintStyle = TemplateConstraintStyle
             .conditionalNewlineIndent;
         bool dfmtSingleTemplateConstraintIndent = false;
+    }
+
+    SymbolConfiguration symbol;
+    AnalysisConfiguration analysis;
+    FormatConfiguration format;
+
+    this()
+    {
+        symbol = new SymbolConfiguration();
+        analysis = new AnalysisConfiguration();
+        format = new FormatConfiguration();
     }
 }

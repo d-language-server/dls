@@ -21,8 +21,8 @@
 module dls.protocol.handlers;
 
 import std.json : JSONValue;
+import std.traits : Parameters, ReturnType, isSomeFunction;
 import std.typecons : Nullable;
-import std.traits;
 
 alias RequestHandler = Nullable!JSONValue delegate(Nullable!JSONValue);
 alias NotificationHandler = void delegate(Nullable!JSONValue);

@@ -21,20 +21,20 @@
 module dls.protocol.messages.general;
 
 import dls.protocol.interfaces.general;
-import dls.server : Server;
-import dls.util.logger : logger;
 import std.json : JSONValue;
-import std.typecons : Nullable, nullable;
 
 @("")
 InitializeResult initialize(InitializeParams params)
 {
+    import dls.server : Server;
     import dls.tools.symbol_tool : useCompatCompletionItemKinds,
         useCompatSymbolKinds;
     import dls.tools.tools : Tools;
+    import dls.util.logger : logger;
     import dls.util.uri : Uri;
     import std.algorithm : map, sort, uniq;
     import std.array : array;
+    import std.typecons : Nullable, nullable;
 
     logger.info("Initializing server");
     Server.initialized = true;
@@ -137,6 +137,9 @@ void initialized(JSONValue nothing)
     import dls.protocol.interfaces : DidChangeWatchedFilesRegistrationOptions,
         FileSystemWatcher, Registration, RegistrationParams;
     import dls.protocol.messages.methods : Client;
+    import dls.server : Server;
+    import dls.util.logger : logger;
+    import std.typecons : nullable;
 
     debug
     {
@@ -170,6 +173,9 @@ void initialized(JSONValue nothing)
 @("")
 JSONValue shutdown(JSONValue nothing)
 {
+    import dls.server : Server;
+    import dls.util.logger : logger;
+
     logger.info("Shutting down server");
     Server.shutdown = true;
     return JSONValue(null);
@@ -178,6 +184,9 @@ JSONValue shutdown(JSONValue nothing)
 @("")
 void exit(JSONValue nothing)
 {
+    import dls.server : Server;
+    import dls.util.logger : logger;
+
     logger.info("Exiting server");
     Server.exit = true;
 }

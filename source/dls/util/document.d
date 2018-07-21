@@ -20,14 +20,12 @@
 
 module dls.util.document;
 
-import dls.util.uri : Uri;
-
 class Document
 {
+    import dls.util.uri : Uri;
     import dls.protocol.definitions : Position, Range, TextDocumentIdentifier,
         TextDocumentItem, VersionedTextDocumentIdentifier;
     import dls.protocol.interfaces : TextDocumentContentChangeEvent;
-    import std.utf : codeLength, toUTF8;
 
     private static Document[string] _documents;
     private wstring[] _lines;
@@ -90,6 +88,7 @@ class Document
     override string toString() const
     {
         import std.range : join;
+        import std.utf : toUTF8;
 
         return _lines.join().toUTF8();
     }
@@ -98,6 +97,7 @@ class Document
     {
         import std.algorithm : reduce;
         import std.range : iota;
+        import std.utf : codeLength;
 
         const linesBytes = reduce!((s, i) => s + codeLength!char(_lines[i]))(cast(size_t) 0,
                 iota(position.line));
@@ -108,6 +108,7 @@ class Document
     Range wordRangeAtByte(size_t bytePosition)
     {
         import std.algorithm : min;
+        import std.utf : codeLength;
 
         size_t i;
         size_t bytes;
@@ -127,7 +128,7 @@ class Document
     Range wordRangeAtLineAndByte(size_t lineNumber, size_t bytePosition)
     {
         import std.regex : matchAll, regex;
-        import std.utf : UTFException, validate;
+        import std.utf : UTFException, codeLength, toUTF8, validate;
 
         const line = _lines[lineNumber];
         size_t startCharacter;
@@ -187,7 +188,7 @@ class Document
     private wstring[] getText(in string text) const
     {
         import std.algorithm : endsWith;
-        import std.array : array, replaceFirst;
+        import std.array : replaceFirst;
         import std.encoding : getBOM;
         import std.string : splitLines;
         import std.typecons : Yes;

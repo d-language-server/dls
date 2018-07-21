@@ -21,7 +21,7 @@
 module dls.protocol.jsonrpc;
 
 import std.json : JSONValue;
-import std.typecons : Nullable, Tuple, nullable, tuple;
+import std.typecons : Nullable, Tuple, tuple;
 
 private enum jsonrpcVersion = "2.0";
 private enum eol = "\r\n";
@@ -53,6 +53,8 @@ class ResponseError
 
     static ResponseError fromErrorCode(ErrorCodes errorCode, JSONValue data)
     {
+        import std.typecons : nullable;
+
         auto response = new ResponseError();
         response.code = errorCode[0];
         response.message = errorCode[1];
@@ -92,6 +94,8 @@ class CancelParams
 
 void sendError(ErrorCodes error, RequestMessage request, JSONValue data)
 {
+    import std.typecons : nullable;
+
     if (request !is null)
     {
         send(request.id, Nullable!JSONValue(), ResponseError.fromErrorCode(error, data).nullable);
@@ -119,6 +123,7 @@ string send(string method, Nullable!JSONValue params = Nullable!JSONValue())
 string send(T)(string method, T params) if (!is(T : Nullable!JSONValue))
 {
     import dls.util.json : convertToJSON;
+    import std.typecons : nullable;
 
     return send(method, convertToJSON(params).nullable);
 }

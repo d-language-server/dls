@@ -23,7 +23,6 @@ module dls.util.uri;
 class Uri
 {
     import dls.protocol.definitions : DocumentUri;
-    import dls.util.path : normalized;
     import std.regex : regex;
 
     private static enum _reg = regex(
@@ -42,6 +41,7 @@ class Uri
 
     this(DocumentUri uri)
     {
+        import dls.util.path : normalized;
         import std.conv : to;
         import std.path : asNormalizedPath;
         import std.regex : matchAll;

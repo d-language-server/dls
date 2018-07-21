@@ -20,14 +20,15 @@
 
 module dls.util.logger;
 
-import dls.protocol.interfaces : InitializeParams, MessageType;
-import std.conv : to;
+import dls.protocol.interfaces : InitializeParams;
 
 shared auto logger = new shared LspLogger();
 private immutable int[InitializeParams.Trace] traceToType;
 
 shared static this()
 {
+    import dls.protocol.interfaces : MessageType;
+    import std.conv : to;
     import std.experimental.logger : LogLevel, globalLogLevel;
 
     globalLogLevel = LogLevel.off;
@@ -43,7 +44,7 @@ shared static this()
 
 private shared class LspLogger
 {
-    import std.format : format;
+    import dls.protocol.interfaces : MessageType;
 
     private int _messageType;
 
@@ -59,6 +60,8 @@ private shared class LspLogger
 
     void infof(Args...)(in string message, Args args) const
     {
+        import std.format : format;
+
         info(format(message, args));
     }
 
@@ -69,6 +72,8 @@ private shared class LspLogger
 
     void warningf(Args...)(in string message, Args args) const
     {
+        import std.format : format;
+
         warning(format(message, args));
     }
 
@@ -79,6 +84,8 @@ private shared class LspLogger
 
     void errorf(Args...)(in string message, Args args) const
     {
+        import std.format : format;
+
         error(format(message, args));
     }
 
@@ -88,6 +95,7 @@ private shared class LspLogger
         import dls.protocol.jsonrpc : send;
         import dls.protocol.messages.methods : Window;
         import std.datetime : Clock;
+        import std.format : format;
 
         if (type <= _messageType)
         {

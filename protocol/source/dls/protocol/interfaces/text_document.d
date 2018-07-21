@@ -22,12 +22,11 @@ module dls.protocol.interfaces.text_document;
 
 import dls.protocol.definitions;
 import dls.protocol.interfaces.client : TextDocumentRegistrationOptions;
-import dls.util.constructor : Constructor;
-import std.json : JSONValue;
-import std.typecons : Nullable;
 
 class DidOpenTextDocumentParams
 {
+    import dls.util.constructor : Constructor;
+
     TextDocumentItem textDocument;
 
     mixin Constructor!DidOpenTextDocumentParams;
@@ -35,6 +34,8 @@ class DidOpenTextDocumentParams
 
 class DidChangeTextDocumentParams
 {
+    import dls.util.constructor : Constructor;
+
     VersionedTextDocumentIdentifier textDocument;
     TextDocumentContentChangeEvent[] contentChanges;
 
@@ -43,6 +44,8 @@ class DidChangeTextDocumentParams
 
 class TextDocumentContentChangeEvent
 {
+    import std.typecons : Nullable;
+
     Nullable!Range range;
     Nullable!size_t rangeLength;
     string text;
@@ -62,6 +65,8 @@ class TextDocumentChangeRegistrationOptions : TextDocumentRegistrationOptions
 
 private class ParamsBase
 {
+    import dls.util.constructor : Constructor;
+
     TextDocumentIdentifier textDocument;
 
     mixin Constructor!ParamsBase;
@@ -81,11 +86,15 @@ enum TextDocumentSaveReason : uint
 
 class DidSaveTextDocumentParams : ParamsBase
 {
+    import std.typecons : Nullable;
+
     Nullable!string text;
 }
 
 class TextDocumentSaveRegistrationOptions : TextDocumentRegistrationOptions
 {
+    import std.typecons : Nullable;
+
     Nullable!bool includeText;
 
     this(Nullable!bool includeText = Nullable!bool.init)
@@ -110,11 +119,15 @@ class PublishDiagnosticsParams
 
 class CompletionParams : TextDocumentPositionParams
 {
+    import std.typecons : Nullable;
+
     Nullable!CompletionContext context;
 }
 
 class CompletionContext
 {
+    import std.typecons : Nullable;
+
     CompletionTriggerKind triggerKind;
     Nullable!string triggerCharacter;
 }
@@ -146,6 +159,9 @@ enum InsertTextFormat : uint
 
 class CompletionItem
 {
+    import std.json : JSONValue;
+    import std.typecons : Nullable;
+
     string label;
     Nullable!CompletionItemKind kind;
     Nullable!string detail;
@@ -222,6 +238,8 @@ enum CompletionItemKind : uint
 
 class CompletionRegistrationOptions : TextDocumentRegistrationOptions
 {
+    import std.typecons : Nullable;
+
     Nullable!(string[]) triggerCharacters;
     Nullable!bool resolveProvider;
 
@@ -235,6 +253,8 @@ class CompletionRegistrationOptions : TextDocumentRegistrationOptions
 
 class Hover
 {
+    import std.typecons : Nullable;
+
     MarkupContent contents;
     Nullable!Range range;
 
@@ -247,6 +267,8 @@ class Hover
 
 class SignatureHelp
 {
+    import std.typecons : Nullable;
+
     SignatureInformation[] signatures;
     Nullable!double activeSignature;
     Nullable!double activeParameter;
@@ -263,12 +285,16 @@ class SignatureHelp
 
 private class InformationBase
 {
+    import std.typecons : Nullable;
+
     string label;
     Nullable!string documentation;
 }
 
 class SignatureInformation : InformationBase
 {
+    import std.typecons : Nullable;
+
     Nullable!(ParameterInformation[]) parameters;
 
     this(Nullable!(ParameterInformation[]) parameters = Nullable!(ParameterInformation[]).init)
@@ -281,6 +307,8 @@ alias ParameterInformation = InformationBase;
 
 class SignatureHelpRegistrationOptions : TextDocumentRegistrationOptions
 {
+    import std.typecons : Nullable;
+
     Nullable!(string[]) triggerCharacters;
 
     this(Nullable!(string[]) triggerCharacters = Nullable!(string[]).init)
@@ -291,6 +319,8 @@ class SignatureHelpRegistrationOptions : TextDocumentRegistrationOptions
 
 class ReferenceParams : TextDocumentPositionParams
 {
+    import dls.util.constructor : Constructor;
+
     ReferenceContext context;
 
     mixin Constructor!ReferenceParams;
@@ -303,6 +333,8 @@ class ReferenceContext
 
 class DocumentHighlight
 {
+    import std.typecons : Nullable;
+
     Range range;
     Nullable!DocumentHighlightKind kind;
 
@@ -325,6 +357,8 @@ alias DocumentSymbolParams = ParamsBase;
 
 class SymbolInformation
 {
+    import std.typecons : Nullable;
+
     string name;
     SymbolKind kind;
     Location location;
@@ -373,6 +407,8 @@ enum SymbolKind : uint
 
 class CodeActionParams : ParamsBase
 {
+    import dls.util.constructor : Constructor;
+
     Range range;
     CodeActionContext context;
 
@@ -391,12 +427,16 @@ enum CodeActionKind : string
 
 class CodeActionContext
 {
+    import std.typecons : Nullable;
+
     Diagnostic[] diagnostics;
     Nullable!(CodeActionKind[]) only;
 }
 
 class CodeAction
 {
+    import std.typecons : Nullable;
+
     string title;
     Nullable!CodeActionKind kind;
     Nullable!(Diagnostic[]) diagnostics;
@@ -408,6 +448,9 @@ alias CodeLensParams = ParamsBase;
 
 class CodeLens
 {
+    import std.json : JSONValue;
+    import std.typecons : Nullable;
+
     Range range;
     Nullable!Command command;
     Nullable!JSONValue data;
@@ -423,6 +466,8 @@ class CodeLens
 
 class CodeLensRegistrationOptions : TextDocumentRegistrationOptions
 {
+    import std.typecons : Nullable;
+
     Nullable!bool resolveProvider;
 
     this(Nullable!bool resolveProvider = Nullable!bool.init)
@@ -435,6 +480,8 @@ alias DocumentLinkParams = ParamsBase;
 
 class DocumentLink
 {
+    import std.typecons : Nullable;
+
     Range range;
     Nullable!DocumentUri target;
 
@@ -447,6 +494,8 @@ class DocumentLink
 
 class DocumentLinkRegistrationOptions : TextDocumentRegistrationOptions
 {
+    import std.typecons : Nullable;
+
     Nullable!bool resolveProvider;
 
     this(Nullable!bool resolveProvider = Nullable!bool.init)
@@ -457,6 +506,8 @@ class DocumentLinkRegistrationOptions : TextDocumentRegistrationOptions
 
 class DocumentColorParams
 {
+    import dls.util.constructor : Constructor;
+
     TextDocumentIdentifier textDocument;
 
     mixin Constructor!DocumentColorParams;
@@ -492,6 +543,8 @@ class Color
 
 class ColorPresentationParams
 {
+    import dls.util.constructor : Constructor;
+
     TextDocumentIdentifier textDocument;
     Color color;
     Range range;
@@ -501,6 +554,8 @@ class ColorPresentationParams
 
 class ColorPresentation
 {
+    import std.typecons : Nullable;
+
     string label;
     Nullable!TextEdit textEdit;
     Nullable!(TextEdit[]) additionalTextEdits;
@@ -516,6 +571,8 @@ class ColorPresentation
 
 class DocumentFormattingParams : ParamsBase
 {
+    import dls.util.constructor : Constructor;
+
     FormattingOptions options;
 
     mixin Constructor!DocumentFormattingParams;
@@ -529,6 +586,8 @@ class FormattingOptions
 
 class DocumentRangeFormattingParams : DocumentFormattingParams
 {
+    import dls.util.constructor : Constructor;
+
     Range range;
 
     mixin Constructor!DocumentRangeFormattingParams;
@@ -536,6 +595,8 @@ class DocumentRangeFormattingParams : DocumentFormattingParams
 
 class DocumentOnTypeFormattingParams : DocumentFormattingParams
 {
+    import dls.util.constructor : Constructor;
+
     Position position;
     string ch;
 
@@ -544,6 +605,8 @@ class DocumentOnTypeFormattingParams : DocumentFormattingParams
 
 class DocumentOnTypeFormattingRegistrationOptions : TextDocumentRegistrationOptions
 {
+    import std.typecons : Nullable;
+
     string firstTriggerCharacter;
     Nullable!(string[]) moreTriggerCharacter;
 
@@ -557,6 +620,8 @@ class DocumentOnTypeFormattingRegistrationOptions : TextDocumentRegistrationOpti
 
 class RenameParams : ParamsBase
 {
+    import dls.util.constructor : Constructor;
+
     Position position;
     string newName;
 

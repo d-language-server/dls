@@ -20,11 +20,9 @@
 
 module dls.server;
 
-import dls.protocol.handlers;
-import dls.protocol.jsonrpc;
-
 shared static this()
 {
+    import dls.protocol.handlers : isHandler, pushHandler;
     import std.algorithm : map;
     import std.array : join, split;
     import std.meta : AliasSeq;
@@ -59,10 +57,6 @@ shared static this()
 abstract class Server
 {
     import dls.protocol.interfaces : InitializeParams;
-    import dls.util.logger : logger;
-    import std.algorithm : find, findSplit;
-    import std.json : JSONValue;
-    import std.typecons : Nullable, nullable;
 
     static bool initialized = false;
     static bool shutdown = false;
@@ -76,6 +70,8 @@ abstract class Server
 
     @property static void initState(InitializeParams params)
     {
+        import dls.util.logger : logger;
+
         _initState = params;
 
         debug
@@ -96,6 +92,8 @@ abstract class Server
 
     static void loop()
     {
+        import dls.util.logger : logger;
+        import std.algorithm : findSplit;
         import std.array : appender;
         import std.conv : to;
         import std.stdio : stdin;
@@ -168,10 +166,14 @@ abstract class Server
 
     private static void handleJSON(in char[] content)
     {
-        import dls.protocol.jsonrpc : send, sendError;
+        import dls.protocol.handlers : HandlerNotFoundException,
+            NotificationHandler, RequestHandler, ResponseHandler, handler;
+        import dls.protocol.jsonrpc : ErrorCodes, NotificationMessage,
+            RequestMessage, ResponseMessage, send, sendError;
         import dls.util.json : convertFromJSON;
+        import dls.util.logger : logger;
         import std.algorithm : canFind;
-        import std.json : JSONException, parseJSON;
+        import std.json : JSONException, JSONValue, parseJSON;
 
         RequestMessage request;
 

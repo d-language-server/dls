@@ -20,10 +20,10 @@
 
 module dls.protocol.interfaces.dls;
 
-import dls.util.constants : Tr;
-
 class TranslationParams
 {
+    import dls.util.constants : Tr;
+
     string tr;
 
     this(Tr tr = Tr._)
@@ -36,6 +36,8 @@ class TranslationParams
 
 class DlsUpgradeSizeParams : TranslationParams
 {
+    import dls.util.constants : Tr;
+
     size_t size;
 
     this(Tr tr = Tr._, size_t size = size_t.init)

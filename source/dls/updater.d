@@ -21,10 +21,7 @@
 module dls.updater;
 
 import dls.bootstrap : repoBase;
-import dls.protocol.interfaces : InitializeParams;
-import std.file : FileException;
 import std.format : format;
-import std.json : parseJSON;
 
 private enum descriptionJson = import("description.json");
 private immutable changelogUrl = format!"https://github.com/%s/dls/blob/master/CHANGELOG.md"(
@@ -33,7 +30,7 @@ private immutable changelogUrl = format!"https://github.com/%s/dls/blob/master/C
 void cleanup()
 {
     import dls.bootstrap : dubBinDir;
-    import std.file : SpanMode, dirEntries, remove, rmdirRecurse;
+    import std.file : FileException, SpanMode, dirEntries, remove, rmdirRecurse;
     import std.path : baseName;
     import std.regex : matchFirst;
 
@@ -107,6 +104,8 @@ void update()
     import std.algorithm : stripLeft;
     import std.concurrency : ownerTid, receiveOnly, register, send, thisTid;
     import std.datetime : Clock, SysTime;
+    import std.file : FileException;
+    import std.json : parseJSON;
     import std.net.curl : get;
 
     const latestRelease = parseJSON(get(format!apiEndpoint("releases/latest")));
@@ -216,6 +215,7 @@ void update()
 @property private string currentVersion()
 {
     import std.algorithm : find;
+    import std.json : parseJSON;
 
     const desc = parseJSON(descriptionJson);
     return desc["packages"].array.find!(p => p["name"] == desc["rootPackage"])[0]["version"].str;

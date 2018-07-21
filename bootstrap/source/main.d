@@ -40,7 +40,6 @@ int main(string[] args)
     import std.conv : to;
     import std.file : thisExePath;
     import std.format : format;
-    import std.json : JSONValue;
     import std.getopt : getopt, defaultGetoptPrinter;
     import std.path : dirName;
     import std.stdio : stderr, stdout;
@@ -102,7 +101,6 @@ int main(string[] args)
             stderr.flush();
         }
 
-        const dlsDir = thisExePath().dirName.dirName;
         const printSize = progress ? (size_t size) {
             stderr.rawWrite(size.to!string ~ '\n');
             stderr.flush();
@@ -113,7 +111,7 @@ int main(string[] args)
         } : null;
 
         (method == Method.download || (method == Method.auto_ && canDownloadDls)) ? downloadDls(printSize,
-                printSize, printExtract) : buildDls(dlsDir);
+                printSize, printExtract) : buildDls(thisExePath.dirName.dirName);
         output = linkDls();
     }
 

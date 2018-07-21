@@ -22,16 +22,17 @@ module dls.protocol.messages.text_document;
 
 import dls.protocol.definitions;
 import dls.protocol.interfaces.text_document;
-import dls.protocol.jsonrpc : send;
-import dls.protocol.messages.methods : TextDocument;
-import dls.tools.tools : Tools;
-import dls.util.document : Document;
-import dls.util.logger : logger;
 import dls.util.uri : Uri;
 import std.typecons : Nullable;
 
 void didOpen(DidOpenTextDocumentParams params)
 {
+    import dls.protocol.jsonrpc : send;
+    import dls.protocol.messages.methods : TextDocument;
+    import dls.tools.tools : Tools;
+    import dls.util.document : Document;
+    import dls.util.logger : logger;
+
     if (params.textDocument.languageId == "d")
     {
         auto uri = new Uri(params.textDocument.uri);
@@ -44,6 +45,9 @@ void didOpen(DidOpenTextDocumentParams params)
 
 void didChange(DidChangeTextDocumentParams params)
 {
+    import dls.util.document : Document;
+    import dls.util.logger : logger;
+
     auto uri = new Uri(params.textDocument.uri);
     logger.infof("Document changed: %s", uri.path);
     Document.change(params.textDocument, params.contentChanges);
@@ -60,6 +64,12 @@ TextEdit[] willSaveWaitUntil(WillSaveTextDocumentParams params)
 
 void didSave(DidSaveTextDocumentParams params)
 {
+    import dls.protocol.jsonrpc : send;
+    import dls.protocol.messages.methods : TextDocument;
+    import dls.tools.tools : Tools;
+    import dls.util.document : Document;
+    import dls.util.logger : logger;
+
     auto uri = new Uri(params.textDocument.uri);
 
     if (Document[uri])
@@ -72,6 +82,11 @@ void didSave(DidSaveTextDocumentParams params)
 
 void didClose(DidCloseTextDocumentParams params)
 {
+    import dls.protocol.jsonrpc : send;
+    import dls.protocol.messages.methods : TextDocument;
+    import dls.util.document : Document;
+    import dls.util.logger : logger;
+
     auto uri = new Uri(params.textDocument.uri);
     logger.infof("Document closed: %s", uri.path);
     Document.close(params.textDocument);
@@ -80,17 +95,23 @@ void didClose(DidCloseTextDocumentParams params)
 
 CompletionItem[] completion(CompletionParams params)
 {
+    import dls.tools.tools : Tools;
+
     return Tools.symbolTool.completion(new Uri(params.textDocument.uri), params.position);
 }
 
 @("completionItem", "resolve")
 CompletionItem completionItem_resolve(CompletionItem item)
 {
+    import dls.tools.tools : Tools;
+
     return Tools.symbolTool.completionResolve(item);
 }
 
 Hover hover(TextDocumentPositionParams params)
 {
+    import dls.tools.tools : Tools;
+
     return Tools.symbolTool.hover(new Uri(params.textDocument.uri), params.position);
 }
 
@@ -101,6 +122,8 @@ SignatureHelp signatureHelp(TextDocumentPositionParams params)
 
 Location definition(TextDocumentPositionParams params)
 {
+    import dls.tools.tools : Tools;
+
     return Tools.symbolTool.definition(new Uri(params.textDocument.uri), params.position);
 }
 
@@ -121,11 +144,15 @@ Location[] references(ReferenceParams params)
 
 DocumentHighlight[] documentHighlight(TextDocumentPositionParams params)
 {
+    import dls.tools.tools : Tools;
+
     return Tools.symbolTool.highlight(new Uri(params.textDocument.uri), params.position);
 }
 
 SymbolInformation[] documentSymbol(DocumentSymbolParams params)
 {
+    import dls.tools.tools : Tools;
+
     return Tools.symbolTool.symbol("", new Uri(params.textDocument.uri));
 }
 
@@ -168,6 +195,9 @@ ColorPresentation[] colorPresentation(ColorPresentationParams params)
 
 TextEdit[] formatting(DocumentFormattingParams params)
 {
+    import dls.tools.tools : Tools;
+    import dls.util.logger : logger;
+
     auto uri = new Uri(params.textDocument.uri);
     logger.infof("Formatting %s", uri.path);
     return Tools.formatTool.formatting(uri, params.options);

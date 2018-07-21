@@ -20,12 +20,10 @@
 
 module dls.util.json;
 
-import std.algorithm : map;
-import std.array : array;
-import std.conv : to;
-import std.json : JSONException, JSON_TYPE, JSONValue;
-import std.traits;
-import std.typecons : Nullable, nullable;
+import std.json : JSONValue;
+import std.traits : isArray, isAssociativeArray, isBoolean, isNumeric,
+    isSomeChar, isSomeString;
+import std.typecons : Nullable;
 
 /++
 Converts a `JSONValue` to an object of type `T` by filling its fields with the JSON's fields.
@@ -33,6 +31,9 @@ Converts a `JSONValue` to an object of type `T` by filling its fields with the J
 T convertFromJSON(T)(JSONValue json)
         if ((is(T == class) || is(T == struct)) && !is(T == JSONValue))
 {
+    import std.json : JSONException, JSON_TYPE;
+    import std.traits : isSomeFunction, isType;
+
     static if (is(T == class))
     {
         auto result = new T();
@@ -125,6 +126,9 @@ unittest
 
 N convertFromJSON(N : Nullable!T, T)(JSONValue json)
 {
+    import std.json : JSON_TYPE;
+    import std.typecons : nullable;
+
     return (json.type == JSON_TYPE.NULL) ? N() : convertFromJSON!T(json).nullable;
 }
 
@@ -140,6 +144,8 @@ unittest
 
 T convertFromJSON(T : JSONValue)(JSONValue json)
 {
+    import std.typecons : nullable;
+
     return json.nullable;
 }
 
@@ -150,6 +156,9 @@ unittest
 
 T convertFromJSON(T)(JSONValue json) if (isNumeric!T)
 {
+    import std.conv : to;
+    import std.json : JSONException, JSON_TYPE;
+
     switch (json.type)
     {
     case JSON_TYPE.NULL, JSON_TYPE.FALSE:
@@ -191,6 +200,8 @@ unittest
 
 T convertFromJSON(T)(JSONValue json) if (isBoolean!T)
 {
+    import std.json : JSON_TYPE;
+
     switch (json.type)
     {
     case JSON_TYPE.NULL, JSON_TYPE.FALSE:
@@ -231,6 +242,9 @@ unittest
 T convertFromJSON(T)(JSONValue json)
         if (isSomeChar!T || isSomeString!T || is(T : string) || is(T : wstring) || is(T : dstring))
 {
+    import std.conv : to;
+    import std.json : JSONException, JSON_TYPE;
+
     switch (json.type)
     {
         static if (!is(T == enum))
@@ -301,6 +315,11 @@ unittest
 T convertFromJSON(T : U[], U)(JSONValue json)
         if (isArray!T && !isSomeString!T && !is(T : string) && !is(T : wstring) && !is(T : dstring))
 {
+    import std.algorithm : map;
+    import std.array : array;
+    import std.conv : to;
+    import std.json : JSONException, JSON_TYPE;
+
     switch (json.type)
     {
     case JSON_TYPE.NULL, JSON_TYPE.FALSE, JSON_TYPE.TRUE:
@@ -338,6 +357,9 @@ unittest
 
 T convertFromJSON(T : U[K], U, K)(JSONValue json) if (isAssociativeArray!T)
 {
+    import std.conv : to;
+    import std.json : JSONException, JSON_TYPE;
+
     U[K] result;
 
     switch (json.type)
@@ -383,6 +405,9 @@ unittest
 Nullable!JSONValue convertToJSON(T)(T value)
         if ((is(T == class) || is(T == struct)) && !is(T == JSONValue))
 {
+    import std.traits : isSomeFunction, isType;
+    import std.typecons : nullable;
+
     static if (is(T == class))
     {
         if (value is null)
@@ -468,6 +493,8 @@ unittest
 Nullable!JSONValue convertToJSON(T)(T value)
         if ((!is(T == class) && !is(T == struct)) || is(T == JSONValue))
 {
+    import std.typecons : nullable;
+
     return JSONValue(value).nullable;
 }
 
@@ -486,8 +513,12 @@ unittest
 Nullable!JSONValue convertToJSON(T : U[], U)(T value)
         if (isArray!T && !isSomeString!T && !is(T : string) && !is(T : wstring) && !is(T : dstring))
 {
+    import std.algorithm : map;
+    import std.array : array;
+    import std.typecons : nullable;
+
     return JSONValue(value.map!(item => convertToJSON(item))()
-            .map!(json => json.isNull ? JSONValue(null) : json)().array).nullable;
+            .map!(json => json.isNull ? JSONValue(null) : json).array).nullable;
 }
 
 unittest
@@ -499,6 +530,8 @@ unittest
 Nullable!JSONValue convertToJSON(T : U[string], U)(T value)
         if (isAssociativeArray!T)
 {
+    import std.typecons : nullable;
+
     auto result = JSONValue();
 
     foreach (key; value.keys)
