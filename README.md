@@ -174,3 +174,10 @@ interface DlsUpgradeSizeParams extends TranslationParams {
     size: number;
 }
 ```
+
+## Contributing
+
+### Translations
+
+The file `i18n/data/translations.json` contains localization strings.
+Adding new strings is straightforward, simply add new entries in the `title` objects with the locale as key and the translation as value.

@@ -4,9 +4,19 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+### 0.7.0
+- __Changed license to GPLv3 to comply with DCD being itself under GPLv3__
+- Added system locale detection
+- Added French locale
+- Fixed `Upgrade selections` message being shown when removing `dub.json`/`dub.sdl`
+- Updated libraries:
+    - `dsymbol`: `0.3.10` => `0.3.12`
+
 #### 0.6.11
 - Fixed `dls:bootstrap` exiting before symlink was created on Windows
 - Fixed selections upgrade message being show upon deleting `dub.selections.json`
+- Updated libraries:
+    - `libdparse`: `0.8.7` => `0.8.8`
 
 #### 0.6.10
 - Fixed crash when importing dependencies
