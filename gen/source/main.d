@@ -32,8 +32,12 @@ void main()
     immutable trModulePath = buildNormalizedPath(i18nDir, "source", "dls", "util", "constants.d");
     auto translations = parseJSON(readText(translationsPath));
 
-    write(trModulePath, "module dls.util.constants;\n\n");
-    append(trModulePath, "enum Tr : string\n{\n");
+    write(trModulePath, q{module dls.util.constants;});
+    append(trModulePath, "\n\n");
+    append(trModulePath, q{enum Tr : string});
+    append(trModulePath, "\n{\n");
+    append(trModulePath, q{_ = "### BAD TRANSLATION KEY ###",});
+    append(trModulePath, "\n");
 
     foreach (key; sort(translations.object.keys))
     {

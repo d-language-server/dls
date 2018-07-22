@@ -1,9 +1,4 @@
 {
-    "_": {
-        "title": {
-            "en": "### BAD TRANSLATION KEY ###"
-        }
-    },
     "app.buildError": {
         "messageType": 1,
         "title": {
