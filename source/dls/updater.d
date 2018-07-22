@@ -163,7 +163,7 @@ void update()
         }
         catch (Exception e)
         {
-            logger.warningf("Could not download DLS: %s", e.message);
+            logger.errorf("Could not download DLS: %s", e.message);
         }
     }
 
