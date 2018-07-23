@@ -1,9 +1,9 @@
 {
 	"fileVersion": 1,
 	"versions": {
-		"dcd": "0.9.9",
+		"dcd": "0.9.10",
 		"dfmt": "0.8.2",
-		"dscanner": "0.5.7",
+		"dscanner": "0.5.8",
 		"dsymbol": "0.3.12",
 		"dub": "1.10.0",
 		"emsi_containers": "0.8.0-alpha.9",

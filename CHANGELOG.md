@@ -4,6 +4,11 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.7.1
+- Updated libraries:
+    - `dcd`: `0.9.9` => `0.9.10`
+    - `dscanner`: `0.5.7` => `0.5.8`
+
 ### 0.7.0
 - __Changed license to GPLv3 to comply with DCD being itself under GPLv3__
 - Added system locale detection
