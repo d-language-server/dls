@@ -168,7 +168,7 @@ void useCompatSymbolKinds(SymbolKind[] symbols = [])
 
 class SymbolTool : Tool
 {
-    import dcd.common.messages : AutocompleteRequest;
+    import dcd.common.messages : AutocompleteRequest, RequestKind;
     import dls.protocol.definitions : Location, MarkupContent, Position;
     import dls.protocol.interfaces : CompletionItem, DocumentHighlight, Hover,
         SymbolInformation;
@@ -502,8 +502,7 @@ class SymbolTool : Tool
 
     CompletionItem[] completion(Uri uri, Position position)
     {
-        import dcd.common.messages : AutocompleteResponse, CompletionType,
-            RequestKind;
+        import dcd.common.messages : AutocompleteResponse, CompletionType;
         import dcd.server.autocomplete : complete;
         import dls.util.logger : logger;
         import std.algorithm : chunkBy, filter, map, reduce, sort, uniq;
@@ -515,9 +514,7 @@ class SymbolTool : Tool
         logger.infof("Fetching completions for %s at position %s,%s", uri.path,
                 position.line, position.character);
 
-        auto request = getPreparedRequest(uri, position);
-        request.kind = RequestKind.autocomplete;
-
+        auto request = getPreparedRequest(uri, position, RequestKind.autocomplete);
         static bool compareCompletionsLess(AutocompleteResponse.Completion a,
                 AutocompleteResponse.Completion b)
         {
@@ -595,7 +592,6 @@ class SymbolTool : Tool
 
     Hover hover(Uri uri, Position position)
     {
-        import dcd.common.messages : RequestKind;
         import dcd.server.autocomplete : getDoc;
         import dls.util.logger : logger;
         import std.algorithm : filter, map, reduce, sort, uniq;
@@ -604,8 +600,7 @@ class SymbolTool : Tool
         logger.infof("Fetching documentation for %s at position %s,%s",
                 uri.path, position.line, position.character);
 
-        auto request = getPreparedRequest(uri, position);
-        request.kind = RequestKind.doc;
+        auto request = getPreparedRequest(uri, position, RequestKind.doc);
         auto completions = getRelevantCaches(uri).map!(cache => getDoc(request,
                 *cache).completions)
             .reduce!q{a ~ b}
@@ -620,7 +615,7 @@ class SymbolTool : Tool
 
     Location definition(Uri uri, Position position)
     {
-        import dcd.common.messages : AutocompleteResponse, RequestKind;
+        import dcd.common.messages : AutocompleteResponse;
         import dcd.server.autocomplete : findDeclaration;
         import dls.util.document : Document;
         import dls.util.logger : logger;
@@ -630,8 +625,7 @@ class SymbolTool : Tool
         logger.infof("Finding declaration for %s at position %s,%s", uri.path,
                 position.line, position.character);
 
-        auto request = getPreparedRequest(uri, position);
-        request.kind = RequestKind.symbolLocation;
+        auto request = getPreparedRequest(uri, position, RequestKind.symbolLocation);
         AutocompleteResponse[] results;
 
         foreach (cache; getRelevantCaches(uri))
@@ -656,7 +650,6 @@ class SymbolTool : Tool
 
     DocumentHighlight[] highlight(Uri uri, Position position)
     {
-        import dcd.common.messages : RequestKind;
         import dcd.server.autocomplete.localuse : findLocalUse;
         import dls.protocol.interfaces : DocumentHighlightKind;
         import dls.util.document : Document;
@@ -676,8 +669,7 @@ class SymbolTool : Tool
                         && a.range.start.character < b.range.start.character);
         }
 
-        auto request = getPreparedRequest(uri, position);
-        request.kind = RequestKind.localUse;
+        auto request = getPreparedRequest(uri, position, RequestKind.localUse);
         auto result = new RedBlackTree!(DocumentHighlight, highlightLess, false);
 
         foreach (cache; getRelevantCaches(uri))
@@ -781,7 +773,7 @@ class SymbolTool : Tool
         return new MarkupContent(MarkupKind.markdown, result.data);
     }
 
-    private static AutocompleteRequest getPreparedRequest(Uri uri, Position position)
+    private static AutocompleteRequest getPreparedRequest(Uri uri, Position position, RequestKind kind)
     {
         import dls.util.document : Document;
 
@@ -789,6 +781,7 @@ class SymbolTool : Tool
         auto document = Document[uri];
 
         request.fileName = uri.path;
+        request.kind = kind;
         request.sourceCode = cast(ubyte[]) document.toString();
         request.cursorPosition = document.byteAtPosition(position);
 
