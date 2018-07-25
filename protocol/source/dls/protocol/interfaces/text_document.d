@@ -355,6 +355,19 @@ enum DocumentHighlightKind : uint
 
 alias DocumentSymbolParams = ParamsBase;
 
+class DocumentSymbol
+{
+    import std.typecons : Nullable;
+
+    string name;
+    Nullable!string detail;
+    SymbolKind kind;
+    Nullable!bool deprecated_;
+    Range range;
+    Range selectionRange;
+    Nullable!(DocumentSymbol[]) children;
+}
+
 class SymbolInformation
 {
     import std.typecons : Nullable;
