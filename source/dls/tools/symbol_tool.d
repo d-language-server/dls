@@ -199,7 +199,8 @@ class SymbolTool : Tool
     else version (Posix)
     {
         private static immutable _compilerConfigPaths = [
-            "/etc/dmd.conf", "/usr/local/etc/dmd.conf", "/etc/ldc2.conf",
+            "/Library/D/dmd/bin/dmd.conf", "/etc/dmd.conf", "/usr/local/etc/dmd.conf",
+            "/usr/local/bin/dmd.conf", "/etc/ldc2.conf",
             "/usr/local/etc/ldc2.conf", "/home/linuxbrew/.linuxbrew/etc/dmd.conf"
         ];
     }
@@ -213,11 +214,12 @@ class SymbolTool : Tool
 
     @property private string[] defaultImportPaths()
     {
-        import std.algorithm : each, sort, uniq;
+        import std.algorithm : each, filter, sort, splitter, uniq;
         import std.array : array, replace;
         import std.conv : to;
         import std.file : FileException, exists, readText;
         import std.path : asNormalizedPath, buildNormalizedPath, dirName;
+        import std.process : environment;
         import std.regex : matchAll;
 
         string[] paths;
@@ -240,23 +242,7 @@ class SymbolTool : Tool
             }
         }
 
-        version (Windows)
-        {
-            import std.algorithm : splitter;
-            import std.process : environment;
-
-            if (paths.length == 0)
-            {
-                foreach (path; splitter(environment["PATH"], ';'))
-                {
-                    if (exists(buildNormalizedPath(path, "ldc2.exe")))
-                    {
-                        paths = [buildNormalizedPath(path, "..", "import")];
-                    }
-                }
-            }
-        }
-        else version (linux)
+        version (linux)
         {
             import std.algorithm : map;
 
@@ -283,7 +269,29 @@ class SymbolTool : Tool
             }
         }
 
-        return paths.sort().uniq().array;
+        version (Windows)
+        {
+            const pathSep = ';';
+            const ldc = "ldc2.exe";
+        }
+        else
+        {
+            const pathSep = ':';
+            const ldc = "ldc2";
+        }
+
+        if (paths.length == 0)
+        {
+            foreach (path; splitter(environment["PATH"], pathSep))
+            {
+                if (exists(buildNormalizedPath(path, ldc)))
+                {
+                    paths = [buildNormalizedPath(path, "..", "import")];
+                }
+            }
+        }
+
+        return paths.sort().uniq().filter!exists.array;
     }
 
     this()
