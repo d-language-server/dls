@@ -4,6 +4,9 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.7.2
+- Enhanced druntime/phobos paths search on macOS
+
 #### 0.7.1
 - Updated libraries:
     - `dcd`: `0.9.9` => `0.9.10`
