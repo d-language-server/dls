@@ -99,8 +99,19 @@ class Document
         import std.range : iota;
         import std.utf : codeLength;
 
+        if (position.line >= _lines.length)
+        {
+            return 0;
+        }
+
         const linesBytes = reduce!((s, i) => s + codeLength!char(_lines[i]))(cast(size_t) 0,
                 iota(position.line));
+
+        if (position.character >= _lines[position.line].length)
+        {
+            return 0;
+        }
+
         const characterBytes = codeLength!char(_lines[position.line][0 .. position.character]);
         return linesBytes + characterBytes;
     }
@@ -127,12 +138,13 @@ class Document
 
     Range wordRangeAtLineAndByte(size_t lineNumber, size_t bytePosition)
     {
+        import std.algorithm : min;
         import std.regex : matchAll, regex;
         import std.utf : UTFException, codeLength, toUTF8, validate;
 
-        const line = _lines[lineNumber];
+        const line = _lines[min(lineNumber, $ - 1)];
         size_t startCharacter;
-        const lineSlice = line.toUTF8()[0 .. bytePosition];
+        const lineSlice = line.toUTF8()[0 .. min(bytePosition, $)];
 
         try
         {
