@@ -3,7 +3,7 @@
 	"authors": [
 		"Laurent Tréguier"
 	],
-	"description": "DLS utilities",
+	"description": "DLS translation utilities",
 	"copyright": "Copyright © 2018, Laurent Tréguier",
 	"license": "GPL-3.0 or later",
 	"stringImportPaths": [
@@ -13,6 +13,6 @@
 		"dls:protocol": "*"
 	},
 	"preGenerateCommands": [
-		"dub run dls:gen"
+		"dub run --quiet dls:gen"
 	]
 }

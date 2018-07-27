@@ -3,7 +3,7 @@
 	"authors": [
 		"Laurent Tréguier"
 	],
-	"description": "LSP interfaces implementation",
+	"description": "LSP interfaces implementations",
 	"copyright": "Copyright © 2018, Laurent Tréguier",
 	"license": "GPL-3.0 or later"
 }
