@@ -391,7 +391,7 @@ class SymbolTool : Tool
             auto paths = reduce!(q{a ~ b})(cast(string[])[],
                     dep.recipe.buildSettings.sourcePaths.values);
             importDirectories!true(dep.name,
-                    paths.map!(path => buildNormalizedPath(dep.path.toString(), path)).array, true);
+                    paths.map!(path => buildNormalizedPath(dep.path.toString(), path)).array);
         }
     }
 
@@ -691,13 +691,11 @@ class SymbolTool : Tool
         return result.array;
     }
 
-    package void importDirectories(bool isLibrary)(string root, string[] paths, bool refresh = false)
+    package void importDirectories(bool isLibrary)(string root, string[] paths)
     {
         import dls.util.logger : logger;
         import dsymbol.modulecache : ASTAllocator;
         import std.algorithm : canFind;
-
-        logger.infof(`Importing into cache "%s": %s`, root, paths);
 
         static if (isLibrary)
         {
@@ -708,12 +706,7 @@ class SymbolTool : Tool
             alias caches = _workspaceCaches;
         }
 
-        if (refresh && (root in caches))
-        {
-            caches.remove(root);
-        }
-
-        if (!(root in caches))
+        if (root !in caches)
         {
             caches[root] = new ModuleCache(new ASTAllocator());
         }
@@ -722,6 +715,8 @@ class SymbolTool : Tool
         {
             if (!caches[root].getImportPaths().canFind(path))
             {
+                logger.infof(`Importing into cache "%s": %s`, root, path);
+
                 caches[root].addImportPaths([path]);
             }
         }
@@ -781,7 +776,8 @@ class SymbolTool : Tool
         return new MarkupContent(MarkupKind.markdown, result.data);
     }
 
-    private static AutocompleteRequest getPreparedRequest(Uri uri, Position position, RequestKind kind)
+    private static AutocompleteRequest getPreparedRequest(Uri uri,
+            Position position, RequestKind kind)
     {
         import dls.util.document : Document;
 
