@@ -20,9 +20,14 @@
 
 module dls.tools.symbol_tool;
 
-import dls.protocol.interfaces : CompletionItemKind, SymbolKind;
+import dls.protocol.interfaces : CompletionItemKind, SymbolKind,
+    SymbolInformation;
 import dls.tools.tool : Tool;
+import dparse.ast;
 import dsymbol.symbol : CompletionKind;
+import std.container : RedBlackTree;
+
+alias SymbolInformationTree = RedBlackTree!(SymbolInformation, q{a.name > b.name}, true);
 
 private string[string] macros;
 private CompletionItemKind[CompletionKind] completionKinds;
@@ -170,8 +175,7 @@ class SymbolTool : Tool
 {
     import dcd.common.messages : AutocompleteRequest, RequestKind;
     import dls.protocol.definitions : Location, MarkupContent, Position;
-    import dls.protocol.interfaces : CompletionItem, DocumentHighlight, Hover,
-        SymbolInformation;
+    import dls.protocol.interfaces : CompletionItem, DocumentHighlight, Hover;
     import dls.util.uri : Uri;
     import dsymbol.modulecache : ModuleCache;
     import dub.dub : Dub;
@@ -425,23 +429,22 @@ class SymbolTool : Tool
         }, uri.toString());
     }
 
-    SymbolInformation[] symbol(string query, Uri uri = null)
+    SymbolInformation[] symbol(string query)
     {
         import dls.util.document : Document;
         import dls.util.logger : logger;
         import dsymbol.string_interning : internString;
         import dsymbol.symbol : DSymbol;
+        import std.algorithm : canFind, map;
         import std.array : array;
-        import std.container : RedBlackTree;
         import std.regex : matchFirst;
         import std.typecons : nullable;
         import std.uni : toUpper;
 
-        logger.infof(`Fetching symbols from %s with query "%s"`, uri is null
-                ? "workspace" : uri.path, query);
+        logger.infof(`Fetching symbols from workspace with query "%s"`, query);
 
         const simpleQuery = query.toUpper();
-        auto result = new RedBlackTree!(SymbolInformation, q{a.name > b.name}, true);
+        auto result = new SymbolInformationTree();
 
         void collectSymbolInformations(Uri symbolUri, const(DSymbol)* symbol,
                 string containerName = "")
@@ -485,10 +488,14 @@ class SymbolTool : Tool
 
         foreach (cache; _workspaceCaches.byValue)
         {
-            auto moduleUris = uri is null ? getModuleUris(cache) : [uri];
-
-            foreach (moduleUri; moduleUris)
+            foreach (moduleUri; getModuleUris(cache))
             {
+                if (Document.uris.map!q{a.path}.canFind(moduleUri.path))
+                {
+                    result.insert(symbol(moduleUri, query));
+                    continue;
+                }
+
                 auto moduleSymbol = cache.cacheModule(moduleUri.path);
 
                 if (moduleSymbol !is null)
@@ -504,6 +511,35 @@ class SymbolTool : Tool
                 }
             }
         }
+
+        return result.array;
+    }
+
+    SymbolInformation[] symbol(Uri uri, string query)
+    {
+        import dls.util.document : Document;
+        import dls.util.logger : logger;
+        import dparse.lexer : LexerConfig, StringBehavior, StringCache,
+            getTokensForParser;
+        import dparse.parser : parseModule;
+        import dparse.rollback_allocator : RollbackAllocator;
+        import std.array : array;
+        import std.functional : toDelegate;
+
+        logger.infof(`Fetching symbols from %s`, uri.path);
+
+        static void doNothing(string, size_t, size_t, string, bool)
+        {
+        }
+
+        auto stringCache = StringCache(StringCache.defaultBucketCount);
+        auto tokens = getTokensForParser(Document[uri].toString(),
+                LexerConfig(uri.path, StringBehavior.source), &stringCache);
+        RollbackAllocator ra;
+        const mod = parseModule(tokens, uri.path, &ra, toDelegate(&doNothing));
+        auto result = new SymbolInformationTree();
+        auto visitor = new SymbolVisitor(uri, query, result);
+        visitor.visit(mod);
 
         return result.array;
     }
@@ -664,7 +700,6 @@ class SymbolTool : Tool
         import dls.util.logger : logger;
         import std.algorithm : map;
         import std.array : array;
-        import std.container : RedBlackTree;
         import std.typecons : nullable;
 
         logger.infof("Highlighting usages for %s at position %s,%s", uri.path,
@@ -834,4 +869,185 @@ class SymbolTool : Tool
             Document.close(docIdentifier);
         }
     }
+}
+
+private class SymbolVisitor : ASTVisitor
+{
+    import dls.protocol.definitions : Location, Position, Range;
+    import dls.util.uri : Uri;
+    import std.typecons : nullable;
+
+    private Uri uri;
+    private string query;
+    private SymbolInformationTree result;
+    private string containerName;
+
+    this(Uri uri, string query, SymbolInformationTree result)
+    {
+        this.uri = uri;
+        this.query = query;
+        this.result = result;
+    }
+
+    override void visit(const ModuleDeclaration dec)
+    {
+        import std.algorithm : joiner, map;
+        import std.array : array;
+        import std.conv : to;
+
+        containerName = dec.moduleName.identifiers.map!q{a.text}.array.dup.joiner(".").to!string;
+        dec.accept(this);
+    }
+
+    override void visit(const ClassDeclaration dec)
+    {
+        visitSymbol(dec, SymbolKind.class_, true);
+    }
+
+    override void visit(const StructDeclaration dec)
+    {
+        visitSymbol(dec, SymbolKind.struct_, true);
+    }
+
+    override void visit(const InterfaceDeclaration dec)
+    {
+        visitSymbol(dec, SymbolKind.interface_, true);
+    }
+
+    override void visit(const UnionDeclaration dec)
+    {
+        visitSymbol(dec, SymbolKind.interface_, true);
+    }
+
+    override void visit(const EnumDeclaration dec)
+    {
+        visitSymbol(dec, SymbolKind.enum_, true);
+    }
+
+    override void visit(const EnumMember mem)
+    {
+        visitSymbol(mem, SymbolKind.enumMember, false);
+    }
+
+    override void visit(const AnonymousEnumMember mem)
+    {
+        visitSymbol(mem, SymbolKind.enumMember, false);
+    }
+
+    override void visit(const TemplateDeclaration dec)
+    {
+        visitSymbol(dec, SymbolKind.function_, true);
+    }
+
+    override void visit(const FunctionDeclaration dec)
+    {
+        visitSymbol(dec, SymbolKind.function_, false);
+    }
+
+    override void visit(const Constructor dec)
+    {
+        tryInsert("this", SymbolKind.function_, getLocation(dec), containerName);
+    }
+
+    override void visit(const Destructor dec)
+    {
+        tryInsert("~this", SymbolKind.function_, getLocation(dec), containerName);
+    }
+
+    override void visit(const Invariant dec)
+    {
+        import dls.util.document : Document;
+
+        tryInsert("invariant", SymbolKind.function_, new Location(uri,
+                Document[uri].wordRangeAtLineAndByte(dec.line, dec.index)), containerName);
+    }
+
+    override void visit(const VariableDeclaration dec)
+    {
+        foreach (d; dec.declarators)
+        {
+            tryInsert(d.name.text, SymbolKind.variable, getLocation(d.name), containerName);
+        }
+
+        dec.accept(this);
+    }
+
+    override void visit(const AutoDeclaration dec)
+    {
+        foreach (part; dec.parts)
+        {
+            tryInsert(part.identifier.text, SymbolKind.variable,
+                    getLocation(part.identifier), containerName);
+        }
+
+        dec.accept(this);
+    }
+
+    override void visit(const Unittest dec)
+    {
+    }
+
+    override void visit(const AliasDeclaration dec)
+    {
+        if (dec.declaratorIdentifierList !is null)
+        {
+            foreach (id; dec.declaratorIdentifierList.identifiers)
+            {
+                tryInsert(id.text, SymbolKind.variable, getLocation(id), containerName);
+            }
+        }
+
+        dec.accept(this);
+    }
+
+    override void visit(const AliasInitializer dec)
+    {
+        visitSymbol(dec, SymbolKind.variable, true);
+    }
+
+    override void visit(const AliasThisDeclaration dec)
+    {
+        tryInsert(dec.identifier.text, SymbolKind.variable,
+                getLocation(dec.identifier), containerName);
+        dec.accept(this);
+    }
+
+    private void visitSymbol(A)(const A dec, SymbolKind kind, bool accept)
+            if (is(A : ASTNode))
+    {
+        tryInsert(dec.name.text.dup, kind, getLocation(dec.name), containerName);
+
+        if (accept)
+        {
+            end(dec, dec.name.text.dup);
+        }
+    }
+
+    private Location getLocation(T)(T t)
+    {
+        import dls.util.document : Document;
+
+        return new Location(uri, Document[uri].wordRangeAtLineAndByte(t.line - 1, t.column - 1));
+    }
+
+    private void end(in ASTNode node, string name)
+    {
+        const oldName = containerName;
+        containerName = name;
+        node.accept(this);
+        containerName = oldName;
+    }
+
+    private void tryInsert(string name, SymbolKind kind, Location location, string containerName)
+    {
+        import std.regex : matchFirst, regex;
+        import std.typecons : nullable;
+
+        if (query is null || name.matchFirst(regex(query, "i")))
+        {
+            result.insert(new SymbolInformation(name, kind, location, containerName.nullable));
+        }
+    }
+
+    alias visit = ASTVisitor.visit;
 }

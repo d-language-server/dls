@@ -153,7 +153,6 @@ class Document
         }
         catch (UTFException e)
         {
-            // TODO: properly use document buffers instead of on-disc files
         }
 
         auto word = matchAll(line[startCharacter .. $], regex(`\w+|.`w));

@@ -153,7 +153,7 @@ SymbolInformation[] documentSymbol(DocumentSymbolParams params)
 {
     import dls.tools.tools : Tools;
 
-    return Tools.symbolTool.symbol("", new Uri(params.textDocument.uri));
+    return Tools.symbolTool.symbol(new Uri(params.textDocument.uri), null);
 }
 
 CodeAction[] codeAction(CodeActionParams params)
