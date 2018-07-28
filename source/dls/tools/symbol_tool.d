@@ -377,7 +377,7 @@ class SymbolTool : Tool
             const desc = p.describe(BuildPlatform.any, null, null);
             importDirectories!false(uri.path, desc.importPaths.length > 0
                     ? desc.importPaths.map!(path => buildNormalizedPath(p.path.toString(),
-                        path)).array : [uri.path]);
+                        path)).array : [uri.path], true);
             importSelections(Uri.fromPath(desc.path));
         }
     }
@@ -395,7 +395,7 @@ class SymbolTool : Tool
             auto paths = reduce!(q{a ~ b})(cast(string[])[],
                     dep.recipe.buildSettings.sourcePaths.values);
             importDirectories!true(dep.name,
-                    paths.map!(path => buildNormalizedPath(dep.path.toString(), path)).array);
+                    paths.map!(path => buildNormalizedPath(dep.path.toString(), path)).array, true);
         }
     }
 
@@ -738,7 +738,7 @@ class SymbolTool : Tool
         return result.array;
     }
 
-    package void importDirectories(bool isLibrary)(string root, string[] paths)
+    package void importDirectories(bool isLibrary)(string root, string[] paths, bool refresh = false)
     {
         import dls.util.logger : logger;
         import dsymbol.modulecache : ASTAllocator;
@@ -751,6 +751,11 @@ class SymbolTool : Tool
         else
         {
             alias caches = _workspaceCaches;
+        }
+
+        if (refresh && (root in caches))
+        {
+            caches.remove(root);
         }
 
         if (root !in caches)
