@@ -437,14 +437,24 @@ class SymbolTool : Tool
         import dsymbol.symbol : DSymbol;
         import std.algorithm : canFind, map;
         import std.array : array;
-        import std.regex : matchFirst;
+        import std.regex : matchFirst, regex;
         import std.typecons : nullable;
-        import std.uni : toUpper;
 
         logger.infof(`Fetching symbols from workspace with query "%s"`, query);
 
-        const simpleQuery = query.toUpper();
         auto result = new SymbolInformationTree();
+
+        static string commonName(string name)
+        {
+            switch (name)
+            {
+            case "*constructor*":
+                return "this";
+
+            default:
+                return name;
+            }
+        }
 
         void collectSymbolInformations(Uri symbolUri, const(DSymbol)* symbol,
                 string containerName = "")
@@ -454,17 +464,19 @@ class SymbolTool : Tool
                 return;
             }
 
-            if (symbol.name.data.toUpper().matchFirst(simpleQuery))
+            auto name = commonName(symbol.name);
+
+            if (name.matchFirst(regex(query, "i")))
             {
                 auto location = new Location(symbolUri,
                         Document[symbolUri].wordRangeAtByte(symbol.location));
-                result.insert(new SymbolInformation(symbol.name,
+                result.insert(new SymbolInformation(name,
                         symbolKinds[symbol.kind], location, containerName.nullable));
             }
 
             foreach (s; symbol.getPartsByName(internString(null)))
             {
-                collectSymbolInformations(symbolUri, s, symbol.name);
+                collectSymbolInformations(symbolUri, s, name);
             }
         }
 
