@@ -46,12 +46,10 @@ class Document
     {
         auto path = Uri.getPath(textDocument.uri);
 
-        if (path in _documents)
+        if (path !in _documents)
         {
-            _documents.remove(path);
+            _documents[path] = new Document(textDocument);
         }
-
-        _documents[path] = new Document(textDocument);
     }
 
     static void close(in TextDocumentIdentifier textDocument)
