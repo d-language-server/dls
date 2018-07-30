@@ -671,37 +671,30 @@ class SymbolTool : Tool
 
     Location definition(Uri uri, Position position)
     {
-        import dcd.common.messages : AutocompleteResponse;
         import dcd.server.autocomplete : findDeclaration;
         import dls.util.document : Document;
         import dls.util.logger : logger;
-        import std.algorithm : find;
-        import std.array : array;
 
         logger.infof("Finding declaration for %s at position %s,%s", uri.path,
                 position.line, position.character);
 
         auto request = getPreparedRequest(uri, position, RequestKind.symbolLocation);
-        AutocompleteResponse[] results;
 
         foreach (cache; getRelevantCaches(uri))
         {
-            results ~= findDeclaration(request, *cache);
+            auto result = findDeclaration(request, *cache);
+
+            if (result.symbolFilePath.length > 0)
+            {
+                auto resultUri = result.symbolFilePath == "stdin" ? uri
+                    : Uri.fromPath(result.symbolFilePath);
+                openDocument(resultUri);
+                return new Location(resultUri,
+                        Document[resultUri].wordRangeAtByte(result.symbolLocation));
+            }
         }
 
-        results = results.find!q{a.symbolFilePath.length > 0}.array;
-
-        if (results.length == 0)
-        {
-            return null;
-        }
-
-        auto resultUri = results[0].symbolFilePath == "stdin" ? uri
-            : Uri.fromPath(results[0].symbolFilePath);
-        openDocument(resultUri);
-
-        return new Location(resultUri,
-                Document[resultUri].wordRangeAtByte(results[0].symbolLocation));
+        return null;
     }
 
     DocumentHighlight[] highlight(Uri uri, Position position)
