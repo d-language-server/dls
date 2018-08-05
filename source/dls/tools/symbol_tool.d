@@ -173,6 +173,7 @@ void useCompatSymbolKinds(SymbolKind[] symbols = [])
 
 class SymbolTool : Tool
 {
+    import containers.hashset : HashSet;
     import dcd.common.messages : AutocompleteRequest, RequestKind;
     import dls.protocol.definitions : Location, MarkupContent, Position;
     import dls.protocol.interfaces : CompletionItem, DocumentHighlight, Hover;
@@ -213,6 +214,7 @@ class SymbolTool : Tool
         private static immutable string[] _compilerConfigPaths;
     }
 
+    private HashSet!string _workspaces;
     private ModuleCache* _cache;
 
     @property ModuleCache* cache()
@@ -315,6 +317,8 @@ class SymbolTool : Tool
         import std.array : array;
         import std.path : baseName, buildNormalizedPath;
 
+        _workspaces.insert(uri.path);
+
         auto d = getDub(uri);
         auto packages = [d.project.rootPackage];
 
@@ -362,6 +366,7 @@ class SymbolTool : Tool
 
         // logger.infof("Clearing imports from %s", uri.path);
         // Implement ModuleCache.clear() in DCD
+        _workspaces.remove(uri.path);
     }
 
     void upgradeSelections(Uri uri)
@@ -392,10 +397,10 @@ class SymbolTool : Tool
         import dls.util.logger : logger;
         import dsymbol.string_interning : internString;
         import dsymbol.symbol : DSymbol;
-        import std.algorithm : canFind, map;
-        import std.array : array;
+        import std.algorithm : any, canFind, map, startsWith;
+        import std.array : appender, array;
+        import std.file : SpanMode, dirEntries;
         import std.regex : matchFirst, regex;
-        import std.typecons : nullable;
 
         logger.infof(`Fetching symbols from workspace with query "%s"`, query);
 
@@ -416,6 +421,8 @@ class SymbolTool : Tool
         void collectSymbolInformations(Uri symbolUri, const(DSymbol)* symbol,
                 string containerName = "")
         {
+            import std.typecons : nullable;
+
             if (symbol.symbolFile != symbolUri.path)
             {
                 return;
@@ -437,25 +444,21 @@ class SymbolTool : Tool
             }
         }
 
-        static Uri[] getModuleUris(ModuleCache* cache)
+        auto moduleUris = appender!(Uri[]);
+        auto workspaces = _workspaces[];
+
+        foreach (path; _cache.getImportPaths())
         {
-            import std.array : appender, array;
-            import std.file : SpanMode, dirEntries;
-
-            auto result = appender!(Uri[]);
-
-            foreach (rootPath; cache.getImportPaths())
+            if (workspaces.any!(w => path.startsWith(w)))
             {
-                foreach (entry; dirEntries(rootPath, "*.{d,di}", SpanMode.breadth))
+                foreach (entry; dirEntries(path, "*.{d,di}", SpanMode.breadth))
                 {
-                    result ~= Uri.fromPath(entry.name);
+                    moduleUris ~= Uri.fromPath(entry.name);
                 }
             }
-
-            return result.data;
         }
 
-        foreach (moduleUri; getModuleUris(_cache))
+        foreach (moduleUri; moduleUris.data)
         {
             if (Document.uris.map!q{a.path}.canFind(moduleUri.path))
             {
