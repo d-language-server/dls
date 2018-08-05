@@ -115,14 +115,15 @@ InitializeResult initialize(InitializeParams params)
         textDocumentSync = new TextDocumentSyncOptions(true.nullable,
                 TextDocumentSyncKind.incremental.nullable);
         textDocumentSync.save = new SaveOptions(false.nullable);
+        hoverProvider = Server.initOptions.capabilities.hover;
         completionProvider = Server.initOptions.capabilities.completion
             ? new CompletionOptions(true.nullable, ["."].nullable) : Nullable!CompletionOptions();
-        hoverProvider = Server.initOptions.capabilities.hover;
-        documentFormattingProvider = Server.initOptions.capabilities.documentFormatting;
         definitionProvider = Server.initOptions.capabilities.definition;
         documentHighlightProvider = Server.initOptions.capabilities.documentHighlight;
         documentSymbolProvider = Server.initOptions.capabilities.documentSymbol;
         workspaceSymbolProvider = Server.initOptions.capabilities.workspaceSymbol;
+        documentFormattingProvider = Server.initOptions.capabilities.documentFormatting;
+        renameProvider = true.nullable;
         workspace = new ServerCapabilities.Workspace(new ServerCapabilities.Workspace.WorkspaceFolders(true.nullable,
                 JSONValue(true).nullable).nullable);
     }

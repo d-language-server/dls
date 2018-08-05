@@ -175,7 +175,8 @@ class SymbolTool : Tool
 {
     import containers.hashset : HashSet;
     import dcd.common.messages : AutocompleteRequest, RequestKind;
-    import dls.protocol.definitions : Location, MarkupContent, Position;
+    import dls.protocol.definitions : Location, MarkupContent, Position,
+        WorkspaceEdit;
     import dls.protocol.interfaces : CompletionItem, DocumentHighlight, Hover;
     import dls.util.uri : Uri;
     import dsymbol.modulecache : ASTAllocator, ModuleCache;
@@ -662,6 +663,32 @@ class SymbolTool : Tool
         return result.completions.map!((res) => new DocumentHighlight(
                 Document[uri].wordRangeAtByte(res.symbolLocation), (res.symbolLocation == result.symbolLocation
                 ? DocumentHighlightKind.write : DocumentHighlightKind.text).nullable)).array;
+    }
+
+    WorkspaceEdit rename(Uri uri, Position position, string newName)
+    {
+        import dcd.server.autocomplete.localuse : findLocalUse;
+        import dls.protocol.definitions : TextEdit;
+        import dls.util.document : Document;
+        import dls.util.logger : logger;
+        import std.algorithm : map;
+        import std.array : array;
+        import std.typecons : nullable;
+
+        logger.infof("Renaming symbol for %s at position %s,%s", uri.path,
+                position.line, position.character);
+
+        auto request = getPreparedRequest(uri, position, RequestKind.localUse);
+        auto result = findLocalUse(request, *_cache);
+
+        if (result.symbolFilePath != "stdin")
+        {
+            return null;
+        }
+
+        auto changes = result.completions.map!(c => new TextEdit(
+                Document[uri].wordRangeAtByte(c.symbolLocation), newName));
+        return new WorkspaceEdit([uri.toString() : changes.array].nullable);
     }
 
     package void importDirectories(string[] paths)

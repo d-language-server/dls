@@ -213,7 +213,10 @@ TextEdit[] onTypeFormatting(DocumentOnTypeFormattingParams params)
 
 WorkspaceEdit rename(RenameParams params)
 {
-    return [];
+    import dls.tools.tools : Tools;
+
+    return Tools.symbolTool.rename(new Uri(params.textDocument.uri),
+            params.position, params.newName);
 }
 
 FoldingRange[] foldingRanges(FoldingRangeRequestParams params)
