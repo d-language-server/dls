@@ -196,10 +196,8 @@ ColorPresentation[] colorPresentation(ColorPresentationParams params)
 TextEdit[] formatting(DocumentFormattingParams params)
 {
     import dls.tools.tools : Tools;
-    import dls.util.logger : logger;
 
     auto uri = new Uri(params.textDocument.uri);
-    logger.infof("Formatting %s", uri.path);
     return Tools.formatTool.formatting(uri, params.options);
 }
 

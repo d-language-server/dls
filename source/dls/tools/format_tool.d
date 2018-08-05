@@ -66,7 +66,10 @@ class FormatTool : Tool
         import dfmt.formatter : format;
         import dls.protocol.definitions : Position, Range;
         import dls.util.document : Document;
+        import dls.util.logger : logger;
         import std.outbuffer : OutBuffer;
+
+        logger.infof("Formatting %s", uri.path);
 
         const document = Document[uri];
         auto contents = cast(ubyte[]) document.toString();
