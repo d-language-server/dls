@@ -19,6 +19,7 @@ Current features include:
 - Symbol searching
 - Symbol highlighting
 - Documentation on hover
+- Symbol renaming at module level (not accross entire projects)
 - Random, frustrating crashes
 
 Dub packages used (the stuff doing the actual hard work):

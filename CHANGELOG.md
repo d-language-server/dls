@@ -4,6 +4,11 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+### 0.8.0
+- Added module-level renaming support
+- Enhanced document symbols to be generated using document buffers instead of DCD's cache
+- Fixed duplicate workspace symbols
+
 #### 0.7.2
 - Enhanced druntime/phobos paths search on macOS
 
