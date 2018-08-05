@@ -43,6 +43,6 @@ final class Tools
         import dls.tools.tool : Tool;
 
         Tool._configuration = c;
-        symbolTool.importDirectories!true("", c.symbol.importPaths);
+        symbolTool.importDirectories(c.symbol.importPaths);
     }
 }
