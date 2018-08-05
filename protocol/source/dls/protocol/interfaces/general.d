@@ -183,6 +183,17 @@ class TextDocumentClientCapabilities
         Nullable!CodeActionLiteralSupport codeActionLiteralSupport;
     }
 
+    static class PublishDiagnostics
+    {
+        Nullable!bool relatedInformation;
+    }
+
+    static class FoldingRange : WithDynamicRegistration
+    {
+        Nullable!size_t rangeLimit;
+        Nullable!bool lineFoldingOnly;
+    }
+
     Nullable!Synchronisation synchronisation;
     Nullable!Completion completion;
     Nullable!Hover hover;
@@ -201,6 +212,8 @@ class TextDocumentClientCapabilities
     Nullable!WithDynamicRegistration documentLink;
     Nullable!WithDynamicRegistration colorProvider;
     Nullable!WithDynamicRegistration rename;
+    Nullable!PublishDiagnostics publishDiagnostics;
+    Nullable!FoldingRange foldingRange;
 }
 
 class ClientCapabilities
@@ -305,6 +318,10 @@ class ColorProviderOptions
 {
 }
 
+class FoldingRangeProviderOptions
+{
+}
+
 class TextDocumentSyncOptions
 {
     Nullable!bool openClose;
@@ -380,6 +397,7 @@ class ServerCapabilities
     Nullable!bool renameProvider;
     Nullable!DocumentLinkOptions documentLinkProvider;
     Nullable!JSONValue colorProvider;
+    Nullable!JSONValue foldingRangeProvider;
     Nullable!ExecuteCommandOptions executeCommandProvider;
     Nullable!Workspace workspace;
     Nullable!JSONValue experimental;

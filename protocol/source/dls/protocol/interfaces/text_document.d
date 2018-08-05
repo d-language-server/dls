@@ -640,3 +640,23 @@ class RenameParams : ParamsBase
 
     mixin Constructor!RenameParams;
 }
+
+alias FoldingRangeRequestParams = ParamsBase;
+
+enum FoldingRangeKind : string
+{
+    comments = "comments",
+    imports = "imports",
+    region = "region"
+}
+
+class FoldingRange
+{
+    import std.typecons : Nullable;
+
+    size_t startLine;
+    Nullable!size_t startCharacter;
+    size_t endLine;
+    Nullable!size_t endCharacter;
+    Nullable!FoldingRangeKind kind;
+}

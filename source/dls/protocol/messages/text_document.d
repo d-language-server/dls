@@ -213,7 +213,12 @@ TextEdit[] onTypeFormatting(DocumentOnTypeFormattingParams params)
     return [];
 }
 
-WorkspaceEdit[] rename(RenameParams params)
+WorkspaceEdit rename(RenameParams params)
+{
+    return [];
+}
+
+FoldingRange[] foldingRanges(FoldingRangeRequestParams params)
 {
     return [];
 }
