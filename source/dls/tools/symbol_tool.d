@@ -177,7 +177,7 @@ class SymbolTool : Tool
     import dls.protocol.definitions : Location, MarkupContent, Position;
     import dls.protocol.interfaces : CompletionItem, DocumentHighlight, Hover;
     import dls.util.uri : Uri;
-    import dsymbol.modulecache : ModuleCache;
+    import dsymbol.modulecache : ASTAllocator, ModuleCache;
     import dub.dub : Dub;
 
     version (Windows)
@@ -215,6 +215,7 @@ class SymbolTool : Tool
 
     private ModuleCache*[string] _workspaceCaches;
     private ModuleCache*[string] _libraryCaches;
+    private ASTAllocator _allocator;
 
     @property private string[] defaultImportPaths()
     {
@@ -300,6 +301,7 @@ class SymbolTool : Tool
 
     this()
     {
+        _allocator = new ASTAllocator();
         importDirectories!true("", defaultImportPaths);
     }
 
@@ -372,12 +374,14 @@ class SymbolTool : Tool
             }
         }
 
+        _workspaceCaches.remove(uri.path);
+
         foreach (p; packages)
         {
             const desc = p.describe(BuildPlatform.any, null, null);
             importDirectories!false(uri.path, desc.importPaths.length > 0
                     ? desc.importPaths.map!(path => buildNormalizedPath(p.path.toString(),
-                        path)).array : [uri.path], true);
+                        path)).array : [uri.path]);
             importSelections(Uri.fromPath(desc.path));
         }
     }
@@ -734,7 +738,6 @@ class SymbolTool : Tool
     package void importDirectories(bool isLibrary)(string root, string[] paths, bool refresh = false)
     {
         import dls.util.logger : logger;
-        import dsymbol.modulecache : ASTAllocator;
         import std.algorithm : canFind;
 
         static if (isLibrary)
@@ -746,14 +749,9 @@ class SymbolTool : Tool
             alias caches = _workspaceCaches;
         }
 
-        if (refresh && (root in caches))
+        if (root !in caches || refresh)
         {
-            caches.remove(root);
-        }
-
-        if (root !in caches)
-        {
-            caches[root] = new ModuleCache(new ASTAllocator());
+            caches[root] = new ModuleCache(_allocator);
         }
 
         foreach (path; paths)
