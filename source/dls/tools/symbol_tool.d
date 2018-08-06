@@ -216,9 +216,9 @@ class SymbolTool : Tool
     }
 
     private HashSet!string _workspaces;
-    private ModuleCache* _cache;
+    private ModuleCache _cache;
 
-    @property ModuleCache* cache()
+    @property ref ModuleCache cache()
     {
         return _cache;
     }
@@ -307,7 +307,7 @@ class SymbolTool : Tool
 
     this()
     {
-        _cache = new ModuleCache(new ASTAllocator());
+        _cache = ModuleCache(new ASTAllocator());
         importDirectories(defaultImportPaths);
     }
 
@@ -546,7 +546,7 @@ class SymbolTool : Tool
             return a.symbolFilePath == b.symbolFilePath && a.symbolLocation == b.symbolLocation;
         }
 
-        auto result = complete(request, *_cache);
+        auto result = complete(request, _cache);
 
         if (result.completionType != CompletionType.identifiers)
         {
@@ -611,7 +611,7 @@ class SymbolTool : Tool
                 uri.path, position.line, position.character);
 
         auto request = getPreparedRequest(uri, position, RequestKind.doc);
-        auto result = getDoc(request, *_cache);
+        auto result = getDoc(request, _cache);
         auto completions = result.completions
             .map!q{a.documentation}
             .filter!q{a.length > 0}
@@ -632,7 +632,7 @@ class SymbolTool : Tool
                 position.line, position.character);
 
         auto request = getPreparedRequest(uri, position, RequestKind.symbolLocation);
-        auto result = findDeclaration(request, *_cache);
+        auto result = findDeclaration(request, _cache);
         if (result.symbolFilePath.length > 0)
         {
             auto resultUri = result.symbolFilePath == "stdin" ? uri
@@ -659,7 +659,7 @@ class SymbolTool : Tool
                 position.line, position.character);
 
         auto request = getPreparedRequest(uri, position, RequestKind.localUse);
-        auto result = findLocalUse(request, *_cache);
+        auto result = findLocalUse(request, _cache);
         return result.completions.map!((res) => new DocumentHighlight(
                 Document[uri].wordRangeAtByte(res.symbolLocation), (res.symbolLocation == result.symbolLocation
                 ? DocumentHighlightKind.write : DocumentHighlightKind.text).nullable)).array;
@@ -679,7 +679,7 @@ class SymbolTool : Tool
                 position.line, position.character);
 
         auto request = getPreparedRequest(uri, position, RequestKind.localUse);
-        auto result = findLocalUse(request, *_cache);
+        auto result = findLocalUse(request, _cache);
 
         if (result.symbolFilePath != "stdin")
         {
