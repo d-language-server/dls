@@ -27,7 +27,20 @@ import dparse.ast;
 import dsymbol.symbol : CompletionKind;
 import std.container : RedBlackTree;
 
-alias SymbolInformationTree = RedBlackTree!(SymbolInformation, q{a.name > b.name}, true);
+int compareLocations(inout(SymbolInformation) s1, inout(SymbolInformation) s2)
+{
+    //dfmt off
+    return s1.location.uri < s2.location.uri ? -1
+        : s1.location.uri > s2.location.uri ? 1
+        : s1.location.range.start.line < s2.location.range.start.line ? -1
+        : s1.location.range.start.line > s2.location.range.start.line ? 1
+        : s1.location.range.start.character < s2.location.range.start.character ? -1
+        : s1.location.range.start.character > s2.location.range.start.character ? 1
+        : 0;
+    //dfmt on
+}
+
+alias SymbolInformationTree = RedBlackTree!(SymbolInformation, compareLocations, true);
 
 private string[string] macros;
 private CompletionItemKind[CompletionKind] completionKinds;
