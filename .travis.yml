@@ -1,20 +1,28 @@
 language: d
-d: ldc
-os:
-  - linux
-  - osx
-env:
-  - ARCH=x86
-  - ARCH=x86_64
-matrix: # ldc on 32bit linux needs libcurl4-openssl-dev:i386 which cannot be installed
-  exclude:
+matrix:
+  include:
     - d: ldc
       os: linux
-      env: ARCH=x86
-  include:
-    - d: dmd
+    - d: dmd # ldc on 32bit linux needs libcurl4-openssl-dev:i386 which cannot be installed
       os: linux
       env: ARCH=x86
+    - d: ldc
+      os: osx
+    - d: ldc
+      os: osx
+      env: ARCH=x86
+    - d: dmd
+      os: linux
+      env: OP=test BUILD=debug
+    - d: dmd-beta
+      os: linux
+      env: OP=test BUILD=debug
+    - d: ldc
+      os: linux
+      env: OP=test BUILD=debug
+    - d: ldc-beta
+      os: linux
+      env: OP=test BUILD=debug
 cache:
   directories:
     - $HOME/.dub
@@ -30,8 +38,7 @@ before_script:
   - ln -s /usr/bin/ld.gold ~/ld
 script:
   - export PATH="$HOME:$PATH"
-  - dub test --arch=$ARCH --compiler=$DC || dub test --arch=$ARCH --compiler=$DC # work around link error
-  - dub build --arch=$ARCH --compiler=$DC --build=release
+  - dub ${OP:-build} --arch=${ARCH:-x86_64} --compiler=${DC:-dmd} --build=${BUILD:-release} || dub ${OP:-build} --arch=${ARCH:-x86_64} --compiler=${DC:-dmd} --build=${BUILD:-release} # work around link error
 before_deploy:
   - if which strip; then strip dls; fi
   - upx --best --ultra-brute dls
