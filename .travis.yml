@@ -1,5 +1,6 @@
 language: d
 matrix:
+  fast_finish: true
   include:
     - d: ldc
       os: linux
@@ -13,14 +14,14 @@ matrix:
     - d: ldc
       os: osx
       env: OP=build ARCH=x86    BUILD=release
-    - d: dmd
-      os: linux
     - d: dmd-beta
       os: linux
-    - d: ldc
+    - d: dmd-nightly
       os: linux
     - d: ldc-beta
       os: linux
+  allow_failures:
+    - d: dmd-nightly
 cache:
   directories:
     - $HOME/.dub
