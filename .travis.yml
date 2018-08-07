@@ -3,26 +3,24 @@ matrix:
   include:
     - d: ldc
       os: linux
+      env: OP=build ARCH=x86_64 BUILD=release
     - d: dmd # ldc on 32bit linux needs libcurl4-openssl-dev:i386 which cannot be installed
       os: linux
-      env: ARCH=x86
+      env: OP=build ARCH=x86    BUILD=release
     - d: ldc
       os: osx
+      env: OP=build ARCH=x86_64 BUILD=release
     - d: ldc
       os: osx
-      env: ARCH=x86
+      env: OP=build ARCH=x86    BUILD=release
     - d: dmd
       os: linux
-      env: OP=test BUILD=debug
     - d: dmd-beta
       os: linux
-      env: OP=test BUILD=debug
     - d: ldc
       os: linux
-      env: OP=test BUILD=debug
     - d: ldc-beta
       os: linux
-      env: OP=test BUILD=debug
 cache:
   directories:
     - $HOME/.dub
@@ -38,7 +36,7 @@ before_script:
   - ln -s /usr/bin/ld.gold ~/ld
 script:
   - export PATH="$HOME:$PATH"
-  - dub ${OP:-build} --arch=${ARCH:-x86_64} --compiler=${DC:-dmd} --build=${BUILD:-release} || dub ${OP:-build} --arch=${ARCH:-x86_64} --compiler=${DC:-dmd} --build=${BUILD:-release} # work around link error
+  - dub ${OP:-test} --arch=${ARCH:-x86_64} --compiler=$DC --build=${BUILD:-debug} || dub ${OP:-test} --arch=${ARCH:-x86_64} --compiler=$DC --build=${BUILD:-debug} # work around link error
 before_deploy:
   - if which strip; then strip dls; fi
   - upx --best --ultra-brute dls
@@ -50,5 +48,6 @@ deploy:
   file: dls-*.zip
   skip_cleanup: true
   on:
+    condition: $BUILD = release
     repo: LaurentTreguier/dls
     tags: true
