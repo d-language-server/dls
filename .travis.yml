@@ -32,10 +32,11 @@ addons:
       - libcurl4-openssl-dev
       - upx-ucl
 before_install:
-  - if [[ $TRAVIS_OS_NAME = osx ]]; then brew update && brew install upx; fi
+  - if [[ $TRAVIS_OS_NAME = osx ]]; then brew update && brew install upx dfmt; fi
 before_script:
   - ln -s /usr/bin/ld.gold ~/ld
 script:
+  - if [[ $TRAVIS_OS_NAME = osx ]]; then bash .travis-check-dfmt.sh; fi
   - export PATH="$HOME:$PATH"
   - dub ${OP:-test} --arch=${ARCH:-x86_64} --compiler=$DC --build=${BUILD:-debug} || dub ${OP:-test} --arch=${ARCH:-x86_64} --compiler=$DC --build=${BUILD:-debug} # work around link error
 before_deploy:
