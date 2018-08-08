@@ -2,7 +2,7 @@
 
 modifiedFiles=$(git status --short | wc -l)
 
-for sourceFile in $(find -name '*.d')
+for sourceFile in $(find . -name '*.d')
 do
     dfmt --inplace $sourceFile
 done
