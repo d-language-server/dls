@@ -91,14 +91,33 @@ enum TextDocument : string
     rename                = "textDocument/rename",
 }
 
-enum Dls : string
+interface Dls
 {
-    upgradeDls_start          = "$/dls.upgradeDls.start",
-    upgradeDls_stop           = "$/dls.upgradeDls.stop",
-    upgradeDls_totalSize      = "$/dls.upgradeDls.totalSize",
-    upgradeDls_currentSize    = "$/dls.upgradeDls.currentSize",
-    upgradeDls_extract        = "$/dls.upgradeDls.extract",
-    upgradeSelections_start   = "$/dls.upgradeSelections.start",
-    upgradeSelections_stop    = "$/dls.upgradeSelections.stop",
+    enum Compat : string
+    {
+        upgradeDls_start        = "$/dls.upgradeDls.start",
+        upgradeDls_stop         = "$/dls.upgradeDls.stop",
+        upgradeDls_totalSize    = "$/dls.upgradeDls.totalSize",
+        upgradeDls_currentSize  = "$/dls.upgradeDls.currentSize",
+        upgradeDls_extract      = "$/dls.upgradeDls.extract",
+        upgradeSelections_start = "$/dls.upgradeSelections.start",
+        upgradeSelections_stop  = "$/dls.upgradeSelections.stop",
+    }
+
+    enum UpgradeDls : string
+    {
+        didStart                = "$/dls/upgradeDls/didStart",
+        didStop                 = "$/dls/upgradeDls/didStop",
+        didChangeTotalSize      = "$/dls/upgradeDls/didChangeTotalSize",
+        didChangeCurrentSize    = "$/dls/upgradeDls/didChangeCurrentSize",
+        didExtract              = "$/dls/upgradeDls/didExtract",
+    }
+
+    enum UpgradeSelections : string
+    {
+        didStart    = "$/dls/upgradeDls/didStart",
+        didStop     = "$/dls/upgradeDls/didStop",
+    }
 }
+
 //dfmt on

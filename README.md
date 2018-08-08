@@ -156,15 +156,15 @@ Watching `*.ini` allows DLS to monitor D-Scanner config files, even if the name 
 The LSP defines messages with methods starting in `$/` to be implementation dependant.
 DLS uses `$/dls` as a prefix for custom messages.
 
-|Message                        |Type        |Parameters            |Description                                                                |
-|-------------------------------|------------|----------------------|---------------------------------------------------------------------------|
-|`$/dls.upgradeDls.start`       |Notification|`TranslationParams`   |Sent when the upgrade process starts                                       |
-|`$/dls.upgradeDls.stop`        |Notification|`null`                |Sent when the upgrade process stops                                        |
-|`$/dls.upgradeDls.totalSize`   |Notification|`DlsUpgradeSizeParams`|Sent during the download, with the total size of the upgrade download      |
-|`$/dls.upgradeDls.currentSize` |Notification|`DlsUpgradeSizeParams`|Sent during the download, with the current size of the upgrade download    |
-|`$/dls.upgradeDls.extract`     |Notification|`TranslationParams`   |Sent when the download is finished and the contents are written on the disk|
-|`$/dls.upgradeSelections.start`|Notification|`TranslationParams`   |Sent when DLS starts upgrading dub.selections.json                         |
-|`$/dls.upgradeSelections.stop` |Notification|`null`                |Sent when DLS has finished upgrading dub.selections.json                   |
+|Message                                |Type        |Parameters            |Description                                                                |
+|---------------------------------------|------------|----------------------|---------------------------------------------------------------------------|
+|`$/dls/upgradeDls/didStart`            |Notification|`TranslationParams`   |Sent when the upgrade process starts                                       |
+|`$/dls/upgradeDls/didStop`             |Notification|`null`                |Sent when the upgrade process stops                                        |
+|`$/dls/upgradeDls/didChangeTotalSize`  |Notification|`DlsUpgradeSizeParams`|Sent during the download, with the total size of the upgrade download      |
+|`$/dls/upgradeDls/didChangeCurrentSize`|Notification|`DlsUpgradeSizeParams`|Sent during the download, with the current size of the upgrade download    |
+|`$/dls/upgradeDls/didExtract`          |Notification|`TranslationParams`   |Sent when the download is finished and the contents are written on the disk|
+|`$/dls/upgradeDls/didStart`            |Notification|`TranslationParams`   |Sent when DLS starts upgrading dub.selections.json                         |
+|`$/dls/upgradeDls/didStop`             |Notification|`null`                |Sent when DLS has finished upgrading dub.selections.json                   |
 
 ```typescript
 interface TranslationParams {

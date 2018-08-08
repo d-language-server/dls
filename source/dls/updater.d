@@ -131,12 +131,15 @@ void update()
         return;
     }
 
-    dls.protocol.jsonrpc.send(Dls.upgradeDls_start,
+    dls.protocol.jsonrpc.send(Dls.Compat.upgradeDls_start,
+            new TranslationParams(Tr.app_upgradeDls_upgrading));
+    dls.protocol.jsonrpc.send(Dls.UpgradeDls.didStart,
             new TranslationParams(Tr.app_upgradeDls_upgrading));
 
     scope (exit)
     {
-        dls.protocol.jsonrpc.send(Dls.upgradeDls_stop);
+        dls.protocol.jsonrpc.send(Dls.Compat.upgradeDls_stop);
+        dls.protocol.jsonrpc.send(Dls.UpgradeDls.didStop);
     }
 
     bool success;
@@ -146,15 +149,21 @@ void update()
         try
         {
             enum totalSizeCallback = (size_t size) {
-                dls.protocol.jsonrpc.send(Dls.upgradeDls_totalSize,
+                dls.protocol.jsonrpc.send(Dls.Compat.upgradeDls_totalSize,
+                        new DlsUpgradeSizeParams(Tr.app_upgradeDls_downloading, size));
+                dls.protocol.jsonrpc.send(Dls.UpgradeDls.didChangeTotalSize,
                         new DlsUpgradeSizeParams(Tr.app_upgradeDls_downloading, size));
             };
             enum chunkSizeCallback = (size_t size) {
-                dls.protocol.jsonrpc.send(Dls.upgradeDls_currentSize,
+                dls.protocol.jsonrpc.send(Dls.Compat.upgradeDls_currentSize,
+                        new DlsUpgradeSizeParams(Tr.app_upgradeDls_downloading, size));
+                dls.protocol.jsonrpc.send(Dls.UpgradeDls.didChangeCurrentSize,
                         new DlsUpgradeSizeParams(Tr.app_upgradeDls_downloading, size));
             };
             enum extractCallback = () {
-                dls.protocol.jsonrpc.send(Dls.upgradeDls_extract,
+                dls.protocol.jsonrpc.send(Dls.Compat.upgradeDls_extract,
+                        new TranslationParams(Tr.app_upgradeDls_extracting));
+                dls.protocol.jsonrpc.send(Dls.UpgradeDls.didExtract,
                         new TranslationParams(Tr.app_upgradeDls_extracting));
             };
 

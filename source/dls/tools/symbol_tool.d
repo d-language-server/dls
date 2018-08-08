@@ -398,10 +398,13 @@ class SymbolTool : Tool
             import dls.protocol.jsonrpc : send;
             import dub.dub : UpgradeOptions;
 
-            send(Dls.upgradeSelections_start,
+            send(Dls.Compat.upgradeSelections_start,
+                new TranslationParams(Tr.app_upgradeSelections_upgrading));
+            send(Dls.UpgradeSelections.didStart,
                 new TranslationParams(Tr.app_upgradeSelections_upgrading));
             getDub(new Uri(uriString)).upgrade(UpgradeOptions.upgrade | UpgradeOptions.select);
-            send(Dls.upgradeSelections_stop);
+            send(Dls.Compat.upgradeSelections_stop);
+            send(Dls.UpgradeSelections.didStop);
         }, uri.toString());
     }
 
