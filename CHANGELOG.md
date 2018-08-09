@@ -4,10 +4,13 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
-### 0.8.2
+#### 0.8.3
+- Fixed potential error when creating symlink on Windows if the path contains a space
+
+#### 0.8.2
 - Fixed inability to run `dls:bootstrap` on Windows when LDC is in the PATH
 
-### 0.8.1
+#### 0.8.1
 - Fixed crash happening on garbage collection
 
 ### 0.8.0
