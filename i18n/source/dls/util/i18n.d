@@ -43,10 +43,11 @@ shared static this()
         import core.sys.windows.winnt : KEY_READ;
         import core.sys.windows.winreg : HKEY_USERS, RegOpenKeyExA,
             RegQueryValueExA;
+        import std.string : toStringz;
 
         HKEY hKey;
 
-        if (RegOpenKeyExA(HKEY_USERS, `.DEFAULT\Control Panel\International`,
+        if (RegOpenKeyExA(HKEY_USERS, toStringz(`.DEFAULT\Control Panel\International`),
                 0, KEY_READ, &hKey) != ERROR_SUCCESS)
         {
             return;
@@ -55,7 +56,8 @@ shared static this()
         DWORD size = 32;
         auto buffer = new char[size];
 
-        if (RegQueryValueExA(hKey, "LocaleName", null, null, buffer.ptr, &size) != ERROR_SUCCESS)
+        if (RegQueryValueExA(hKey, toStringz("LocaleName"), null, null,
+                buffer.ptr, &size) != ERROR_SUCCESS)
         {
             return;
         }
