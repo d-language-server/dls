@@ -286,14 +286,14 @@ string linkDls()
 
         foreach (memberPath; archiveMemberPaths)
         {
-            mklinks ~= format("mklink %s %s", buildNormalizedPath(dubBinDir,
-                    baseName(memberPath)), memberPath);
+            mklinks ~= format(`mklink "%s" "%s"`,
+                    buildNormalizedPath(dubBinDir, baseName(memberPath)), memberPath);
         }
 
         const mklinkCommand = mklinks.joiner(" & ").to!string;
         const command = [
             "powershell.exe",
-            format!"Start-Process -Wait -FilePath cmd.exe -ArgumentList '/c %s' -Verb runas"(
+            format!"Start-Process -Wait -FilePath cmd.exe -ArgumentList '/c %s' -Verb runas -WindowStyle Hidden"(
                 mklinkCommand)
         ];
         const result = execute(command);
