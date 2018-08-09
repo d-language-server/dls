@@ -40,11 +40,6 @@ void initialSetup()
 
         foreach (path; splitter(environment["PATH"], ';'))
         {
-            if (exists(buildNormalizedPath(path, "ldc2.exe")))
-            {
-                environment["PATH"] = path ~ ';' ~ environment["PATH"];
-            }
-
             if (exists(buildNormalizedPath(path, "dmd.exe")))
             {
                 environment["PATH"] = buildNormalizedPath(dirName(path), binDir)
