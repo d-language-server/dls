@@ -301,29 +301,15 @@ private void makeLink(in string target, in string link, bool directory)
             }
         }
 
-        int status;
-        string output;
-        const mklinkCommand = format!"mklink %s %s %s"(directory ? "/J" : "", link, target);
+        const mklinkCommand = format!`mklink %s "%s" "%s"`(directory ? "/J" : "", link, target);
+        const powershellArgs = ["Start-Process", "-Wait", "-FilePath", "cmd.exe",
+            "-ArgumentList", format!"'/c %s'"(mklinkCommand), "-WindowStyle", "Hidden"] ~ (directory
+                ? [] : ["-Verb", "runas"]);
+        const result = execute(["powershell.exe", powershellArgs.join(' ')]);
 
-        if (directory)
+        if (result.status != 0)
         {
-            const result = execute(["cmd.exe", "/c ", mklinkCommand]);
-            status = result.status;
-            output = result.output;
-        }
-        else
-        {
-            const powershellArgs = ["Start-Process", "-Wait", "-FilePath", "cmd.exe",
-                "-ArgumentList", format!"'/c %s'"(mklinkCommand), "-WindowStyle", "Hidden"] ~ (directory
-                    ? [] : ["-Verb", "runas"]);
-            const result = execute(["powershell.exe", powershellArgs.join(' ')]);
-            status = result.status;
-            output = result.output;
-        }
-
-        if (status != 0)
-        {
-            throw new UpgradeFailedException("Symlink failed: " ~ output);
+            throw new UpgradeFailedException("Symlink failed: " ~ result.output);
         }
     }
     else version (Posix)
