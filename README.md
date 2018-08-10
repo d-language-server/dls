@@ -1,5 +1,7 @@
 # D Language Server
 
+[![GitHub](https://img.shields.io/github/license/LaurentTreguier/dls.svg?style=social)](https://www.gnu.org/licenses/gpl.html)
+
 |DUB|Travis|AppVeyor|
 |---|------|--------|
 |[![DUB](https://img.shields.io/dub/v/dls.svg?style=flat-square)](https://code.dlang.org/packages/dls)|[![Travis](https://img.shields.io/travis/LaurentTreguier/dls.svg?style=flat-square)](https://travis-ci.org/LaurentTreguier/dls)|[![AppVeyor](https://img.shields.io/appveyor/ci/LaurentTreguier/dls.svg?style=flat-square)](https://ci.appveyor.com/project/LaurentTreguier/dls)
@@ -67,7 +69,7 @@ Some editors may need DLS to be [installed manually](#installing) (don't worry i
     ```
 
 DLS may or may not work with other editors.
-Given the editor-neutral nature of the LSP, it should work, but given the nature of DLS, it should have some weird quirks.
+Given the editor-neutral nature of the LSP, it should work, but given the somewhat buggy nature of DLS, it should have some weird quirks.
 If it's not working with your editor of choice, [submit an issue](https://github.com/LaurentTreguier/dls/issues/new)!
 
 ## Installing

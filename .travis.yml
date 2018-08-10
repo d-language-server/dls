@@ -42,7 +42,7 @@ script:
 before_deploy:
   - if which strip; then strip dls; fi
   - upx --best --ultra-brute dls
-  - zip -0 dls-${TRAVIS_TAG:-untagged}.$TRAVIS_OS_NAME.$ARCH.zip dls
+  - zip -0 dls-${TRAVIS_TAG:-untagged}.$TRAVIS_OS_NAME.$ARCH.zip dls LICENSE.txt
 deploy:
   provider: releases
   api_key: $GITHUB_API_KEY
