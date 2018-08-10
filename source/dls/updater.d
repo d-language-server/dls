@@ -104,7 +104,6 @@ void update()
     import std.algorithm : stripLeft;
     import std.concurrency : ownerTid, receiveOnly, register, send, thisTid;
     import std.datetime : Clock, SysTime;
-    import std.file : FileException;
     import std.json : parseJSON;
     import std.net.curl : get;
 
@@ -215,7 +214,7 @@ void update()
                 [Tr.app_showChangelog_show], [latestVersion]);
         send(ownerTid(), Util.ThreadMessageData(id, Tr.app_showChangelog, changelogUrl));
     }
-    catch (FileException e)
+    catch (UpgradeFailedException e)
     {
         Util.sendMessage(Tr.app_linkError);
     }

@@ -27,35 +27,35 @@ immutable apiEndpoint = format!"https://api.github.com/repos/%s/dls/%%s"(repoBas
 
 version (Windows)
 {
-    immutable os = "windows";
+    private immutable os = "windows";
 }
 else version (OSX)
 {
-    immutable os = "osx";
+    private immutable os = "osx";
 }
 else version (linux)
 {
-    immutable os = "linux";
+    private immutable os = "linux";
 }
 else
 {
-    immutable os = "none";
+    private immutable os = "none";
 }
 
 version (Windows)
 {
-    immutable dlsExecutable = "dls.exe";
+    private immutable dlsExecutable = "dls.exe";
 }
 else
 {
-    immutable dlsExecutable = "dls";
+    private immutable dlsExecutable = "dls";
 }
 
 private immutable string dlsArchiveName;
 private immutable string dlsDirName = "dls-%s";
+private immutable string dlsLatestDirName = "dls-latest";
 private string downloadUrl;
 private string downloadVersion;
-private string[] archiveMemberPaths;
 
 shared static this()
 {
@@ -193,13 +193,11 @@ void downloadDls(in void function(size_t size) totalSizeCallback = null,
         }
 
         auto archive = new ZipArchive(archiveData.data);
-        archiveMemberPaths = [];
 
         foreach (name, member; archive.directory)
         {
             const memberPath = buildNormalizedPath(dlsDir, name);
             write(memberPath, archive.expand(member));
-            archiveMemberPaths ~= memberPath;
 
             version (Posix)
             {
@@ -239,86 +237,28 @@ void buildDls(in string dlsDir, in string[] additionalArgs = [])
     {
         throw new UpgradeFailedException("Build failed: " ~ result.output);
     }
-
-    archiveMemberPaths = [buildNormalizedPath(dlsDir, dlsExecutable)];
 }
 
 string linkDls()
 {
-    import std.file : FileException, exists, isFile, mkdirRecurse, remove;
+    import std.file : exists, isFile, mkdirRecurse, remove;
     import std.path : baseName, buildNormalizedPath;
     import std.string : endsWith;
 
-    string dlsLinkPath;
+    mkdirRecurse(dubBinDir);
 
-    foreach (memberPath; archiveMemberPaths)
+    const dlsDir = buildNormalizedPath(dubBinDir, format(dlsDirName, downloadVersion));
+    const oldDlsLink = buildNormalizedPath(dubBinDir, dlsExecutable);
+    const dlsLatestDir = buildNormalizedPath(dubBinDir, dlsLatestDirName);
+
+    if (exists(oldDlsLink) && !exists(dlsLatestDir))
     {
-        if (!isFile(memberPath))
-        {
-            throw new FileException(format!"%s doesn't exist"(memberPath));
-        }
-
-        const linkPath = buildNormalizedPath(dubBinDir, baseName(memberPath));
-
-        mkdirRecurse(dubBinDir);
-
-        if (exists(linkPath))
-        {
-            remove(linkPath);
-        }
-
-        if (memberPath.endsWith(dlsExecutable))
-        {
-            dlsLinkPath = linkPath;
-        }
+        makeLink(buildNormalizedPath(dlsLatestDir, dlsExecutable), oldDlsLink, false);
     }
 
-    version (Windows)
-    {
-        import std.algorithm : joiner;
-        import std.conv : to;
-        import std.file : FileException;
-        import std.format : format;
-        import std.path : buildNormalizedPath;
-        import std.process : execute;
+    makeLink(dlsDir, dlsLatestDir, true);
 
-        string[] mklinks;
-
-        foreach (memberPath; archiveMemberPaths)
-        {
-            mklinks ~= format(`mklink "%s" "%s"`,
-                    buildNormalizedPath(dubBinDir, baseName(memberPath)), memberPath);
-        }
-
-        const mklinkCommand = mklinks.joiner(" & ").to!string;
-        const command = [
-            "powershell.exe",
-            format!"Start-Process -Wait -FilePath cmd.exe -ArgumentList '/c %s' -Verb runas -WindowStyle Hidden"(
-                mklinkCommand)
-        ];
-        const result = execute(command);
-
-        if (result.status != 0)
-        {
-            throw new FileException("Symlink failed: " ~ result.output);
-        }
-    }
-    else version (Posix)
-    {
-        import std.file : symlink;
-
-        foreach (memberPath; archiveMemberPaths)
-        {
-            const linkPath = buildNormalizedPath(dubBinDir, baseName(memberPath));
-            symlink(memberPath, linkPath);
-        }
-    }
-    else
-    {
-        static assert(false, "Platform not suported");
-    }
-
-    return dlsLinkPath;
+    return buildNormalizedPath(dlsLatestDir, dlsExecutable);
 }
 
 @property string dubBinDir()
@@ -338,6 +278,69 @@ string linkDls()
     }
 
     return buildNormalizedPath(dubDirPath, dubDirName, "packages", ".bin");
+}
+
+private void makeLink(in string target, in string link, bool directory)
+{
+    version (Windows)
+    {
+        import std.array : join;
+        import std.file : exists, isFile, remove, rmdir;
+        import std.format : format;
+        import std.process : execute;
+
+        if (exists(link))
+        {
+            if (isFile(link))
+            {
+                remove(link);
+            }
+            else
+            {
+                rmdir(link);
+            }
+        }
+
+        int status;
+        string output;
+        const mklinkCommand = format!"mklink %s %s %s"(directory ? "/J" : "", link, target);
+
+        if (directory)
+        {
+            const result = execute(["cmd.exe", "/c ", mklinkCommand]);
+            status = result.status;
+            output = result.output;
+        }
+        else
+        {
+            const powershellArgs = ["Start-Process", "-Wait", "-FilePath", "cmd.exe",
+                "-ArgumentList", format!"'/c %s'"(mklinkCommand), "-WindowStyle", "Hidden"] ~ (directory
+                    ? [] : ["-Verb", "runas"]);
+            const result = execute(["powershell.exe", powershellArgs.join(' ')]);
+            status = result.status;
+            output = result.output;
+        }
+
+        if (status != 0)
+        {
+            throw new UpgradeFailedException("Symlink failed: " ~ output);
+        }
+    }
+    else version (Posix)
+    {
+        import std.file : exists, remove, symlink;
+
+        if (exists(link))
+        {
+            remove(link);
+        }
+
+        symlink(target, link);
+    }
+    else
+    {
+        static assert(false, "Platform not suported");
+    }
 }
 
 class UpgradeFailedException : Exception
