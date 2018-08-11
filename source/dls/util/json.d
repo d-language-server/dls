@@ -28,8 +28,7 @@ import std.typecons : Nullable;
 /++
 Converts a `JSONValue` to an object of type `T` by filling its fields with the JSON's fields.
 +/
-T convertFromJSON(T)(JSONValue json)
-        if ((is(T == class) || is(T == struct)) && !is(T == JSONValue))
+T convertFromJSON(T)(JSONValue json) if (is(T == class) || is(T == struct))
 {
     import std.json : JSONException, JSON_TYPE;
     import std.traits : isSomeFunction, isType;
@@ -38,13 +37,9 @@ T convertFromJSON(T)(JSONValue json)
     {
         auto result = new T();
     }
-    else static if (is(T == struct))
-    {
-        auto result = T();
-    }
     else
     {
-        static assert(false, "Cannot convert JSON to " ~ typeid(T));
+        auto result = T();
     }
 
     if (json.type != JSON_TYPE.OBJECT)
@@ -473,8 +468,9 @@ unittest
     }`;
 
     auto json = convertToJSON(testClass);
-    // parseJSON() will parse `uinteger` as a regular integer, meaning that the JSON's are considered equal,
-    // even though technically they are equivalent (16 as int or as uint is technically the same value)
+    // parseJSON() will parse `uinteger` as a regular integer, meaning that the JSON's aren't considered equal,
+    // even though technically they are equivalent (16 as int or as uint is technically the same value), which
+    // is why .toStirng() is used here
     assert(json.get().toString() == parseJSON(jsonString).toString());
 
     TestClass nullTestClass = null;
