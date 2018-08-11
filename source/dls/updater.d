@@ -30,31 +30,32 @@ private immutable changelogUrl = format!"https://github.com/%s/dls/blob/master/C
 void cleanup()
 {
     import dls.bootstrap : dubBinDir;
-    import std.file : FileException, SpanMode, dirEntries, remove, rmdirRecurse;
+    import std.file : FileException, SpanMode, dirEntries, isSymlink, remove,
+        rmdirRecurse;
     import std.path : baseName;
     import std.regex : matchFirst;
 
     bool[string] entriesToRemove;
 
-    foreach (entry; dirEntries(dubBinDir, SpanMode.shallow))
+    foreach (string entry; dirEntries(dubBinDir, SpanMode.shallow))
     {
-        const match = entry.name.baseName.matchFirst(`dls-v([\d.]+)`);
+        const match = entry.baseName.matchFirst(`dls-v([\d.]+)`);
 
         if (match)
         {
             if (match[1] < currentVersion)
             {
-                foreach (subEntry; dirEntries(entry.name, SpanMode.shallow))
+                foreach (subEntry; dirEntries(entry, SpanMode.shallow))
                 {
                     if (subEntry.baseName !in entriesToRemove)
                     {
-                        entriesToRemove[subEntry.name.baseName] = true;
+                        entriesToRemove[subEntry.baseName] = true;
                     }
                 }
 
                 try
                 {
-                    rmdirRecurse(entry.name);
+                    rmdirRecurse(entry);
                 }
                 catch (FileException e)
                 {
@@ -62,21 +63,67 @@ void cleanup()
             }
             else
             {
-                foreach (subEntry; dirEntries(entry.name, SpanMode.shallow))
+                foreach (subEntry; dirEntries(entry, SpanMode.shallow))
                 {
-                    entriesToRemove[subEntry.name.baseName] = false;
+                    entriesToRemove[subEntry.baseName] = false;
                 }
+            }
+        }
+        else if (isSymlink(entry))
+        {
+            try
+            {
+                version (Windows)
+                {
+                    import std.file : isDir, rmdir;
+                    import std.stdio : File;
+
+                    if (isDir(entry))
+                    {
+                        try
+                        {
+                            dirEntries(entry, SpanMode.shallow);
+                        }
+                        catch (FileException e)
+                        {
+                            rmdir(entry);
+                        }
+                    }
+                    else
+                    {
+                        try
+                        {
+                            File(entry, "rb");
+                        }
+                        catch (Exception e)
+                        {
+                            remove(entry);
+                        }
+                    }
+                }
+                else version (Posix)
+                {
+                    import std.file : exists, readLink;
+
+                    if (!exists(readLink(entry)))
+                    {
+                        remove(entry);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
             }
         }
     }
 
     foreach (entry; dirEntries(dubBinDir, SpanMode.shallow))
     {
-        if (entry.name.baseName in entriesToRemove && entriesToRemove[entry.name.baseName])
+        if (entry.baseName in entriesToRemove && entriesToRemove[entry.baseName])
         {
             try
             {
-                remove(entry.name);
+                remove(entry);
             }
             catch (FileException e)
             {
