@@ -201,13 +201,11 @@ void downloadDls(in void function(size_t size) totalSizeCallback = null,
 
             version (Posix)
             {
-                import core.sys.posix.sys.stat : chmod;
-                import std.conv : octal;
-                import std.string : toStringz;
+                import std.process : execute;
 
                 if (name == dlsExecutable)
                 {
-                    chmod(memberPath.toStringz(), octal!755);
+                    execute(["chmod", "+x", memberPath]);
                 }
             }
         }
