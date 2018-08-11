@@ -4,6 +4,11 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+### 0.9.0
+- __Changed custom message naming, old messages will stop being sent in a future version__
+- Added license file to distributed archives
+- Enhanced `dls:bootstrap` to not require admin rights on Windows
+
 #### 0.8.3
 - Fixed potential error when creating symlink on Windows if the path contains a space
 
