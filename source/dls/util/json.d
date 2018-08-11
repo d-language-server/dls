@@ -216,6 +216,9 @@ T convertFromJSON(T)(JSONValue json) if (isBoolean!T)
     case JSON_TYPE.UINTEGER:
         return json.uinteger != 0;
 
+    case JSON_TYPE.STRING:
+        return json.str.length > 0;
+
     default:
         return true;
     }
