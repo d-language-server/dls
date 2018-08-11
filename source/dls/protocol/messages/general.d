@@ -46,8 +46,9 @@ InitializeResult initialize(InitializeParams params)
     else
     {
         import dls.updater : cleanup;
+        import std.concurrency : spawn;
 
-        cleanup();
+        spawn(&cleanup);
     }
 
     Tools.initialize();
