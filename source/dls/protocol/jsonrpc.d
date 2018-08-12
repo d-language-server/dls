@@ -105,10 +105,10 @@ void sendError(ErrorCodes error, RequestMessage request, JSONValue data)
 /++ Sends a request or a notification message. +/
 string send(string method, Nullable!JSONValue params = Nullable!JSONValue())
 {
-    import dls.protocol.handlers : hasRegisteredHandler, pushHandler;
+    import dls.protocol.handlers : hasResponseHandler, pushHandler;
     import std.uuid : randomUUID;
 
-    if (hasRegisteredHandler(method))
+    if (hasResponseHandler(method))
     {
         auto id = "dls-" ~ randomUUID().toString();
         pushHandler(id, method);

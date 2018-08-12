@@ -51,14 +51,14 @@ class HandlerNotFoundException : Exception
 }
 
 /++
-Checks if a method has a handler registered for it. Used to determine if the
-server should send a request or a notification to the client (if the method has
-a handler, then the server will expect a response and thus send a request).
+Checks if a method has a response handler registered for it. Used to determine
+if the server should send a request or a notification to the client (if the
+method has a response handler, then the server will expect a response and thus
+send a request instead of a notification).
 +/
-bool hasRegisteredHandler(string method)
+bool hasResponseHandler(string method)
 {
-    return (method in requestHandlers) || (method in notificationHandlers)
-        || (method in responseHandlers);
+    return (method in responseHandlers) !is null;
 }
 
 /++
