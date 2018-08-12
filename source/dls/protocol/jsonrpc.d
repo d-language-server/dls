@@ -110,7 +110,7 @@ string send(string method, Nullable!JSONValue params = Nullable!JSONValue())
 
     if (hasResponseHandler(method))
     {
-        auto id = "dls-" ~ randomUUID().toString();
+        auto id = randomUUID().toString();
         pushHandler(id, method);
         send!RequestMessage(JSONValue(id), method, params, Nullable!ResponseError());
         return id;
