@@ -30,6 +30,7 @@ private immutable changelogUrl = format!"https://github.com/%s/dls/blob/master/C
 void cleanup()
 {
     import dls.bootstrap : dubBinDir;
+    import dub.semver : compareVersions;
     import std.file : FileException, SpanMode, dirEntries, isSymlink, remove,
         rmdirRecurse;
     import std.path : baseName;
@@ -43,7 +44,7 @@ void cleanup()
 
         if (match)
         {
-            if (match[1] < currentVersion)
+            if (compareVersions(currentVersion, match[1]) > 0)
             {
                 foreach (subEntry; dirEntries(entry, SpanMode.shallow))
                 {
