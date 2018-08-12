@@ -46,7 +46,7 @@ void cleanup()
         {
             if (compareVersions(currentVersion, match[1]) > 0)
             {
-                foreach (subEntry; dirEntries(entry, SpanMode.shallow))
+                foreach (string subEntry; dirEntries(entry, SpanMode.shallow))
                 {
                     if (subEntry.baseName !in entriesToRemove)
                     {
@@ -64,7 +64,7 @@ void cleanup()
             }
             else
             {
-                foreach (subEntry; dirEntries(entry, SpanMode.shallow))
+                foreach (string subEntry; dirEntries(entry, SpanMode.shallow))
                 {
                     entriesToRemove[subEntry.baseName] = false;
                 }

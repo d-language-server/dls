@@ -58,9 +58,9 @@ abstract class Server
 {
     import dls.protocol.interfaces : InitializeParams;
 
-    static bool initialized = false;
-    static bool shutdown = false;
-    static bool exit = false;
+    static bool initialized;
+    static bool shutdown;
+    static bool exit;
     private static InitializeParams _initState;
 
     @property static InitializeParams initState()
@@ -154,13 +154,9 @@ abstract class Server
                 continue;
             }
 
-            auto contentLengthResult = headers["Content-Length"];
             static char[] buffer;
-            const contentLength = contentLengthResult.strip().to!size_t;
-            buffer.length = contentLength;
-            const content = stdin.rawRead(buffer);
-
-            handleJSON(content);
+            buffer.length = headers["Content-Length"].strip().to!size_t;
+            handleJSON(stdin.rawRead(buffer));
         }
     }
 
@@ -172,7 +168,6 @@ abstract class Server
             RequestMessage, ResponseMessage, send, sendError;
         import dls.util.json : convertFromJSON;
         import dls.util.logger : logger;
-        import std.algorithm : canFind;
         import std.json : JSONException, JSONValue, parseJSON;
 
         RequestMessage request;
@@ -187,7 +182,7 @@ abstract class Server
                 {
                     request = convertFromJSON!RequestMessage(json);
 
-                    if (!shutdown && (initialized || ["initialize"].canFind(request.method)))
+                    if (!shutdown && (initialized || request.method == "initialize"))
                     {
                         send(request.id, handler!RequestHandler(request.method)(request.params));
                     }

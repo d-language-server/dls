@@ -58,7 +58,7 @@ private shared class LspLogger
         sendMessage(message, MessageType.info);
     }
 
-    void infof(Args...)(in string message, Args args) const
+    void infof(Args...)(in string message, in Args args) const
     {
         import std.format : format;
 
@@ -70,7 +70,7 @@ private shared class LspLogger
         sendMessage(message, MessageType.warning);
     }
 
-    void warningf(Args...)(in string message, Args args) const
+    void warningf(Args...)(in string message, in Args args) const
     {
         import std.format : format;
 
@@ -82,7 +82,7 @@ private shared class LspLogger
         sendMessage(message, MessageType.error);
     }
 
-    void errorf(Args...)(in string message, Args args) const
+    void errorf(Args...)(in string message, in Args args) const
     {
         import std.format : format;
 

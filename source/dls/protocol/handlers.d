@@ -21,7 +21,7 @@
 module dls.protocol.handlers;
 
 import std.json : JSONValue;
-import std.traits : Parameters, ReturnType, isSomeFunction;
+import std.traits : isSomeFunction;
 import std.typecons : Nullable;
 
 alias RequestHandler = Nullable!JSONValue delegate(Nullable!JSONValue);
@@ -39,7 +39,7 @@ at startup time and will never be unregistered.
 +/
 template isHandler(func...)
 {
-    enum isHandler = __traits(compiles, isSomeFunction!func) && isSomeFunction!func;
+    enum isHandler = isSomeFunction!func;
 }
 
 class HandlerNotFoundException : Exception
@@ -70,6 +70,7 @@ void pushHandler(F)(string method, F func)
             && !is(F == NotificationHandler) && !is(F == ResponseHandler))
 {
     import dls.util.json : convertFromJSON;
+    import std.traits : Parameters, ReturnType;
 
     static if ((Parameters!F).length == 1)
     {

@@ -217,11 +217,17 @@ class SymbolTool : Tool
     }
     else version (Posix)
     {
+        //dfmt off
         private static immutable _compilerConfigPaths = [
-            "/Library/D/dmd/bin/dmd.conf", "/etc/dmd.conf", "/usr/local/etc/dmd.conf",
-            "/usr/local/bin/dmd.conf", "/etc/ldc2.conf",
-            "/usr/local/etc/ldc2.conf", "/home/linuxbrew/.linuxbrew/etc/dmd.conf"
+            "/Library/D/dmd/bin/dmd.conf",
+            "/etc/dmd.conf",
+            "/usr/local/etc/dmd.conf",
+            "/usr/local/bin/dmd.conf",
+            "/etc/ldc2.conf",
+            "/usr/local/etc/ldc2.conf",
+            "/home/linuxbrew/.linuxbrew/etc/dmd.conf"
         ];
+        //dfmt on
     }
     else
     {
@@ -423,18 +429,6 @@ class SymbolTool : Tool
 
         auto result = new SymbolInformationTree();
 
-        static string commonName(string name)
-        {
-            switch (name)
-            {
-            case "*constructor*":
-                return "this";
-
-            default:
-                return name;
-            }
-        }
-
         void collectSymbolInformations(Uri symbolUri, const(DSymbol)* symbol,
                 string containerName = "")
         {
@@ -445,7 +439,7 @@ class SymbolTool : Tool
                 return;
             }
 
-            auto name = commonName(symbol.name);
+            auto name = symbol.name == "*constructor*" ? "this" : symbol.name;
 
             if (name.matchFirst(regex(query, "i")))
             {
