@@ -157,10 +157,10 @@ void update()
 
     const latestRelease = parseJSON(get(format!apiEndpoint("releases/latest")));
     const latestVersion = latestRelease["tag_name"].str.stripLeft('v');
-    const releaseDate = SysTime.fromISOExtString(latestRelease["published_at"].str);
+    const releaseTime = SysTime.fromISOExtString(latestRelease["published_at"].str);
 
     if (latestVersion.length == 0 || compareVersions(currentVersion,
-            latestVersion) >= 0 || (Clock.currTime.toUTC() - releaseDate < 1.hours))
+            latestVersion) >= 0 || (Clock.currTime.toUTC() - releaseTime < 1.hours))
     {
         return;
     }
@@ -189,7 +189,7 @@ void update()
         dls.protocol.jsonrpc.send(Dls.UpgradeDls.didStop);
     }
 
-    bool success;
+    bool upgradeSuccessful;
 
     if (canDownloadDls)
     {
@@ -215,7 +215,7 @@ void update()
             };
 
             downloadDls(totalSizeCallback, chunkSizeCallback, extractCallback);
-            success = true;
+            upgradeSuccessful = true;
         }
         catch (Exception e)
         {
@@ -223,7 +223,7 @@ void update()
         }
     }
 
-    if (!success)
+    if (!upgradeSuccessful)
     {
         auto dub = new Dub();
         FetchOptions fetchOpts;
@@ -239,16 +239,16 @@ void update()
             try
             {
                 buildDls(pack.path.toString().normalized, additionalArgs[i]);
-                success = true;
+                upgradeSuccessful = true;
             }
             catch (UpgradeFailedException e)
             {
                 ++i;
             }
         }
-        while (i < additionalArgs.length && !success);
+        while (i < additionalArgs.length && !upgradeSuccessful);
 
-        if (!success)
+        if (!upgradeSuccessful)
         {
             Util.sendMessage(Tr.app_buildError);
             return;

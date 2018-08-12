@@ -977,7 +977,7 @@ private class SymbolVisitor : ASTVisitor
 
         if (accept)
         {
-            end(dec, dec.name.text.dup);
+            doAccept(dec, dec.name.text.dup);
         }
     }
 
@@ -988,7 +988,7 @@ private class SymbolVisitor : ASTVisitor
         return new Location(uri, Document[uri].wordRangeAtLineAndByte(t.line - 1, t.column - 1));
     }
 
-    private void end(in ASTNode node, string name)
+    private void doAccept(in ASTNode node, string name)
     {
         const oldName = containerName;
         containerName = name;
