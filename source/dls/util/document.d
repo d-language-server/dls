@@ -44,32 +44,32 @@ class Document
 
     static void open(in TextDocumentItem textDocument)
     {
-        auto path = Uri.getPath(textDocument.uri);
+        auto uri = new Uri(textDocument.uri);
 
-        if (path !in _documents)
+        if (uri.path !in _documents)
         {
-            _documents[path] = new Document(textDocument);
+            _documents[uri.path] = new Document(textDocument);
         }
     }
 
     static void close(in TextDocumentIdentifier textDocument)
     {
-        auto path = Uri.getPath(textDocument.uri);
+        auto uri = new Uri(textDocument.uri);
 
-        if (path in _documents)
+        if (uri.path in _documents)
         {
-            _documents.remove(path);
+            _documents.remove(uri.path);
         }
     }
 
     static void change(in VersionedTextDocumentIdentifier textDocument,
             TextDocumentContentChangeEvent[] events)
     {
-        auto path = Uri.getPath(textDocument.uri);
+        auto uri = new Uri(textDocument.uri);
 
-        if (path in _documents)
+        if (uri.path in _documents)
         {
-            _documents[path].change(events);
+            _documents[uri.path].change(events);
         }
     }
 

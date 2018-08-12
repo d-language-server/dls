@@ -65,11 +65,6 @@ class Uri
         return _uri;
     }
 
-    static string getPath(DocumentUri uri)
-    {
-        return new Uri(uri).path;
-    }
-
     static Uri fromPath(string path)
     {
         import std.algorithm : startsWith;
