@@ -149,7 +149,7 @@ unittest
     assert(convertFromJSON!JSONValue(JSONValue(42)) == JSONValue(42));
 }
 
-T convertFromJSON(T)(JSONValue json) if (isNumeric!T)
+T convertFromJSON(T)(JSONValue json) if (isNumeric!T || isSomeChar!T)
 {
     import std.conv : to;
     import std.json : JSONException, JSON_TYPE;
@@ -184,6 +184,7 @@ unittest
     assert(convertFromJSON!float(JSONValue(3.0)) == 3.0);
     assert(convertFromJSON!int(JSONValue(42)) == 42);
     assert(convertFromJSON!uint(JSONValue(42U)) == 42U);
+    assert(convertFromJSON!char(JSONValue('a')) == 'a');
 
     // quirky JSON cases
 
@@ -191,6 +192,7 @@ unittest
     assert(convertFromJSON!int(JSONValue(false)) == 0);
     assert(convertFromJSON!int(JSONValue(true)) == 1);
     assert(convertFromJSON!int(JSONValue("42")) == 42);
+    assert(convertFromJSON!char(JSONValue("a")) == 'a');
 }
 
 T convertFromJSON(T)(JSONValue json) if (isBoolean!T)
@@ -238,46 +240,12 @@ unittest
 }
 
 T convertFromJSON(T)(JSONValue json)
-        if (isSomeChar!T || isSomeString!T || is(T : string) || is(T : wstring) || is(T : dstring))
+        if (isSomeString!T || is(T : string) || is(T : wstring) || is(T : dstring))
 {
     import std.conv : to;
-    import std.json : JSONException, JSON_TYPE;
+    import std.json : JSON_TYPE;
 
-    switch (json.type)
-    {
-        static if (!is(T == enum))
-        {
-            static if (!isSomeChar!T)
-            {
-    case JSON_TYPE.NULL:
-                return "null".to!T;
-
-    case JSON_TYPE.FALSE:
-                return "false".to!T;
-
-    case JSON_TYPE.TRUE:
-                return "true".to!T;
-            }
-
-    case JSON_TYPE.FLOAT:
-            return json.floating.to!T;
-
-    case JSON_TYPE.INTEGER:
-            return json.integer.to!T;
-
-    case JSON_TYPE.UINTEGER:
-            return json.uinteger.to!T;
-
-    case JSON_TYPE.OBJECT, JSON_TYPE.ARRAY:
-            return json.toString().to!T;
-        }
-
-    case JSON_TYPE.STRING:
-        return json.str.to!T;
-
-    default:
-        throw new JSONException(json.toString() ~ " is not a string type");
-    }
+    return (json.type == JSON_TYPE.STRING ? json.str : json.toString()).to!T;
 }
 
 unittest
@@ -291,9 +259,6 @@ unittest
     // beware of the fact that JSONValue treats chars as integers; this returns "97" and not "a"
     assert(convertFromJSON!string(JSONValue('a')) != "a");
     assert(convertFromJSON!string(JSONValue("a")) == "a");
-
-    assert(convertFromJSON!char(JSONValue('a')) == 'a');
-    assert(convertFromJSON!char(JSONValue("a")) == 'a');
 
     enum TestEnum : string
     {
