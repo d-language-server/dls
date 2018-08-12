@@ -496,9 +496,9 @@ unittest
     assert(convertToJSON(["hello", "world"]) == JSONValue(["hello", "world"]));
 }
 
-Nullable!JSONValue convertToJSON(T : U[string], U)(T value)
-        if (isAssociativeArray!T)
+Nullable!JSONValue convertToJSON(T : U[K], U, K)(T value) if (isAssociativeArray!T)
 {
+    import std.conv : to;
     import std.typecons : nullable;
 
     auto result = JSONValue();
@@ -506,7 +506,7 @@ Nullable!JSONValue convertToJSON(T : U[string], U)(T value)
     foreach (key; value.keys)
     {
         auto json = convertToJSON(value[key]);
-        result[key] = json.isNull ? JSONValue(null) : json;
+        result[key.to!string] = json.isNull ? JSONValue(null) : json;
     }
 
     return result.nullable;
@@ -514,10 +514,9 @@ Nullable!JSONValue convertToJSON(T : U[string], U)(T value)
 
 unittest
 {
-    auto json = convertToJSON(["hello" : 16, "world" : 42]);
-    assert(!json.isNull);
-    assert(json["hello"].integer == 16);
-    assert(json["world"].integer == 42);
+    assert(convertToJSON(["hello" : 16, "world" : 42]) == JSONValue(["hello" : 16, "world" : 42]));
+    assert(convertToJSON(['a' : 16, 'b' : 42]) == JSONValue(["a" : 16, "b" : 42]));
+    assert(convertToJSON([0 : 16, 1 : 42]) == JSONValue(["0" : 16, "1" : 42]));
 }
 
 /++
