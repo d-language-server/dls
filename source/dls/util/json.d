@@ -44,7 +44,7 @@ T convertFromJSON(T)(JSONValue json) if (is(T == class) || is(T == struct))
 
     if (json.type != JSON_TYPE.OBJECT)
     {
-        return result;
+        throw new JSONException(json.toString() ~ " is not an object type");
     }
 
     foreach (member; __traits(allMembers, T))
@@ -232,11 +232,13 @@ unittest
     assert(convertFromJSON!bool(JSONValue(0.0)) == false);
     assert(convertFromJSON!bool(JSONValue(0)) == false);
     assert(convertFromJSON!bool(JSONValue(0U)) == false);
+    assert(convertFromJSON!bool(JSONValue("")) == false);
 
-    assert(convertFromJSON!bool(JSONValue(new int[0])) == true);
     assert(convertFromJSON!bool(JSONValue(3.0)) == true);
     assert(convertFromJSON!bool(JSONValue(42)) == true);
     assert(convertFromJSON!bool(JSONValue(42U)) == true);
+    assert(convertFromJSON!bool(JSONValue("Hello world")) == true);
+    assert(convertFromJSON!bool(JSONValue(new int[0])) == true);
 }
 
 T convertFromJSON(T)(JSONValue json)
