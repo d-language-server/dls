@@ -285,12 +285,14 @@ T convertFromJSON(T : U[], U)(JSONValue json)
 
     switch (json.type)
     {
-    case JSON_TYPE.NULL, JSON_TYPE.FALSE, JSON_TYPE.TRUE:
+    case JSON_TYPE.NULL:
         return [];
 
-    case JSON_TYPE.FLOAT, JSON_TYPE.INTEGER, JSON_TYPE.UINTEGER,
-            JSON_TYPE.STRING:
-            return [convertFromJSON!U(json)];
+    case JSON_TYPE.FALSE:
+        return [convertFromJSON!U(JSONValue(false))];
+
+    case JSON_TYPE.TRUE:
+        return [convertFromJSON!U(JSONValue(true))];
 
     case JSON_TYPE.ARRAY:
         return json.array
@@ -298,8 +300,11 @@ T convertFromJSON(T : U[], U)(JSONValue json)
             .array
             .to!T;
 
-    default:
+    case JSON_TYPE.OBJECT:
         throw new JSONException(json.toString() ~ " is not a string type");
+
+    default:
+        return [convertFromJSON!U(json)];
     }
 }
 
@@ -310,8 +315,8 @@ unittest
     // quirky JSON cases
 
     assert(convertFromJSON!(int[])(JSONValue(null)) == []);
-    assert(convertFromJSON!(int[])(JSONValue(false)) == []);
-    assert(convertFromJSON!(int[])(JSONValue(true)) == []);
+    assert(convertFromJSON!(int[])(JSONValue(false)) == [0]);
+    assert(convertFromJSON!(bool[])(JSONValue(true)) == [true]);
     assert(convertFromJSON!(float[])(JSONValue(3.0)) == [3.0]);
     assert(convertFromJSON!(int[])(JSONValue(42)) == [42]);
     assert(convertFromJSON!(uint[])(JSONValue(42U)) == [42U]);
