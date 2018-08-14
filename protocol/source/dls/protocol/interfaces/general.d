@@ -20,12 +20,10 @@
 
 module dls.protocol.interfaces.general;
 
-import dls.util.constructor : Constructor;
-import std.json : JSONValue;
-import std.typecons : Nullable;
-
 private class WithDynamicRegistration
 {
+    import std.typecons : Nullable;
+
     Nullable!bool dynamicRegistration;
 }
 
@@ -33,6 +31,8 @@ class InitializeParams
 {
     import dls.protocol.definitions : DocumentUri;
     import dls.protocol.interfaces.workspace : WorkspaceFolder;
+    import dls.util.constructor : Constructor;
+    import std.typecons : Nullable;
 
     static enum Trace : string
     {
@@ -72,6 +72,8 @@ class InitializeParams
 
 class WorkspaceClientCapabilities
 {
+    import std.typecons : Nullable;
+
     static class WorkspaceEdit
     {
         Nullable!bool documentChanges;
@@ -101,6 +103,8 @@ class WorkspaceClientCapabilities
 
 class TextDocumentClientCapabilities
 {
+    import std.typecons : Nullable;
+
     static class Synchronisation
     {
         Nullable!bool dynamicRegistration;
@@ -218,6 +222,9 @@ class TextDocumentClientCapabilities
 
 class ClientCapabilities
 {
+    import std.json : JSONValue;
+    import std.typecons : Nullable;
+
     Nullable!WorkspaceClientCapabilities workspace;
     Nullable!TextDocumentClientCapabilities textDocument;
     Nullable!JSONValue experimental;
@@ -247,6 +254,8 @@ enum TextDocumentSyncKind : uint
 
 private class OptionsBase
 {
+    import std.typecons : Nullable;
+
     Nullable!bool resolveProvider;
 
     this(Nullable!bool resolveProvider = Nullable!bool.init)
@@ -257,6 +266,8 @@ private class OptionsBase
 
 class CompletionOptions : OptionsBase
 {
+    import std.typecons : Nullable;
+
     Nullable!(string[]) triggerCharacters;
 
     this(Nullable!bool resolveProvider = Nullable!bool.init,
@@ -269,6 +280,8 @@ class CompletionOptions : OptionsBase
 
 class SignatureHelpOptions
 {
+    import std.typecons : Nullable;
+
     Nullable!(string[]) triggerCharacters;
 
     this(Nullable!(string[]) triggerCharacters = Nullable!(string[]).init)
@@ -281,6 +294,8 @@ alias CodeLensOptions = OptionsBase;
 
 class DocumentOnTypeFormattingOptions
 {
+    import std.typecons : Nullable;
+
     string firstTriggerCharacter;
     Nullable!(string[]) moreTriggerCharacter;
 
@@ -306,6 +321,8 @@ class ExecuteCommandOptions
 
 class SaveOptions
 {
+    import std.typecons : Nullable;
+
     Nullable!bool includeText;
 
     this(Nullable!bool includeText = Nullable!bool.init)
@@ -324,6 +341,8 @@ class FoldingRangeProviderOptions
 
 class TextDocumentSyncOptions
 {
+    import std.typecons : Nullable;
+
     Nullable!bool openClose;
     Nullable!TextDocumentSyncKind change;
     Nullable!bool willSave;
@@ -345,6 +364,8 @@ class TextDocumentSyncOptions
 
 class StaticRegistrationOptions
 {
+    import std.typecons : Nullable;
+
     Nullable!string id;
 
     this(Nullable!string id = Nullable!string.init)
@@ -355,6 +376,9 @@ class StaticRegistrationOptions
 
 class ServerCapabilities
 {
+    import std.json : JSONValue;
+    import std.typecons : Nullable;
+
     static class Workspace
     {
         static class WorkspaceFolders
@@ -405,5 +429,7 @@ class ServerCapabilities
 
 class CancelParams
 {
+    import std.json : JSONValue;
+
     JSONValue id;
 }
