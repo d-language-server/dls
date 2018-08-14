@@ -36,8 +36,6 @@ void cleanup()
     import std.path : baseName;
     import std.regex : matchFirst;
 
-    bool[string] entriesToRemove;
-
     foreach (string entry; dirEntries(dubBinDir, SpanMode.shallow))
     {
         const match = entry.baseName.matchFirst(`dls-v([\d.]+)`);
@@ -46,27 +44,12 @@ void cleanup()
         {
             if (compareVersions(currentVersion, match[1]) > 0)
             {
-                foreach (string subEntry; dirEntries(entry, SpanMode.shallow))
-                {
-                    if (subEntry.baseName !in entriesToRemove)
-                    {
-                        entriesToRemove[subEntry.baseName] = true;
-                    }
-                }
-
                 try
                 {
                     rmdirRecurse(entry);
                 }
                 catch (FileException e)
                 {
-                }
-            }
-            else
-            {
-                foreach (string subEntry; dirEntries(entry, SpanMode.shallow))
-                {
-                    entriesToRemove[subEntry.baseName] = false;
                 }
             }
         }
@@ -113,20 +96,6 @@ void cleanup()
                 }
             }
             catch (Exception e)
-            {
-            }
-        }
-    }
-
-    foreach (entry; dirEntries(dubBinDir, SpanMode.shallow))
-    {
-        if (entry.baseName in entriesToRemove && entriesToRemove[entry.baseName])
-        {
-            try
-            {
-                remove(entry);
-            }
-            catch (FileException e)
             {
             }
         }
