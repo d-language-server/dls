@@ -908,10 +908,7 @@ private class SymbolVisitor : ASTVisitor
 
     override void visit(const Invariant dec)
     {
-        import dls.util.document : Document;
-
-        tryInsert("invariant", SymbolKind.function_, new Location(uri,
-                Document[uri].wordRangeAtLineAndByte(dec.line, dec.index)), containerName);
+        tryInsert("invariant", SymbolKind.function_, getLocation(dec), containerName);
     }
 
     override void visit(const VariableDeclaration dec)
@@ -979,7 +976,16 @@ private class SymbolVisitor : ASTVisitor
     {
         import dls.util.document : Document;
 
-        return new Location(uri, Document[uri].wordRangeAtLineAndByte(t.line - 1, t.column - 1));
+        static if (__traits(hasMember, T, "line") && __traits(hasMember, T, "column"))
+        {
+            auto range = Document[uri].wordRangeAtLineAndByte(t.line - 1, t.column - 1);
+        }
+        else
+        {
+            auto range = Document[uri].wordRangeAtByte(t.index);
+        }
+
+        return new Location(uri, range);
     }
 
     private void doAccept(in ASTNode node, string name)
