@@ -23,6 +23,7 @@ module dls.protocol.messages.text_document;
 import dls.protocol.definitions;
 import dls.protocol.interfaces.text_document;
 import dls.util.uri : Uri;
+import std.json : JSONValue;
 import std.typecons : Nullable;
 
 void didOpen(DidOpenTextDocumentParams params)
@@ -149,11 +150,26 @@ DocumentHighlight[] documentHighlight(TextDocumentPositionParams params)
     return Tools.symbolTool.highlight(new Uri(params.textDocument.uri), params.position);
 }
 
-SymbolInformation[] documentSymbol(DocumentSymbolParams params)
+JSONValue documentSymbol(DocumentSymbolParams params)
 {
+    import dls.server : Server;
     import dls.tools.tools : Tools;
+    import dls.util.json : convertToJSON;
 
-    return Tools.symbolTool.symbol(new Uri(params.textDocument.uri), null);
+    auto uri = new Uri(params.textDocument.uri);
+
+    if (!Server.initState.capabilities.textDocument.isNull
+            && !Server.initState.capabilities.textDocument.documentSymbol.isNull
+            && !Server.initState.capabilities.textDocument.documentSymbol.hierarchicalDocumentSymbolSupport.isNull
+            && Server.initState.capabilities.textDocument.documentSymbol
+            .hierarchicalDocumentSymbolSupport)
+    {
+        return convertToJSON(Tools.symbolTool.symbol!DocumentSymbol(uri, null));
+    }
+    else
+    {
+        return convertToJSON(Tools.symbolTool.symbol!SymbolInformation(uri, null));
+    }
 }
 
 CodeAction[] codeAction(CodeActionParams params)

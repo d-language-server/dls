@@ -190,7 +190,8 @@ class SymbolTool : Tool
     import dcd.common.messages : AutocompleteRequest, RequestKind;
     import dls.protocol.definitions : Location, MarkupContent, Position,
         WorkspaceEdit;
-    import dls.protocol.interfaces : CompletionItem, DocumentHighlight, Hover;
+    import dls.protocol.interfaces : CompletionItem, DocumentHighlight,
+        DocumentSymbol, Hover;
     import dls.util.uri : Uri;
     import dsymbol.modulecache : ASTAllocator, ModuleCache;
     import dub.dub : Dub;
@@ -473,7 +474,7 @@ class SymbolTool : Tool
         {
             if (Document.uris.map!q{a.path}.canFind(moduleUri.path))
             {
-                result.insert(symbol(moduleUri, query));
+                result.insert(symbol!SymbolInformation(moduleUri, query));
                 continue;
             }
 
@@ -495,7 +496,8 @@ class SymbolTool : Tool
         return result.array;
     }
 
-    SymbolInformation[] symbol(Uri uri, string query)
+    SymbolType[] symbol(SymbolType)(Uri uri, string query)
+            if (is(SymbolType == SymbolInformation) || is(SymbolType == DocumentSymbol))
     {
         import dls.util.document : Document;
         import dls.util.logger : logger;
@@ -503,10 +505,9 @@ class SymbolTool : Tool
             getTokensForParser;
         import dparse.parser : parseModule;
         import dparse.rollback_allocator : RollbackAllocator;
-        import std.array : array;
         import std.functional : toDelegate;
 
-        logger.infof(`Fetching symbols from %s`, uri.path);
+        logger.infof("Fetching symbols from %s", uri.path);
 
         static void doNothing(string, size_t, size_t, string, bool)
         {
@@ -517,11 +518,9 @@ class SymbolTool : Tool
                 LexerConfig(uri.path, StringBehavior.source), &stringCache);
         RollbackAllocator ra;
         const mod = parseModule(tokens, uri.path, &ra, toDelegate(&doNothing));
-        auto result = new SymbolInformationTree();
-        auto visitor = new SymbolVisitor(uri, query, result);
+        auto visitor = new SymbolVisitor!SymbolType(uri, query);
         visitor.visit(mod);
-
-        return result.array;
+        return visitor.result;
     }
 
     CompletionItem[] completion(Uri uri, Position position)
@@ -823,57 +822,60 @@ class SymbolTool : Tool
     }
 }
 
-private class SymbolVisitor : ASTVisitor
+private class SymbolVisitor(SymbolType) : ASTVisitor
 {
-    import dls.protocol.definitions : Location, Position;
+    import dls.protocol.definitions : Location;
+    import dls.protocol.interfaces : DocumentSymbol;
     import dls.util.uri : Uri;
     import std.typecons : nullable;
 
-    private Uri uri;
-    private string query;
-    private SymbolInformationTree result;
-    private string containerName;
+    SymbolType[] result;
+    private Uri _uri;
+    private string _query;
 
-    this(Uri uri, string query, SymbolInformationTree result)
+    static if (is(SymbolType == SymbolInformation))
     {
-        this.uri = uri;
-        this.query = query;
-        this.result = result;
+        private string container;
+    }
+    else
+    {
+        private DocumentSymbol container;
+    }
+
+    this(Uri uri, string query)
+    {
+        _uri = uri;
+        _query = query;
     }
 
     override void visit(const ModuleDeclaration dec)
     {
-        import std.algorithm : joiner, map;
-        import std.array : array;
-        import std.conv : to;
-
-        containerName = dec.moduleName.identifiers.map!q{a.text}.array.dup.joiner(".").to!string;
         dec.accept(this);
     }
 
     override void visit(const ClassDeclaration dec)
     {
-        visitSymbol(dec, SymbolKind.class_, true);
+        visitSymbol(dec, SymbolKind.class_, true, dec.structBody.endLocation);
     }
 
     override void visit(const StructDeclaration dec)
     {
-        visitSymbol(dec, SymbolKind.struct_, true);
+        visitSymbol(dec, SymbolKind.struct_, true, dec.structBody.endLocation);
     }
 
     override void visit(const InterfaceDeclaration dec)
     {
-        visitSymbol(dec, SymbolKind.interface_, true);
+        visitSymbol(dec, SymbolKind.interface_, true, dec.structBody.endLocation);
     }
 
     override void visit(const UnionDeclaration dec)
     {
-        visitSymbol(dec, SymbolKind.interface_, true);
+        visitSymbol(dec, SymbolKind.interface_, true, dec.structBody.endLocation);
     }
 
     override void visit(const EnumDeclaration dec)
     {
-        visitSymbol(dec, SymbolKind.enum_, true);
+        visitSymbol(dec, SymbolKind.enum_, true, dec.enumBody.endLocation);
     }
 
     override void visit(const EnumMember mem)
@@ -888,34 +890,40 @@ private class SymbolVisitor : ASTVisitor
 
     override void visit(const TemplateDeclaration dec)
     {
-        visitSymbol(dec, SymbolKind.function_, true);
+        visitSymbol(dec, SymbolKind.function_, true, dec.endLocation);
     }
 
     override void visit(const FunctionDeclaration dec)
     {
-        visitSymbol(dec, SymbolKind.function_, false);
+        const endLocation = dec.functionBody.bodyStatement !is null
+            ? dec.functionBody.bodyStatement.blockStatement.endLocation
+            : dec.functionBody.blockStatement.endLocation;
+        visitSymbol(dec, SymbolKind.function_, false, endLocation);
     }
 
     override void visit(const Constructor dec)
     {
-        tryInsert("this", SymbolKind.function_, getLocation(dec), containerName);
+        tryInsert("this", SymbolKind.function_, getLocation(dec),
+                dec.functionBody.blockStatement.endLocation);
     }
 
     override void visit(const Destructor dec)
     {
-        tryInsert("~this", SymbolKind.function_, getLocation(dec), containerName);
+        tryInsert("~this", SymbolKind.function_, getLocation(dec),
+                dec.functionBody.blockStatement.endLocation);
     }
 
     override void visit(const Invariant dec)
     {
-        tryInsert("invariant", SymbolKind.function_, getLocation(dec), containerName);
+        tryInsert("invariant", SymbolKind.function_, getLocation(dec),
+                dec.blockStatement.endLocation);
     }
 
     override void visit(const VariableDeclaration dec)
     {
         foreach (d; dec.declarators)
         {
-            tryInsert(d.name.text, SymbolKind.variable, getLocation(d.name), containerName);
+            tryInsert(d.name.text, SymbolKind.variable, getLocation(d.name));
         }
 
         dec.accept(this);
@@ -925,8 +933,7 @@ private class SymbolVisitor : ASTVisitor
     {
         foreach (part; dec.parts)
         {
-            tryInsert(part.identifier.text, SymbolKind.variable,
-                    getLocation(part.identifier), containerName);
+            tryInsert(part.identifier.text, SymbolKind.variable, getLocation(part.identifier));
         }
 
         dec.accept(this);
@@ -942,7 +949,7 @@ private class SymbolVisitor : ASTVisitor
         {
             foreach (id; dec.declaratorIdentifierList.identifiers)
             {
-                tryInsert(id.text, SymbolKind.variable, getLocation(id), containerName);
+                tryInsert(id.text, SymbolKind.variable, getLocation(id));
             }
         }
 
@@ -956,19 +963,30 @@ private class SymbolVisitor : ASTVisitor
 
     override void visit(const AliasThisDeclaration dec)
     {
-        tryInsert(dec.identifier.text, SymbolKind.variable,
-                getLocation(dec.identifier), containerName);
+        tryInsert(dec.identifier.text, SymbolKind.variable, getLocation(dec.identifier));
         dec.accept(this);
     }
 
-    private void visitSymbol(A)(const A dec, SymbolKind kind, bool accept)
-            if (is(A : ASTNode))
+    private void visitSymbol(A : ASTNode)(const A dec, SymbolKind kind,
+            bool accept, size_t endLocation = 0)
     {
-        tryInsert(dec.name.text.dup, kind, getLocation(dec.name), containerName);
+        tryInsert(dec.name.text.dup, kind, getLocation(dec.name), endLocation);
 
         if (accept)
         {
-            doAccept(dec, dec.name.text.dup);
+            auto oldContainer = container;
+
+            static if (is(SymbolType == SymbolInformation))
+            {
+                container = dec.name.text.dup;
+            }
+            else
+            {
+                container = (container is null ? result : container.children)[$ - 1];
+            }
+
+            dec.accept(this);
+            container = oldContainer;
         }
     }
 
@@ -976,34 +994,41 @@ private class SymbolVisitor : ASTVisitor
     {
         import dls.util.document : Document;
 
+        auto document = Document[_uri];
+
         static if (__traits(hasMember, T, "line") && __traits(hasMember, T, "column"))
         {
-            auto range = Document[uri].wordRangeAtLineAndByte(t.line - 1, t.column - 1);
+            auto range = document.wordRangeAtLineAndByte(t.line - 1, t.column - 1);
         }
         else
         {
-            auto range = Document[uri].wordRangeAtByte(t.index);
+            auto range = document.wordRangeAtByte(t.index);
         }
 
-        return new Location(uri, range);
+        return new Location(_uri, range);
     }
 
-    private void doAccept(in ASTNode node, string name)
+    private void tryInsert(string name, SymbolKind kind, Location location, size_t endLocation = 0)
     {
-        const oldName = containerName;
-        containerName = name;
-        node.accept(this);
-        containerName = oldName;
-    }
-
-    private void tryInsert(string name, SymbolKind kind, Location location, string containerName)
-    {
+        import dls.protocol.definitions : Position, Range;
+        import dls.util.document : Document;
         import std.regex : matchFirst, regex;
-        import std.typecons : nullable;
+        import std.typecons : Nullable, nullable;
 
-        if (query is null || name.matchFirst(regex(query, "i")))
+        if (_query is null || name.matchFirst(regex(_query, "i")))
         {
-            result.insert(new SymbolInformation(name, kind, location, containerName.nullable));
+            static if (is(SymbolType == SymbolInformation))
+            {
+                result ~= new SymbolInformation(name, kind, location, container.nullable);
+            }
+            else
+            {
+                auto range = endLocation > 0 ? new Range(location.range.start,
+                        Document[_uri].positionAtByte(endLocation)) : location.range;
+                DocumentSymbol[] children;
+                (container is null ? result : container.children) ~= new DocumentSymbol(name, Nullable!string(),
+                        kind, Nullable!bool(), range, location.range, children.nullable);
+            }
         }
     }
 
