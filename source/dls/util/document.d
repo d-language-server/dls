@@ -137,35 +137,27 @@ class Document
 
     Range wordRangeAtByte(size_t bytePosition)
     {
-        import std.utf : toUTFindex;
+        return wordRangeAtPosition(positionAtByte(bytePosition));
+    }
 
-        auto position = positionAtByte(bytePosition);
-        return wordRangeAtLineAndByte(position.line,
-                toUTFindex(_lines[position.line], position.character));
+    Range wordRangeAtPosition(in Position position)
+    {
+        import std.algorithm : min;
+        import std.regex : matchAll, regex;
+
+        const line = _lines[min(position.line, $ - 1)];
+        const startCharacter = min(position.character, line.length);
+        auto word = matchAll(line[startCharacter .. $], regex(`\w+|.`w));
+        return new Range(new Position(position.line, startCharacter),
+                new Position(position.line, startCharacter + (word ? word.hit.length : 0)));
     }
 
     Range wordRangeAtLineAndByte(size_t lineNumber, size_t bytePosition)
     {
-        import std.algorithm : min;
-        import std.regex : matchAll, regex;
-        import std.utf : UTFException, codeLength, toUTF8, validate;
+        import std.utf : toUCSindex;
 
-        const line = _lines[min(lineNumber, $ - 1)];
-        size_t startCharacter;
-        const lineSlice = line.toUTF8()[0 .. min(bytePosition, $)];
-
-        try
-        {
-            validate(lineSlice);
-            startCharacter = codeLength!wchar(lineSlice);
-        }
-        catch (UTFException e)
-        {
-        }
-
-        auto word = matchAll(line[startCharacter .. $], regex(`\w+|.`w));
-        return new Range(new Position(lineNumber, startCharacter),
-                new Position(lineNumber, startCharacter + (word ? word.hit.length : 0)));
+        return wordRangeAtPosition(new Position(lineNumber,
+                toUCSindex(_lines[lineNumber], bytePosition)));
     }
 
     private void change(in TextDocumentContentChangeEvent[] events)
