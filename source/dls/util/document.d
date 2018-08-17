@@ -114,10 +114,10 @@ class Document
         return linesBytes + characterBytes;
     }
 
-    Range wordRangeAtByte(size_t bytePosition)
+    Position positionAtByte(size_t bytePosition)
     {
         import std.algorithm : min;
-        import std.utf : codeLength;
+        import std.utf : codeLength, toUCSindex;
 
         size_t i;
         size_t bytes;
@@ -131,7 +131,17 @@ class Document
         const lineNumber = i - 1;
         const line = _lines[lineNumber];
         bytes -= codeLength!char(line);
-        return wordRangeAtLineAndByte(lineNumber, min(bytePosition - bytes, line.length));
+        const columnNumber = toUCSindex(line, min(bytePosition - bytes, line.length));
+        return new Position(lineNumber, columnNumber);
+    }
+
+    Range wordRangeAtByte(size_t bytePosition)
+    {
+        import std.utf : toUTFindex;
+
+        auto position = positionAtByte(bytePosition);
+        return wordRangeAtLineAndByte(position.line,
+                toUTFindex(_lines[position.line], position.character));
     }
 
     Range wordRangeAtLineAndByte(size_t lineNumber, size_t bytePosition)
