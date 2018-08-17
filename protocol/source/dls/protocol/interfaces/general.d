@@ -168,6 +168,7 @@ class TextDocumentClientCapabilities
         }
 
         Nullable!SymbolKind symbolKind;
+        Nullable!bool hierarchicalDocumentSymbolSupport;
     }
 
     static class CodeAction : WithDynamicRegistration

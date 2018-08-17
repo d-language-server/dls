@@ -366,6 +366,20 @@ class DocumentSymbol
     Range range;
     Range selectionRange;
     Nullable!(DocumentSymbol[]) children;
+
+    this(string name = string.init, Nullable!string detail = Nullable!string.init,
+            SymbolKind kind = SymbolKind.init, Nullable!bool deprecated_ = Nullable!bool.init,
+            Range range = new Range(), Range selectionRange = new Range(),
+            Nullable!(DocumentSymbol[]) children = Nullable!(DocumentSymbol[]).init)
+    {
+        this.name = name;
+        this.detail = detail;
+        this.kind = kind;
+        this.deprecated_ = deprecated_;
+        this.range = range;
+        this.selectionRange = selectionRange;
+        this.children = children;
+    }
 }
 
 class SymbolInformation
