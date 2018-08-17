@@ -824,7 +824,7 @@ class SymbolTool : Tool
 
 private class SymbolVisitor(SymbolType) : ASTVisitor
 {
-    import dls.protocol.definitions : Location;
+    import dls.protocol.definitions : Range;
     import dls.protocol.interfaces : DocumentSymbol;
     import dls.util.uri : Uri;
     import std.typecons : nullable;
@@ -903,19 +903,19 @@ private class SymbolVisitor(SymbolType) : ASTVisitor
 
     override void visit(const Constructor dec)
     {
-        tryInsert("this", SymbolKind.function_, getLocation(dec),
+        tryInsert("this", SymbolKind.function_, getRange(dec),
                 dec.functionBody.blockStatement.endLocation);
     }
 
     override void visit(const Destructor dec)
     {
-        tryInsert("~this", SymbolKind.function_, getLocation(dec),
+        tryInsert("~this", SymbolKind.function_, getRange(dec),
                 dec.functionBody.blockStatement.endLocation);
     }
 
     override void visit(const Invariant dec)
     {
-        tryInsert("invariant", SymbolKind.function_, getLocation(dec),
+        tryInsert("invariant", SymbolKind.function_, getRange(dec),
                 dec.blockStatement.endLocation);
     }
 
@@ -923,7 +923,7 @@ private class SymbolVisitor(SymbolType) : ASTVisitor
     {
         foreach (d; dec.declarators)
         {
-            tryInsert(d.name.text, SymbolKind.variable, getLocation(d.name));
+            tryInsert(d.name.text, SymbolKind.variable, getRange(d.name));
         }
 
         dec.accept(this);
@@ -933,7 +933,7 @@ private class SymbolVisitor(SymbolType) : ASTVisitor
     {
         foreach (part; dec.parts)
         {
-            tryInsert(part.identifier.text, SymbolKind.variable, getLocation(part.identifier));
+            tryInsert(part.identifier.text, SymbolKind.variable, getRange(part.identifier));
         }
 
         dec.accept(this);
@@ -949,7 +949,7 @@ private class SymbolVisitor(SymbolType) : ASTVisitor
         {
             foreach (id; dec.declaratorIdentifierList.identifiers)
             {
-                tryInsert(id.text, SymbolKind.variable, getLocation(id));
+                tryInsert(id.text, SymbolKind.variable, getRange(id));
             }
         }
 
@@ -963,14 +963,14 @@ private class SymbolVisitor(SymbolType) : ASTVisitor
 
     override void visit(const AliasThisDeclaration dec)
     {
-        tryInsert(dec.identifier.text, SymbolKind.variable, getLocation(dec.identifier));
+        tryInsert(dec.identifier.text, SymbolKind.variable, getRange(dec.identifier));
         dec.accept(this);
     }
 
     private void visitSymbol(A : ASTNode)(const A dec, SymbolKind kind,
             bool accept, size_t endLocation = 0)
     {
-        tryInsert(dec.name.text.dup, kind, getLocation(dec.name), endLocation);
+        tryInsert(dec.name.text.dup, kind, getRange(dec.name), endLocation);
 
         if (accept)
         {
@@ -990,7 +990,7 @@ private class SymbolVisitor(SymbolType) : ASTVisitor
         }
     }
 
-    private Location getLocation(T)(T t)
+    private Range getRange(T)(T t)
     {
         import dls.util.document : Document;
 
@@ -998,19 +998,17 @@ private class SymbolVisitor(SymbolType) : ASTVisitor
 
         static if (__traits(hasMember, T, "line") && __traits(hasMember, T, "column"))
         {
-            auto range = document.wordRangeAtLineAndByte(t.line - 1, t.column - 1);
+            return document.wordRangeAtLineAndByte(t.line - 1, t.column - 1);
         }
         else
         {
-            auto range = document.wordRangeAtByte(t.index);
+            return document.wordRangeAtByte(t.index);
         }
-
-        return new Location(_uri, range);
     }
 
-    private void tryInsert(string name, SymbolKind kind, Location location, size_t endLocation = 0)
+    private void tryInsert(string name, SymbolKind kind, Range range, size_t endLocation = 0)
     {
-        import dls.protocol.definitions : Position, Range;
+        import dls.protocol.definitions : Location, Position;
         import dls.util.document : Document;
         import std.regex : matchFirst, regex;
         import std.typecons : Nullable, nullable;
@@ -1019,15 +1017,17 @@ private class SymbolVisitor(SymbolType) : ASTVisitor
         {
             static if (is(SymbolType == SymbolInformation))
             {
-                result ~= new SymbolInformation(name, kind, location, container.nullable);
+                result ~= new SymbolInformation(name, kind, new Location(_uri,
+                        range), container.nullable);
             }
             else
             {
-                auto range = endLocation > 0 ? new Range(location.range.start,
-                        Document[_uri].positionAtByte(endLocation)) : location.range;
+                auto fullRange = endLocation > 0 ? new Range(range.start,
+                        Document[_uri].positionAtByte(endLocation)) : range;
                 DocumentSymbol[] children;
-                (container is null ? result : container.children) ~= new DocumentSymbol(name, Nullable!string(),
-                        kind, Nullable!bool(), range, location.range, children.nullable);
+                (container is null ? result : container.children) ~= new DocumentSymbol(name,
+                        Nullable!string(), kind, Nullable!bool(), fullRange,
+                        range, children.nullable);
             }
         }
     }
