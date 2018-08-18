@@ -115,8 +115,8 @@ interface Dls
 
     enum UpgradeSelections : string
     {
-        didStart    = "$/dls/upgradeDls/didStart",
-        didStop     = "$/dls/upgradeDls/didStop",
+        didStart    = "$/dls/upgradeSelections/didStart",
+        didStop     = "$/dls/upgradeSelections/didStop",
     }
 }
 //dfmt on

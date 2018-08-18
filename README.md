@@ -166,8 +166,8 @@ DLS uses `$/dls` as a prefix for custom messages.
 |`$/dls/upgradeDls/didChangeTotalSize`  |Notification|`DlsUpgradeSizeParams`|Sent during the download, with the total size of the upgrade download      |
 |`$/dls/upgradeDls/didChangeCurrentSize`|Notification|`DlsUpgradeSizeParams`|Sent during the download, with the current size of the upgrade download    |
 |`$/dls/upgradeDls/didExtract`          |Notification|`TranslationParams`   |Sent when the download is finished and the contents are written on the disk|
-|`$/dls/upgradeDls/didStart`            |Notification|`TranslationParams`   |Sent when DLS starts upgrading dub.selections.json                         |
-|`$/dls/upgradeDls/didStop`             |Notification|`null`                |Sent when DLS has finished upgrading dub.selections.json                   |
+|`$/dls/upgradeSelections/didStart`     |Notification|`TranslationParams`   |Sent when DLS starts upgrading dub.selections.json                         |
+|`$/dls/upgradeSelections/didStop`      |Notification|`null`                |Sent when DLS has finished upgrading dub.selections.json                   |
 
 ```typescript
 interface TranslationParams {
