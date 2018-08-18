@@ -118,7 +118,8 @@ InitializeResult initialize(InitializeParams params)
         textDocumentSync.save = new SaveOptions(false.nullable);
         hoverProvider = Server.initOptions.capabilities.hover;
         completionProvider = Server.initOptions.capabilities.completion
-            ? new CompletionOptions(true.nullable, ["."].nullable) : Nullable!CompletionOptions();
+            ? new CompletionOptions(true.nullable, ["."].nullable).nullable
+            : Nullable!CompletionOptions();
         definitionProvider = Server.initOptions.capabilities.definition;
         documentHighlightProvider = Server.initOptions.capabilities.documentHighlight;
         documentSymbolProvider = Server.initOptions.capabilities.documentSymbol;
