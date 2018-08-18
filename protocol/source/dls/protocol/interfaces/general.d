@@ -45,13 +45,14 @@ class InitializeParams
     {
         static class Capabilities
         {
-            bool completion = true;
             bool hover = true;
-            bool documentFormatting = true;
+            bool completion = true;
             bool definition = true;
             bool documentHighlight = true;
             bool documentSymbol = true;
             bool workspaceSymbol = true;
+            bool documentFormatting = true;
+            bool rename = true;
         }
 
         Capabilities capabilities;

@@ -114,13 +114,14 @@ DLS supports a few custom initialization options in the `InitializeParams` objec
 ```typescript
 initializationOptions: {
     capabilities: {
-        completion?: true;
         hover?: true;
-        documentFormatting?: true;
+        completion?: true;
         definition?: true;
         documentHighlight?: true;
         documentSymbol?: true;
         workspaceSymbol?: true;
+        documentFormatting?: true;
+        rename?: true;
     }
 }
 ```
