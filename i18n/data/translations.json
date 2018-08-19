@@ -16,14 +16,14 @@
     "app.upgradeSelections": {
         "messageType": 3,
         "title": {
-            "en": "$1 was updated",
-            "fr": "$1 a été mis à jour"
+            "en": "Dependencies for project $1 changed",
+            "fr": "Dépendences du projet $1 modifiées"
         }
     },
     "app.upgradeSelections.upgrade": {
         "title": {
-            "en": "Upgrade dependencies",
-            "fr": "Mettre à jour les dépendances"
+            "en": "Upgrade selections",
+            "fr": "Mettre à jour les sélections"
         }
     },
     "app.upgradeSelections.upgrading": {
@@ -36,7 +36,7 @@
         "messageType": 3,
         "title": {
             "en": "DLS version $1 is available (current: $2)",
-            "fr": "DLS version $1 est disponible (actuel: $2)"
+            "fr": "DLS version $1 est disponible (actuelle: $2)"
         }
     },
     "app.upgradeDls.upgrade": {
