@@ -186,7 +186,6 @@ void useCompatSymbolKinds(SymbolKind[] symbols = [])
 
 class SymbolTool : Tool
 {
-    import containers.hashset : HashSet;
     import dcd.common.messages : AutocompleteRequest, RequestKind;
     import dls.protocol.definitions : Location, MarkupContent, Position,
         WorkspaceEdit;
@@ -235,7 +234,7 @@ class SymbolTool : Tool
         private static immutable string[] _compilerConfigPaths;
     }
 
-    private HashSet!string _workspaces;
+    private string[string][string] _workspaceDependencies;
     private ModuleCache _cache;
 
     @property ref ModuleCache cache()
@@ -333,14 +332,34 @@ class SymbolTool : Tool
 
     void importPath(Uri uri)
     {
+        import dls.protocol.messages.window : Util;
+        import dls.util.constants : Tr;
         import dub.platform : BuildPlatform;
         import std.algorithm : map;
         import std.array : array;
         import std.path : baseName, buildNormalizedPath;
 
-        _workspaces.insert(uri.path);
-
         auto d = getDub(uri);
+        string[string] workspaceDeps;
+        auto buildSettingsList = d.project.rootPackage.recipe.buildSettings
+            ~ d.project.rootPackage.recipe.configurations.map!q{a.buildSettings}.array;
+
+        foreach (buildSettings; buildSettingsList)
+        {
+            foreach (depName, depVersion; buildSettings.dependencies)
+            {
+                workspaceDeps[depName] = depVersion.toString();
+            }
+        }
+
+        if (uri.path in _workspaceDependencies && _workspaceDependencies[uri.path] != workspaceDeps)
+        {
+            auto id = Util.sendMessageRequest(Tr.app_upgradeSelections,
+                    [Tr.app_upgradeSelections_upgrade], [d.projectName]);
+            Util.bindMessageToRequestId(id, Tr.app_upgradeSelections, uri);
+        }
+
+        _workspaceDependencies[uri.path] = workspaceDeps;
         auto packages = [d.project.rootPackage];
 
         foreach (sub; d.project.rootPackage.subPackages)
@@ -387,7 +406,7 @@ class SymbolTool : Tool
 
         // logger.infof("Clearing imports from %s", uri.path);
         // Implement ModuleCache.clear() in DCD
-        _workspaces.remove(uri.path);
+        _workspaceDependencies.remove(uri.path);
     }
 
     void upgradeSelections(Uri uri)
@@ -457,11 +476,10 @@ class SymbolTool : Tool
         }
 
         auto moduleUris = appender!(Uri[]);
-        auto workspaces = _workspaces[];
 
         foreach (path; _cache.getImportPaths())
         {
-            if (workspaces.any!(w => path.startsWith(w)))
+            if (_workspaceDependencies.byKey.any!(w => path.startsWith(w)))
             {
                 foreach (entry; dirEntries(path, "*.{d,di}", SpanMode.breadth))
                 {

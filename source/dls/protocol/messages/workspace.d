@@ -79,9 +79,7 @@ void didChangeConfiguration(DidChangeConfigurationParams params)
 
 void didChangeWatchedFiles(DidChangeWatchedFilesParams params)
 {
-    import dls.util.constants : Tr;
     import dls.protocol.interfaces : FileChangeType;
-    import dls.protocol.messages.window : Util;
     import dls.tools.tools : Tools;
     import dls.util.logger : logger;
     import dls.util.uri : Uri;
@@ -90,6 +88,7 @@ void didChangeWatchedFiles(DidChangeWatchedFilesParams params)
     foreach (event; params.changes)
     {
         auto uri = new Uri(event.uri);
+        auto dirUri = Uri.fromPath(dirName(uri.path));
 
         logger.infof("File changed: %s", uri.path);
 
@@ -99,20 +98,17 @@ void didChangeWatchedFiles(DidChangeWatchedFilesParams params)
             if (baseName(dirName(uri.path)) != ".dub"
                     && event.type != FileChangeType.deleted)
             {
-                auto id = Util.sendMessageRequest(Tr.app_upgradeSelections,
-                        [Tr.app_upgradeSelections_upgrade], [uri.path]);
-                Util.bindMessageToRequestId(id, Tr.app_upgradeSelections, uri);
-                Tools.symbolTool.importPath(uri);
+                Tools.symbolTool.importPath(dirUri);
             }
 
             break;
 
         case "dub.selections.json":
-            Tools.symbolTool.importSelections(uri);
+            Tools.symbolTool.importSelections(dirUri);
             break;
 
         default:
-            Tools.analysisTool.updateAnalysisConfigPath(Uri.fromPath(uri.path.dirName));
+            Tools.analysisTool.updateAnalysisConfigPath(dirUri);
             break;
         }
     }
