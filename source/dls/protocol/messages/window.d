@@ -21,8 +21,9 @@
 module dls.protocol.messages.window;
 
 import dls.protocol.interfaces : MessageActionItem;
+import std.typecons : Nullable;
 
-void showMessageRequest(string id, MessageActionItem item)
+void showMessageRequest(string id, Nullable!MessageActionItem item)
 {
     import dls.tools.tools : Tools;
     import dls.util.constants : Tr;
@@ -39,33 +40,36 @@ void showMessageRequest(string id, MessageActionItem item)
         Util.bindMessageToRequestId(data[0], data[1], data[2]);
     }
 
-    switch (Util.messageRequestInfo[id][0])
+    if (!item.isNull)
     {
-    case Tr.app_upgradeSelections:
-        if (item.title == tr(Tr.app_upgradeSelections_upgrade))
+        switch (Util.messageRequestInfo[id][0])
         {
-            auto uri = new Uri(Util.messageRequestInfo[id][1]);
-            Tools.symbolTool.upgradeSelections(uri);
+        case Tr.app_upgradeSelections:
+            if (item.title == tr(Tr.app_upgradeSelections_upgrade))
+            {
+                auto uri = new Uri(Util.messageRequestInfo[id][1]);
+                Tools.symbolTool.upgradeSelections(uri);
+            }
+
+            break;
+
+        case Tr.app_upgradeDls:
+            send(locate(Util.messageRequestInfo[id][1]),
+                    item.title == tr(Tr.app_upgradeDls_upgrade));
+            break;
+
+        case Tr.app_showChangelog:
+            if (item.title == tr(Tr.app_showChangelog_show))
+            {
+                logger.info("Opening changelog in browser");
+                browse(Util.messageRequestInfo[id][1]);
+            }
+
+            break;
+
+        default:
+            assert(false, Util.messageRequestInfo[id][0] ~ " cannot be handled as requests");
         }
-
-        break;
-
-    case Tr.app_upgradeDls:
-        send(locate(Util.messageRequestInfo[id][1]),
-                item.title == tr(Tr.app_upgradeDls_upgrade));
-        break;
-
-    case Tr.app_showChangelog:
-        if (item.title == tr(Tr.app_showChangelog_show))
-        {
-            logger.info("Opening changelog in browser");
-            browse(Util.messageRequestInfo[id][1]);
-        }
-
-        break;
-
-    default:
-        assert(false, Util.messageRequestInfo[id][0] ~ " cannot be handled as requests");
     }
 
     Util.messageRequestInfo.remove(id);
