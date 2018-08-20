@@ -102,7 +102,7 @@ void cleanup()
     }
 }
 
-void update()
+void update(bool autoUpdate)
 {
     import core.time : hours;
     import dls.bootstrap : UpgradeFailedException, apiEndpoint, buildDls,
@@ -134,17 +134,20 @@ void update()
         return;
     }
 
-    auto id = Util.sendMessageRequest(Tr.app_upgradeDls,
-            [Tr.app_upgradeDls_upgrade], [latestVersion, currentVersion]);
-    const threadName = "updater";
-    register(threadName, thisTid());
-    send(ownerTid(), Util.ThreadMessageData(id, Tr.app_upgradeDls, threadName));
-
-    const shouldUpgrade = receiveOnly!bool();
-
-    if (!shouldUpgrade)
+    if (!autoUpdate)
     {
-        return;
+        auto id = Util.sendMessageRequest(Tr.app_upgradeDls,
+                [Tr.app_upgradeDls_upgrade], [latestVersion, currentVersion]);
+        const threadName = "updater";
+        register(threadName, thisTid());
+        send(ownerTid(), Util.ThreadMessageData(id, Tr.app_upgradeDls, threadName));
+
+        const shouldUpgrade = receiveOnly!bool();
+
+        if (!shouldUpgrade)
+        {
+            return;
+        }
     }
 
     dls.protocol.jsonrpc.send(Dls.Compat.upgradeDls_start,
@@ -227,7 +230,7 @@ void update()
     try
     {
         linkDls();
-        id = Util.sendMessageRequest(Tr.app_showChangelog,
+        auto id = Util.sendMessageRequest(Tr.app_showChangelog,
                 [Tr.app_showChangelog_show], [latestVersion]);
         send(ownerTid(), Util.ThreadMessageData(id, Tr.app_showChangelog, changelogUrl));
     }

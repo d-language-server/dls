@@ -55,6 +55,7 @@ class InitializeParams
             bool rename = true;
         }
 
+        bool autoUpdate = true;
         Capabilities capabilities;
 
         mixin Constructor!InitializationOptions;

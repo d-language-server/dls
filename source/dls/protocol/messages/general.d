@@ -152,7 +152,7 @@ void initialized(JSONValue nothing)
         import dls.updater : update;
         import std.concurrency : spawn;
 
-        spawn(&update);
+        spawn(&update, Server.initOptions.autoUpdate);
     }
 
     const didChangeWatchedFiles = Server.initState.capabilities.workspace.didChangeWatchedFiles;
