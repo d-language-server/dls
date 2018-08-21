@@ -40,7 +40,7 @@ Dub packages used (the stuff doing the actual hard work):
 
 ## Usage
 
-Some editors may need DLS to be [installed manually](#installing) (don't worry it's easy).
+Some editors may need DLS to be [installed manually](#installing) (don't worry, it's easy).
 
 - Visual Studio Code: [install the extension](https://marketplace.visualstudio.com/items?itemName=LaurentTreguier.vscode-dls)
 - Atom: [install the package](https://atom.io/packages/ide-dlang)
@@ -68,15 +68,14 @@ Some editors may need DLS to be [installed manually](#installing) (don't worry i
     }
     ```
 
-DLS may or may not work with other editors.
-Given the editor-neutral nature of the LSP, it should work, but given the somewhat buggy nature of DLS, it should have some weird quirks.
+DLS should work with other editors, but it may have some quirks.
 If it's not working with your editor of choice, [submit an issue](https://github.com/d-language-server/dls/issues/new)!
 
 ## Installing
 
 You can run `dub fetch dls` and then `dub run dls:bootstrap` to install dls.
-The second command will output a path to a symbolic link that will always point to the latest DLS executable.
-DLS will offer updates as they come, and update the symbolic link accordingly.
+The second command will output a path that will always point to the latest DLS executable.
+DLS will automatically update itself whenever a new version is out.
 
 ## Client side configuration
 
@@ -109,34 +108,23 @@ All these keys should be formatted as `d.dls.[section].[key]` (e.g. `d.dls.forma
 
 ## Server initialization options
 
-DLS supports a few custom initialization options in the `InitializeParams` object sent with the `initialize` request:
+DLS supports a few custom initialization options in the `InitializeParams.initializationOptions` object sent with the `initialize` request:
 
 ```typescript
-initializationOptions: {
-    capabilities: {
-        hover?: true;
-        completion?: true;
-        definition?: true;
-        documentHighlight?: true;
-        documentSymbol?: true;
-        workspaceSymbol?: true;
-        documentFormatting?: true;
-        rename?: true;
+interface InitializationOptions: {
+    autoUpdate?: boolean;
+    capabilities?: {
+        hover?: boolean;
+        completion?: boolean;
+        definition?: boolean;
+        documentHighlight?: boolean;
+        documentSymbol?: boolean;
+        workspaceSymbol?: boolean;
+        documentFormatting?: boolean;
+        rename?: boolean;
     }
 }
 ```
-
-## The `bootstrap` subpackage and the update system
-
-In order to simplify the process of updating DLS, an update system is implemented.
-However, the extension will need to locate a first version of DLS; this is where `dls:bootstrap` comes in.
-The steps are:
-
-- `dub fetch dls` will fetch the latest version of DLS
-- `dub run --quiet dls:bootstrap` will output the path to a symlink pointing to the latest DLS executable
-
-Nothing specific is required on the client's part regarding updates: the server will send notifications to the user when an update is available, and download/build the new version (in parallel to responding to requests).
-Binary downloads are available and should be picked up automatically for Windows, macOS and Linux in both x86 and x86_64 flavors.
 
 ## Caveats
 
@@ -151,13 +139,12 @@ The client should watch these files for the server to work properly:
 If the client supports dynamic registration of the `workspace/didChangeWatchedFiles` method, then the server will automatically register file watching.
 If the client doesn't support dynamic registration however, the client-side extension will need to manually do it.
 The server needs to know at least when `dub.selections.json` files change to properly provide completion support.
-If `dub.json` and `dub.sdl` are also watched, `dub.selections.json` will automatically be regenerated and then it will be used for completion support.
-Watching `*.ini` allows DLS to monitor D-Scanner config files, even if the name is changed in the config and isn't precisly `dscanner.ini`.
+If `dub.json` and `dub.sdl` are also watched, `dub.selections.json` can be regenerated on demand.
+Watching `*.ini` allows DLS to monitor D-Scanner config files, even if the name is changed in the config and isn't `dscanner.ini`.
 
 ## Custom messages
 
-The LSP defines messages with methods starting in `$/` to be implementation dependant.
-DLS uses `$/dls` as a prefix for custom messages.
+Since the LSP defines messages with methods starting in `$/` to be implementation dependant, DLS uses `$/dls` as a prefix for custom messages.
 
 |Message                                |Type        |Parameters            |Description                                                                |
 |---------------------------------------|------------|----------------------|---------------------------------------------------------------------------|
@@ -184,4 +171,4 @@ interface DlsUpgradeSizeParams extends TranslationParams {
 ### Translations
 
 The file `i18n/data/translations.json` contains localization strings.
-Adding new strings is straightforward, simply add new entries in the `title` objects with the locale as key and the translation as value.
+Adding new strings is straightforward, simply add new entries in the `title` objects with the locale identifier as key and the translated string as value.
