@@ -51,5 +51,5 @@ deploy:
   skip_cleanup: true
   on:
     condition: $BUILD = release
-    repo: LaurentTreguier/dls
+    repo: d-language-server/dls
     tags: true

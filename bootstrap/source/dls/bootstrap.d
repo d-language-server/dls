@@ -22,8 +22,7 @@ module dls.bootstrap;
 
 import std.format : format;
 
-immutable repoBase = import("repo.txt");
-immutable apiEndpoint = format!"https://api.github.com/repos/%s/dls/%%s"(repoBase);
+immutable apiEndpoint = "https://api.github.com/repos/d-language-server/dls/%s";
 
 version (Windows)
 {

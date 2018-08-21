@@ -20,12 +20,8 @@
 
 module dls.updater;
 
-import dls.bootstrap : repoBase;
-import std.format : format;
-
 private enum descriptionJson = import("description.json");
-private immutable changelogUrl = format!"https://github.com/%s/dls/blob/master/CHANGELOG.md"(
-        repoBase);
+private immutable changelogUrl = "https://github.com/d-language-server/dls/blob/master/CHANGELOG.md";
 
 void cleanup()
 {
@@ -121,6 +117,7 @@ void update(bool autoUpdate)
     import std.algorithm : stripLeft;
     import std.concurrency : ownerTid, receiveOnly, register, send, thisTid;
     import std.datetime : Clock, SysTime;
+    import std.format : format;
     import std.json : parseJSON;
     import std.net.curl : get;
 
