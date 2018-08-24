@@ -6,9 +6,6 @@
 	"description": "DLS bootstrap utility",
 	"copyright": "Copyright © 2018, Laurent Tréguier",
 	"license": "GPL-3.0 or later",
-	"stringImportPaths": [
-		"data"
-	],
 	"dependencies": {
 		"dls:i18n": "*"
 	}
