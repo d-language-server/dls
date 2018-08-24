@@ -4,6 +4,12 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+### 0.10.0
+- Added hierarchical symbols support
+- Enhanced updating to be automatic
+- Enhanced `Upgrade selections` message to be shown only when dependencies actually changed
+- Fixed wrong position when searching for invariants in symbol search
+
 ### 0.9.0
 - __Changed custom message naming, old messages will stop being sent in a future version__
 - Added license file to distributed archives
