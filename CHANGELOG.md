@@ -4,6 +4,9 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.10.2
+- Fixed module constructors/destructors missing in symbol search
+
 #### 0.10.1
 - Fixed crashes with document symbols
 
