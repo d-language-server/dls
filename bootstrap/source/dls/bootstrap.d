@@ -20,8 +20,6 @@
 
 module dls.bootstrap;
 
-import std.format : format;
-
 immutable apiEndpoint = "https://api.github.com/repos/d-language-server/dls/%s";
 
 version (Windows)
@@ -58,6 +56,8 @@ private string downloadVersion;
 
 shared static this()
 {
+    import std.format : format;
+
     version (X86_64)
     {
         immutable arch = "x86_64";
@@ -81,6 +81,7 @@ shared static this()
     import core.time : hours;
     import std.algorithm : min;
     import std.datetime : Clock, SysTime;
+    import std.format : format;
     import std.json : parseJSON;
     import std.net.curl : get;
 
@@ -121,6 +122,7 @@ void downloadDls(in void function(size_t size) totalSizeCallback = null,
     import std.array : appender;
     import std.net.curl : HTTP;
     import std.file : exists, isFile, mkdirRecurse, remove, rmdirRecurse, write;
+    import std.format : format;
     import std.path : buildNormalizedPath;
     import std.zip : ZipArchive;
 
@@ -239,6 +241,7 @@ void buildDls(in string dlsDir, in string[] additionalArgs = [])
 string linkDls()
 {
     import std.file : exists, isFile, mkdirRecurse, remove;
+    import std.format : format;
     import std.path : baseName, buildNormalizedPath;
     import std.string : endsWith;
 
