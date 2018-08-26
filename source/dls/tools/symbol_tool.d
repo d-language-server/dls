@@ -23,6 +23,7 @@ module dls.tools.symbol_tool;
 import dls.protocol.interfaces : CompletionItemKind, SymbolKind,
     SymbolInformation;
 import dls.tools.tool : Tool;
+import dls.util.uri : Uri;
 import dparse.ast;
 import dsymbol.symbol : CompletionKind;
 import std.container : RedBlackTree;
@@ -191,7 +192,6 @@ class SymbolTool : Tool
         WorkspaceEdit;
     import dls.protocol.interfaces : CompletionItem, DocumentHighlight,
         DocumentSymbol, Hover;
-    import dls.util.uri : Uri;
     import dsymbol.modulecache : ASTAllocator, ModuleCache;
     import dub.dub : Dub;
 
@@ -805,39 +805,6 @@ class SymbolTool : Tool
         d.loadPackage();
         return d;
     }
-
-    private static bool openDocument(Uri docUri)
-    {
-        import dls.protocol.definitions : TextDocumentItem;
-        import dls.util.document : Document;
-        import std.file : readText;
-
-        auto closed = Document[docUri] is null;
-
-        if (closed)
-        {
-            auto doc = new TextDocumentItem();
-            doc.uri = docUri;
-            doc.languageId = "d";
-            doc.text = readText(docUri.path);
-            Document.open(doc);
-        }
-
-        return closed;
-    }
-
-    private static void closeDocument(Uri docUri, bool wasClosed)
-    {
-        import dls.util.document : Document;
-        import dls.protocol.definitions : TextDocumentIdentifier;
-
-        if (wasClosed)
-        {
-            auto docIdentifier = new TextDocumentIdentifier();
-            docIdentifier.uri = docUri;
-            Document.close(docIdentifier);
-        }
-    }
 }
 
 private class SymbolVisitor(SymbolType) : ASTVisitor
@@ -1012,16 +979,20 @@ private class SymbolVisitor(SymbolType) : ASTVisitor
     {
         import dls.util.document : Document;
 
+        const closed = openDocument(_uri);
         auto document = Document[_uri];
 
         static if (__traits(hasMember, T, "line") && __traits(hasMember, T, "column"))
         {
-            return document.wordRangeAtLineAndByte(t.line - 1, t.column - 1);
+            auto range = document.wordRangeAtLineAndByte(t.line - 1, t.column - 1);
         }
         else
         {
-            return document.wordRangeAtByte(t.index);
+            auto range = document.wordRangeAtByte(t.index);
         }
+
+        closeDocument(_uri, closed);
+        return range;
     }
 
     private void tryInsert(string name, SymbolKind kind, Range range, size_t endLocation = 0)
@@ -1040,9 +1011,11 @@ private class SymbolVisitor(SymbolType) : ASTVisitor
             }
             else
             {
+                const closed = openDocument(_uri);
                 auto fullRange = endLocation > 0 ? new Range(range.start,
                         Document[_uri].positionAtByte(endLocation)) : range;
                 DocumentSymbol[] children;
+                closeDocument(_uri, closed);
                 (container is null ? result : container.children) ~= new DocumentSymbol(name,
                         Nullable!string(), kind, Nullable!bool(), fullRange,
                         range, children.nullable);
@@ -1051,4 +1024,37 @@ private class SymbolVisitor(SymbolType) : ASTVisitor
     }
 
     alias visit = ASTVisitor.visit;
+}
+
+private static bool openDocument(Uri docUri)
+{
+    import dls.protocol.definitions : TextDocumentItem;
+    import dls.util.document : Document;
+    import std.file : readText;
+
+    auto closed = Document[docUri] is null;
+
+    if (closed)
+    {
+        auto doc = new TextDocumentItem();
+        doc.uri = docUri;
+        doc.languageId = "d";
+        doc.text = readText(docUri.path);
+        Document.open(doc);
+    }
+
+    return closed;
+}
+
+private static void closeDocument(Uri docUri, bool wasClosed)
+{
+    import dls.util.document : Document;
+    import dls.protocol.definitions : TextDocumentIdentifier;
+
+    if (wasClosed)
+    {
+        auto docIdentifier = new TextDocumentIdentifier();
+        docIdentifier.uri = docUri;
+        Document.close(docIdentifier);
+    }
 }
