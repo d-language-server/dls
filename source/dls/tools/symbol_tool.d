@@ -840,27 +840,32 @@ private class SymbolVisitor(SymbolType) : ASTVisitor
 
     override void visit(const ClassDeclaration dec)
     {
-        visitSymbol(dec, SymbolKind.class_, true, dec.structBody.endLocation);
+        visitSymbol(dec, SymbolKind.class_, true, dec.structBody is null ? 0
+                : dec.structBody.endLocation);
     }
 
     override void visit(const StructDeclaration dec)
     {
-        visitSymbol(dec, SymbolKind.struct_, true, dec.structBody.endLocation);
+        visitSymbol(dec, SymbolKind.struct_, true, dec.structBody is null ? 0
+                : dec.structBody.endLocation);
     }
 
     override void visit(const InterfaceDeclaration dec)
     {
-        visitSymbol(dec, SymbolKind.interface_, true, dec.structBody.endLocation);
+        visitSymbol(dec, SymbolKind.interface_, true, dec.structBody is null ? 0
+                : dec.structBody.endLocation);
     }
 
     override void visit(const UnionDeclaration dec)
     {
-        visitSymbol(dec, SymbolKind.interface_, true, dec.structBody.endLocation);
+        visitSymbol(dec, SymbolKind.interface_, true, dec.structBody is null ? 0
+                : dec.structBody.endLocation);
     }
 
     override void visit(const EnumDeclaration dec)
     {
-        visitSymbol(dec, SymbolKind.enum_, true, dec.enumBody.endLocation);
+        visitSymbol(dec, SymbolKind.enum_, true, dec.enumBody is null ? 0 : dec
+                .enumBody.endLocation);
     }
 
     override void visit(const EnumMember mem)
@@ -880,22 +885,17 @@ private class SymbolVisitor(SymbolType) : ASTVisitor
 
     override void visit(const FunctionDeclaration dec)
     {
-        const endLocation = dec.functionBody.bodyStatement !is null
-            ? dec.functionBody.bodyStatement.blockStatement.endLocation
-            : dec.functionBody.blockStatement.endLocation;
-        visitSymbol(dec, SymbolKind.function_, false, endLocation);
+        visitSymbol(dec, SymbolKind.function_, false, getFunctionEndLocation(dec));
     }
 
     override void visit(const Constructor dec)
     {
-        tryInsert("this", SymbolKind.function_, getRange(dec),
-                dec.functionBody.blockStatement.endLocation);
+        tryInsert("this", SymbolKind.function_, getRange(dec), getFunctionEndLocation(dec));
     }
 
     override void visit(const Destructor dec)
     {
-        tryInsert("~this", SymbolKind.function_, getRange(dec),
-                dec.functionBody.blockStatement.endLocation);
+        tryInsert("~this", SymbolKind.function_, getRange(dec), getFunctionEndLocation(dec));
     }
 
     override void visit(const Invariant dec)
@@ -950,6 +950,20 @@ private class SymbolVisitor(SymbolType) : ASTVisitor
     {
         tryInsert(dec.identifier.text, SymbolKind.variable, getRange(dec.identifier));
         dec.accept(this);
+    }
+
+    private size_t getFunctionEndLocation(A : ASTNode)(const A dec)
+    {
+        size_t endLocation;
+
+        if (dec.functionBody !is null)
+        {
+            endLocation = dec.functionBody.bodyStatement !is null
+                ? dec.functionBody.bodyStatement.blockStatement.endLocation
+                : dec.functionBody.blockStatement.endLocation;
+        }
+
+        return endLocation;
     }
 
     private void visitSymbol(A : ASTNode)(const A dec, SymbolKind kind,
