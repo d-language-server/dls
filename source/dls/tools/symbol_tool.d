@@ -890,12 +890,32 @@ private class SymbolVisitor(SymbolType) : ASTVisitor
 
     override void visit(const Constructor dec)
     {
-        tryInsert("this", SymbolKind.function_, getRange(dec), getFunctionEndLocation(dec));
+        tryInsertFunction(dec, "this");
     }
 
     override void visit(const Destructor dec)
     {
-        tryInsert("~this", SymbolKind.function_, getRange(dec), getFunctionEndLocation(dec));
+        tryInsertFunction(dec, "~this");
+    }
+
+    override void visit(const StaticConstructor dec)
+    {
+        tryInsertFunction(dec, "static this");
+    }
+
+    override void visit(const StaticDestructor dec)
+    {
+        tryInsertFunction(dec, "static ~this");
+    }
+
+    override void visit(const SharedStaticConstructor dec)
+    {
+        tryInsertFunction(dec, "shared static this");
+    }
+
+    override void visit(const SharedStaticDestructor dec)
+    {
+        tryInsertFunction(dec, "shared static ~this");
     }
 
     override void visit(const Invariant dec)
@@ -1035,6 +1055,11 @@ private class SymbolVisitor(SymbolType) : ASTVisitor
                         range, children.nullable);
             }
         }
+    }
+
+    private void tryInsertFunction(A : ASTNode)(const A dec, string name)
+    {
+        tryInsert(name, SymbolKind.function_, getRange(dec), getFunctionEndLocation(dec));
     }
 
     alias visit = ASTVisitor.visit;
