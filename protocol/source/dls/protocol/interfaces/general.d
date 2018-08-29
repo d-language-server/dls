@@ -107,15 +107,14 @@ class TextDocumentClientCapabilities
 {
     import std.typecons : Nullable;
 
-    static class Synchronisation
+    static class Synchronisation : WithDynamicRegistration
     {
-        Nullable!bool dynamicRegistration;
         Nullable!bool willSave;
         Nullable!bool willSaveWaitUntil;
         Nullable!bool didSave;
     }
 
-    static class Completion
+    static class Completion : WithDynamicRegistration
     {
         static class CompletionItem
         {
@@ -135,7 +134,6 @@ class TextDocumentClientCapabilities
             Nullable!(CompletionItemKind[]) valueSet;
         }
 
-        Nullable!bool dynamicRegistration;
         Nullable!CompletionItem completionItem;
         Nullable!CompletionItemKind completionItemKind;
         Nullable!bool contextSupport;
