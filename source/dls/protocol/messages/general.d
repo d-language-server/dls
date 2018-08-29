@@ -39,6 +39,7 @@ InitializeResult initialize(InitializeParams params)
     logger.info("Initializing server");
     Server.initialized = true;
     Server.initState = params;
+    Tools.initialize();
 
     debug
     {
@@ -50,8 +51,6 @@ InitializeResult initialize(InitializeParams params)
 
         spawn(&cleanup);
     }
-
-    Tools.initialize();
 
     if (params.capabilities.textDocument.completion.isNull
             || params.capabilities.textDocument.completion.completionItemKind.isNull
@@ -177,10 +176,12 @@ void initialized(JSONValue nothing)
 JSONValue shutdown(JSONValue nothing)
 {
     import dls.server : Server;
+    import dls.tools.tools : Tools;
     import dls.util.logger : logger;
 
     logger.info("Shutting down server");
     Server.shutdown = true;
+    Tools.shutdown();
     return JSONValue(null);
 }
 
