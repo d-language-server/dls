@@ -22,6 +22,7 @@ module dls.protocol.interfaces.text_document;
 
 import dls.protocol.definitions;
 import dls.protocol.interfaces.client : TextDocumentRegistrationOptions;
+import std.json : JSONValue;
 
 class DidOpenTextDocumentParams
 {
@@ -159,7 +160,6 @@ enum InsertTextFormat : uint
 
 class CompletionItem
 {
-    import std.json : JSONValue;
     import std.typecons : Nullable;
 
     string label;
@@ -471,11 +471,12 @@ class CodeAction
     Nullable!Command command;
 }
 
+alias CodeActionRegistrationOptions = JSONValue;
+
 alias CodeLensParams = ParamsBase;
 
 class CodeLens
 {
-    import std.json : JSONValue;
     import std.typecons : Nullable;
 
     Range range;
@@ -655,7 +656,14 @@ class RenameParams : ParamsBase
     mixin Constructor!RenameParams;
 }
 
-alias FoldingRangeRequestParams = ParamsBase;
+class RenameRegistrationOptions : TextDocumentRegistrationOptions
+{
+    import std.typecons : Nullable;
+
+    Nullable!bool prepareProvider;
+}
+
+alias FoldingRangeParams = ParamsBase;
 
 enum FoldingRangeKind : string
 {

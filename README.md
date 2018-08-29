@@ -6,7 +6,7 @@
 |---|------|--------|
 |[![DUB](https://img.shields.io/dub/v/dls.svg?style=flat-square)](https://code.dlang.org/packages/dls)|[![Travis](https://img.shields.io/travis/d-language-server/dls.svg?style=flat-square)](https://travis-ci.org/d-language-server/dls)|[![AppVeyor](https://img.shields.io/appveyor/ci/dlanguageserver/dls.svg?style=flat-square)](https://ci.appveyor.com/project/dlanguageserver/dls)
 
-### LSP compliance: `3.10`
+### LSP compliance: `3.12`
 
 _This is a work in progress. There ~~might~~ will be bugs and crashes..._
 

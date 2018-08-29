@@ -175,6 +175,8 @@ class TextDocumentClientCapabilities
     {
         static class CodeActionLiteralSupport
         {
+            import dls.util.constructor : Constructor;
+
             static class CodeActionKind
             {
                 import dls.protocol.interfaces.text_document : CodeActionKind;
@@ -183,9 +185,16 @@ class TextDocumentClientCapabilities
             }
 
             CodeActionKind codeActionKind;
+
+            mixin Constructor!CodeActionLiteralSupport;
         }
 
         Nullable!CodeActionLiteralSupport codeActionLiteralSupport;
+    }
+
+    static class Rename : WithDynamicRegistration
+    {
+        Nullable!bool prepareSupport;
     }
 
     static class PublishDiagnostics
@@ -212,11 +221,11 @@ class TextDocumentClientCapabilities
     Nullable!WithDynamicRegistration definition;
     Nullable!WithDynamicRegistration typeDefinition;
     Nullable!WithDynamicRegistration implementation;
-    Nullable!WithDynamicRegistration codeAction; // don't use CodeAction yet
+    Nullable!WithDynamicRegistration codeAction; // CodeAction poses some problems
     Nullable!WithDynamicRegistration codeLens;
     Nullable!WithDynamicRegistration documentLink;
     Nullable!WithDynamicRegistration colorProvider;
-    Nullable!WithDynamicRegistration rename;
+    Nullable!Rename rename;
     Nullable!PublishDiagnostics publishDiagnostics;
     Nullable!FoldingRange foldingRange;
 }
@@ -291,6 +300,14 @@ class SignatureHelpOptions
     }
 }
 
+class CodeActionOptions
+{
+    import dls.protocol.interfaces.text_document : CodeActionKind;
+    import std.typecons : Nullable;
+
+    Nullable!(CodeActionKind[]) codeActionKinds;
+}
+
 alias CodeLensOptions = OptionsBase;
 
 class DocumentOnTypeFormattingOptions
@@ -306,6 +323,13 @@ class DocumentOnTypeFormattingOptions
         this.firstTriggerCharacter = firstTriggerCharacter;
         this.moreTriggerCharacter = moreTriggerCharacter;
     }
+}
+
+class RenameOptions
+{
+    import std.typecons : Nullable;
+
+    Nullable!bool prepareProvider;
 }
 
 alias DocumentLinkOptions = OptionsBase;
@@ -414,12 +438,12 @@ class ServerCapabilities
     Nullable!bool documentHighlightProvider;
     Nullable!bool documentSymbolProvider;
     Nullable!bool workspaceSymbolProvider;
-    Nullable!bool codeActionProvider;
+    Nullable!JSONValue codeActionProvider;
     Nullable!CodeLensOptions codeLensProvider;
     Nullable!bool documentFormattingProvider;
     Nullable!bool documentRangeFormattingProvider;
     Nullable!DocumentOnTypeFormattingOptions documentOnTypeFormattingProvider;
-    Nullable!bool renameProvider;
+    Nullable!JSONValue renameProvider;
     Nullable!DocumentLinkOptions documentLinkProvider;
     Nullable!JSONValue colorProvider;
     Nullable!JSONValue foldingRangeProvider;

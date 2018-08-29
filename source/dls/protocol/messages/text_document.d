@@ -22,7 +22,6 @@ module dls.protocol.messages.text_document;
 
 import dls.protocol.definitions;
 import dls.protocol.interfaces.text_document;
-import dls.util.uri : Uri;
 import std.json : JSONValue;
 import std.typecons : Nullable;
 
@@ -33,6 +32,7 @@ void didOpen(DidOpenTextDocumentParams params)
     import dls.tools.tools : Tools;
     import dls.util.document : Document;
     import dls.util.logger : logger;
+    import dls.util.uri : Uri;
 
     if (params.textDocument.languageId == "d")
     {
@@ -48,6 +48,7 @@ void didChange(DidChangeTextDocumentParams params)
 {
     import dls.util.document : Document;
     import dls.util.logger : logger;
+    import dls.util.uri : Uri;
 
     auto uri = new Uri(params.textDocument.uri);
     logger.infof("Document changed: %s", uri.path);
@@ -70,6 +71,7 @@ void didSave(DidSaveTextDocumentParams params)
     import dls.tools.tools : Tools;
     import dls.util.document : Document;
     import dls.util.logger : logger;
+    import dls.util.uri : Uri;
 
     auto uri = new Uri(params.textDocument.uri);
 
@@ -87,6 +89,7 @@ void didClose(DidCloseTextDocumentParams params)
     import dls.protocol.messages.methods : TextDocument;
     import dls.util.document : Document;
     import dls.util.logger : logger;
+    import dls.util.uri : Uri;
 
     auto uri = new Uri(params.textDocument.uri);
     logger.infof("Document closed: %s", uri.path);
@@ -97,6 +100,7 @@ void didClose(DidCloseTextDocumentParams params)
 CompletionItem[] completion(CompletionParams params)
 {
     import dls.tools.tools : Tools;
+    import dls.util.uri : Uri;
 
     return Tools.symbolTool.completion(new Uri(params.textDocument.uri), params.position);
 }
@@ -112,6 +116,7 @@ CompletionItem completionItem_resolve(CompletionItem item)
 Hover hover(TextDocumentPositionParams params)
 {
     import dls.tools.tools : Tools;
+    import dls.util.uri : Uri;
 
     return Tools.symbolTool.hover(new Uri(params.textDocument.uri), params.position);
 }
@@ -124,6 +129,7 @@ SignatureHelp signatureHelp(TextDocumentPositionParams params)
 Location definition(TextDocumentPositionParams params)
 {
     import dls.tools.tools : Tools;
+    import dls.util.uri : Uri;
 
     return Tools.symbolTool.definition(new Uri(params.textDocument.uri), params.position);
 }
@@ -146,6 +152,7 @@ Location[] references(ReferenceParams params)
 DocumentHighlight[] documentHighlight(TextDocumentPositionParams params)
 {
     import dls.tools.tools : Tools;
+    import dls.util.uri : Uri;
 
     return Tools.symbolTool.highlight(new Uri(params.textDocument.uri), params.position);
 }
@@ -155,6 +162,7 @@ JSONValue documentSymbol(DocumentSymbolParams params)
     import dls.server : Server;
     import dls.tools.tools : Tools;
     import dls.util.json : convertToJSON;
+    import dls.util.uri : Uri;
 
     auto uri = new Uri(params.textDocument.uri);
 
@@ -212,6 +220,7 @@ ColorPresentation[] colorPresentation(ColorPresentationParams params)
 TextEdit[] formatting(DocumentFormattingParams params)
 {
     import dls.tools.tools : Tools;
+    import dls.util.uri : Uri;
 
     auto uri = new Uri(params.textDocument.uri);
     return Tools.formatTool.formatting(uri, params.options);
@@ -230,12 +239,20 @@ TextEdit[] onTypeFormatting(DocumentOnTypeFormattingParams params)
 WorkspaceEdit rename(RenameParams params)
 {
     import dls.tools.tools : Tools;
+    import dls.util.uri : Uri;
 
     return Tools.symbolTool.rename(new Uri(params.textDocument.uri),
             params.position, params.newName);
 }
 
-FoldingRange[] foldingRanges(FoldingRangeRequestParams params)
+Range prepareRename(TextDocumentPositionParams params)
+{
+    import dls.util.uri : Uri;
+
+    return null;
+}
+
+FoldingRange[] foldingRange(FoldingRangeParams params)
 {
     return [];
 }

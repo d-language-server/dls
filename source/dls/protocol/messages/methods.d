@@ -89,6 +89,8 @@ enum TextDocument : string
     rangeFormatting       = "textDocument/rangeFormatting",
     onTypeFormatting      = "textDocument/onTypeFormatting",
     rename                = "textDocument/rename",
+    prepareRename         = "textDocument/prepareRename",
+    foldingRange          = "textDocument/foldingRange",
 }
 
 interface Dls
