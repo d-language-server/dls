@@ -1,5 +1,5 @@
 
-# Created by https://www.gitignore.io/api/d,visualstudiocode
+# Created by https://www.gitignore.io/api/d
 
 ### D ###
 # Compiled Object files
@@ -27,16 +27,9 @@ docs/
 # Code coverage
 *.lst
 
-### VisualStudioCode ###
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
-.history
 
-# End of https://www.gitignore.io/api/d,visualstudiocode
+# End of https://www.gitignore.io/api/d
 
 /dls
-/dls-test-library*
+/dls-test-library
 /resources/icon.png
