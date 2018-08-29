@@ -38,6 +38,13 @@ final class Tools
         formatTool = new FormatTool();
     }
 
+    static void shutdown()
+    {
+        destroy(symbolTool);
+        destroy(analysisTool);
+        destroy(formatTool);
+    }
+
     static void setConfiguration(Configuration c)
     {
         import dls.tools.tool : Tool;

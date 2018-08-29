@@ -39,6 +39,7 @@ InitializeResult initialize(InitializeParams params)
     logger.info("Initializing server");
     Server.initialized = true;
     Server.initState = params;
+    Tools.initialize();
 
     debug
     {
@@ -50,8 +51,6 @@ InitializeResult initialize(InitializeParams params)
 
         spawn(&cleanup);
     }
-
-    Tools.initialize();
 
     if (params.capabilities.textDocument.completion.isNull
             || params.capabilities.textDocument.completion.completionItemKind.isNull
@@ -125,7 +124,7 @@ InitializeResult initialize(InitializeParams params)
         documentSymbolProvider = Server.initOptions.capabilities.documentSymbol;
         workspaceSymbolProvider = Server.initOptions.capabilities.workspaceSymbol;
         documentFormattingProvider = Server.initOptions.capabilities.documentFormatting;
-        renameProvider = Server.initOptions.capabilities.documentFormatting;
+        renameProvider = Server.initOptions.capabilities.rename;
         workspace = new ServerCapabilities.Workspace(new ServerCapabilities.Workspace.WorkspaceFolders(true.nullable,
                 JSONValue(true).nullable).nullable);
     }
@@ -177,10 +176,12 @@ void initialized(JSONValue nothing)
 JSONValue shutdown(JSONValue nothing)
 {
     import dls.server : Server;
+    import dls.tools.tools : Tools;
     import dls.util.logger : logger;
 
     logger.info("Shutting down server");
     Server.shutdown = true;
+    Tools.shutdown();
     return JSONValue(null);
 }
 
