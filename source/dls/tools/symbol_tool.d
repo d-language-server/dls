@@ -531,6 +531,7 @@ class SymbolTool : Tool
         {
         }
 
+        auto closed = openDocument(uri);
         auto stringCache = StringCache(StringCache.defaultBucketCount);
         auto tokens = getTokensForParser(Document[uri].toString(),
                 LexerConfig(uri.path, StringBehavior.source), &stringCache);
@@ -538,6 +539,7 @@ class SymbolTool : Tool
         const mod = parseModule(tokens, uri.path, &ra, toDelegate(&doNothing));
         auto visitor = new SymbolVisitor!SymbolType(uri, query);
         visitor.visit(mod);
+        closeDocument(uri, closed);
         return visitor.result;
     }
 
@@ -1013,20 +1015,16 @@ private class SymbolVisitor(SymbolType) : ASTVisitor
     {
         import dls.util.document : Document;
 
-        const closed = openDocument(_uri);
         auto document = Document[_uri];
 
         static if (__traits(hasMember, T, "line") && __traits(hasMember, T, "column"))
         {
-            auto range = document.wordRangeAtLineAndByte(t.line - 1, t.column - 1);
+            return document.wordRangeAtLineAndByte(t.line - 1, t.column - 1);
         }
         else
         {
-            auto range = document.wordRangeAtByte(t.index);
+            return document.wordRangeAtByte(t.index);
         }
-
-        closeDocument(_uri, closed);
-        return range;
     }
 
     private void tryInsert(string name, SymbolKind kind, Range range, size_t endLocation = 0)
@@ -1045,11 +1043,9 @@ private class SymbolVisitor(SymbolType) : ASTVisitor
             }
             else
             {
-                const closed = openDocument(_uri);
                 auto fullRange = endLocation > 0 ? new Range(range.start,
                         Document[_uri].positionAtByte(endLocation)) : range;
                 DocumentSymbol[] children;
-                closeDocument(_uri, closed);
                 (container is null ? result : container.children) ~= new DocumentSymbol(name,
                         Nullable!string(), kind, Nullable!bool(), fullRange,
                         range, children.nullable);
@@ -1065,7 +1061,7 @@ private class SymbolVisitor(SymbolType) : ASTVisitor
     alias visit = ASTVisitor.visit;
 }
 
-private static bool openDocument(Uri docUri)
+private bool openDocument(Uri docUri)
 {
     import dls.protocol.definitions : TextDocumentItem;
     import dls.util.document : Document;
@@ -1085,7 +1081,7 @@ private static bool openDocument(Uri docUri)
     return closed;
 }
 
-private static void closeDocument(Uri docUri, bool wasClosed)
+private void closeDocument(Uri docUri, bool wasClosed)
 {
     import dls.util.document : Document;
     import dls.protocol.definitions : TextDocumentIdentifier;

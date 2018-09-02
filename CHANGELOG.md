@@ -4,6 +4,9 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.10.4
+- Fixed potential crash with document symbols
+
 #### 0.10.3
 - Fixed crash on garbage collection (for good this time)
 - Fixed rename feature activation not taken into account
