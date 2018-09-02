@@ -99,15 +99,17 @@ abstract class Server
         import std.stdio : stdin;
         import std.string : strip, stripRight;
 
+        auto lineAppender = appender!(char[]);
+        auto charBuffer = new char[1];
+        string[string] headers;
+        string line;
+
         while (!stdin.eof && !exit)
         {
-            string[string] headers;
-            string line;
+            headers.clear();
 
             do
             {
-                auto lineAppender = appender!(char[]);
-                auto charBuffer = new char[1];
                 bool cr;
                 bool lf;
 
