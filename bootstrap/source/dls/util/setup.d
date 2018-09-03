@@ -38,12 +38,23 @@ void initialSetup()
             enum binDir = "bin";
         }
 
-        foreach (path; splitter(environment["PATH"], ';'))
+        auto pathParts = splitter(environment["PATH"], ';');
+
+        foreach (path; pathParts)
         {
             if (exists(buildNormalizedPath(path, "dmd.exe")))
             {
                 environment["PATH"] = buildNormalizedPath(dirName(path), binDir)
                     ~ ';' ~ environment["PATH"];
+                return;
+            }
+        }
+
+        foreach (path; pathParts)
+        {
+            if (exists(buildNormalizedPath(path, "ldc2.exe")))
+            {
+                environment["PATH"] = path ~ ';' ~ environment["PATH"];
             }
         }
     }
