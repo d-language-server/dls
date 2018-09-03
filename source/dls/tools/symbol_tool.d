@@ -500,14 +500,10 @@ class SymbolTool : Tool
 
             if (moduleSymbol !is null)
             {
-                const closed = openDocument(moduleUri);
-
                 foreach (symbol; moduleSymbol.getPartsByName(internString(null)))
                 {
                     collectSymbolInformations(moduleUri, symbol);
                 }
-
-                closeDocument(moduleUri, closed);
             }
         }
 
@@ -531,7 +527,6 @@ class SymbolTool : Tool
         {
         }
 
-        auto closed = openDocument(uri);
         auto stringCache = StringCache(StringCache.defaultBucketCount);
         auto tokens = getTokensForParser(Document[uri].toString(),
                 LexerConfig(uri.path, StringBehavior.source), &stringCache);
@@ -539,7 +534,6 @@ class SymbolTool : Tool
         const mod = parseModule(tokens, uri.path, &ra, toDelegate(&doNothing));
         auto visitor = new SymbolVisitor!SymbolType(uri, query);
         visitor.visit(mod);
-        closeDocument(uri, closed);
         return visitor.result;
     }
 
@@ -662,11 +656,11 @@ class SymbolTool : Tool
 
         auto request = getPreparedRequest(uri, position, RequestKind.symbolLocation);
         auto result = findDeclaration(request, _cache);
+
         if (result.symbolFilePath.length > 0)
         {
             auto resultUri = result.symbolFilePath == "stdin" ? uri
                 : Uri.fromPath(result.symbolFilePath);
-            openDocument(resultUri);
             return new Location(resultUri,
                     Document[resultUri].wordRangeAtByte(result.symbolLocation));
         }
@@ -1059,37 +1053,4 @@ private class SymbolVisitor(SymbolType) : ASTVisitor
     }
 
     alias visit = ASTVisitor.visit;
-}
-
-private bool openDocument(Uri docUri)
-{
-    import dls.protocol.definitions : TextDocumentItem;
-    import dls.util.document : Document;
-    import std.file : readText;
-
-    auto closed = Document[docUri] is null;
-
-    if (closed)
-    {
-        auto doc = new TextDocumentItem();
-        doc.uri = docUri;
-        doc.languageId = "d";
-        doc.text = readText(docUri.path);
-        Document.open(doc);
-    }
-
-    return closed;
-}
-
-private void closeDocument(Uri docUri, bool wasClosed)
-{
-    import dls.util.document : Document;
-    import dls.protocol.definitions : TextDocumentIdentifier;
-
-    if (wasClosed)
-    {
-        auto docIdentifier = new TextDocumentIdentifier();
-        docIdentifier.uri = docUri;
-        Document.close(docIdentifier);
-    }
 }

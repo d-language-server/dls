@@ -32,7 +32,9 @@ class Document
 
     static Document opIndex(in Uri uri)
     {
-        return uri.path in _documents ? _documents[uri.path] : null;
+        import std.file : readText;
+
+        return uri.path in _documents ? _documents[uri.path] : new Document(readText(uri.path));
     }
 
     @property static auto uris()
@@ -48,7 +50,7 @@ class Document
 
         if (uri.path !in _documents)
         {
-            _documents[uri.path] = new Document(textDocument);
+            _documents[uri.path] = new Document(textDocument.text);
         }
     }
 
@@ -78,9 +80,9 @@ class Document
         return _lines;
     }
 
-    this(in TextDocumentItem textDocument)
+    private this(in string text)
     {
-        _lines = getText(textDocument.text);
+        _lines = getText(text);
     }
 
     override string toString() const

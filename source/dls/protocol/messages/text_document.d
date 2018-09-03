@@ -74,13 +74,9 @@ void didSave(DidSaveTextDocumentParams params)
     import dls.util.uri : Uri;
 
     auto uri = new Uri(params.textDocument.uri);
-
-    if (Document[uri])
-    {
-        logger.infof("Document saved: %s", uri.path);
-        send(TextDocument.publishDiagnostics, new PublishDiagnosticsParams(uri,
-                Tools.analysisTool.scan(uri)));
-    }
+    logger.infof("Document saved: %s", uri.path);
+    send(TextDocument.publishDiagnostics, new PublishDiagnosticsParams(uri,
+            Tools.analysisTool.scan(uri)));
 }
 
 void didClose(DidCloseTextDocumentParams params)
