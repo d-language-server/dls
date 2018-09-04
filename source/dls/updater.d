@@ -166,15 +166,15 @@ void update(bool autoUpdate)
         {
             enum totalSizeCallback = (size_t size) {
                 dls.protocol.jsonrpc.send(Dls.Compat.upgradeDls_totalSize,
-                        new DlsUpgradeSizeParams(Tr.app_upgradeDls_downloading, size));
+                        new DlsUpgradeSizeParams(Tr.app_upgradeDls_downloading, [], size));
                 dls.protocol.jsonrpc.send(Dls.UpgradeDls.didChangeTotalSize,
-                        new DlsUpgradeSizeParams(Tr.app_upgradeDls_downloading, size));
+                        new DlsUpgradeSizeParams(Tr.app_upgradeDls_downloading, [], size));
             };
             enum chunkSizeCallback = (size_t size) {
                 dls.protocol.jsonrpc.send(Dls.Compat.upgradeDls_currentSize,
-                        new DlsUpgradeSizeParams(Tr.app_upgradeDls_downloading, size));
+                        new DlsUpgradeSizeParams(Tr.app_upgradeDls_downloading, [], size));
                 dls.protocol.jsonrpc.send(Dls.UpgradeDls.didChangeCurrentSize,
-                        new DlsUpgradeSizeParams(Tr.app_upgradeDls_downloading, size));
+                        new DlsUpgradeSizeParams(Tr.app_upgradeDls_downloading, [], size));
             };
             enum extractCallback = () {
                 dls.protocol.jsonrpc.send(Dls.Compat.upgradeDls_extract,

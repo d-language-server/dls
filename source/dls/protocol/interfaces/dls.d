@@ -26,11 +26,11 @@ class TranslationParams
 
     string tr;
 
-    this(Tr tr = Tr._)
+    this(Tr tr = Tr._, string[] args = string[].init)
     {
         static import dls.util.i18n;
 
-        this.tr = dls.util.i18n.tr(tr);
+        this.tr = dls.util.i18n.tr(tr, args);
     }
 }
 
@@ -40,9 +40,9 @@ class DlsUpgradeSizeParams : TranslationParams
 
     size_t size;
 
-    this(Tr tr = Tr._, size_t size = size_t.init)
+    this(Tr tr = Tr._, string[] args = string[].init, size_t size = size_t.init)
     {
-        super(tr);
+        super(tr, args);
         this.size = size;
     }
 }
