@@ -413,6 +413,7 @@ class SymbolTool : Tool
     {
         import dls.protocol.interfaces.dls : TranslationParams;
         import dls.protocol.messages.methods : Dls;
+        import dls.protocol.messages.window : Util;
         import dls.util.constants : Tr;
         import dls.util.logger : logger;
         import std.concurrency : spawn;
@@ -428,9 +429,20 @@ class SymbolTool : Tool
                 new TranslationParams(Tr.app_upgradeSelections_upgrading));
             send(Dls.UpgradeSelections.didStart,
                 new TranslationParams(Tr.app_upgradeSelections_upgrading));
-            getDub(new Uri(uriString)).upgrade(UpgradeOptions.upgrade | UpgradeOptions.select);
-            send(Dls.Compat.upgradeSelections_stop);
-            send(Dls.UpgradeSelections.didStop);
+
+            try
+            {
+                getDub(new Uri(uriString)).upgrade(UpgradeOptions.upgrade | UpgradeOptions.select);
+            }
+            catch (Exception e)
+            {
+                Util.sendMessage(Tr.app_upgradeSelections_error, [e.msg]);
+            }
+            finally
+            {
+                send(Dls.Compat.upgradeSelections_stop);
+                send(Dls.UpgradeSelections.didStop);
+            }
         }, uri.toString());
     }
 

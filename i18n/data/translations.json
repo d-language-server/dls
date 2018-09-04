@@ -14,7 +14,6 @@
         }
     },
     "app.upgradeSelections": {
-        "messageType": 3,
         "title": {
             "en": "Dependencies for project $1 changed",
             "fr": "Dépendences du projet $1 modifiées"
@@ -32,8 +31,14 @@
             "fr": "Mise à jour des sélections"
         }
     },
+    "app.upgradeSelections.error": {
+        "messageType": 1,
+        "title": {
+            "en": "Error upgrading selections:\n$1",
+            "fr": "Erreur de mise à jour des sélections:\n$1"
+        }
+    },
     "app.upgradeDls": {
-        "messageType": 3,
         "title": {
             "en": "DLS version $1 is available (current: $2)",
             "fr": "DLS version $1 est disponible (actuelle: $2)"
@@ -64,7 +69,6 @@
         }
     },
     "app.showChangelog": {
-        "messageType": 3,
         "title": {
             "en": "DLS upgraded to version $1",
             "fr": "DLS mis à jour vers la version $1"
