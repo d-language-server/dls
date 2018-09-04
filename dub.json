@@ -13,7 +13,7 @@
 		"dls:bootstrap": "*",
 		"dls:i18n": "*",
 		"dls:protocol": "*",
-		"dub": "1.10.0",
+		"dub": "1.11.0",
 		"dcd": "0.9.10",
 		"dscanner": "0.5.8",
 		"dfmt": "0.8.2"
