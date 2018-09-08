@@ -726,6 +726,32 @@ class SymbolTool : Tool
         return new WorkspaceEdit([uri.toString() : changes.array].nullable);
     }
 
+    Uri getWorkspace(Uri uri)
+    {
+        import std.algorithm : startsWith;
+        import std.array : array;
+        import std.path : buildNormalizedPath, pathSplitter;
+
+        string[] workspacePathParts;
+
+        foreach (path; _workspaceDependencies.keys)
+        {
+            auto splitter = pathSplitter(path);
+
+            if (pathSplitter(uri.path).startsWith(splitter))
+            {
+                auto pathParts = splitter.array;
+
+                if (pathParts.length > workspacePathParts.length)
+                {
+                    workspacePathParts = pathParts;
+                }
+            }
+        }
+
+        return Uri.fromPath(buildNormalizedPath(workspacePathParts));
+    }
+
     package void importDirectories(string[] paths)
     {
         import dls.util.logger : logger;

@@ -125,29 +125,10 @@ class AnalysisTool : Tool
 
     private StaticAnalysisConfig getConfig(Uri uri)
     {
+        import dls.tools.tools : Tools;
         import dscanner.analysis.config : defaultStaticAnalysisConfig;
-        import std.algorithm : startsWith;
-        import std.array : array;
-        import std.path : buildNormalizedPath, pathSplitter;
 
-        string[] configPathParts;
-
-        foreach (path, config; _analysisConfigs)
-        {
-            auto splitter = pathSplitter(path);
-
-            if (pathSplitter(uri.path).startsWith(splitter))
-            {
-                auto pathParts = splitter.array;
-
-                if (pathParts.length > configPathParts.length)
-                {
-                    configPathParts = pathParts;
-                }
-            }
-        }
-
-        const configPath = buildNormalizedPath(configPathParts);
+        const configPath = Tools.symbolTool.getWorkspace(uri).path;
         return (configPath in _analysisConfigs) ? _analysisConfigs[configPath]
             : defaultStaticAnalysisConfig();
     }
