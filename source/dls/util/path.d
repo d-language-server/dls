@@ -25,12 +25,19 @@ module dls.util.path;
     version (Windows)
     {
         import std.algorithm : startsWith;
+        import std.conv : to;
+        import std.path : driveName, stripDrive;
+        import std.uni : asLowerCase;
 
-        if (path.startsWith('/') || path.startsWith(`\`))
+        if (path.startsWith('/') || path.startsWith('\\'))
         {
-            return path[1 .. $];
+            return path[1 .. $].normalized;
         }
-    }
 
-    return path;
+        return driveName(path).asLowerCase.to!string ~ stripDrive(path);
+    }
+    else
+    {
+        return path;
+    }
 }
