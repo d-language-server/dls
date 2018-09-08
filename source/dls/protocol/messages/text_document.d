@@ -142,7 +142,11 @@ Nullable!Location implementation(TextDocumentPositionParams params)
 
 Location[] references(ReferenceParams params)
 {
-    return [];
+    import dls.tools.tools : Tools;
+    import dls.util.uri : Uri;
+
+    return Tools.symbolTool.references(new Uri(params.textDocument.uri),
+            params.position, params.context.includeDeclaration);
 }
 
 DocumentHighlight[] documentHighlight(TextDocumentPositionParams params)

@@ -235,6 +235,7 @@ class SymbolTool : Tool
     }
 
     private string[string][string] _workspaceDependencies;
+    private ASTAllocator _allocator;
     private ModuleCache _cache;
 
     @property ref ModuleCache cache()
@@ -326,7 +327,8 @@ class SymbolTool : Tool
 
     this()
     {
-        _cache = ModuleCache(new ASTAllocator());
+        _allocator = new ASTAllocator();
+        _cache = ModuleCache(_allocator);
         importDirectories(defaultImportPaths);
     }
 
@@ -678,6 +680,119 @@ class SymbolTool : Tool
         }
 
         return null;
+    }
+
+    Location[] references(Uri sourceUri, Position position, bool includeDeclaration)
+    {
+        import dcd.common.messages : CompletionType;
+        import dcd.server.autocomplete.util : SymbolStuff,
+            getSymbolsForCompletion;
+        import dparse.lexer : LexerConfig, StringBehavior, StringCache, Token,
+            WhitespaceBehavior, getTokensForParser, tok;
+        import dparse.rollback_allocator : RollbackAllocator;
+        import dls.util.document : Document;
+        import dls.util.logger : logger;
+        import dsymbol.string_interning : internString;
+        import std.algorithm : filter, map;
+        import std.file : SpanMode, dirEntries;
+        import std.path : filenameCmp, globMatch;
+
+        logger.infof("Finding references for %s at position %s,%s",
+                sourceUri.path, position.line, position.character);
+
+        auto stringCache = StringCache(StringCache.defaultBucketCount);
+
+        auto sourceTokens = getTokensForParser(Document[sourceUri].toString(),
+                LexerConfig(sourceUri.path, StringBehavior.compiler, WhitespaceBehavior.skip),
+                &stringCache);
+        RollbackAllocator ra;
+        auto request = getPreparedRequest(sourceUri, position, RequestKind.symbolLocation);
+        auto stuff = getSymbolsForCompletion(request, CompletionType.location,
+                _allocator, &ra, stringCache, cache);
+
+        scope (exit)
+        {
+            stuff.destroy();
+        }
+
+        if (stuff.symbols.length != 1)
+        {
+            return null;
+        }
+
+        const(Token)* sourceToken;
+
+        foreach (i, token; sourceTokens)
+        {
+            if (token.type == tok!"identifier" && request.cursorPosition >= token.index
+                    && request.cursorPosition < token.index + token.text.length)
+            {
+                sourceToken = &sourceTokens[i];
+                break;
+            }
+        }
+
+        if (sourceToken is null)
+        {
+            return null;
+        }
+
+        Location[] result;
+        const sourceSymbol = stuff.symbols[0];
+        const sourceSymbolFile = sourceSymbol.symbolFile == "stdin"
+            ? sourceUri.path : sourceSymbol.symbolFile;
+        auto workspaceUris = dirEntries(getWorkspace(sourceUri).path, SpanMode.depth)
+            .map!q{a.name}
+            .filter!(path => globMatch(path, "*.{d,di}"))
+            .map!(Uri.fromPath);
+
+        foreach (uri; workspaceUris)
+        {
+            auto document = Document[uri];
+            request.fileName = uri.path;
+            request.sourceCode = cast(ubyte[]) document.toString();
+            auto tokens = getTokensForParser(request.sourceCode, LexerConfig(uri.path,
+                    StringBehavior.compiler, WhitespaceBehavior.skip), &stringCache);
+
+            foreach (token; tokens)
+            {
+                if (token.type == tok!"identifier" && token.text == sourceToken.text)
+                {
+                    request.cursorPosition = token.index + 1;
+                    SymbolStuff candidateStuff = getSymbolsForCompletion(request,
+                            CompletionType.location, _allocator, &ra, stringCache, cache);
+
+                    scope (exit)
+                    {
+                        candidateStuff.destroy();
+                    }
+
+                    if (candidateStuff.symbols.length != 1)
+                    {
+                        continue;
+                    }
+
+                    const candidateSymbol = candidateStuff.symbols[0];
+                    const candidateSymbolFile = candidateSymbol.symbolFile == "stdin"
+                        ? uri.path : candidateSymbol.symbolFile;
+
+                    if (!includeDeclaration && filenameCmp(uri.path,
+                            sourceSymbolFile) == 0 && token.index == sourceSymbol.location)
+                    {
+                        continue;
+                    }
+
+                    if (candidateSymbol.location == sourceSymbol.location
+                            && filenameCmp(candidateSymbolFile, sourceSymbolFile) == 0)
+                    {
+                        result ~= new Location(uri.toString(),
+                                document.wordRangeAtByte(token.index));
+                    }
+                }
+            }
+        }
+
+        return result;
     }
 
     DocumentHighlight[] highlight(Uri uri, Position position)

@@ -48,6 +48,7 @@ class InitializeParams
             bool hover = true;
             bool completion = true;
             bool definition = true;
+            bool references = true;
             bool documentHighlight = true;
             bool documentSymbol = true;
             bool workspaceSymbol = true;

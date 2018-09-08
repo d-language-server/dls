@@ -120,6 +120,7 @@ InitializeResult initialize(InitializeParams params)
             ? new CompletionOptions(true.nullable, ["."].nullable).nullable
             : Nullable!CompletionOptions();
         definitionProvider = Server.initOptions.capabilities.definition;
+        referencesProvider = Server.initOptions.capabilities.references;
         documentHighlightProvider = Server.initOptions.capabilities.documentHighlight;
         documentSymbolProvider = Server.initOptions.capabilities.documentSymbol;
         workspaceSymbolProvider = Server.initOptions.capabilities.workspaceSymbol;
