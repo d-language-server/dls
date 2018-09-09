@@ -307,6 +307,11 @@ class CodeActionOptions
     import std.typecons : Nullable;
 
     Nullable!(CodeActionKind[]) codeActionKinds;
+
+    this(Nullable!(CodeActionKind[]) codeActionKinds = Nullable!(CodeActionKind[]).init)
+    {
+        this.codeActionKinds = codeActionKinds;
+    }
 }
 
 alias CodeLensOptions = OptionsBase;
@@ -331,6 +336,11 @@ class RenameOptions
     import std.typecons : Nullable;
 
     Nullable!bool prepareProvider;
+
+    this(Nullable!bool prepareProvider = Nullable!bool.init)
+    {
+        this.prepareProvider = prepareProvider;
+    }
 }
 
 alias DocumentLinkOptions = OptionsBase;
@@ -444,7 +454,7 @@ class ServerCapabilities
     Nullable!bool documentFormattingProvider;
     Nullable!bool documentRangeFormattingProvider;
     Nullable!DocumentOnTypeFormattingOptions documentOnTypeFormattingProvider;
-    Nullable!JSONValue renameProvider;
+    Nullable!RenameOptions renameProvider;
     Nullable!DocumentLinkOptions documentLinkProvider;
     Nullable!JSONValue colorProvider;
     Nullable!JSONValue foldingRangeProvider;
