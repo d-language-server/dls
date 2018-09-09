@@ -47,7 +47,7 @@ class ResponseMessage : Message
 
 class ResponseError
 {
-    int code;
+    long code;
     string message;
     Nullable!JSONValue data;
 
@@ -69,22 +69,22 @@ class NotificationMessage : Message
     Nullable!JSONValue params;
 }
 
-enum ErrorCodes : Tuple!(int, string)
+enum ErrorCodes : Tuple!(long, string)
 {
-    parseError = tuple(-32_700, "Parse error"),
-    invalidRequest = tuple(-32_600,
+    parseError = tuple(-32_700L, "Parse error"),
+    invalidRequest = tuple(-32_600L,
             "Invalid Request"),
     methodNotFound = tuple(
-            -32_601, "Method not found"),
-    invalidParams = tuple(-32_602,
+            -32_601L, "Method not found"),
+    invalidParams = tuple(-32_602L,
             "Invalid params"),
-    internalError = tuple(-32_603,
+    internalError = tuple(-32_603L,
             "Internal error"),
-    serverNotInitialized = tuple(-32_202,
+    serverNotInitialized = tuple(-32_202L,
             "Server not initialized"),
-    unknownErrorCode = tuple(-32_201,
-            "Unknown error"),
-    requestCancelled = tuple(-32_800, "Request cancelled")
+    unknownErrorCode = tuple(
+            -32_201L, "Unknown error"),
+    requestCancelled = tuple(-32_800L, "Request cancelled")
 }
 
 class CancelParams
