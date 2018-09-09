@@ -138,8 +138,9 @@ abstract class Server
     {
         import dls.protocol.handlers : HandlerNotFoundException,
             NotificationHandler, RequestHandler, ResponseHandler, handler;
-        import dls.protocol.jsonrpc : ErrorCodes, NotificationMessage,
-            RequestMessage, ResponseMessage, send, sendError;
+        import dls.protocol.jsonrpc : ErrorCodes, InvalidParamsException,
+            NotificationMessage, RequestMessage, ResponseMessage, send,
+            sendError;
         import dls.util.json : convertFromJSON;
         import dls.util.logger : logger;
         import std.json : JSONException, JSONValue, parseJSON;
@@ -198,6 +199,11 @@ abstract class Server
         {
             logger.errorf("%s: %s", ErrorCodes.methodNotFound[0], e.message);
             sendError(ErrorCodes.methodNotFound, request, JSONValue(e.message));
+        }
+        catch (InvalidParamsException e)
+        {
+            logger.errorf("%s: %s", ErrorCodes.invalidParams[0], e.message);
+            sendError(ErrorCodes.invalidParams, request, JSONValue(e.message));
         }
         catch (Exception e)
         {

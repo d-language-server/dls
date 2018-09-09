@@ -701,13 +701,12 @@ class SymbolTool : Tool
         logger.infof("Finding references for %s at position %s,%s",
                 sourceUri.path, position.line, position.character);
 
+        auto request = getPreparedRequest(sourceUri, position, RequestKind.symbolLocation);
         auto stringCache = StringCache(StringCache.defaultBucketCount);
-
         auto sourceTokens = getTokensForParser(Document[sourceUri].toString(),
                 LexerConfig(sourceUri.path, StringBehavior.compiler, WhitespaceBehavior.skip),
                 &stringCache);
         RollbackAllocator ra;
-        auto request = getPreparedRequest(sourceUri, position, RequestKind.symbolLocation);
         auto stuff = getSymbolsForCompletion(request, CompletionType.location,
                 _allocator, &ra, stringCache, cache);
 
@@ -968,10 +967,18 @@ class SymbolTool : Tool
     private static AutocompleteRequest getPreparedRequest(Uri uri,
             Position position, RequestKind kind)
     {
+        import dls.protocol.jsonrpc : InvalidParamsException;
         import dls.util.document : Document;
+        import std.format : format;
 
         auto request = AutocompleteRequest();
         auto document = Document[uri];
+
+        if (!document.validatePosition(position))
+        {
+            throw new InvalidParamsException(format!"invalid position: %s %s,%s"(uri,
+                    position.line, position.character));
+        }
 
         request.fileName = uri.path;
         request.kind = kind;
