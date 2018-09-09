@@ -27,6 +27,7 @@ import std.json : JSONValue;
 InitializeResult initialize(InitializeParams params)
 {
     import dls.server : Server;
+    import dls.protocol.state : initOptions, initState;
     import dls.tools.symbol_tool : useCompatCompletionItemKinds,
         useCompatSymbolKinds;
     import dls.tools.tools : Tools;
@@ -37,8 +38,8 @@ InitializeResult initialize(InitializeParams params)
     import std.typecons : Nullable, nullable;
 
     logger.info("Initializing server");
+    initState = params;
     Server.initialized = true;
-    Server.initState = params;
     Tools.initialize();
 
     debug
@@ -115,17 +116,16 @@ InitializeResult initialize(InitializeParams params)
         textDocumentSync = new TextDocumentSyncOptions(true.nullable,
                 TextDocumentSyncKind.incremental.nullable);
         textDocumentSync.save = new SaveOptions(false.nullable);
-        hoverProvider = Server.initOptions.capabilities.hover;
-        completionProvider = Server.initOptions.capabilities.completion
-            ? new CompletionOptions(true.nullable, ["."].nullable).nullable
-            : Nullable!CompletionOptions();
-        definitionProvider = Server.initOptions.capabilities.definition;
-        referencesProvider = Server.initOptions.capabilities.references;
-        documentHighlightProvider = Server.initOptions.capabilities.documentHighlight;
-        documentSymbolProvider = Server.initOptions.capabilities.documentSymbol;
-        workspaceSymbolProvider = Server.initOptions.capabilities.workspaceSymbol;
-        documentFormattingProvider = Server.initOptions.capabilities.documentFormatting;
-        renameProvider = JSONValue(Server.initOptions.capabilities.rename);
+        hoverProvider = initOptions.capabilities.hover;
+        completionProvider = initOptions.capabilities.completion ? new CompletionOptions(true.nullable,
+                ["."].nullable).nullable : Nullable!CompletionOptions();
+        definitionProvider = initOptions.capabilities.definition;
+        referencesProvider = initOptions.capabilities.references;
+        documentHighlightProvider = initOptions.capabilities.documentHighlight;
+        documentSymbolProvider = initOptions.capabilities.documentSymbol;
+        workspaceSymbolProvider = initOptions.capabilities.workspaceSymbol;
+        documentFormattingProvider = initOptions.capabilities.documentFormatting;
+        renameProvider = JSONValue(initOptions.capabilities.rename);
         workspace = new ServerCapabilities.Workspace(new ServerCapabilities.Workspace.WorkspaceFolders(true.nullable,
                 JSONValue(true).nullable).nullable);
     }
@@ -136,10 +136,11 @@ InitializeResult initialize(InitializeParams params)
 @("")
 void initialized(JSONValue nothing)
 {
-    import dls.protocol.jsonrpc : send;
     import dls.protocol.interfaces : DidChangeWatchedFilesRegistrationOptions,
         FileSystemWatcher, Registration, RegistrationParams;
+    import dls.protocol.jsonrpc : send;
     import dls.protocol.messages.methods : Client;
+    import dls.protocol.state : initOptions, initState;
     import dls.server : Server;
     import dls.util.logger : logger;
     import std.typecons : nullable;
@@ -152,10 +153,10 @@ void initialized(JSONValue nothing)
         import dls.updater : update;
         import std.concurrency : spawn;
 
-        spawn(&update, Server.initOptions.autoUpdate);
+        spawn(&update, initOptions.autoUpdate);
     }
 
-    const didChangeWatchedFiles = Server.initState.capabilities.workspace.didChangeWatchedFiles;
+    const didChangeWatchedFiles = initState.capabilities.workspace.didChangeWatchedFiles;
 
     if (!didChangeWatchedFiles.isNull && didChangeWatchedFiles.dynamicRegistration)
     {

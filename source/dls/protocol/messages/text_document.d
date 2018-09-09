@@ -159,18 +159,16 @@ DocumentHighlight[] documentHighlight(TextDocumentPositionParams params)
 
 JSONValue documentSymbol(DocumentSymbolParams params)
 {
-    import dls.server : Server;
+    import dls.protocol.state : initState;
     import dls.tools.tools : Tools;
     import dls.util.json : convertToJSON;
     import dls.util.uri : Uri;
 
     auto uri = new Uri(params.textDocument.uri);
 
-    if (!Server.initState.capabilities.textDocument.isNull
-            && !Server.initState.capabilities.textDocument.documentSymbol.isNull
-            && !Server.initState.capabilities.textDocument.documentSymbol.hierarchicalDocumentSymbolSupport.isNull
-            && Server.initState.capabilities.textDocument.documentSymbol
-            .hierarchicalDocumentSymbolSupport)
+    if (!initState.capabilities.textDocument.isNull && !initState.capabilities.textDocument.documentSymbol.isNull
+            && !initState.capabilities.textDocument.documentSymbol.hierarchicalDocumentSymbolSupport.isNull
+            && initState.capabilities.textDocument.documentSymbol.hierarchicalDocumentSymbolSupport)
     {
         return convertToJSON(Tools.symbolTool.symbol!DocumentSymbol(uri, null));
     }

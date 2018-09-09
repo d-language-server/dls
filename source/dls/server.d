@@ -61,34 +61,6 @@ abstract class Server
     static bool initialized;
     static bool shutdown;
     static bool exit;
-    private static InitializeParams _initState;
-
-    @property static InitializeParams initState()
-    {
-        return _initState;
-    }
-
-    @property static void initState(InitializeParams params)
-    {
-        import dls.util.logger : logger;
-
-        _initState = params;
-
-        debug
-        {
-            logger.trace = InitializeParams.Trace.verbose;
-        }
-        else
-        {
-            logger.trace = params.trace;
-        }
-    }
-
-    @property static InitializeParams.InitializationOptions initOptions()
-    {
-        return _initState.initializationOptions.isNull
-            ? new InitializeParams.InitializationOptions() : _initState.initializationOptions;
-    }
 
     static void loop()
     {
