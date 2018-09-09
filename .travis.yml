@@ -21,7 +21,9 @@ matrix:
     - d: ldc-beta
       os: linux
   allow_failures:
+    - d: dmd-beta
     - d: dmd-nightly
+    - d: ldc-beta
 cache:
   directories:
     - $HOME/.dub
