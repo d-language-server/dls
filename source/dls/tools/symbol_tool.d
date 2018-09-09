@@ -693,7 +693,8 @@ class SymbolTool : Tool
         import dls.util.document : Document;
         import dls.util.logger : logger;
         import dsymbol.string_interning : internString;
-        import std.algorithm : filter, map;
+        import std.algorithm : filter, map, reduce;
+        import std.array : array;
         import std.file : SpanMode, dirEntries;
         import std.path : filenameCmp, globMatch;
 
@@ -741,10 +742,12 @@ class SymbolTool : Tool
         const sourceSymbol = stuff.symbols[0];
         const sourceSymbolFile = sourceSymbol.symbolFile == "stdin"
             ? sourceUri.path : sourceSymbol.symbolFile;
-        auto workspaceUris = dirEntries(getWorkspace(sourceUri).path, SpanMode.depth)
-            .map!q{a.name}
-            .filter!(path => globMatch(path, "*.{d,di}"))
-            .map!(Uri.fromPath);
+        auto workspaceUris = _workspaceDependencies.keys
+            .map!(w => dirEntries(w, SpanMode.depth).map!q{a.name}
+                    .filter!(path => globMatch(path, "*.{d,di}"))
+                    .map!(Uri.fromPath)
+                    .array)
+            .reduce!q{a ~ b};
 
         foreach (uri; workspaceUris)
         {
