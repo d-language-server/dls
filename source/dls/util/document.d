@@ -26,9 +26,11 @@ class Document
     import dls.protocol.definitions : Position, Range, TextDocumentIdentifier,
         TextDocumentItem, VersionedTextDocumentIdentifier;
     import dls.protocol.interfaces : TextDocumentContentChangeEvent;
+    import std.json : JSONValue;
 
     private static Document[string] _documents;
     private wstring[] _lines;
+    private JSONValue _version;
 
     static Document opIndex(in Uri uri)
     {
@@ -51,6 +53,7 @@ class Document
         if (uri.path !in _documents)
         {
             _documents[uri.path] = new Document(textDocument.text);
+            _documents[uri.path]._version = textDocument.version_;
         }
     }
 
@@ -72,12 +75,18 @@ class Document
         if (uri.path in _documents)
         {
             _documents[uri.path].change(events);
+            _documents[uri.path]._version = textDocument.version_;
         }
     }
 
     @property const(wstring[]) lines() const
     {
         return _lines;
+    }
+
+    @property JSONValue version_() const
+    {
+        return _version;
     }
 
     private this(in string text)
