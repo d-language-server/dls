@@ -153,11 +153,12 @@ class WorkspaceEdit
 {
     import std.typecons : Nullable;
 
-    Nullable!((TextEdit[])[string]) changes;
+    Nullable!(TextEdit[][string]) changes;
     Nullable!(TextDocumentEdit[]) documentChanges;
 
-    this(Nullable!((TextEdit[])[string]) changes = Nullable!((TextEdit[])[string]).init,
-            Nullable!(TextDocumentEdit[]) documentChanges = Nullable!(TextDocumentEdit[]).init)
+    this(Nullable!(TextEdit[][string]) changes = Nullable!(TextEdit[][string])
+            .init, Nullable!(TextDocumentEdit[]) documentChanges = Nullable!(
+                TextDocumentEdit[]).init)
     {
         this.changes = changes;
         this.documentChanges = documentChanges;
@@ -167,6 +168,11 @@ class WorkspaceEdit
 class TextDocumentIdentifier
 {
     DocumentUri uri;
+
+    this(DocumentUri uri = DocumentUri.init)
+    {
+        this.uri = uri;
+    }
 }
 
 class TextDocumentItem
@@ -182,6 +188,12 @@ class VersionedTextDocumentIdentifier : TextDocumentIdentifier
     import std.json : JSONValue;
 
     JSONValue version_;
+
+    this(DocumentUri uri = DocumentUri.init, JSONValue version_ = JSONValue.init)
+    {
+        super(uri);
+        this.version_ = version_;
+    }
 }
 
 class TextDocumentPositionParams

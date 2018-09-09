@@ -245,9 +245,10 @@ WorkspaceEdit rename(RenameParams params)
 
 Range prepareRename(TextDocumentPositionParams params)
 {
+    import dls.tools.tools : Tools;
     import dls.util.uri : Uri;
 
-    return null;
+    return Tools.symbolTool.prepareRename(new Uri(params.textDocument.uri), params.position);
 }
 
 FoldingRange[] foldingRange(FoldingRangeParams params)

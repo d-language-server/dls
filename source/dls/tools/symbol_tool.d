@@ -188,7 +188,7 @@ void useCompatSymbolKinds(SymbolKind[] symbols = [])
 class SymbolTool : Tool
 {
     import dcd.common.messages : AutocompleteRequest, RequestKind;
-    import dls.protocol.definitions : Location, MarkupContent, Position,
+    import dls.protocol.definitions : Location, MarkupContent, Position, Range,
         WorkspaceEdit;
     import dls.protocol.interfaces : CompletionItem, DocumentHighlight,
         DocumentSymbol, Hover;
@@ -820,28 +820,60 @@ class SymbolTool : Tool
 
     WorkspaceEdit rename(Uri uri, Position position, string newName)
     {
-        import dcd.server.autocomplete.localuse : findLocalUse;
-        import dls.protocol.definitions : TextEdit;
+        import dls.protocol.definitions : TextDocumentEdit, TextEdit,
+            VersionedTextDocumentIdentifier;
+        import dls.protocol.state : initState;
         import dls.util.document : Document;
         import dls.util.logger : logger;
-        import std.algorithm : map;
-        import std.array : array;
         import std.typecons : nullable;
 
-        logger.infof("Renaming symbol for %s at position %s,%s", uri.path,
-                position.line, position.character);
-
-        auto request = getPreparedRequest(uri, position, RequestKind.localUse);
-        auto result = findLocalUse(request, _cache);
-
-        if (result.symbolFilePath != "stdin")
+        if ((initState.capabilities.textDocument.isNull || initState.capabilities.textDocument.rename.isNull
+                || initState.capabilities.textDocument.rename.prepareSupport.isNull
+                || !initState.capabilities.textDocument.rename.prepareSupport)
+                && prepareRename(uri, position) is null)
         {
             return null;
         }
 
-        auto changes = result.completions.map!(c => new TextEdit(
-                Document[uri].wordRangeAtByte(c.symbolLocation), newName));
-        return new WorkspaceEdit([uri.toString() : changes.array].nullable);
+        logger.infof("Renaming symbol for %s at position %s,%s", uri.path,
+                position.line, position.character);
+
+        auto refs = references(uri, position, true);
+
+        if (refs.length == 0)
+        {
+            return null;
+        }
+
+        TextEdit[][string] changes;
+        TextDocumentEdit[] documentChanges;
+
+        foreach (reference; refs)
+        {
+            changes[reference.uri] ~= new TextEdit(reference.range, newName);
+        }
+
+        foreach (documentUri, textEdits; changes)
+        {
+            auto identifier = new VersionedTextDocumentIdentifier(documentUri,
+                    Document[new Uri(documentUri)].version_);
+            documentChanges ~= new TextDocumentEdit(identifier, textEdits);
+        }
+
+        return new WorkspaceEdit(changes.nullable, documentChanges.nullable);
+    }
+
+    Range prepareRename(Uri uri, Position position)
+    {
+        import dls.util.document : Document;
+        import dls.util.logger : logger;
+
+        logger.infof("Preparing symbol rename for %s at position %s,%s",
+                uri.path, position.line, position.character);
+
+        auto def = definition(uri, position);
+        return def is null || getWorkspace(new Uri(def.uri)) is null ? null
+            : Document[uri].wordRangeAtPosition(position);
     }
 
     Uri getWorkspace(Uri uri)
@@ -867,7 +899,8 @@ class SymbolTool : Tool
             }
         }
 
-        return Uri.fromPath(buildNormalizedPath(workspacePathParts));
+        return workspacePathParts.length > 0
+            ? Uri.fromPath(buildNormalizedPath(workspacePathParts)) : null;
     }
 
     package void importDirectories(string[] paths)

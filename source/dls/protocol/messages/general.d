@@ -125,7 +125,8 @@ InitializeResult initialize(InitializeParams params)
         documentSymbolProvider = initOptions.capabilities.documentSymbol;
         workspaceSymbolProvider = initOptions.capabilities.workspaceSymbol;
         documentFormattingProvider = initOptions.capabilities.documentFormatting;
-        renameProvider = JSONValue(initOptions.capabilities.rename);
+        renameProvider = initOptions.capabilities.rename
+            ? new RenameOptions(true.nullable) : Nullable!RenameOptions();
         workspace = new ServerCapabilities.Workspace(new ServerCapabilities.Workspace.WorkspaceFolders(true.nullable,
                 JSONValue(true).nullable).nullable);
     }
