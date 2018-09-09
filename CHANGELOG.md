@@ -4,6 +4,11 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+### 0.11.0
+- Added find references support
+- Added project-wide renaming support
+- Enhanced dub selections upgrade to show a message on error
+
 #### 0.10.4
 - Fixed potential crash with document symbols
 

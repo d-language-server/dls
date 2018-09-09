@@ -6,7 +6,7 @@
 |---|------|--------|
 |[![DUB](https://img.shields.io/dub/v/dls.svg?style=flat-square)](https://code.dlang.org/packages/dls)|[![Travis](https://img.shields.io/travis/d-language-server/dls.svg?style=flat-square)](https://travis-ci.org/d-language-server/dls)|[![AppVeyor](https://img.shields.io/appveyor/ci/dlanguageserver/dls.svg?style=flat-square)](https://ci.appveyor.com/project/dlanguageserver/dls)
 
-### LSP compliance: `3.12`
+__LSP compliance: `3.12`__
 
 _This is a work in progress. There ~~might~~ will be bugs and crashes..._
 
@@ -16,12 +16,13 @@ Current features include:
 
 - Code completion
 - Go to definition
+- Find references
+- Symbol renaming
 - Error checking
-- Formatting
+- Code formatting
 - Symbol searching
 - Symbol highlighting
 - Documentation on hover
-- Symbol renaming at module level (not accross entire projects)
 - Random, frustrating crashes
 
 Dub packages used (the stuff doing the actual hard work):
