@@ -48,6 +48,7 @@ class InitializeParams
             bool hover = true;
             bool completion = true;
             bool definition = true;
+            bool typeDefinition = true;
             bool references = true;
             bool documentHighlight = true;
             bool documentSymbol = true;
@@ -443,7 +444,7 @@ class ServerCapabilities
     Nullable!CompletionOptions completionProvider;
     Nullable!SignatureHelpOptions signatureHelpProvider;
     Nullable!bool definitionProvider;
-    Nullable!JSONValue typeDefinitionProvider;
+    Nullable!bool typeDefinitionProvider;
     Nullable!JSONValue implementationProvider;
     Nullable!bool referencesProvider;
     Nullable!bool documentHighlightProvider;

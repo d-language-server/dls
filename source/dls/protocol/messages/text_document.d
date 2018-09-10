@@ -130,14 +130,17 @@ Location[] definition(TextDocumentPositionParams params)
     return Tools.symbolTool.definition(new Uri(params.textDocument.uri), params.position);
 }
 
-Nullable!Location typeDefinition(TextDocumentPositionParams params)
+Location[] typeDefinition(TextDocumentPositionParams params)
 {
-    return Nullable!Location();
+    import dls.tools.tools : Tools;
+    import dls.util.uri : Uri;
+
+    return Tools.symbolTool.typeDefinition(new Uri(params.textDocument.uri), params.position);
 }
 
-Nullable!Location implementation(TextDocumentPositionParams params)
+Location implementation(TextDocumentPositionParams params)
 {
-    return Nullable!Location();
+    return null;
 }
 
 Location[] references(ReferenceParams params)

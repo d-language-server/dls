@@ -693,6 +693,44 @@ class SymbolTool : Tool
         return result;
     }
 
+    Location[] typeDefinition(Uri uri, Position position)
+    {
+        import dcd.common.messages : CompletionType;
+        import dcd.server.autocomplete.util : getSymbolsForCompletion;
+        import dls.util.document : Document;
+        import dls.util.logger : logger;
+        import dparse.lexer : StringCache;
+        import dparse.rollback_allocator : RollbackAllocator;
+        import std.algorithm : filter, map, uniq;
+
+        logger.infof("Finding type declaration for %s at position %s,%s",
+                uri.path, position.line, position.character);
+
+        auto request = getPreparedRequest(uri, position, RequestKind.symbolLocation);
+        auto stringCache = StringCache(StringCache.defaultBucketCount);
+        RollbackAllocator ra;
+        auto stuff = getSymbolsForCompletion(request, CompletionType.location,
+                _allocator, &ra, stringCache, cache);
+
+        scope (exit)
+        {
+            stuff.destroy();
+        }
+
+        Location[] result;
+
+        foreach (type; stuff.symbols
+                .map!q{a.type}
+                .filter!q{a !is null && a.symbolFile.length > 0}
+                .uniq!q{a.symbolFile == b.symbolFile && a.location == b.location})
+        {
+            auto symbolUri = type.symbolFile == "stdin" ? uri : Uri.fromPath(type.symbolFile);
+            result ~= new Location(symbolUri, Document[symbolUri].wordRangeAtByte(type.location));
+        }
+
+        return result;
+    }
+
     Location[] references(Uri uri, Position position, bool includeDeclaration)
     {
         import dcd.common.messages : CompletionType;
