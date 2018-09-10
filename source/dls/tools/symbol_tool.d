@@ -659,27 +659,38 @@ class SymbolTool : Tool
             : new Hover(getDocumentation(completions.map!q{ ["", a] }.array));
     }
 
-    Location definition(Uri uri, Position position)
+    Location[] definition(Uri uri, Position position)
     {
-        import dcd.server.autocomplete : findDeclaration;
+        import dcd.common.messages : CompletionType;
+        import dcd.server.autocomplete.util : getSymbolsForCompletion;
         import dls.util.document : Document;
         import dls.util.logger : logger;
+        import dparse.lexer : StringCache;
+        import dparse.rollback_allocator : RollbackAllocator;
 
-        logger.infof("Finding declaration for %s at position %s,%s", uri.path,
+        logger.infof("Finding declarations for %s at position %s,%s", uri.path,
                 position.line, position.character);
 
         auto request = getPreparedRequest(uri, position, RequestKind.symbolLocation);
-        auto result = findDeclaration(request, _cache);
+        auto stringCache = StringCache(StringCache.defaultBucketCount);
+        RollbackAllocator ra;
+        auto stuff = getSymbolsForCompletion(request, CompletionType.location,
+                _allocator, &ra, stringCache, cache);
 
-        if (result.symbolFilePath.length > 0)
+        scope (exit)
         {
-            auto resultUri = result.symbolFilePath == "stdin" ? uri
-                : Uri.fromPath(result.symbolFilePath);
-            return new Location(resultUri,
-                    Document[resultUri].wordRangeAtByte(result.symbolLocation));
+            stuff.destroy();
         }
 
-        return null;
+        Location[] result;
+
+        foreach (symbol; stuff.symbols)
+        {
+            auto symbolUri = symbol.symbolFile == "stdin" ? uri : Uri.fromPath(symbol.symbolFile);
+            result ~= new Location(symbolUri, Document[symbolUri].wordRangeAtByte(symbol.location));
+        }
+
+        return result;
     }
 
     Location[] references(Uri uri, Position position, bool includeDeclaration)
@@ -864,12 +875,14 @@ class SymbolTool : Tool
     {
         import dls.util.document : Document;
         import dls.util.logger : logger;
+        import std.algorithm : any;
 
         logger.infof("Preparing symbol rename for %s at position %s,%s",
                 uri.path, position.line, position.character);
 
-        auto def = definition(uri, position);
-        return def is null || getWorkspace(new Uri(def.uri)) is null ? null
+        auto defs = definition(uri, position);
+        return defs.length == 0
+            || defs.any!(d => getWorkspace(new Uri(d.uri)) is null) ? null
             : Document[uri].wordRangeAtPosition(position);
     }
 

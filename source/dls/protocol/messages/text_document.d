@@ -122,7 +122,7 @@ SignatureHelp signatureHelp(TextDocumentPositionParams params)
     return null;
 }
 
-Location definition(TextDocumentPositionParams params)
+Location[] definition(TextDocumentPositionParams params)
 {
     import dls.tools.tools : Tools;
     import dls.util.uri : Uri;
