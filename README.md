@@ -118,6 +118,8 @@ interface InitializationOptions: {
         hover?: boolean;
         completion?: boolean;
         definition?: boolean;
+        typeDefinition?: boolean;
+        references?: boolean;
         documentHighlight?: boolean;
         documentSymbol?: boolean;
         workspaceSymbol?: boolean;
