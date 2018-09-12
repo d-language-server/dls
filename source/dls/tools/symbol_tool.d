@@ -733,135 +733,49 @@ class SymbolTool : Tool
 
     Location[] references(Uri uri, Position position, bool includeDeclaration)
     {
-        import dcd.common.messages : CompletionType;
-        import dcd.server.autocomplete.util : getSymbolsForCompletion;
-        import dls.util.document : Document;
         import dls.util.logger : logger;
-        import dparse.lexer : LexerConfig, StringBehavior, StringCache, Token,
-            WhitespaceBehavior, getTokensForParser, tok;
-        import dparse.rollback_allocator : RollbackAllocator;
-        import dsymbol.string_interning : internString;
         import std.algorithm : filter, map, reduce;
         import std.array : array;
         import std.file : SpanMode, dirEntries;
-        import std.path : filenameCmp, globMatch;
+        import std.path : globMatch;
 
         logger.infof("Finding references for %s at position %s,%s", uri.path,
                 position.line, position.character);
 
-        auto request = getPreparedRequest(uri, position, RequestKind.symbolLocation);
-        auto stringCache = StringCache(StringCache.defaultBucketCount);
-        auto sourceTokens = getTokensForParser(Document[uri].toString(), LexerConfig(uri.path,
-                StringBehavior.compiler, WhitespaceBehavior.skip), &stringCache);
-        RollbackAllocator ra;
-        auto stuff = getSymbolsForCompletion(request, CompletionType.location,
-                _allocator, &ra, stringCache, cache);
-
-        scope (exit)
-        {
-            stuff.destroy();
-        }
-
-        if (stuff.symbols.length != 1)
-        {
-            return null;
-        }
-
-        const(Token)* sourceToken;
-
-        foreach (i, token; sourceTokens)
-        {
-            if (token.type == tok!"identifier" && request.cursorPosition >= token.index
-                    && request.cursorPosition < token.index + token.text.length)
-            {
-                sourceToken = &sourceTokens[i];
-                break;
-            }
-        }
-
-        if (sourceToken is null)
-        {
-            return null;
-        }
-
-        Location[] result;
-        const sourceSymbol = stuff.symbols[0];
-        const sourceSymbolFile = sourceSymbol.symbolFile == "stdin" ? uri.path
-            : sourceSymbol.symbolFile;
         auto workspaceUris = _workspaceDependencies.keys
             .map!(w => dirEntries(w, SpanMode.depth).map!q{a.name}
                     .filter!(path => globMatch(path, "*.{d,di}"))
                     .map!(Uri.fromPath)
                     .array)
             .reduce!q{a ~ b};
-
-        foreach (fileUri; workspaceUris)
-        {
-            auto document = Document[fileUri];
-            request.fileName = fileUri.path;
-            request.sourceCode = cast(ubyte[]) document.toString();
-            auto tokens = getTokensForParser(request.sourceCode, LexerConfig(fileUri.path,
-                    StringBehavior.compiler, WhitespaceBehavior.skip), &stringCache);
-
-            foreach (token; tokens)
-            {
-                if (token.type == tok!"identifier" && token.text == sourceToken.text)
-                {
-                    request.cursorPosition = token.index + 1;
-                    auto candidateStuff = getSymbolsForCompletion(request,
-                            CompletionType.location, _allocator, &ra, stringCache, cache);
-
-                    scope (exit)
-                    {
-                        candidateStuff.destroy();
-                    }
-
-                    if (candidateStuff.symbols.length != 1)
-                    {
-                        continue;
-                    }
-
-                    const candidateSymbol = candidateStuff.symbols[0];
-                    const candidateSymbolFile = candidateSymbol.symbolFile == "stdin"
-                        ? fileUri.path : candidateSymbol.symbolFile;
-
-                    if (!includeDeclaration && filenameCmp(fileUri.path,
-                            sourceSymbolFile) == 0 && token.index == sourceSymbol.location)
-                    {
-                        continue;
-                    }
-
-                    if (candidateSymbol.location == sourceSymbol.location
-                            && filenameCmp(candidateSymbolFile, sourceSymbolFile) == 0)
-                    {
-                        result ~= new Location(fileUri.toString(),
-                                document.wordRangeAtByte(token.index));
-                    }
-                }
-            }
-        }
-
-        return result;
+        return referencesForFiles(uri, position, workspaceUris, includeDeclaration, false);
     }
 
     DocumentHighlight[] highlight(Uri uri, Position position)
     {
-        import dcd.server.autocomplete.localuse : findLocalUse;
         import dls.protocol.interfaces : DocumentHighlightKind;
-        import dls.util.document : Document;
         import dls.util.logger : logger;
-        import std.algorithm : map;
-        import std.array : array;
+        import std.algorithm : any;
+        import std.path : filenameCmp;
         import std.typecons : nullable;
 
         logger.infof("Highlighting usages for %s at position %s,%s", uri.path,
                 position.line, position.character);
 
-        auto request = getPreparedRequest(uri, position, RequestKind.localUse);
-        auto result = findLocalUse(request, _cache);
-        return result.completions.map!((res) => new DocumentHighlight(
-                Document[uri].wordRangeAtByte(res.symbolLocation), (res.symbolLocation == result.symbolLocation
-                ? DocumentHighlightKind.write : DocumentHighlightKind.text).nullable)).array;
+        auto sources = referencesForFiles(uri, position, [uri], true, true);
+        auto locations = referencesForFiles(uri, position, [uri], true, false);
+        DocumentHighlight[] result;
+
+        foreach (location; locations)
+        {
+            auto kind = sources.any!(sourceLoc => location.range.start.line == sourceLoc.range.start.line
+                    && location.range.start.character == sourceLoc.range.start.character
+                    && filenameCmp(new Uri(location.uri).path, new Uri(sourceLoc.uri).path) == 0) ? DocumentHighlightKind
+                .write : DocumentHighlightKind.read;
+            result ~= new DocumentHighlight(location.range, kind.nullable);
+        }
+
+        return result;
     }
 
     WorkspaceEdit rename(Uri uri, Position position, string newName)
@@ -957,6 +871,129 @@ class SymbolTool : Tool
 
         logger.infof("Importing directories: %s", paths);
         _cache.addImportPaths(paths);
+    }
+
+    private Location[] referencesForFiles(Uri uri, Position position, Uri[] files,
+            bool includeDeclaration, bool sources)
+    {
+        import dcd.common.messages : CompletionType;
+        import dcd.server.autocomplete.util : getSymbolsForCompletion;
+        import dls.util.document : Document;
+        import dparse.lexer : LexerConfig, StringBehavior, StringCache, Token,
+            WhitespaceBehavior, getTokensForParser, tok;
+        import dparse.rollback_allocator : RollbackAllocator;
+        import dsymbol.string_interning : internString;
+        import std.range : zip;
+
+        auto request = getPreparedRequest(uri, position, RequestKind.symbolLocation);
+        auto stringCache = StringCache(StringCache.defaultBucketCount);
+        auto sourceTokens = getTokensForParser(Document[uri].toString(), LexerConfig(uri.path,
+                StringBehavior.compiler, WhitespaceBehavior.skip), &stringCache);
+        RollbackAllocator ra;
+        auto stuff = getSymbolsForCompletion(request, CompletionType.location,
+                _allocator, &ra, stringCache, cache);
+
+        scope (exit)
+        {
+            stuff.destroy();
+        }
+
+        const(Token)* sourceToken;
+
+        foreach (i, token; sourceTokens)
+        {
+            if (token.type == tok!"identifier" && request.cursorPosition >= token.index
+                    && request.cursorPosition < token.index + token.text.length)
+            {
+                sourceToken = &sourceTokens[i];
+                break;
+            }
+        }
+
+        if (sourceToken is null)
+        {
+            return null;
+        }
+
+        size_t[] sourceSymbolLocations;
+        string[] sourceSymbolFiles;
+        Location[] result;
+
+        foreach (s; stuff.symbols)
+        {
+            sourceSymbolLocations ~= s.location;
+            sourceSymbolFiles ~= s.symbolFile == "stdin" ? uri.path : s.symbolFile;
+        }
+
+        if (sources)
+        {
+            foreach (sourceLocation, sourceFile; zip(sourceSymbolLocations, sourceSymbolFiles))
+            {
+                auto sourceUri = Uri.fromPath(sourceFile);
+                result ~= new Location(sourceUri.toString(),
+                        Document[sourceUri].wordRangeAtByte(sourceLocation));
+            }
+
+            return result;
+        }
+
+        bool checkFileAndLocation(string file, size_t location)
+        {
+            import std.path : filenameCmp;
+
+            foreach (sourceLocation, sourceFile; zip(sourceSymbolLocations, sourceSymbolFiles))
+            {
+                if (location == sourceLocation && filenameCmp(file, sourceFile) == 0)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        foreach (fileUri; files)
+        {
+            auto document = Document[fileUri];
+            request.fileName = fileUri.path;
+            request.sourceCode = cast(ubyte[]) document.toString();
+            auto tokens = getTokensForParser(request.sourceCode, LexerConfig(fileUri.path,
+                    StringBehavior.compiler, WhitespaceBehavior.skip), &stringCache);
+
+            foreach (token; tokens)
+            {
+                if (token.type == tok!"identifier" && token.text == sourceToken.text)
+                {
+                    request.cursorPosition = token.index + 1;
+                    auto candidateStuff = getSymbolsForCompletion(request,
+                            CompletionType.location, _allocator, &ra, stringCache, cache);
+
+                    scope (exit)
+                    {
+                        candidateStuff.destroy();
+                    }
+
+                    foreach (candidateSymbol; candidateStuff.symbols)
+                    {
+                        if (!includeDeclaration && checkFileAndLocation(fileUri.path, token.index))
+                        {
+                            continue;
+                        }
+
+                        const candidateSymbolFile = candidateSymbol.symbolFile == "stdin"
+                            ? fileUri.path : candidateSymbol.symbolFile;
+
+                        if (checkFileAndLocation(candidateSymbolFile, candidateSymbol.location))
+                        {
+                            result ~= new Location(fileUri.toString(),
+                                    document.wordRangeAtByte(token.index));
+                        }
+                    }
+                }
+            }
+        }
+
+        return result;
     }
 
     private MarkupContent getDocumentation(string[][] detailsAndDocumentations)
