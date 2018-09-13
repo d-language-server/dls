@@ -674,20 +674,35 @@ class SymbolTool : Tool
         auto request = getPreparedRequest(uri, position, RequestKind.symbolLocation);
         auto stringCache = StringCache(StringCache.defaultBucketCount);
         RollbackAllocator ra;
-        auto stuff = getSymbolsForCompletion(request, CompletionType.location,
-                _allocator, &ra, stringCache, cache);
+        auto currentFileStuff = getSymbolsForCompletion(request,
+                CompletionType.location, _allocator, &ra, stringCache, cache);
 
         scope (exit)
         {
-            stuff.destroy();
+            currentFileStuff.destroy();
         }
 
         Location[] result;
 
-        foreach (symbol; stuff.symbols)
+        foreach (symbol; currentFileStuff.symbols)
         {
             auto symbolUri = symbol.symbolFile == "stdin" ? uri : Uri.fromPath(symbol.symbolFile);
-            result ~= new Location(symbolUri, Document[symbolUri].wordRangeAtByte(symbol.location));
+            auto document = Document[symbolUri];
+            request.fileName = symbolUri.path;
+            request.sourceCode = cast(ubyte[]) document.toString();
+            request.cursorPosition = symbol.location + 1;
+            auto stuff = getSymbolsForCompletion(request,
+                    CompletionType.location, _allocator, &ra, stringCache, cache);
+
+            scope (exit)
+            {
+                stuff.destroy();
+            }
+
+            foreach (s; stuff.symbols)
+            {
+                result ~= new Location(symbolUri, document.wordRangeAtByte(s.location));
+            }
         }
 
         return result;
