@@ -175,12 +175,20 @@ class TextDocumentIdentifier
     }
 }
 
-class TextDocumentItem
+class TextDocumentItem : TextDocumentIdentifier
 {
-    DocumentUri uri;
     string languageId;
     long version_;
     string text;
+
+    this(DocumentUri uri = DocumentUri.init, string languageId = string.init,
+            long version_ = long.init, string text = string.init)
+    {
+        super(uri);
+        this.languageId = languageId;
+        this.version_ = version_;
+        this.text = text;
+    }
 }
 
 class VersionedTextDocumentIdentifier : TextDocumentIdentifier
