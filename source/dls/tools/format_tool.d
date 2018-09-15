@@ -108,8 +108,6 @@ class FormatTool : Tool
 
         auto buffer = new OutBuffer();
         format(uri.path, contents, buffer, &config);
-        auto range = new Range(new Position(0, 0),
-                new Position(document.lines.length - 1, document.lines[$ - 1].length));
         return diff(uri, buffer.toString());
     }
 
@@ -117,6 +115,7 @@ class FormatTool : Tool
     {
         import dls.protocol.definitions : Range;
         import dls.util.document : Document;
+        import std.ascii : isWhite;
         import std.utf : decode;
 
         const document = Document.get(uri);
@@ -177,7 +176,8 @@ class FormatTool : Tool
                     stopIndex = i;
                 }
 
-                if (before.length - i < after.length - j && j < after.length)
+                if (j < after.length && !isWhite(beforeChar)
+                        && (isWhite(afterChar) || before.length - i < after.length - j))
                 {
                     text ~= after[j .. newJ];
                     j = newJ;
