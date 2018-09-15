@@ -96,10 +96,10 @@ class AnalysisTool : Tool
         logger.infof("Scanning document %s", uri.path);
 
         auto stringCache = StringCache(StringCache.defaultBucketCount);
-        auto tokens = getTokensForParser(Document[uri].toString(),
+        auto tokens = getTokensForParser(Document.get(uri).toString(),
                 LexerConfig(uri.path, StringBehavior.source), &stringCache);
         RollbackAllocator ra;
-        auto document = Document[uri];
+        auto document = Document.get(uri);
         auto diagnostics = appender!(Diagnostic[]);
 
         const syntaxProblemhandler = (string path, size_t line, size_t column,

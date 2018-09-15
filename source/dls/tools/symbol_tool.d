@@ -477,8 +477,8 @@ class SymbolTool : Tool
 
             if (name.matchFirst(regex(query, "i")))
             {
-                auto location = new Location(symbolUri,
-                        Document[symbolUri].wordRangeAtByte(symbol.location));
+                auto location = new Location(symbolUri, Document.get(symbolUri)
+                        .wordRangeAtByte(symbol.location));
                 result.insert(new SymbolInformation(name,
                         symbolKinds[symbol.kind], location, containerName.nullable));
             }
@@ -542,7 +542,7 @@ class SymbolTool : Tool
         }
 
         auto stringCache = StringCache(StringCache.defaultBucketCount);
-        auto tokens = getTokensForParser(Document[uri].toString(),
+        auto tokens = getTokensForParser(Document.get(uri).toString(),
                 LexerConfig(uri.path, StringBehavior.source), &stringCache);
         RollbackAllocator ra;
         const mod = parseModule(tokens, uri.path, &ra, toDelegate(&doNothing));
@@ -687,7 +687,7 @@ class SymbolTool : Tool
         foreach (symbol; currentFileStuff.symbols)
         {
             auto symbolUri = symbol.symbolFile == "stdin" ? uri : Uri.fromPath(symbol.symbolFile);
-            auto document = Document[symbolUri];
+            auto document = Document.get(symbolUri);
             request.fileName = symbolUri.path;
             request.sourceCode = cast(ubyte[]) document.toString();
             request.cursorPosition = symbol.location + 1;
@@ -740,7 +740,8 @@ class SymbolTool : Tool
                 .uniq!q{a.symbolFile == b.symbolFile && a.location == b.location})
         {
             auto symbolUri = type.symbolFile == "stdin" ? uri : Uri.fromPath(type.symbolFile);
-            result ~= new Location(symbolUri, Document[symbolUri].wordRangeAtByte(type.location));
+            result ~= new Location(symbolUri, Document.get(symbolUri)
+                    .wordRangeAtByte(type.location));
         }
 
         return result;
@@ -831,7 +832,7 @@ class SymbolTool : Tool
         foreach (documentUri, textEdits; changes)
         {
             auto identifier = new VersionedTextDocumentIdentifier(documentUri,
-                    Document[new Uri(documentUri)].version_);
+                    Document.get(new Uri(documentUri)).version_);
             documentChanges ~= new TextDocumentEdit(identifier, textEdits);
         }
 
@@ -850,7 +851,7 @@ class SymbolTool : Tool
         auto defs = definition(uri, position);
         return defs.length == 0
             || defs.any!(d => getWorkspace(new Uri(d.uri)) is null) ? null
-            : Document[uri].wordRangeAtPosition(position);
+            : Document.get(uri).wordRangeAtPosition(position);
     }
 
     Uri getWorkspace(Uri uri)
@@ -902,8 +903,9 @@ class SymbolTool : Tool
 
         auto request = getPreparedRequest(uri, position, RequestKind.symbolLocation);
         auto stringCache = StringCache(StringCache.defaultBucketCount);
-        auto sourceTokens = getTokensForParser(Document[uri].toString(), LexerConfig(uri.path,
-                StringBehavior.compiler, WhitespaceBehavior.skip), &stringCache);
+        auto sourceTokens = getTokensForParser(Document.get(uri).toString(),
+                LexerConfig(uri.path, StringBehavior.compiler, WhitespaceBehavior.skip),
+                &stringCache);
         RollbackAllocator ra;
         auto stuff = getSymbolsForCompletion(request, CompletionType.location,
                 _allocator, &ra, stringCache, cache);
@@ -946,7 +948,7 @@ class SymbolTool : Tool
             {
                 auto sourceUri = Uri.fromPath(sourceFile);
                 result ~= new Location(sourceUri.toString(),
-                        Document[sourceUri].wordRangeAtByte(sourceLocation));
+                        Document.get(sourceUri).wordRangeAtByte(sourceLocation));
             }
 
             return result;
@@ -969,7 +971,7 @@ class SymbolTool : Tool
 
         foreach (fileUri; files)
         {
-            auto document = Document[fileUri];
+            auto document = Document.get(fileUri);
             request.fileName = fileUri.path;
             request.sourceCode = cast(ubyte[]) document.toString();
             auto tokens = getTokensForParser(request.sourceCode, LexerConfig(fileUri.path,
@@ -1073,7 +1075,7 @@ class SymbolTool : Tool
         import std.format : format;
 
         auto request = AutocompleteRequest();
-        auto document = Document[uri];
+        auto document = Document.get(uri);
 
         if (!document.validatePosition(position))
         {
@@ -1306,7 +1308,7 @@ private class SymbolVisitor(SymbolType) : ASTVisitor
     {
         import dls.util.document : Document;
 
-        auto document = Document[_uri];
+        auto document = Document.get(_uri);
 
         static if (__traits(hasMember, T, "line") && __traits(hasMember, T, "column"))
         {
@@ -1335,7 +1337,7 @@ private class SymbolVisitor(SymbolType) : ASTVisitor
             else
             {
                 auto fullRange = endLocation > 0 ? new Range(range.start,
-                        Document[_uri].positionAtByte(endLocation)) : range;
+                        Document.get(_uri).positionAtByte(endLocation)) : range;
                 DocumentSymbol[] children;
                 (container is null ? result : container.children) ~= new DocumentSymbol(name,
                         Nullable!string(), kind, Nullable!bool(), fullRange,

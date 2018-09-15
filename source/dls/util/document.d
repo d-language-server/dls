@@ -32,18 +32,18 @@ class Document
     private wstring[] _lines;
     private JSONValue _version;
 
-    static Document opIndex(in Uri uri)
-    {
-        import std.file : readText;
-
-        return uri.path in _documents ? _documents[uri.path] : new Document(readText(uri.path));
-    }
-
     @property static auto uris()
     {
         import std.algorithm : map;
 
         return _documents.keys.map!(path => Uri.fromPath(path));
+    }
+
+    static Document get(in Uri uri)
+    {
+        import std.file : readText;
+
+        return uri.path in _documents ? _documents[uri.path] : new Document(readText(uri.path));
     }
 
     static void open(in TextDocumentItem textDocument)

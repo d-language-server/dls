@@ -71,7 +71,7 @@ class FormatTool : Tool
 
         logger.infof("Formatting %s", uri.path);
 
-        const document = Document[uri];
+        const document = Document.get(uri);
         auto contents = cast(ubyte[]) document.toString();
         auto config = Config();
 
