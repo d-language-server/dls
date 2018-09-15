@@ -95,17 +95,6 @@ enum TextDocument : string
 
 interface Dls
 {
-    enum Compat : string
-    {
-        upgradeDls_start        = "$/dls.upgradeDls.start",
-        upgradeDls_stop         = "$/dls.upgradeDls.stop",
-        upgradeDls_totalSize    = "$/dls.upgradeDls.totalSize",
-        upgradeDls_currentSize  = "$/dls.upgradeDls.currentSize",
-        upgradeDls_extract      = "$/dls.upgradeDls.extract",
-        upgradeSelections_start = "$/dls.upgradeSelections.start",
-        upgradeSelections_stop  = "$/dls.upgradeSelections.stop",
-    }
-
     enum UpgradeDls : string
     {
         didStart                = "$/dls/upgradeDls/didStart",

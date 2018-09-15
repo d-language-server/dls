@@ -427,8 +427,6 @@ class SymbolTool : Tool
             import dls.protocol.jsonrpc : send;
             import dub.dub : UpgradeOptions;
 
-            send(Dls.Compat.upgradeSelections_start,
-                new TranslationParams(Tr.app_upgradeSelections_upgrading));
             send(Dls.UpgradeSelections.didStart,
                 new TranslationParams(Tr.app_upgradeSelections_upgrading));
 
@@ -442,7 +440,6 @@ class SymbolTool : Tool
             }
             finally
             {
-                send(Dls.Compat.upgradeSelections_stop);
                 send(Dls.UpgradeSelections.didStop);
             }
         }, uri.toString());
