@@ -104,7 +104,7 @@ class Document
 
     bool validatePosition(in Position position)
     {
-        return position.line < _lines.length && position.character < _lines[position.line].length;
+        return position.line < _lines.length && position.character <= _lines[position.line].length;
     }
 
     size_t byteAtPosition(in Position position)
