@@ -102,12 +102,12 @@ class Document
         return _lines.join().toUTF8();
     }
 
-    bool validatePosition(in Position position)
+    bool validatePosition(in Position position) const
     {
         return position.line < _lines.length && position.character <= _lines[position.line].length;
     }
 
-    size_t byteAtPosition(in Position position)
+    size_t byteAtPosition(in Position position) const
     {
         import std.algorithm : reduce;
         import std.range : iota;
@@ -130,7 +130,7 @@ class Document
         return linesBytes + characterBytes;
     }
 
-    Position positionAtByte(size_t bytePosition)
+    Position positionAtByte(size_t bytePosition) const
     {
         import std.algorithm : min;
         import std.utf : codeLength, toUCSindex;
@@ -151,12 +151,12 @@ class Document
         return new Position(lineNumber, columnNumber);
     }
 
-    Range wordRangeAtByte(size_t bytePosition)
+    Range wordRangeAtByte(size_t bytePosition) const
     {
         return wordRangeAtPosition(positionAtByte(bytePosition));
     }
 
-    Range wordRangeAtPosition(in Position position)
+    Range wordRangeAtPosition(in Position position) const
     {
         import std.algorithm : min;
         import std.regex : matchAll, regex;
@@ -168,7 +168,7 @@ class Document
                 new Position(position.line, startCharacter + (word ? word.hit.length : 0)));
     }
 
-    Range wordRangeAtLineAndByte(size_t lineNumber, size_t bytePosition)
+    Range wordRangeAtLineAndByte(size_t lineNumber, size_t bytePosition) const
     {
         import std.utf : toUCSindex;
 

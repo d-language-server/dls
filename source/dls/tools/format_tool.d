@@ -59,7 +59,7 @@ class FormatTool : Tool
     import dls.protocol.interfaces : FormattingOptions;
     import dls.util.uri : Uri;
 
-    TextEdit[] formatting(Uri uri, FormattingOptions options)
+    TextEdit[] formatting(in Uri uri, in FormattingOptions options)
     {
         import dfmt.config : Config;
         import dfmt.editorconfig : IndentStyle, OptionalBoolean;
@@ -110,6 +110,87 @@ class FormatTool : Tool
         format(uri.path, contents, buffer, &config);
         auto range = new Range(new Position(0, 0),
                 new Position(document.lines.length - 1, document.lines[$ - 1].length));
-        return [new TextEdit(range, buffer.toString())];
+        return diff(uri, buffer.toString());
+    }
+
+    private TextEdit[] diff(in Uri uri, in string after)
+    {
+        import dls.protocol.definitions : Range;
+        import dls.util.document : Document;
+        import std.utf : decode;
+
+        const document = Document.get(uri);
+        const before = document.toString();
+        size_t i;
+        size_t j;
+        TextEdit[] result;
+
+        size_t startIndex;
+        size_t stopIndex;
+        string text;
+
+        bool pushTextEdit()
+        {
+            if (startIndex != stopIndex || text.length > 0)
+            {
+                result ~= new TextEdit(new Range(document.positionAtByte(startIndex),
+                        document.positionAtByte(stopIndex)), text);
+                return true;
+            }
+
+            return false;
+        }
+
+        while (i < before.length || j < after.length)
+        {
+            auto newI = i;
+            auto newJ = j;
+            dchar beforeChar;
+            dchar afterChar;
+
+            if (newI < before.length)
+            {
+                beforeChar = decode(before, newI);
+            }
+
+            if (newJ < after.length)
+            {
+                afterChar = decode(after, newJ);
+            }
+
+            if (i < before.length && j < after.length && beforeChar == afterChar)
+            {
+                i = newI;
+                j = newJ;
+
+                if (pushTextEdit())
+                {
+                    startIndex = stopIndex;
+                    text = "";
+                }
+            }
+            else
+            {
+                if (startIndex == stopIndex)
+                {
+                    startIndex = i;
+                    stopIndex = i;
+                }
+
+                if (before.length - i < after.length - j && j < after.length)
+                {
+                    text ~= after[j .. newJ];
+                    j = newJ;
+                }
+                else if (i < before.length)
+                {
+                    stopIndex = newI;
+                    i = newI;
+                }
+            }
+        }
+
+        pushTextEdit();
+        return result;
     }
 }
