@@ -4,6 +4,9 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.11.1
+- Fixed position validation error shown on completion at the end of a line
+
 ### 0.11.0
 - Added find references support
 - Added project-wide renaming support
