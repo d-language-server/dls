@@ -413,10 +413,6 @@ class SymbolTool : Tool
 
     void upgradeSelections(Uri uri)
     {
-        import dls.protocol.interfaces.dls : TranslationParams;
-        import dls.protocol.messages.methods : Dls;
-        import dls.protocol.messages.window : Util;
-        import dls.util.constants : Tr;
         import dls.util.logger : logger;
         import std.concurrency : spawn;
         import std.path : dirName;
@@ -424,7 +420,11 @@ class SymbolTool : Tool
         logger.infof("Upgrading dependencies from %s", dirName(uri.path));
 
         spawn((string uriString) {
+            import dls.protocol.interfaces.dls : TranslationParams;
             import dls.protocol.jsonrpc : send;
+            import dls.protocol.messages.methods : Dls;
+            import dls.protocol.messages.window : Util;
+            import dls.util.constants : Tr;
             import dub.dub : UpgradeOptions;
 
             send(Dls.UpgradeSelections.didStart,
