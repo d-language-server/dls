@@ -20,7 +20,7 @@
 
 module dls.tools.tools;
 
-abstract class Tools
+final abstract class Tools
 {
     import dls.tools.analysis_tool : AnalysisTool;
     import dls.tools.configuration : Configuration;

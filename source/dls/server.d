@@ -54,7 +54,7 @@ shared static this()
     }
 }
 
-abstract class Server
+final abstract class Server
 {
     import dls.protocol.interfaces : InitializeParams;
 

@@ -75,7 +75,7 @@ void showMessageRequest(string id, Nullable!MessageActionItem item)
     Util.messageRequestInfo.remove(id);
 }
 
-abstract class Util
+final abstract class Util
 {
     import dls.protocol.interfaces : MessageType;
     import dls.protocol.jsonrpc : send;
