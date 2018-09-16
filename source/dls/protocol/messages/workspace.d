@@ -27,7 +27,8 @@ import std.typecons : Nullable;
 
 void workspaceFolders(string id, Nullable!(WorkspaceFolder[]) folders)
 {
-    import dls.tools.tools : Tools;
+    import dls.tools.analysis_tool : AnalysisTool;
+    import dls.tools.symbol_tool : SymbolTool;
     import dls.util.uri : Uri;
 
     if (!folders.isNull)
@@ -35,15 +36,16 @@ void workspaceFolders(string id, Nullable!(WorkspaceFolder[]) folders)
         foreach (workspaceFolder; folders)
         {
             auto uri = new Uri(workspaceFolder.uri);
-            Tools.symbolTool.importPath(uri);
-            Tools.analysisTool.addAnalysisConfigPath(uri);
+            SymbolTool.instance.importPath(uri);
+            AnalysisTool.instance.addAnalysisConfigPath(uri);
         }
     }
 }
 
 void didChangeWorkspaceFolders(DidChangeWorkspaceFoldersParams params)
 {
-    import dls.tools.tools : Tools;
+    import dls.tools.analysis_tool : AnalysisTool;
+    import dls.tools.symbol_tool : SymbolTool;
     import dls.util.uri : Uri;
     import std.typecons : nullable;
 
@@ -52,8 +54,8 @@ void didChangeWorkspaceFolders(DidChangeWorkspaceFoldersParams params)
     foreach (folder; params.event.removed)
     {
         auto uri = new Uri(folder.uri);
-        Tools.symbolTool.clearPath(uri);
-        Tools.analysisTool.removeAnalysisConfigPath(uri);
+        SymbolTool.instance.clearPath(uri);
+        AnalysisTool.instance.removeAnalysisConfigPath(uri);
     }
 }
 
@@ -64,7 +66,7 @@ void configuration(string id, JSONValue[] config)
 void didChangeConfiguration(DidChangeConfigurationParams params)
 {
     import dls.tools.configuration : Configuration;
-    import dls.tools.tools : Tools;
+    import dls.tools.tool : Tool;
     import dls.util.json : convertFromJSON;
     import dls.util.logger : logger;
 
@@ -73,14 +75,15 @@ void didChangeConfiguration(DidChangeConfigurationParams params)
     if ("d" in params.settings && "dls" in params.settings["d"])
     {
         logger.info("Applying new configuration");
-        Tools.setConfiguration(convertFromJSON!Configuration(params.settings["d"]["dls"]));
+        Tool.configuration = convertFromJSON!Configuration(params.settings["d"]["dls"]);
     }
 }
 
 void didChangeWatchedFiles(DidChangeWatchedFilesParams params)
 {
     import dls.protocol.interfaces : FileChangeType;
-    import dls.tools.tools : Tools;
+    import dls.tools.analysis_tool : AnalysisTool;
+    import dls.tools.symbol_tool : SymbolTool;
     import dls.util.logger : logger;
     import dls.util.uri : Uri;
     import std.path : baseName, dirName;
@@ -98,17 +101,17 @@ void didChangeWatchedFiles(DidChangeWatchedFilesParams params)
             if (baseName(dirName(uri.path)) != ".dub"
                     && event.type != FileChangeType.deleted)
             {
-                Tools.symbolTool.importPath(dirUri);
+                SymbolTool.instance.importPath(dirUri);
             }
 
             break;
 
         case "dub.selections.json":
-            Tools.symbolTool.importSelections(dirUri);
+            SymbolTool.instance.importSelections(dirUri);
             break;
 
         default:
-            Tools.analysisTool.updateAnalysisConfigPath(dirUri);
+            AnalysisTool.instance.updateAnalysisConfigPath(dirUri);
             break;
         }
     }
@@ -116,9 +119,9 @@ void didChangeWatchedFiles(DidChangeWatchedFilesParams params)
 
 SymbolInformation[] symbol(WorkspaceSymbolParams params)
 {
-    import dls.tools.tools : Tools;
+    import dls.tools.symbol_tool : SymbolTool;
 
-    return Tools.symbolTool.symbol(params.query);
+    return SymbolTool.instance.symbol(params.query);
 }
 
 JSONValue executeCommand(ExecuteCommandParams params)

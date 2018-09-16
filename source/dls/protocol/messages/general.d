@@ -30,7 +30,9 @@ InitializeResult initialize(InitializeParams params)
     import dls.protocol.state : initOptions, initState;
     import dls.tools.symbol_tool : useCompatCompletionItemKinds,
         useCompatSymbolKinds;
-    import dls.tools.tools : Tools;
+    import dls.tools.analysis_tool : AnalysisTool;
+    import dls.tools.format_tool : FormatTool;
+    import dls.tools.symbol_tool : SymbolTool;
     import dls.util.logger : logger;
     import dls.util.uri : Uri;
     import std.algorithm : map, sort, uniq;
@@ -40,7 +42,9 @@ InitializeResult initialize(InitializeParams params)
     logger.info("Initializing server");
     initState = params;
     Server.initialized = true;
-    Tools.initialize();
+    AnalysisTool.initialize();
+    FormatTool.initialize();
+    SymbolTool.initialize();
 
     debug
     {
@@ -105,8 +109,8 @@ InitializeResult initialize(InitializeParams params)
     foreach (uri; uris.sort!q{a.path < b.path}
             .uniq!q{a.path == b.path})
     {
-        Tools.symbolTool.importPath(uri);
-        Tools.analysisTool.addAnalysisConfigPath(uri);
+        SymbolTool.instance.importPath(uri);
+        AnalysisTool.instance.addAnalysisConfigPath(uri);
     }
 
     auto result = new InitializeResult();
@@ -180,12 +184,16 @@ void initialized(JSONValue nothing)
 JSONValue shutdown(JSONValue nothing)
 {
     import dls.server : Server;
-    import dls.tools.tools : Tools;
+    import dls.tools.analysis_tool : AnalysisTool;
+    import dls.tools.format_tool : FormatTool;
+    import dls.tools.symbol_tool : SymbolTool;
     import dls.util.logger : logger;
 
     logger.info("Shutting down server");
     Server.shutdown = true;
-    Tools.shutdown();
+    AnalysisTool.shutdown();
+    FormatTool.shutdown();
+    SymbolTool.shutdown();
     return JSONValue(null);
 }
 

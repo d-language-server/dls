@@ -30,6 +30,23 @@ class AnalysisTool : Tool
     import dls.util.uri : Uri;
     import dscanner.analysis.config : StaticAnalysisConfig;
 
+    private static AnalysisTool _instance;
+
+    static void initialize()
+    {
+        _instance = new AnalysisTool();
+    }
+
+    static void shutdown()
+    {
+        destroy(_instance);
+    }
+
+    @property static AnalysisTool instance()
+    {
+        return _instance;
+    }
+
     private StaticAnalysisConfig[string] _analysisConfigs;
 
     void addAnalysisConfigPath(Uri uri)
@@ -60,7 +77,7 @@ class AnalysisTool : Tool
         import std.file : exists;
         import std.path : buildNormalizedPath;
 
-        auto configPath = buildNormalizedPath(uri.path, _configuration.analysis.configFile);
+        auto configPath = buildNormalizedPath(uri.path, configuration.analysis.configFile);
 
         if (configPath.exists())
         {
@@ -81,7 +98,7 @@ class AnalysisTool : Tool
     Diagnostic[] scan(Uri uri)
     {
         import dls.protocol.definitions : DiagnosticSeverity;
-        import dls.tools.tools : Tools;
+        import dls.tools.symbol_tool : SymbolTool;
         import dls.util.document : Document;
         import dls.util.logger : logger;
         import dparse.lexer : LexerConfig, StringBehavior, StringCache,
@@ -111,7 +128,7 @@ class AnalysisTool : Tool
 
         const mod = parseModule(tokens, uri.path, &ra, syntaxProblemhandler);
         const analysisResults = analyze(uri.path, mod, getConfig(uri),
-                Tools.symbolTool.cache, tokens, true);
+                SymbolTool.instance.cache, tokens, true);
 
         foreach (result; analysisResults)
         {
@@ -125,10 +142,10 @@ class AnalysisTool : Tool
 
     private StaticAnalysisConfig getConfig(Uri uri)
     {
-        import dls.tools.tools : Tools;
+        import dls.tools.symbol_tool : SymbolTool;
         import dscanner.analysis.config : defaultStaticAnalysisConfig;
 
-        const configUri = Tools.symbolTool.getWorkspace(uri);
+        const configUri = SymbolTool.instance.getWorkspace(uri);
         const configPath = configUri is null ? "" : configUri.path;
         return (configPath in _analysisConfigs) ? _analysisConfigs[configPath]
             : defaultStaticAnalysisConfig();

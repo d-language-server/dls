@@ -59,6 +59,23 @@ class FormatTool : Tool
     import dls.protocol.interfaces : FormattingOptions;
     import dls.util.uri : Uri;
 
+    private static FormatTool _instance;
+
+    static void initialize()
+    {
+        _instance = new FormatTool();
+    }
+
+    static void shutdown()
+    {
+        destroy(_instance);
+    }
+
+    @property static FormatTool instance()
+    {
+        return _instance;
+    }
+
     TextEdit[] formatting(in Uri uri, in FormattingOptions options)
     {
         import dfmt.config : Config;
@@ -81,30 +98,30 @@ class FormatTool : Tool
         }
 
         config.initializeWithDefaults();
-        config.end_of_line = eolMap[_configuration.format.endOfLine];
+        config.end_of_line = eolMap[configuration.format.endOfLine];
         config.indent_style = options.insertSpaces ? IndentStyle.space : IndentStyle.tab;
         config.indent_size = cast(typeof(config.indent_size)) options.tabSize;
         config.tab_width = config.indent_size;
-        config.max_line_length = _configuration.format.maxLineLength;
+        config.max_line_length = configuration.format.maxLineLength;
         config.dfmt_align_switch_statements = toOptBool(
-                _configuration.format.dfmtAlignSwitchStatements);
-        config.dfmt_brace_style = braceStyleMap[_configuration.format.dfmtBraceStyle];
-        config.dfmt_outdent_attributes = toOptBool(_configuration.format.dfmtOutdentAttributes);
-        config.dfmt_soft_max_line_length = _configuration.format.dfmtSoftMaxLineLength;
-        config.dfmt_space_after_cast = toOptBool(_configuration.format.dfmtSpaceAfterCast);
-        config.dfmt_space_after_keywords = toOptBool(_configuration.format.dfmtSpaceAfterKeywords);
+                configuration.format.dfmtAlignSwitchStatements);
+        config.dfmt_brace_style = braceStyleMap[configuration.format.dfmtBraceStyle];
+        config.dfmt_outdent_attributes = toOptBool(configuration.format.dfmtOutdentAttributes);
+        config.dfmt_soft_max_line_length = configuration.format.dfmtSoftMaxLineLength;
+        config.dfmt_space_after_cast = toOptBool(configuration.format.dfmtSpaceAfterCast);
+        config.dfmt_space_after_keywords = toOptBool(configuration.format.dfmtSpaceAfterKeywords);
         config.dfmt_space_before_function_parameters = toOptBool(
-                _configuration.format.dfmtSpaceBeforeFunctionParameters);
+                configuration.format.dfmtSpaceBeforeFunctionParameters);
         config.dfmt_split_operator_at_line_end = toOptBool(
-                _configuration.format.dfmtSplitOperatorAtLineEnd);
+                configuration.format.dfmtSplitOperatorAtLineEnd);
         config.dfmt_selective_import_space = toOptBool(
-                _configuration.format.dfmtSelectiveImportSpace);
-        config.dfmt_compact_labeled_statements = _configuration.format.dfmtCompactLabeledStatements
+                configuration.format.dfmtSelectiveImportSpace);
+        config.dfmt_compact_labeled_statements = configuration.format.dfmtCompactLabeledStatements
             ? OptionalBoolean.t : OptionalBoolean.f;
         config.dfmt_template_constraint_style
-            = templateConstraintStyleMap[_configuration.format.dfmtTemplateConstraintStyle];
+            = templateConstraintStyleMap[configuration.format.dfmtTemplateConstraintStyle];
         config.dfmt_single_template_constraint_indent = toOptBool(
-                _configuration.format.dfmtSingleTemplateConstraintIndent);
+                configuration.format.dfmtSingleTemplateConstraintIndent);
 
         auto buffer = new OutBuffer();
         format(uri.path, contents, buffer, &config);

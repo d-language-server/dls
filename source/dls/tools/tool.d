@@ -20,14 +20,31 @@
 
 module dls.tools.tool;
 
+private alias Hook = void delegate();
+
 abstract class Tool
 {
     import dls.tools.configuration : Configuration;
 
-    package static Configuration _configuration;
+    static Configuration configuration;
+    private static Hook[] _configHooks;
 
     static this()
     {
-        _configuration = new Configuration();
+        configuration = new Configuration();
+
+        foreach (hook; _configHooks)
+        {
+            hook();
+        }
     }
+
+    protected static void addConfigHook(Hook hook)
+    {
+        _configHooks ~= hook;
+    }
+
+    static void initialize();
+    static void shutdown();
+    @property static T instance(T : Tool)();
 }

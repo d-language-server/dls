@@ -25,7 +25,7 @@ import std.typecons : Nullable;
 
 void showMessageRequest(string id, Nullable!MessageActionItem item)
 {
-    import dls.tools.tools : Tools;
+    import dls.tools.symbol_tool : SymbolTool;
     import dls.util.constants : Tr;
     import dls.util.i18n : tr;
     import dls.util.logger : logger;
@@ -48,7 +48,7 @@ void showMessageRequest(string id, Nullable!MessageActionItem item)
             if (item.title == tr(Tr.app_upgradeSelections_upgrade))
             {
                 auto uri = new Uri(Util.messageRequestInfo[id][1]);
-                Tools.symbolTool.upgradeSelections(uri);
+                SymbolTool.instance.upgradeSelections(uri);
             }
 
             break;

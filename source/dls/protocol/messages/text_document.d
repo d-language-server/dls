@@ -29,7 +29,7 @@ void didOpen(DidOpenTextDocumentParams params)
 {
     import dls.protocol.jsonrpc : send;
     import dls.protocol.messages.methods : TextDocument;
-    import dls.tools.tools : Tools;
+    import dls.tools.analysis_tool : AnalysisTool;
     import dls.util.document : Document;
     import dls.util.logger : logger;
     import dls.util.uri : Uri;
@@ -40,7 +40,7 @@ void didOpen(DidOpenTextDocumentParams params)
         logger.infof("Document opened: %s", uri.path);
         Document.open(params.textDocument);
         send(TextDocument.publishDiagnostics, new PublishDiagnosticsParams(uri,
-                Tools.analysisTool.scan(uri)));
+                AnalysisTool.instance.scan(uri)));
     }
 }
 
@@ -68,7 +68,7 @@ void didSave(DidSaveTextDocumentParams params)
 {
     import dls.protocol.jsonrpc : send;
     import dls.protocol.messages.methods : TextDocument;
-    import dls.tools.tools : Tools;
+    import dls.tools.analysis_tool : AnalysisTool;
     import dls.util.document : Document;
     import dls.util.logger : logger;
     import dls.util.uri : Uri;
@@ -76,7 +76,7 @@ void didSave(DidSaveTextDocumentParams params)
     auto uri = new Uri(params.textDocument.uri);
     logger.infof("Document saved: %s", uri.path);
     send(TextDocument.publishDiagnostics, new PublishDiagnosticsParams(uri,
-            Tools.analysisTool.scan(uri)));
+            AnalysisTool.instance.scan(uri)));
 }
 
 void didClose(DidCloseTextDocumentParams params)
@@ -95,26 +95,26 @@ void didClose(DidCloseTextDocumentParams params)
 
 CompletionItem[] completion(CompletionParams params)
 {
-    import dls.tools.tools : Tools;
+    import dls.tools.symbol_tool : SymbolTool;
     import dls.util.uri : Uri;
 
-    return Tools.symbolTool.completion(new Uri(params.textDocument.uri), params.position);
+    return SymbolTool.instance.completion(new Uri(params.textDocument.uri), params.position);
 }
 
 @("completionItem", "resolve")
 CompletionItem completionItem_resolve(CompletionItem item)
 {
-    import dls.tools.tools : Tools;
+    import dls.tools.symbol_tool : SymbolTool;
 
-    return Tools.symbolTool.completionResolve(item);
+    return SymbolTool.instance.completionResolve(item);
 }
 
 Hover hover(TextDocumentPositionParams params)
 {
-    import dls.tools.tools : Tools;
+    import dls.tools.symbol_tool : SymbolTool;
     import dls.util.uri : Uri;
 
-    return Tools.symbolTool.hover(new Uri(params.textDocument.uri), params.position);
+    return SymbolTool.instance.hover(new Uri(params.textDocument.uri), params.position);
 }
 
 SignatureHelp signatureHelp(TextDocumentPositionParams params)
@@ -124,18 +124,18 @@ SignatureHelp signatureHelp(TextDocumentPositionParams params)
 
 Location[] definition(TextDocumentPositionParams params)
 {
-    import dls.tools.tools : Tools;
+    import dls.tools.symbol_tool : SymbolTool;
     import dls.util.uri : Uri;
 
-    return Tools.symbolTool.definition(new Uri(params.textDocument.uri), params.position);
+    return SymbolTool.instance.definition(new Uri(params.textDocument.uri), params.position);
 }
 
 Location[] typeDefinition(TextDocumentPositionParams params)
 {
-    import dls.tools.tools : Tools;
+    import dls.tools.symbol_tool : SymbolTool;
     import dls.util.uri : Uri;
 
-    return Tools.symbolTool.typeDefinition(new Uri(params.textDocument.uri), params.position);
+    return SymbolTool.instance.typeDefinition(new Uri(params.textDocument.uri), params.position);
 }
 
 Location implementation(TextDocumentPositionParams params)
@@ -145,25 +145,25 @@ Location implementation(TextDocumentPositionParams params)
 
 Location[] references(ReferenceParams params)
 {
-    import dls.tools.tools : Tools;
+    import dls.tools.symbol_tool : SymbolTool;
     import dls.util.uri : Uri;
 
-    return Tools.symbolTool.references(new Uri(params.textDocument.uri),
+    return SymbolTool.instance.references(new Uri(params.textDocument.uri),
             params.position, params.context.includeDeclaration);
 }
 
 DocumentHighlight[] documentHighlight(TextDocumentPositionParams params)
 {
-    import dls.tools.tools : Tools;
+    import dls.tools.symbol_tool : SymbolTool;
     import dls.util.uri : Uri;
 
-    return Tools.symbolTool.highlight(new Uri(params.textDocument.uri), params.position);
+    return SymbolTool.instance.highlight(new Uri(params.textDocument.uri), params.position);
 }
 
 JSONValue documentSymbol(DocumentSymbolParams params)
 {
     import dls.protocol.state : initState;
-    import dls.tools.tools : Tools;
+    import dls.tools.symbol_tool : SymbolTool;
     import dls.util.json : convertToJSON;
     import dls.util.uri : Uri;
 
@@ -173,11 +173,11 @@ JSONValue documentSymbol(DocumentSymbolParams params)
             && !initState.capabilities.textDocument.documentSymbol.hierarchicalDocumentSymbolSupport.isNull
             && initState.capabilities.textDocument.documentSymbol.hierarchicalDocumentSymbolSupport)
     {
-        return convertToJSON(Tools.symbolTool.symbol!DocumentSymbol(uri, null));
+        return convertToJSON(SymbolTool.instance.symbol!DocumentSymbol(uri, null));
     }
     else
     {
-        return convertToJSON(Tools.symbolTool.symbol!SymbolInformation(uri, null));
+        return convertToJSON(SymbolTool.instance.symbol!SymbolInformation(uri, null));
     }
 }
 
@@ -220,11 +220,11 @@ ColorPresentation[] colorPresentation(ColorPresentationParams params)
 
 TextEdit[] formatting(DocumentFormattingParams params)
 {
-    import dls.tools.tools : Tools;
+    import dls.tools.format_tool : FormatTool;
     import dls.util.uri : Uri;
 
     auto uri = new Uri(params.textDocument.uri);
-    return Tools.formatTool.formatting(uri, params.options);
+    return FormatTool.instance.formatting(uri, params.options);
 }
 
 TextEdit[] rangeFormatting(DocumentRangeFormattingParams params)
@@ -239,19 +239,19 @@ TextEdit[] onTypeFormatting(DocumentOnTypeFormattingParams params)
 
 WorkspaceEdit rename(RenameParams params)
 {
-    import dls.tools.tools : Tools;
+    import dls.tools.symbol_tool : SymbolTool;
     import dls.util.uri : Uri;
 
-    return Tools.symbolTool.rename(new Uri(params.textDocument.uri),
+    return SymbolTool.instance.rename(new Uri(params.textDocument.uri),
             params.position, params.newName);
 }
 
 Range prepareRename(TextDocumentPositionParams params)
 {
-    import dls.tools.tools : Tools;
+    import dls.tools.symbol_tool : SymbolTool;
     import dls.util.uri : Uri;
 
-    return Tools.symbolTool.prepareRename(new Uri(params.textDocument.uri), params.position);
+    return SymbolTool.instance.prepareRename(new Uri(params.textDocument.uri), params.position);
 }
 
 FoldingRange[] foldingRange(FoldingRangeParams params)

@@ -195,6 +195,27 @@ class SymbolTool : Tool
     import dsymbol.modulecache : ASTAllocator, ModuleCache;
     import dub.dub : Dub;
 
+    private static SymbolTool _instance;
+
+    static void initialize()
+    {
+        _instance = new SymbolTool();
+        _instance.importDirectories(defaultImportPaths);
+        addConfigHook(() {
+            _instance.importDirectories(Tool.configuration.symbol.importPaths);
+        });
+    }
+
+    static void shutdown()
+    {
+        destroy(_instance);
+    }
+
+    @property static SymbolTool instance()
+    {
+        return _instance;
+    }
+
     version (Windows)
     {
         @property private static string[] _compilerConfigPaths()
@@ -243,7 +264,7 @@ class SymbolTool : Tool
         return _cache;
     }
 
-    @property private string[] defaultImportPaths()
+    @property private static string[] defaultImportPaths()
     {
         import std.algorithm : each, filter, sort, splitter, uniq;
         import std.array : array, replace;
@@ -329,7 +350,6 @@ class SymbolTool : Tool
     {
         _allocator = new ASTAllocator();
         _cache = ModuleCache(_allocator);
-        importDirectories(defaultImportPaths);
     }
 
     void importPath(Uri uri)
@@ -878,7 +898,7 @@ class SymbolTool : Tool
             ? Uri.fromPath(buildNormalizedPath(workspacePathParts)) : null;
     }
 
-    package void importDirectories(string[] paths)
+    private void importDirectories(string[] paths)
     {
         import dls.util.logger : logger;
 
