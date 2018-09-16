@@ -4,6 +4,9 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.11.2
+- Fixed crash on file diagnostics generation
+
 #### 0.11.1
 - Fixed position validation error shown on completion at the end of a line
 
