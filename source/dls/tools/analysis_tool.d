@@ -128,7 +128,8 @@ class AnalysisTool : Tool
         import dls.tools.tools : Tools;
         import dscanner.analysis.config : defaultStaticAnalysisConfig;
 
-        const configPath = Tools.symbolTool.getWorkspace(uri).path;
+        const configUri = Tools.symbolTool.getWorkspace(uri);
+        const configPath = configUri is null ? "" : configUri.path;
         return (configPath in _analysisConfigs) ? _analysisConfigs[configPath]
             : defaultStaticAnalysisConfig();
     }
