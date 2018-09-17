@@ -245,17 +245,45 @@ T convertFromJSON(T)(JSONValue json)
         if (isSomeString!T || is(T : string) || is(T : wstring) || is(T : dstring))
 {
     import std.conv : to;
-    import std.json : JSON_TYPE;
+    import std.json : JSONException, JSON_TYPE;
 
-    return (json.type == JSON_TYPE.STRING ? json.str : json.toString()).to!T;
+    static if (is(T == enum))
+    {
+        foreach (member; __traits(allMembers, T))
+        {
+            auto m = __traits(getMember, T, member);
+
+            if (json.str == m)
+            {
+                return m;
+            }
+        }
+
+        throw new JSONException(json.toString() ~ " is not a member of " ~ typeid(T).toString());
+    }
+    else
+    {
+        return (json.type == JSON_TYPE.STRING ? json.str : json.toString()).to!T;
+    }
 }
 
 unittest
 {
+    enum Operation : string
+    {
+        create = "create",
+        delete_ = "delete"
+    }
+
+    assert(convertFromJSON!Operation(JSONValue("create")) == Operation.create);
+    assert(convertFromJSON!Operation(JSONValue("delete")) == Operation.delete_);
+
     auto json = JSONValue("Hello");
     assert(convertFromJSON!string(json) == json.str);
     assert(convertFromJSON!(char[])(json) == json.str);
+    assert(convertFromJSON!(wstring)(json) == "Hello"w);
     assert(convertFromJSON!(wchar[])(json) == "Hello"w);
+    assert(convertFromJSON!(dstring)(json) == "Hello"d);
     assert(convertFromJSON!(dchar[])(json) == "Hello"d);
 
     // beware of the fact that JSONValue treats chars as integers; this returns "97" and not "a"
@@ -269,6 +297,7 @@ unittest
     }
 
     assert(convertFromJSON!TestEnum(JSONValue("hello")) == TestEnum.hello);
+    assert(convertFromJSON!TestEnum(JSONValue("world")) == TestEnum.world);
 
     // quirky JSON cases
 
@@ -442,7 +471,7 @@ unittest
     auto json = convertToJSON(testClass);
     // parseJSON() will parse `uinteger` as a regular integer, meaning that the JSON's aren't considered equal,
     // even though technically they are equivalent (16 as int or as uint is technically the same value), which
-    // is why .toStirng() is used here
+    // is why .toString() is used here
     assert(json.get().toString() == parseJSON(jsonString).toString());
 
     TestClass nullTestClass = null;
