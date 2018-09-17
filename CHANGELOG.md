@@ -4,6 +4,12 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+### 0.12.0
+- __Removed custom message using old naming__
+- Added support for automatically picking up `.editorconfig` files when formatting
+- Enhanced formatting to only edit specific portions of documents instead of replacing the whole buffer
+- Enhanced go-to-definition, find references and highlighting to work with overloaded methods and such
+
 #### 0.11.2
 - Fixed crash on file diagnostics generation
 

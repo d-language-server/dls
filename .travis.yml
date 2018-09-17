@@ -29,6 +29,7 @@ cache:
     - $HOME/.dub
 addons:
   apt:
+    update: true
     packages:
       - gcc-multilib
       - libcurl4-openssl-dev
