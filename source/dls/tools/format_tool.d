@@ -28,6 +28,7 @@ import dls.tools.tool : Tool;
 private immutable EOL[Configuration.FormatConfiguration.EndOfLine] eolMap;
 private immutable BraceStyle[Configuration.FormatConfiguration.BraceStyle] braceStyleMap;
 private immutable TemplateConstraintStyle[Configuration.FormatConfiguration.TemplateConstraintStyle] templateConstraintStyleMap;
+private immutable configPattern = "dummy.d";
 
 shared static this()
 {
@@ -55,6 +56,7 @@ shared static this()
 
 class FormatTool : Tool
 {
+    import dfmt.config : Config;
     import dls.protocol.definitions : TextEdit;
     import dls.protocol.interfaces : FormattingOptions;
     import dls.util.uri : Uri;
@@ -78,8 +80,6 @@ class FormatTool : Tool
 
     TextEdit[] formatting(in Uri uri, in FormattingOptions options)
     {
-        import dfmt.config : Config;
-        import dfmt.editorconfig : IndentStyle, OptionalBoolean;
         import dfmt.formatter : format;
         import dls.protocol.definitions : Position, Range;
         import dls.util.document : Document;
@@ -90,13 +90,24 @@ class FormatTool : Tool
 
         const document = Document.get(uri);
         auto contents = cast(ubyte[]) document.toString();
-        auto config = Config();
+        auto config = getConfig(uri, options);
+        auto buffer = new OutBuffer();
+        format(uri.path, contents, buffer, &config);
+        return diff(uri, buffer.toString());
+    }
 
-        OptionalBoolean toOptBool(bool b)
+    private Config getConfig(in Uri uri, in FormattingOptions options)
+    {
+        import dfmt.editorconfig : IndentStyle, OptionalBoolean, getConfigFor;
+        import dls.tools.symbol_tool : SymbolTool;
+
+        static OptionalBoolean toOptBool(bool b)
         {
             return b ? OptionalBoolean.t : OptionalBoolean.f;
         }
 
+        Config config;
+        config.pattern = configPattern;
         config.initializeWithDefaults();
         config.end_of_line = eolMap[configuration.format.endOfLine];
         config.indent_style = options.insertSpaces ? IndentStyle.space : IndentStyle.tab;
@@ -123,9 +134,10 @@ class FormatTool : Tool
         config.dfmt_single_template_constraint_indent = toOptBool(
                 configuration.format.dfmtSingleTemplateConstraintIndent);
 
-        auto buffer = new OutBuffer();
-        format(uri.path, contents, buffer, &config);
-        return diff(uri, buffer.toString());
+        auto fileConfig = getConfigFor!Config(SymbolTool.instance.getWorkspace(uri).path);
+        fileConfig.pattern = configPattern;
+        config.merge(fileConfig, configPattern);
+        return config;
     }
 
     private TextEdit[] diff(in Uri uri, in string after)

@@ -871,7 +871,7 @@ class SymbolTool : Tool
             : Document.get(uri).wordRangeAtPosition(position);
     }
 
-    Uri getWorkspace(Uri uri)
+    Uri getWorkspace(in Uri uri)
     {
         import std.algorithm : startsWith;
         import std.array : array;
