@@ -74,6 +74,21 @@ class InitializeParams
     mixin Constructor!InitializeParams;
 }
 
+enum ResourceOperationKind : string
+{
+    create = "create",
+    rename = "rename",
+    delete_ = "delete"
+}
+
+enum FailureHandlingKind : string
+{
+    abort = "abort",
+    transactional = "transactional",
+    textOnlyTransactional = "textOnlyTransactional",
+    undo = "undo"
+}
+
 class WorkspaceClientCapabilities
 {
     import std.typecons : Nullable;
@@ -81,6 +96,8 @@ class WorkspaceClientCapabilities
     static class WorkspaceEdit
     {
         Nullable!bool documentChanges;
+        Nullable!(ResourceOperationKind[]) resourceOperations;
+        Nullable!FailureHandlingKind failureHandling;
     }
 
     static class Symbol : WithDynamicRegistration
@@ -223,7 +240,7 @@ class TextDocumentClientCapabilities
     Nullable!WithDynamicRegistration definition;
     Nullable!WithDynamicRegistration typeDefinition;
     Nullable!WithDynamicRegistration implementation;
-    Nullable!WithDynamicRegistration codeAction; // CodeAction poses some problems
+    Nullable!CodeAction codeAction;
     Nullable!WithDynamicRegistration codeLens;
     Nullable!WithDynamicRegistration documentLink;
     Nullable!WithDynamicRegistration colorProvider;

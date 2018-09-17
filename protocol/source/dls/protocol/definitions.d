@@ -149,12 +149,107 @@ class TextDocumentEdit
     }
 }
 
+class CreateFileOptions
+{
+    import std.typecons : Nullable;
+
+    Nullable!bool overwrite;
+    Nullable!bool ignoreIfExists;
+
+    this(Nullable!bool overwrite = Nullable!bool.init,
+            Nullable!bool ignoreIfExists = Nullable!bool.init)
+    {
+        this.overwrite = overwrite;
+        this.ignoreIfExists = ignoreIfExists;
+    }
+}
+
+class CreateFile
+{
+    import std.typecons : Nullable;
+
+    immutable string kind = "create";
+    string uri;
+    Nullable!CreateFileOptions options;
+
+    this(string uri = string.init,
+            Nullable!CreateFileOptions options = Nullable!CreateFileOptions.init)
+    {
+        this.uri = uri;
+        this.options = options;
+    }
+}
+
+class RenameFileOptions
+{
+    import std.typecons : Nullable;
+
+    Nullable!bool overwrite;
+    Nullable!bool ignoreIfExists;
+
+    this(Nullable!bool overwrite = Nullable!bool.init,
+            Nullable!bool ignoreIfExists = Nullable!bool.init)
+    {
+        this.overwrite = overwrite;
+        this.ignoreIfExists = ignoreIfExists;
+    }
+}
+
+class RenameFile
+{
+    import std.typecons : Nullable;
+
+    immutable string kind = "rename";
+    string oldUri;
+    string newUri;
+    Nullable!RenameFileOptions options;
+
+    this(string oldUri = string.init, string newUri = string.init,
+            Nullable!RenameFileOptions options = Nullable!RenameFileOptions.init)
+    {
+        this.oldUri = oldUri;
+        this.newUri = newUri;
+        this.options = options;
+    }
+}
+
+class DeleteFileOptions
+{
+    import std.typecons : Nullable;
+
+    Nullable!bool recursive;
+    Nullable!bool ignoreIfExists;
+
+    this(Nullable!bool recursive = Nullable!bool.init,
+            Nullable!bool ignoreIfExists = Nullable!bool.init)
+    {
+        this.recursive = recursive;
+        this.ignoreIfExists = ignoreIfExists;
+    }
+}
+
+class DeleteFile
+{
+    import std.typecons : Nullable;
+
+    immutable string kind = "delete";
+    string uri;
+    Nullable!DeleteFileOptions options;
+
+    this(string uri = string.init,
+            Nullable!DeleteFileOptions options = Nullable!DeleteFileOptions.init)
+    {
+        this.uri = uri;
+        this.options = options;
+    }
+}
+
 class WorkspaceEdit
 {
     import std.typecons : Nullable;
 
     Nullable!(TextEdit[][string]) changes;
-    Nullable!(TextDocumentEdit[]) documentChanges;
+    Nullable!(TextDocumentEdit[]) documentChanges; // (TextDocumentEdit | CreateFile | RenameFile | DeleteFile)[]
 
     this(Nullable!(TextEdit[][string]) changes = Nullable!(TextEdit[][string])
             .init, Nullable!(TextDocumentEdit[]) documentChanges = Nullable!(

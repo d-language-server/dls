@@ -469,6 +469,18 @@ class CodeAction
     Nullable!(Diagnostic[]) diagnostics;
     Nullable!WorkspaceEdit edit;
     Nullable!Command command;
+
+    this(string title = string.init, Nullable!CodeActionKind kind = Nullable!CodeActionKind.init,
+            Nullable!(Diagnostic[]) diagnostics = Nullable!(Diagnostic[]).init,
+            Nullable!WorkspaceEdit edit = Nullable!WorkspaceEdit.init,
+            Nullable!Command command = Nullable!Command.init)
+    {
+        this.title = title;
+        this.kind = kind;
+        this.diagnostics = diagnostics;
+        this.edit = edit;
+        this.command = command;
+    }
 }
 
 alias CodeActionRegistrationOptions = JSONValue;
