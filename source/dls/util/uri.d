@@ -41,7 +41,6 @@ class Uri
 
     this(DocumentUri uri)
     {
-        import dls.util.path : normalized;
         import std.conv : to;
         import std.path : asNormalizedPath;
         import std.regex : matchAll;
@@ -54,7 +53,7 @@ class Uri
         _uri        = uri;
         _scheme     = matches.front[1];
         _authority  = matches.front[2];
-        _path       = matches.front[3].asNormalizedPath().to!string.normalized;
+        _path       = matches.front[3].asNormalizedPath.to!string.normalized;
         _query      = matches.front[4];
         _fragment   = matches.front[5];
         //dfmt on
@@ -77,4 +76,26 @@ class Uri
     }
 
     alias toString this;
+}
+
+@property private string normalized(in string path)
+{
+    version (Windows)
+    {
+        import std.algorithm : startsWith;
+        import std.conv : to;
+        import std.path : driveName, stripDrive;
+        import std.uni : asLowerCase;
+
+        if (path.startsWith('/') || path.startsWith('\\'))
+        {
+            return path[1 .. $].normalized;
+        }
+
+        return driveName(path).asLowerCase.to!string ~ stripDrive(path);
+    }
+    else
+    {
+        return path;
+    }
 }

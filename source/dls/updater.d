@@ -113,15 +113,16 @@ void update(bool autoUpdate)
     import dls.protocol.messages.window : Util;
     import dls.util.constants : Tr;
     import dls.util.logger : logger;
-    import dls.util.path : normalized;
     import dub.dependency : Dependency;
     import dub.dub : Dub, FetchOptions;
     import dub.semver : compareVersions;
     import std.algorithm : stripLeft;
     import std.concurrency : ownerTid, receiveOnly, register, send, thisTid;
+    import std.conv : to;
     import std.datetime : Clock, SysTime;
     import std.json : parseJSON;
     import std.net.curl : get;
+    import std.path : asNormalizedPath;
 
     const latestRelease = parseJSON(get(format!apiEndpoint("releases/latest")));
     const latestVersion = latestRelease["tag_name"].str.stripLeft('v');
@@ -200,7 +201,7 @@ void update(bool autoUpdate)
         {
             try
             {
-                buildDls(pack.path.toString().normalized, additionalArgs[i]);
+                buildDls(pack.path.toString().asNormalizedPath.to!string, additionalArgs[i]);
                 upgradeSuccessful = true;
             }
             catch (UpgradeFailedException e)
