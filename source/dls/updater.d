@@ -20,11 +20,8 @@
 
 module dls.updater;
 
-import std.format : format;
-
 private enum descriptionJson = import("description.json");
-private immutable changelogUrl = format!"https://github.com/d-language-server/dls/blob/v%s/CHANGELOG.md"(
-        currentVersion);
+private immutable changelogUrl = "https://github.com/d-language-server/dls/blob/v%s/CHANGELOG.md";
 
 void cleanup()
 {
@@ -120,6 +117,7 @@ void update(bool autoUpdate)
     import std.algorithm : stripLeft;
     import std.concurrency : ownerTid, receiveOnly, register, send, thisTid;
     import std.datetime : Clock, SysTime;
+    import std.format : format;
     import std.json : parseJSON;
     import std.net.curl : get;
 
@@ -222,7 +220,8 @@ void update(bool autoUpdate)
         linkDls();
         auto id = Util.sendMessageRequest(Tr.app_showChangelog,
                 [Tr.app_showChangelog_show], [latestVersion]);
-        send(ownerTid(), Util.ThreadMessageData(id, Tr.app_showChangelog, changelogUrl));
+        send(ownerTid(), Util.ThreadMessageData(id, Tr.app_showChangelog,
+                format!changelogUrl(latestVersion)));
     }
     catch (UpgradeFailedException e)
     {
