@@ -684,6 +684,7 @@ class SymbolTool : Tool
         import dls.util.logger : logger;
         import dparse.lexer : StringCache;
         import dparse.rollback_allocator : RollbackAllocator;
+        import std.algorithm : filter;
 
         logger.infof("Finding declarations for %s at position %s,%s", uri.path,
                 position.line, position.character);
@@ -701,7 +702,7 @@ class SymbolTool : Tool
 
         Location[] result;
 
-        foreach (symbol; currentFileStuff.symbols)
+        foreach (symbol; currentFileStuff.symbols.filter!q{a.location > 0})
         {
             auto symbolUri = symbol.symbolFile == "stdin" ? uri : Uri.fromPath(symbol.symbolFile);
             auto document = Document.get(symbolUri);
@@ -753,6 +754,7 @@ class SymbolTool : Tool
 
         foreach (type; stuff.symbols
                 .map!q{a.type}
+                .filter!q{a.location > 0}
                 .filter!q{a !is null && a.symbolFile.length > 0}
                 .uniq!q{a.symbolFile == b.symbolFile && a.location == b.location})
         {
@@ -916,6 +918,7 @@ class SymbolTool : Tool
             WhitespaceBehavior, getTokensForParser, tok;
         import dparse.rollback_allocator : RollbackAllocator;
         import dsymbol.string_interning : internString;
+        import std.algorithm : filter;
         import std.range : zip;
 
         auto request = getPreparedRequest(uri, position, RequestKind.symbolLocation);
@@ -953,13 +956,10 @@ class SymbolTool : Tool
         string[] sourceSymbolFiles;
         Location[] result;
 
-        foreach (s; stuff.symbols)
+        foreach (symbol; stuff.symbols.filter!q{a.location > 0})
         {
-            if (s.location > 0)
-            {
-                sourceSymbolLocations ~= s.location;
-                sourceSymbolFiles ~= s.symbolFile == "stdin" ? uri.path : s.symbolFile;
-            }
+            sourceSymbolLocations ~= symbol.location;
+            sourceSymbolFiles ~= symbol.symbolFile == "stdin" ? uri.path : symbol.symbolFile;
         }
 
         if (sources)

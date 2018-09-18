@@ -4,6 +4,9 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.12.2
+- Fixed error on go-to-definition
+
 #### 0.12.1
 - Fixed error on symbol highlighting
 
