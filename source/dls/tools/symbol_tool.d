@@ -955,8 +955,11 @@ class SymbolTool : Tool
 
         foreach (s; stuff.symbols)
         {
-            sourceSymbolLocations ~= s.location;
-            sourceSymbolFiles ~= s.symbolFile == "stdin" ? uri.path : s.symbolFile;
+            if (s.location > 0)
+            {
+                sourceSymbolLocations ~= s.location;
+                sourceSymbolFiles ~= s.symbolFile == "stdin" ? uri.path : s.symbolFile;
+            }
         }
 
         if (sources)
