@@ -4,6 +4,9 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.12.1
+- Fixed error on symbol highlighting
+
 ### 0.12.0
 - __Removed custom message using old naming__
 - Added support for automatically picking up `.editorconfig` files when formatting
