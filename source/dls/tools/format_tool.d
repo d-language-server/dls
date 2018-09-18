@@ -57,7 +57,7 @@ shared static this()
 class FormatTool : Tool
 {
     import dfmt.config : Config;
-    import dls.protocol.definitions : TextEdit;
+    import dls.protocol.definitions : Range, TextEdit;
     import dls.protocol.interfaces : FormattingOptions;
     import dls.util.uri : Uri;
 
@@ -81,7 +81,7 @@ class FormatTool : Tool
     TextEdit[] formatting(in Uri uri, in FormattingOptions options)
     {
         import dfmt.formatter : format;
-        import dls.protocol.definitions : Position, Range;
+        import dls.protocol.definitions : Position;
         import dls.util.document : Document;
         import dls.util.logger : logger;
         import std.outbuffer : OutBuffer;
@@ -96,6 +96,15 @@ class FormatTool : Tool
         return diff(uri, buffer.toString());
     }
 
+    TextEdit[] rangeFormatting(in Uri uri, Range range, in FormattingOptions options)
+    {
+        import std.algorithm : filter;
+        import std.array : array;
+
+        return formatting(uri, options).filter!(edit => edit.range.start.line >= range.start.line
+                && edit.range.end.line <= range.end.line).array;
+    }
+
     private Config getConfig(in Uri uri, in FormattingOptions options)
     {
         import dfmt.editorconfig : IndentStyle, OptionalBoolean, getConfigFor;
@@ -107,8 +116,8 @@ class FormatTool : Tool
         }
 
         Config config;
-        config.pattern = configPattern;
         config.initializeWithDefaults();
+        config.pattern = configPattern;
         config.end_of_line = eolMap[configuration.format.endOfLine];
         config.indent_style = options.insertSpaces ? IndentStyle.space : IndentStyle.tab;
         config.indent_size = cast(typeof(config.indent_size)) options.tabSize;
@@ -142,7 +151,6 @@ class FormatTool : Tool
 
     private TextEdit[] diff(in Uri uri, in string after)
     {
-        import dls.protocol.definitions : Range;
         import dls.util.document : Document;
         import std.ascii : isWhite;
         import std.utf : decode;

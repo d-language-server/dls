@@ -54,6 +54,7 @@ class InitializeParams
             bool documentSymbol = true;
             bool workspaceSymbol = true;
             bool documentFormatting = true;
+            bool documentRangeFormatting = true;
             bool rename = true;
         }
 

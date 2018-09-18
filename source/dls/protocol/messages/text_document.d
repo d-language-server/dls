@@ -50,8 +50,7 @@ void didChange(DidChangeTextDocumentParams params)
     import dls.util.logger : logger;
     import dls.util.uri : Uri;
 
-    auto uri = new Uri(params.textDocument.uri);
-    logger.infof("Document changed: %s", uri.path);
+    logger.infof("Document changed: %s", new Uri(params.textDocument.uri).path);
     Document.change(params.textDocument, params.contentChanges);
 }
 
@@ -223,13 +222,16 @@ TextEdit[] formatting(DocumentFormattingParams params)
     import dls.tools.format_tool : FormatTool;
     import dls.util.uri : Uri;
 
-    auto uri = new Uri(params.textDocument.uri);
-    return FormatTool.instance.formatting(uri, params.options);
+    return FormatTool.instance.formatting(new Uri(params.textDocument.uri), params.options);
 }
 
 TextEdit[] rangeFormatting(DocumentRangeFormattingParams params)
 {
-    return [];
+    import dls.tools.format_tool : FormatTool;
+    import dls.util.uri : Uri;
+
+    return FormatTool.instance.rangeFormatting(new Uri(params.textDocument.uri),
+            params.range, params.options);
 }
 
 TextEdit[] onTypeFormatting(DocumentOnTypeFormattingParams params)
