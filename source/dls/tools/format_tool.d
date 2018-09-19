@@ -57,7 +57,7 @@ shared static this()
 class FormatTool : Tool
 {
     import dfmt.config : Config;
-    import dls.protocol.definitions : Range, TextEdit;
+    import dls.protocol.definitions : Position, Range, TextEdit;
     import dls.protocol.interfaces : FormattingOptions;
     import dls.util.uri : Uri;
 
@@ -81,7 +81,6 @@ class FormatTool : Tool
     TextEdit[] formatting(in Uri uri, in FormattingOptions options)
     {
         import dfmt.formatter : format;
-        import dls.protocol.definitions : Position;
         import dls.util.document : Document;
         import dls.util.logger : logger;
         import std.outbuffer : OutBuffer;
@@ -96,13 +95,22 @@ class FormatTool : Tool
         return diff(uri, buffer.toString());
     }
 
-    TextEdit[] rangeFormatting(in Uri uri, Range range, in FormattingOptions options)
+    TextEdit[] rangeFormatting(in Uri uri, in Range range, in FormattingOptions options)
     {
         import std.algorithm : filter;
         import std.array : array;
 
         return formatting(uri, options).filter!(edit => edit.range.start.line >= range.start.line
                 && edit.range.end.line <= range.end.line).array;
+    }
+
+    TextEdit[] onTypeFormatting(in Uri uri, in Position position, in FormattingOptions options)
+    {
+        import std.algorithm : filter;
+        import std.array : array;
+
+        return formatting(uri, options).filter!(edit => edit.range.start.line == position.line
+                || edit.range.end.line == position.line).array;
     }
 
     private Config getConfig(in Uri uri, in FormattingOptions options)

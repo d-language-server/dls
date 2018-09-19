@@ -236,7 +236,11 @@ TextEdit[] rangeFormatting(DocumentRangeFormattingParams params)
 
 TextEdit[] onTypeFormatting(DocumentOnTypeFormattingParams params)
 {
-    return [];
+    import dls.tools.format_tool : FormatTool;
+    import dls.util.uri : Uri;
+
+    return FormatTool.instance.onTypeFormatting(new Uri(params.textDocument.uri),
+            params.position, params.options);
 }
 
 WorkspaceEdit rename(RenameParams params)

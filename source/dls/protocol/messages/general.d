@@ -131,6 +131,9 @@ InitializeResult initialize(InitializeParams params)
         workspaceSymbolProvider = initOptions.capabilities.workspaceSymbol;
         documentFormattingProvider = initOptions.capabilities.documentFormatting;
         documentRangeFormattingProvider = initOptions.capabilities.documentRangeFormatting;
+        documentOnTypeFormattingProvider = initOptions.capabilities.documentOnTypeFormatting
+            ? new DocumentOnTypeFormattingOptions(";").nullable
+            : Nullable!DocumentOnTypeFormattingOptions();
         renameProvider = initOptions.capabilities.rename
             ? new RenameOptions(true.nullable) : Nullable!RenameOptions();
         workspace = new ServerCapabilities.Workspace(new ServerCapabilities.Workspace.WorkspaceFolders(true.nullable,

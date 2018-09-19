@@ -125,6 +125,7 @@ interface InitializationOptions: {
         workspaceSymbol?: boolean;
         documentFormatting?: boolean;
         documentRangeFormatting?: boolean;
+        documentOnTypeFormatting?: boolean;
         rename?: boolean;
     }
 }
