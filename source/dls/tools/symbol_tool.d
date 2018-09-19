@@ -44,8 +44,8 @@ int compareLocations(inout(SymbolInformation) s1, inout(SymbolInformation) s2)
 alias SymbolInformationTree = RedBlackTree!(SymbolInformation, compareLocations, true);
 
 private string[string] macros;
-private CompletionItemKind[CompletionKind] completionKinds;
-private SymbolKind[CompletionKind] symbolKinds;
+private immutable CompletionItemKind[CompletionKind] completionKinds;
+private immutable SymbolKind[CompletionKind] symbolKinds;
 
 shared static this()
 {
@@ -142,47 +142,6 @@ static this()
         CompletionKind.mixinTemplateName    : SymbolKind.function_
     ];
     //dfmt on
-}
-
-void useCompatCompletionItemKinds(CompletionItemKind[] items = [])
-{
-    import std.algorithm : canFind;
-
-    //dfmt off
-    immutable map = [
-        CompletionKind.structName  : CompletionItemKind.class_,
-        CompletionKind.enumMember  : CompletionItemKind.field,
-        CompletionKind.packageName : CompletionItemKind.module_
-    ];
-    //dfmt on
-
-    foreach (ck, cik; map)
-    {
-        if (!items.canFind(completionKinds[ck]))
-        {
-            completionKinds[ck] = cik;
-        }
-    }
-}
-
-void useCompatSymbolKinds(SymbolKind[] symbols = [])
-{
-    import std.algorithm : canFind;
-
-    //dfmt off
-    immutable map = [
-        CompletionKind.structName : SymbolKind.class_,
-        CompletionKind.enumMember : SymbolKind.field
-    ];
-    //dfmt on
-
-    foreach (ck, sk; map)
-    {
-        if (!symbols.canFind(symbolKinds[ck]))
-        {
-            symbolKinds[ck] = sk;
-        }
-    }
 }
 
 class SymbolTool : Tool

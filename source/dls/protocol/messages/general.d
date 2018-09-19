@@ -28,8 +28,6 @@ InitializeResult initialize(InitializeParams params)
 {
     import dls.server : Server;
     import dls.protocol.state : initOptions, initState;
-    import dls.tools.symbol_tool : useCompatCompletionItemKinds,
-        useCompatSymbolKinds;
     import dls.tools.analysis_tool : AnalysisTool;
     import dls.tools.format_tool : FormatTool;
     import dls.tools.symbol_tool : SymbolTool;
@@ -55,39 +53,6 @@ InitializeResult initialize(InitializeParams params)
         import std.concurrency : spawn;
 
         spawn(&cleanup);
-    }
-
-    if (params.capabilities.textDocument.completion.isNull
-            || params.capabilities.textDocument.completion.completionItemKind.isNull
-            || params.capabilities.textDocument.completion.completionItemKind.valueSet.isNull)
-    {
-        useCompatCompletionItemKinds();
-    }
-    else
-    {
-        useCompatCompletionItemKinds(
-                params.capabilities.textDocument.completion.completionItemKind.valueSet);
-    }
-
-    if (params.capabilities.workspace.symbol.isNull || params.capabilities.workspace.symbol.symbolKind.isNull
-            || params.capabilities.workspace.symbol.symbolKind.valueSet.isNull)
-    {
-        useCompatSymbolKinds();
-    }
-    else
-    {
-        useCompatSymbolKinds(params.capabilities.workspace.symbol.symbolKind.valueSet);
-    }
-
-    if (params.capabilities.textDocument.documentSymbol.isNull
-            || params.capabilities.textDocument.documentSymbol.symbolKind.isNull
-            || params.capabilities.textDocument.documentSymbol.symbolKind.valueSet.isNull)
-    {
-        useCompatSymbolKinds();
-    }
-    else
-    {
-        useCompatSymbolKinds(params.capabilities.textDocument.documentSymbol.symbolKind.valueSet);
     }
 
     Uri[] uris;
