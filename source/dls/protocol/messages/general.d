@@ -152,6 +152,7 @@ void initialized(JSONValue nothing)
     import dls.protocol.messages.methods : Client;
     import dls.protocol.state : initOptions, initState;
     import dls.server : Server;
+    import dls.tools.analysis_tool : AnalysisTool;
     import dls.util.logger : logger;
     import std.typecons : nullable;
 
@@ -182,6 +183,8 @@ void initialized(JSONValue nothing)
         send(Client.registerCapability,
                 new RegistrationParams!DidChangeWatchedFilesRegistrationOptions([registration]));
     }
+
+    AnalysisTool.instance.scanAllWorkspaces();
 }
 
 @("")

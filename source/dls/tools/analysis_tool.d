@@ -49,53 +49,7 @@ class AnalysisTool : Tool
 
     private StaticAnalysisConfig[string] _analysisConfigs;
 
-    void addAnalysisConfigPath(Uri uri)
-    {
-        import dscanner.analysis.config : defaultStaticAnalysisConfig;
-
-        _analysisConfigs[uri.path] = defaultStaticAnalysisConfig();
-        updateAnalysisConfigPath(uri);
-    }
-
-    void removeAnalysisConfigPath(Uri uri)
-    {
-        if (uri.path in _analysisConfigs)
-        {
-            _analysisConfigs.remove(uri.path);
-        }
-    }
-
-    void updateAnalysisConfigPath(Uri uri)
-    {
-        import dls.protocol.interfaces : PublishDiagnosticsParams;
-        import dls.protocol.jsonrpc : send;
-        import dls.protocol.messages.methods : TextDocument;
-        import dls.util.document : Document;
-        import dls.util.logger : logger;
-        import dscanner.analysis.config : defaultStaticAnalysisConfig;
-        import inifiled : readINIFile;
-        import std.file : exists;
-        import std.path : buildNormalizedPath;
-
-        auto configPath = buildNormalizedPath(uri.path, _configuration.analysis.configFile);
-
-        if (configPath.exists())
-        {
-            logger.infof("Updating config from file %s", configPath);
-            auto conf = uri.path in _analysisConfigs ? _analysisConfigs[uri.path]
-                : defaultStaticAnalysisConfig();
-            readINIFile(conf, configPath);
-            _analysisConfigs[uri.path] = conf;
-
-            foreach (documentUri; Document.uris)
-            {
-                send(TextDocument.publishDiagnostics,
-                        new PublishDiagnosticsParams(documentUri, scan(documentUri)));
-            }
-        }
-    }
-
-    Diagnostic[] scan(Uri uri)
+    Diagnostic[] diagnostics(Uri uri)
     {
         import dls.protocol.definitions : DiagnosticSeverity;
         import dls.tools.symbol_tool : SymbolTool;
@@ -123,7 +77,7 @@ class AnalysisTool : Tool
                 string msg, bool isError) {
             diagnostics ~= new Diagnostic(document.wordRangeAtLineAndByte(line - 1, column - 1), msg, (isError
                     ? DiagnosticSeverity.error : DiagnosticSeverity.warning).nullable,
-                    Nullable!JSONValue.init, diagnosticSource.nullable);
+                    Nullable!JSONValue(), diagnosticSource.nullable);
         };
 
         const mod = parseModule(tokens, uri.path, &ra, syntaxProblemhandler);
@@ -138,6 +92,57 @@ class AnalysisTool : Tool
         }
 
         return diagnostics.data;
+    }
+
+    void scanAllWorkspaces()
+    {
+        import dls.protocol.jsonrpc : send;
+        import dls.protocol.interfaces : PublishDiagnosticsParams;
+        import dls.protocol.messages.methods : Client, TextDocument;
+        import dls.tools.symbol_tool : SymbolTool;
+        import std.algorithm : each;
+
+        SymbolTool.instance.workspaceFilesUris.each!((uri) {
+            send(TextDocument.publishDiagnostics, new PublishDiagnosticsParams(uri,
+                AnalysisTool.instance.diagnostics(uri)));
+        });
+    }
+
+    void addAnalysisConfigPath(Uri uri)
+    {
+        import dscanner.analysis.config : defaultStaticAnalysisConfig;
+
+        _analysisConfigs[uri.path] = defaultStaticAnalysisConfig();
+        updateAnalysisConfigPath(uri);
+    }
+
+    void removeAnalysisConfigPath(Uri uri)
+    {
+        if (uri.path in _analysisConfigs)
+        {
+            _analysisConfigs.remove(uri.path);
+        }
+    }
+
+    void updateAnalysisConfigPath(Uri uri)
+    {
+        import dls.util.logger : logger;
+        import dscanner.analysis.config : defaultStaticAnalysisConfig;
+        import inifiled : readINIFile;
+        import std.file : exists;
+        import std.path : buildNormalizedPath;
+
+        auto configPath = buildNormalizedPath(uri.path, _configuration.analysis.configFile);
+
+        if (exists(configPath))
+        {
+            logger.infof("Updating config from file %s", configPath);
+            auto conf = uri.path in _analysisConfigs ? _analysisConfigs[uri.path]
+                : defaultStaticAnalysisConfig();
+            readINIFile(conf, configPath);
+            _analysisConfigs[uri.path] = conf;
+            scanAllWorkspaces();
+        }
     }
 
     private StaticAnalysisConfig getConfig(Uri uri)

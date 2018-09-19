@@ -259,6 +259,21 @@ class SymbolTool : Tool
     private ASTAllocator _allocator;
     private ModuleCache _cache;
 
+    @property Uri[] workspaceFilesUris()
+    {
+        import std.algorithm : filter, map, reduce;
+        import std.array : array;
+        import std.file : SpanMode, dirEntries;
+        import std.path : globMatch;
+
+        return _workspaceDependencies.byKey
+            .map!(w => dirEntries(w, SpanMode.depth).map!q{a.name}
+                    .filter!(path => globMatch(path, "*.{d,di}"))
+                    .map!(Uri.fromPath)
+                    .array)
+            .reduce!q{a ~ b};
+    }
+
     @property ref ModuleCache cache()
     {
         return _cache;
@@ -769,21 +784,10 @@ class SymbolTool : Tool
     Location[] references(Uri uri, Position position, bool includeDeclaration)
     {
         import dls.util.logger : logger;
-        import std.algorithm : filter, map, reduce;
-        import std.array : array;
-        import std.file : SpanMode, dirEntries;
-        import std.path : globMatch;
 
         logger.infof("Finding references for %s at position %s,%s", uri.path,
                 position.line, position.character);
-
-        auto workspaceUris = _workspaceDependencies.keys
-            .map!(w => dirEntries(w, SpanMode.depth).map!q{a.name}
-                    .filter!(path => globMatch(path, "*.{d,di}"))
-                    .map!(Uri.fromPath)
-                    .array)
-            .reduce!q{a ~ b};
-        return referencesForFiles(uri, position, workspaceUris, includeDeclaration, false);
+        return referencesForFiles(uri, position, workspaceFilesUris, includeDeclaration, false);
     }
 
     DocumentHighlight[] highlight(Uri uri, Position position)
@@ -881,7 +885,7 @@ class SymbolTool : Tool
 
         string[] workspacePathParts;
 
-        foreach (path; _workspaceDependencies.keys)
+        foreach (path; _workspaceDependencies.byKey)
         {
             auto splitter = pathSplitter(path);
 

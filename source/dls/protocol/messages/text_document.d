@@ -27,20 +27,14 @@ import std.typecons : Nullable;
 
 void didOpen(DidOpenTextDocumentParams params)
 {
-    import dls.protocol.jsonrpc : send;
-    import dls.protocol.messages.methods : TextDocument;
-    import dls.tools.analysis_tool : AnalysisTool;
     import dls.util.document : Document;
     import dls.util.logger : logger;
     import dls.util.uri : Uri;
 
     if (params.textDocument.languageId == "d")
     {
-        auto uri = new Uri(params.textDocument.uri);
-        logger.infof("Document opened: %s", uri.path);
+        logger.infof("Document opened: %s", new Uri(params.textDocument.uri).path);
         Document.open(params.textDocument);
-        send(TextDocument.publishDiagnostics, new PublishDiagnosticsParams(uri,
-                AnalysisTool.instance.scan(uri)));
     }
 }
 
@@ -75,21 +69,17 @@ void didSave(DidSaveTextDocumentParams params)
     auto uri = new Uri(params.textDocument.uri);
     logger.infof("Document saved: %s", uri.path);
     send(TextDocument.publishDiagnostics, new PublishDiagnosticsParams(uri,
-            AnalysisTool.instance.scan(uri)));
+            AnalysisTool.instance.diagnostics(uri)));
 }
 
 void didClose(DidCloseTextDocumentParams params)
 {
-    import dls.protocol.jsonrpc : send;
-    import dls.protocol.messages.methods : TextDocument;
     import dls.util.document : Document;
     import dls.util.logger : logger;
     import dls.util.uri : Uri;
 
-    auto uri = new Uri(params.textDocument.uri);
-    logger.infof("Document closed: %s", uri.path);
+    logger.infof("Document closed: %s", new Uri(params.textDocument.uri).path);
     Document.close(params.textDocument);
-    send(TextDocument.publishDiagnostics, new PublishDiagnosticsParams(uri, []));
 }
 
 CompletionItem[] completion(CompletionParams params)
