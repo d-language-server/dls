@@ -202,7 +202,7 @@ class SymbolTool : Tool
         _instance = new SymbolTool();
         _instance.importDirectories(defaultImportPaths);
         addConfigHook(() {
-            _instance.importDirectories(Tool.configuration.symbol.importPaths);
+            _instance.importDirectories(_configuration.symbol.importPaths);
         });
     }
 

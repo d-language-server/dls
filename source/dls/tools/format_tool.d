@@ -118,30 +118,30 @@ class FormatTool : Tool
         Config config;
         config.initializeWithDefaults();
         config.pattern = configPattern;
-        config.end_of_line = eolMap[configuration.format.endOfLine];
+        config.end_of_line = eolMap[_configuration.format.endOfLine];
         config.indent_style = options.insertSpaces ? IndentStyle.space : IndentStyle.tab;
         config.indent_size = cast(typeof(config.indent_size)) options.tabSize;
         config.tab_width = config.indent_size;
-        config.max_line_length = configuration.format.maxLineLength;
+        config.max_line_length = _configuration.format.maxLineLength;
         config.dfmt_align_switch_statements = toOptBool(
-                configuration.format.dfmtAlignSwitchStatements);
-        config.dfmt_brace_style = braceStyleMap[configuration.format.dfmtBraceStyle];
-        config.dfmt_outdent_attributes = toOptBool(configuration.format.dfmtOutdentAttributes);
-        config.dfmt_soft_max_line_length = configuration.format.dfmtSoftMaxLineLength;
-        config.dfmt_space_after_cast = toOptBool(configuration.format.dfmtSpaceAfterCast);
-        config.dfmt_space_after_keywords = toOptBool(configuration.format.dfmtSpaceAfterKeywords);
+                _configuration.format.dfmtAlignSwitchStatements);
+        config.dfmt_brace_style = braceStyleMap[_configuration.format.dfmtBraceStyle];
+        config.dfmt_outdent_attributes = toOptBool(_configuration.format.dfmtOutdentAttributes);
+        config.dfmt_soft_max_line_length = _configuration.format.dfmtSoftMaxLineLength;
+        config.dfmt_space_after_cast = toOptBool(_configuration.format.dfmtSpaceAfterCast);
+        config.dfmt_space_after_keywords = toOptBool(_configuration.format.dfmtSpaceAfterKeywords);
         config.dfmt_space_before_function_parameters = toOptBool(
-                configuration.format.dfmtSpaceBeforeFunctionParameters);
+                _configuration.format.dfmtSpaceBeforeFunctionParameters);
         config.dfmt_split_operator_at_line_end = toOptBool(
-                configuration.format.dfmtSplitOperatorAtLineEnd);
+                _configuration.format.dfmtSplitOperatorAtLineEnd);
         config.dfmt_selective_import_space = toOptBool(
-                configuration.format.dfmtSelectiveImportSpace);
-        config.dfmt_compact_labeled_statements = configuration.format.dfmtCompactLabeledStatements
+                _configuration.format.dfmtSelectiveImportSpace);
+        config.dfmt_compact_labeled_statements = _configuration.format.dfmtCompactLabeledStatements
             ? OptionalBoolean.t : OptionalBoolean.f;
         config.dfmt_template_constraint_style
-            = templateConstraintStyleMap[configuration.format.dfmtTemplateConstraintStyle];
+            = templateConstraintStyleMap[_configuration.format.dfmtTemplateConstraintStyle];
         config.dfmt_single_template_constraint_indent = toOptBool(
-                configuration.format.dfmtSingleTemplateConstraintIndent);
+                _configuration.format.dfmtSingleTemplateConstraintIndent);
 
         auto fileConfig = getConfigFor!Config(SymbolTool.instance.getWorkspace(uri).path);
         fileConfig.pattern = configPattern;

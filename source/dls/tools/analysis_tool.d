@@ -77,7 +77,7 @@ class AnalysisTool : Tool
         import std.file : exists;
         import std.path : buildNormalizedPath;
 
-        auto configPath = buildNormalizedPath(uri.path, configuration.analysis.configFile);
+        auto configPath = buildNormalizedPath(uri.path, _configuration.analysis.configFile);
 
         if (configPath.exists())
         {

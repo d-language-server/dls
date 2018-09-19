@@ -4,6 +4,10 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.12.3
+- Fixed manual path importing (#10)
+- Fixed changelog URL
+
 #### 0.12.2
 - Fixed error on go-to-definition
 

@@ -26,17 +26,22 @@ abstract class Tool
 {
     import dls.tools.configuration : Configuration;
 
-    static Configuration configuration;
+    protected static Configuration _configuration;
     private static Hook[] _configHooks;
 
-    static this()
+    @property static void configuration(Configuration config)
     {
-        configuration = new Configuration();
+        _configuration = config;
 
         foreach (hook; _configHooks)
         {
             hook();
         }
+    }
+
+    static this()
+    {
+        configuration = new Configuration();
     }
 
     protected static void addConfigHook(Hook hook)
