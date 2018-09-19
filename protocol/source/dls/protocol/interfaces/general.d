@@ -31,7 +31,6 @@ class InitializeParams
 {
     import dls.protocol.definitions : DocumentUri;
     import dls.protocol.interfaces.workspace : WorkspaceFolder;
-    import dls.util.constructor : Constructor;
     import std.typecons : Nullable;
 
     static enum Trace : string
@@ -62,7 +61,10 @@ class InitializeParams
         bool autoUpdate = true;
         Capabilities capabilities;
 
-        mixin Constructor!InitializationOptions;
+        this()
+        {
+            this.capabilities = new Capabilities();
+        }
     }
 
     Nullable!ulong processId;
@@ -73,7 +75,10 @@ class InitializeParams
     Nullable!Trace trace;
     Nullable!(WorkspaceFolder[]) workspaceFolders;
 
-    mixin Constructor!InitializeParams;
+    this()
+    {
+        this.capabilities = new ClientCapabilities();
+    }
 }
 
 enum ResourceOperationKind : string
@@ -196,8 +201,6 @@ class TextDocumentClientCapabilities
     {
         static class CodeActionLiteralSupport
         {
-            import dls.util.constructor : Constructor;
-
             static class CodeActionKind
             {
                 import dls.protocol.interfaces.text_document : CodeActionKind;
@@ -207,7 +210,10 @@ class TextDocumentClientCapabilities
 
             CodeActionKind codeActionKind;
 
-            mixin Constructor!CodeActionLiteralSupport;
+            this()
+            {
+                this.codeActionKind = new CodeActionKind();
+            }
         }
 
         Nullable!CodeActionLiteralSupport codeActionLiteralSupport;

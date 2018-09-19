@@ -301,12 +301,15 @@ class VersionedTextDocumentIdentifier : TextDocumentIdentifier
 
 class TextDocumentPositionParams
 {
-    import dls.util.constructor : Constructor;
-
     TextDocumentIdentifier textDocument;
     Position position;
 
-    mixin Constructor!TextDocumentPositionParams;
+    this(TextDocumentIdentifier textDocument = new TextDocumentIdentifier(),
+            Position position = new Position())
+    {
+        this.textDocument = textDocument;
+        this.position = position;
+    }
 }
 
 class DocumentFilter

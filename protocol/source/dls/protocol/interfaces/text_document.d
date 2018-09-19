@@ -26,21 +26,23 @@ import std.json : JSONValue;
 
 class DidOpenTextDocumentParams
 {
-    import dls.util.constructor : Constructor;
-
     TextDocumentItem textDocument;
 
-    mixin Constructor!DidOpenTextDocumentParams;
+    this()
+    {
+        this.textDocument = new TextDocumentItem();
+    }
 }
 
 class DidChangeTextDocumentParams
 {
-    import dls.util.constructor : Constructor;
-
     VersionedTextDocumentIdentifier textDocument;
     TextDocumentContentChangeEvent[] contentChanges;
 
-    mixin Constructor!DidChangeTextDocumentParams;
+    this()
+    {
+        this.textDocument = new VersionedTextDocumentIdentifier();
+    }
 }
 
 class TextDocumentContentChangeEvent
@@ -66,11 +68,12 @@ class TextDocumentChangeRegistrationOptions : TextDocumentRegistrationOptions
 
 private class ParamsBase
 {
-    import dls.util.constructor : Constructor;
-
     TextDocumentIdentifier textDocument;
 
-    mixin Constructor!ParamsBase;
+    this()
+    {
+        this.textDocument = new TextDocumentIdentifier();
+    }
 }
 
 class WillSaveTextDocumentParams : ParamsBase
@@ -319,11 +322,12 @@ class SignatureHelpRegistrationOptions : TextDocumentRegistrationOptions
 
 class ReferenceParams : TextDocumentPositionParams
 {
-    import dls.util.constructor : Constructor;
-
     ReferenceContext context;
 
-    mixin Constructor!ReferenceParams;
+    this()
+    {
+        this.context = new ReferenceContext();
+    }
 }
 
 class ReferenceContext
@@ -434,12 +438,14 @@ enum SymbolKind : uint
 
 class CodeActionParams : ParamsBase
 {
-    import dls.util.constructor : Constructor;
-
     Range range;
     CodeActionContext context;
 
-    mixin Constructor!CodeActionParams;
+    this()
+    {
+        this.range = new Range();
+        this.context = new CodeActionContext();
+    }
 }
 
 enum CodeActionKind : string
@@ -544,14 +550,7 @@ class DocumentLinkRegistrationOptions : TextDocumentRegistrationOptions
     }
 }
 
-class DocumentColorParams
-{
-    import dls.util.constructor : Constructor;
-
-    TextDocumentIdentifier textDocument;
-
-    mixin Constructor!DocumentColorParams;
-}
+alias DocumentColorParams = ParamsBase;
 
 class ColorInformation
 {
@@ -581,15 +580,17 @@ class Color
     }
 }
 
-class ColorPresentationParams
+class ColorPresentationParams : ParamsBase
 {
-    import dls.util.constructor : Constructor;
-
-    TextDocumentIdentifier textDocument;
     Color color;
     Range range;
 
-    mixin Constructor!ColorPresentationParams;
+    this()
+    {
+        super();
+        this.color = new Color();
+        this.range = new Range();
+    }
 }
 
 class ColorPresentation
@@ -611,11 +612,12 @@ class ColorPresentation
 
 class DocumentFormattingParams : ParamsBase
 {
-    import dls.util.constructor : Constructor;
-
     FormattingOptions options;
 
-    mixin Constructor!DocumentFormattingParams;
+    this()
+    {
+        this.options = new FormattingOptions();
+    }
 }
 
 class FormattingOptions
@@ -626,21 +628,23 @@ class FormattingOptions
 
 class DocumentRangeFormattingParams : DocumentFormattingParams
 {
-    import dls.util.constructor : Constructor;
-
     Range range;
 
-    mixin Constructor!DocumentRangeFormattingParams;
+    this()
+    {
+        this.range = new Range();
+    }
 }
 
 class DocumentOnTypeFormattingParams : DocumentFormattingParams
 {
-    import dls.util.constructor : Constructor;
-
     Position position;
     string ch;
 
-    mixin Constructor!DocumentOnTypeFormattingParams;
+    this()
+    {
+        this.position = new Position();
+    }
 }
 
 class DocumentOnTypeFormattingRegistrationOptions : TextDocumentRegistrationOptions
@@ -660,12 +664,13 @@ class DocumentOnTypeFormattingRegistrationOptions : TextDocumentRegistrationOpti
 
 class RenameParams : ParamsBase
 {
-    import dls.util.constructor : Constructor;
-
     Position position;
     string newName;
 
-    mixin Constructor!RenameParams;
+    this()
+    {
+        this.position = new Position();
+    }
 }
 
 class RenameRegistrationOptions : TextDocumentRegistrationOptions
