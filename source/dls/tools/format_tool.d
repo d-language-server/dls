@@ -106,11 +106,15 @@ class FormatTool : Tool
 
     TextEdit[] onTypeFormatting(in Uri uri, in Position position, in FormattingOptions options)
     {
+        import dls.util.document : Document;
         import std.algorithm : filter;
         import std.array : array;
+        import std.string : stripRight;
 
-        return formatting(uri, options).filter!(edit => edit.range.start.line == position.line
-                || edit.range.end.line == position.line).array;
+        return position.character == stripRight(Document.get(uri)
+                .lines[position.line]).length ? formatting(uri, options)
+            .filter!(edit => edit.range.start.line == position.line
+                    || edit.range.end.line == position.line).array : [];
     }
 
     private Config getConfig(in Uri uri, in FormattingOptions options)
