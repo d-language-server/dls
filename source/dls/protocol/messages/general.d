@@ -82,6 +82,9 @@ InitializeResult initialize(InitializeParams params)
 
     with (result.capabilities)
     {
+        import std.json : JSONValue;
+        import std.typecons : Nullable;
+
         textDocumentSync = new TextDocumentSyncOptions(true.nullable,
                 TextDocumentSyncKind.incremental.nullable);
         textDocumentSync.save = new SaveOptions(false.nullable);
