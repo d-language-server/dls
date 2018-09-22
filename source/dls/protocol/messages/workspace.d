@@ -101,13 +101,13 @@ void didChangeWatchedFiles(DidChangeWatchedFilesParams params)
             if (baseName(dirName(uri.path)) != ".dub"
                     && event.type != FileChangeType.deleted)
             {
-                SymbolTool.instance.importPath(dirUri);
+                SymbolTool.instance.importDubProject(dirUri);
             }
 
             break;
 
         case "dub.selections.json":
-            SymbolTool.instance.importSelections(dirUri);
+            SymbolTool.instance.importDubSelections(dirUri);
             break;
 
         default:

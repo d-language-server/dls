@@ -225,12 +225,11 @@ class SymbolTool : Tool
         import std.file : SpanMode, dirEntries;
         import std.path : globMatch;
 
-        return _workspaceDependencies.byKey
-            .map!(w => dirEntries(w, SpanMode.depth).map!q{a.name}
+        return reduce!q{a ~ b}(cast(Uri[])[],
+                _workspaceDependencies.byKey.map!(w => dirEntries(w, SpanMode.depth).map!q{a.name}
                     .filter!(path => globMatch(path, "*.{d,di}"))
                     .map!(Uri.fromPath)
-                    .array)
-            .reduce!q{a ~ b};
+                    .array));
     }
 
     @property ref ModuleCache cache()
@@ -328,6 +327,29 @@ class SymbolTool : Tool
 
     void importPath(Uri uri)
     {
+        import dls.util.logger : logger;
+        import std.algorithm : filter, map;
+        import std.file : exists;
+        import std.path : buildNormalizedPath;
+
+        if (["dub.json", "dub.sdl"].map!(f => buildNormalizedPath(uri.path, f))
+                .filter!exists
+                .empty)
+        {
+            logger.infof("Custom project: %s", uri.path);
+            string[string] deps;
+            _workspaceDependencies[uri.path] = deps;
+            importDirectories([uri.path]);
+        }
+        else
+        {
+            logger.infof("Dub project: %s", uri.path);
+            importDubProject(uri);
+        }
+    }
+
+    void importDubProject(Uri uri)
+    {
         import dls.protocol.messages.window : Util;
         import dls.util.constants : Tr;
         import dub.platform : BuildPlatform;
@@ -375,11 +397,11 @@ class SymbolTool : Tool
             importDirectories(desc.importPaths.length > 0
                     ? desc.importPaths.map!(path => buildNormalizedPath(p.path.toString(),
                         path)).array : [uri.path]);
-            importSelections(Uri.fromPath(desc.path));
+            importDubSelections(Uri.fromPath(desc.path));
         }
     }
 
-    void importSelections(Uri uri)
+    void importDubSelections(Uri uri)
     {
         import std.algorithm : map, reduce;
         import std.array : array;
