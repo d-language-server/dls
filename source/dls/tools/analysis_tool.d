@@ -49,51 +49,6 @@ class AnalysisTool : Tool
 
     private StaticAnalysisConfig[string] _analysisConfigs;
 
-    Diagnostic[] diagnostics(Uri uri)
-    {
-        import dls.protocol.definitions : DiagnosticSeverity;
-        import dls.tools.symbol_tool : SymbolTool;
-        import dls.util.document : Document;
-        import dls.util.logger : logger;
-        import dparse.lexer : LexerConfig, StringBehavior, StringCache,
-            getTokensForParser;
-        import dparse.parser : parseModule;
-        import dparse.rollback_allocator : RollbackAllocator;
-        import dscanner.analysis.run : analyze;
-        import std.array : appender;
-        import std.json : JSONValue;
-        import std.typecons : Nullable, nullable;
-
-        logger.infof("Scanning document %s", uri.path);
-
-        auto stringCache = StringCache(StringCache.defaultBucketCount);
-        auto tokens = getTokensForParser(Document.get(uri).toString(),
-                LexerConfig(uri.path, StringBehavior.source), &stringCache);
-        RollbackAllocator ra;
-        auto document = Document.get(uri);
-        auto diagnostics = appender!(Diagnostic[]);
-
-        const syntaxProblemhandler = (string path, size_t line, size_t column,
-                string msg, bool isError) {
-            diagnostics ~= new Diagnostic(document.wordRangeAtLineAndByte(line - 1, column - 1), msg, (isError
-                    ? DiagnosticSeverity.error : DiagnosticSeverity.warning).nullable,
-                    Nullable!JSONValue(), diagnosticSource.nullable);
-        };
-
-        const mod = parseModule(tokens, uri.path, &ra, syntaxProblemhandler);
-        const analysisResults = analyze(uri.path, mod, getConfig(uri),
-                SymbolTool.instance.cache, tokens, true);
-
-        foreach (result; analysisResults)
-        {
-            diagnostics ~= new Diagnostic(document.wordRangeAtLineAndByte(result.line - 1, result.column - 1),
-                    result.message, DiagnosticSeverity.warning.nullable,
-                    JSONValue(result.key).nullable, diagnosticSource.nullable);
-        }
-
-        return diagnostics.data;
-    }
-
     void scanAllWorkspaces()
     {
         import dls.protocol.jsonrpc : send;
@@ -143,6 +98,51 @@ class AnalysisTool : Tool
             _analysisConfigs[uri.path] = conf;
             scanAllWorkspaces();
         }
+    }
+
+    Diagnostic[] diagnostics(Uri uri)
+    {
+        import dls.protocol.definitions : DiagnosticSeverity;
+        import dls.tools.symbol_tool : SymbolTool;
+        import dls.util.document : Document;
+        import dls.util.logger : logger;
+        import dparse.lexer : LexerConfig, StringBehavior, StringCache,
+            getTokensForParser;
+        import dparse.parser : parseModule;
+        import dparse.rollback_allocator : RollbackAllocator;
+        import dscanner.analysis.run : analyze;
+        import std.array : appender;
+        import std.json : JSONValue;
+        import std.typecons : Nullable, nullable;
+
+        logger.infof("Scanning document %s", uri.path);
+
+        auto stringCache = StringCache(StringCache.defaultBucketCount);
+        auto tokens = getTokensForParser(Document.get(uri).toString(),
+                LexerConfig(uri.path, StringBehavior.source), &stringCache);
+        RollbackAllocator ra;
+        auto document = Document.get(uri);
+        auto diagnostics = appender!(Diagnostic[]);
+
+        const syntaxProblemhandler = (string path, size_t line, size_t column,
+                string msg, bool isError) {
+            diagnostics ~= new Diagnostic(document.wordRangeAtLineAndByte(line - 1, column - 1), msg, (isError
+                    ? DiagnosticSeverity.error : DiagnosticSeverity.warning).nullable,
+                    Nullable!JSONValue(), diagnosticSource.nullable);
+        };
+
+        const mod = parseModule(tokens, uri.path, &ra, syntaxProblemhandler);
+        const analysisResults = analyze(uri.path, mod, getConfig(uri),
+                SymbolTool.instance.cache, tokens, true);
+
+        foreach (result; analysisResults)
+        {
+            diagnostics ~= new Diagnostic(document.wordRangeAtLineAndByte(result.line - 1, result.column - 1),
+                    result.message, DiagnosticSeverity.warning.nullable,
+                    JSONValue(result.key).nullable, diagnosticSource.nullable);
+        }
+
+        return diagnostics.data;
     }
 
     private StaticAnalysisConfig getConfig(Uri uri)

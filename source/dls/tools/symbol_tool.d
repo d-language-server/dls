@@ -325,6 +325,33 @@ class SymbolTool : Tool
         _cache = ModuleCache(_allocator);
     }
 
+    Uri getWorkspace(in Uri uri)
+    {
+        import std.algorithm : startsWith;
+        import std.array : array;
+        import std.path : buildNormalizedPath, pathSplitter;
+
+        string[] workspacePathParts;
+
+        foreach (path; _workspaceDependencies.byKey)
+        {
+            auto splitter = pathSplitter(path);
+
+            if (pathSplitter(uri.path).startsWith(splitter))
+            {
+                auto pathParts = splitter.array;
+
+                if (pathParts.length > workspacePathParts.length)
+                {
+                    workspacePathParts = pathParts;
+                }
+            }
+        }
+
+        return workspacePathParts.length > 0
+            ? Uri.fromPath(buildNormalizedPath(workspacePathParts)) : null;
+    }
+
     void importPath(Uri uri)
     {
         import std.algorithm : filter, map;
@@ -871,33 +898,6 @@ class SymbolTool : Tool
         return defs.length == 0
             || defs.any!(d => getWorkspace(new Uri(d.uri)) is null) ? null
             : Document.get(uri).wordRangeAtPosition(position);
-    }
-
-    Uri getWorkspace(in Uri uri)
-    {
-        import std.algorithm : startsWith;
-        import std.array : array;
-        import std.path : buildNormalizedPath, pathSplitter;
-
-        string[] workspacePathParts;
-
-        foreach (path; _workspaceDependencies.byKey)
-        {
-            auto splitter = pathSplitter(path);
-
-            if (pathSplitter(uri.path).startsWith(splitter))
-            {
-                auto pathParts = splitter.array;
-
-                if (pathParts.length > workspacePathParts.length)
-                {
-                    workspacePathParts = pathParts;
-                }
-            }
-        }
-
-        return workspacePathParts.length > 0
-            ? Uri.fromPath(buildNormalizedPath(workspacePathParts)) : null;
     }
 
     private void importDirectories(string[] paths)
