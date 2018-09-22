@@ -327,7 +327,6 @@ class SymbolTool : Tool
 
     void importPath(Uri uri)
     {
-        import dls.util.logger : logger;
         import std.algorithm : filter, map;
         import std.file : exists;
         import std.path : buildNormalizedPath;
@@ -336,26 +335,42 @@ class SymbolTool : Tool
                 .filter!exists
                 .empty)
         {
-            logger.infof("Custom project: %s", uri.path);
-            string[string] deps;
-            _workspaceDependencies[uri.path] = deps;
-            importDirectories([uri.path]);
+            importCustomProject(uri);
         }
         else
         {
-            logger.infof("Dub project: %s", uri.path);
             importDubProject(uri);
         }
+    }
+
+    void importCustomProject(Uri uri)
+    {
+        import dls.util.logger : logger;
+        import std.algorithm : filter, map;
+        import std.file : exists;
+        import std.path : buildNormalizedPath;
+
+        logger.infof("Custom project: %s", uri.path);
+
+        string[string] deps;
+        const sourceDir = ["source", "src", ""].map!(d => buildNormalizedPath(uri.path, d))
+            .filter!exists
+            .front;
+        _workspaceDependencies[uri.path] = deps;
+        importDirectories([sourceDir]);
     }
 
     void importDubProject(Uri uri)
     {
         import dls.protocol.messages.window : Util;
         import dls.util.constants : Tr;
+        import dls.util.logger : logger;
         import dub.platform : BuildPlatform;
         import std.algorithm : map;
         import std.array : array;
         import std.path : baseName, buildNormalizedPath;
+
+        logger.infof("Dub project: %s", uri.path);
 
         auto d = getDub(uri);
         string[string] workspaceDeps;
