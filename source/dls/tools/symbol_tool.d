@@ -354,37 +354,18 @@ class SymbolTool : Tool
 
     void importPath(Uri uri)
     {
-        import std.algorithm : filter, map;
+        import std.algorithm : any;
         import std.file : exists;
         import std.path : buildNormalizedPath;
 
-        if (["dub.json", "dub.sdl"].map!(f => buildNormalizedPath(uri.path, f))
-                .filter!exists
-                .empty)
-        {
-            importCustomProject(uri);
-        }
-        else
+        if (["dub.json", "dub.sdl"].any!(f => buildNormalizedPath(uri.path, f).exists()))
         {
             importDubProject(uri);
         }
-    }
-
-    void importCustomProject(Uri uri)
-    {
-        import dls.util.logger : logger;
-        import std.algorithm : filter, map;
-        import std.file : exists;
-        import std.path : buildNormalizedPath;
-
-        logger.infof("Custom project: %s", uri.path);
-
-        string[string] deps;
-        const sourceDir = ["source", "src", ""].map!(d => buildNormalizedPath(uri.path, d))
-            .filter!exists
-            .front;
-        _workspaceDependencies[uri.path] = deps;
-        importDirectories([sourceDir]);
+        else
+        {
+            importCustomProject(uri);
+        }
     }
 
     void importDubProject(Uri uri)
@@ -441,6 +422,22 @@ class SymbolTool : Tool
                         path)).array : [uri.path]);
             importDubSelections(Uri.fromPath(desc.path));
         }
+    }
+
+    void importCustomProject(Uri uri)
+    {
+        import dls.util.logger : logger;
+        import std.algorithm : find;
+        import std.file : exists;
+        import std.path : buildNormalizedPath;
+
+        logger.infof("Custom project: %s", uri.path);
+
+        string[string] deps;
+        const sourceDir = ["source", "src", ""].find!(d => buildNormalizedPath(uri.path,
+                d).exists())[0];
+        _workspaceDependencies[uri.path] = deps;
+        importDirectories([sourceDir]);
     }
 
     void importDubSelections(Uri uri)
