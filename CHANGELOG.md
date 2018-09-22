@@ -4,6 +4,12 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+### 0.13.0
+- Added range formatting support
+- Added on type formatting support
+- Enhanced diagnostics to show errors and warnings on whole projects instead of only open documents
+- Enhanced handling on non-dub projects
+
 #### 0.12.3
 - Fixed manual path importing (#10)
 - Fixed changelog URL
