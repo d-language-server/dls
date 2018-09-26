@@ -57,7 +57,7 @@ class AnalysisTool : Tool
         import dls.tools.symbol_tool : SymbolTool;
         import std.algorithm : each;
 
-        SymbolTool.instance.workspaceFilesUris.each!((uri) {
+        SymbolTool.instance.workspacesFilesUris.each!((uri) {
             send(TextDocument.publishDiagnostics, new PublishDiagnosticsParams(uri,
                 AnalysisTool.instance.diagnostics(uri)));
         });

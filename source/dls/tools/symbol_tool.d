@@ -218,17 +218,33 @@ class SymbolTool : Tool
     private ASTAllocator _allocator;
     private ModuleCache _cache;
 
-    @property Uri[] workspaceFilesUris()
+    @property Uri[] workspacesFilesUris()
     {
         import std.algorithm : filter, map, reduce;
         import std.array : array;
         import std.file : SpanMode, dirEntries;
         import std.path : globMatch;
 
+        bool isImported(in Uri uri)
+        {
+            import std.algorithm : startsWith;
+
+            foreach (path; _cache.getImportPaths())
+            {
+                if (uri.path.startsWith(Uri.fromPath(path).path))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         return reduce!q{a ~ b}(cast(Uri[])[],
                 _workspaceDependencies.byKey.map!(w => dirEntries(w, SpanMode.depth).map!q{a.name}
-                    .filter!(path => globMatch(path, "*.{d,di}"))
+                    .filter!(file => globMatch(file, "*.{d,di}"))
                     .map!(Uri.fromPath)
+                    .filter!isImported
                     .array));
     }
 
@@ -807,7 +823,7 @@ class SymbolTool : Tool
 
         logger.infof("Finding references for %s at position %s,%s", uri.path,
                 position.line, position.character);
-        return referencesForFiles(uri, position, workspaceFilesUris, includeDeclaration, false);
+        return referencesForFiles(uri, position, workspacesFilesUris, includeDeclaration, false);
     }
 
     DocumentHighlight[] highlight(Uri uri, Position position)
