@@ -4,6 +4,9 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.13.1
+- Fixed crash on non-D or bad D files outside of project source paths
+
 ### 0.13.0
 - Added range formatting support
 - Added on type formatting support
