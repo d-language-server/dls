@@ -225,8 +225,15 @@ class FormatTool : Tool
                     stopIndex = i;
                 }
 
-                if (j < after.length && !isWhite(beforeChar)
-                        && (isWhite(afterChar) || before.length - i < after.length - j))
+                auto addition = !isWhite(beforeChar) && isWhite(afterChar);
+                auto deletion = isWhite(beforeChar) && !isWhite(afterChar);
+
+                if (!addition && !deletion)
+                {
+                    addition = before.length - i < after.length - j;
+                }
+
+                if (addition && j < after.length)
                 {
                     text ~= after[j .. newJ];
                     j = newJ;
