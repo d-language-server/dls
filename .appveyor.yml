@@ -2,8 +2,8 @@ platform: x64
 image: Visual Studio 2017
 environment:
   matrix:
-    - ARCH: x86
     - ARCH: x86_64
+    - ARCH: x86
 cache:
   - '%LOCALAPPDATA%\dub -> dub.selections.json'
 install:
@@ -19,10 +19,10 @@ install:
   - ps: extractCompiler
   - ps: $env:PATH += ";C:\ldc2-$($latest)-windows-multilib\bin;"
 build_script:
-  - dub build --arch=%ARCH% --compiler=ldc2 --build=release
+  - if defined APPVEYOR_REPO_TAG_NAME (set BUILD=release) else (set BUILD=debug)
+  - dub build --arch=%ARCH% --compiler=ldc2 --build=%BUILD%
 after_build:
-  - if defined APPVEYOR_REPO_TAG_NAME (set TAG_NAME=%APPVEYOR_REPO_TAG_NAME%)
-  - if not defined APPVEYOR_REPO_TAG_NAME (set TAG_NAME=untagged)
+  - if defined APPVEYOR_REPO_TAG_NAME (set TAG_NAME=%APPVEYOR_REPO_TAG_NAME%) else (set TAG_NAME=untagged)
   - 7z -mx=9 a dls-%TAG_NAME%.windows.%ARCH%.zip dls.exe LICENSE.txt
 test_script:
   - dub test --arch=%ARCH% --compiler=ldc2
