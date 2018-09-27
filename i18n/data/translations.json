@@ -1,135 +1,135 @@
 {
     "app.buildError": {
-        "messageType": 1,
-        "title": {
+        "type": 1,
+        "message": {
             "en": "DLS could not be built",
             "fr": "DLS n'a pas pu être compilé"
         }
     },
     "app.linkError": {
-        "messageType": 1,
-        "title": {
+        "type": 1,
+        "message": {
             "en": "DLS could not be linked",
             "fr": "DLS n'a pas pu être lié"
         }
     },
     "app.upgradeSelections": {
-        "title": {
+        "message": {
             "en": "Dependencies for project $1 changed",
             "fr": "Dépendences du projet $1 modifiées"
         }
     },
     "app.upgradeSelections.upgrade": {
-        "title": {
+        "message": {
             "en": "Upgrade selections",
             "fr": "Mettre à jour les sélections"
         }
     },
     "app.upgradeSelections.upgrading": {
-        "title": {
+        "message": {
             "en": "Upgrading selections",
             "fr": "Mise à jour des sélections"
         }
     },
     "app.upgradeSelections.error": {
-        "messageType": 1,
-        "title": {
+        "type": 1,
+        "message": {
             "en": "Error upgrading selections:\n$1",
             "fr": "Erreur de mise à jour des sélections:\n$1"
         }
     },
     "app.upgradeDls": {
-        "title": {
+        "message": {
             "en": "DLS version $1 is available (current: $2)",
             "fr": "DLS version $1 est disponible (actuelle: $2)"
         }
     },
     "app.upgradeDls.upgrade": {
-        "title": {
+        "message": {
             "en": "Upgrade",
             "fr": "Mettre à jour"
         }
     },
     "app.upgradeDls.upgrading": {
-        "title": {
+        "message": {
             "en": "Upgrading DLS",
             "fr": "Mise à jour de DLS"
         }
     },
     "app.upgradeDls.downloading": {
-        "title": {
+        "message": {
             "en": "Downloading",
             "fr": "Téléchargement"
         }
     },
     "app.upgradeDls.extracting": {
-        "title": {
+        "message": {
             "en": "Extracting",
             "fr": "Extraction"
         }
     },
     "app.showChangelog": {
-        "title": {
+        "message": {
             "en": "DLS upgraded to version $1",
             "fr": "DLS mis à jour vers la version $1"
         }
     },
     "app.showChangelog.show": {
-        "title": {
+        "message": {
             "en": "See what's new",
             "fr": "Voir les nouveautés"
         }
     },
     "bootstrap.help.default": {
-        "title": {
+        "message": {
             "en": "default",
             "fr": "défaut"
         }
     },
     "bootstrap.help.method": {
-        "title": {
+        "message": {
             "en": "%s|%s|%s The installation method.",
             "fr": "%s|%s|%s La méthode d'installation."
         }
     },
     "bootstrap.help.method.auto": {
-        "title": {
+        "message": {
             "en": "`%s` tries `%s` and falls back to `%s` if it's unavailable).",
             "fr": "`%s` tente `%s` et retombe sur `%s` s'il n'est pas disponible)."
         }
     },
     "bootstrap.help.check": {
-        "title": {
+        "message": {
             "en": "Checks if the selected method is available.",
             "fr": "Vérifie si la méthode sélectionnée est disponible."
         }
     },
     "bootstrap.help.localization": {
-        "title": {
+        "message": {
             "en": "Output localized strings.",
             "fr": "Émettre des chaînes localisées."
         }
     },
     "bootstrap.help.progress": {
-        "title": {
+        "message": {
             "en": "Show progress (only for method `%s`).",
             "fr": "Montrer le progrès (uniquement pour la méthode `%s`)."
         }
     },
     "bootstrap.installDls.installing": {
-        "title": {
+        "message": {
             "en": "Installing DLS",
             "fr": "Installation de DLS"
         }
     },
     "bootstrap.installDls.downloading": {
-        "title": {
+        "message": {
             "en": "Downloading",
             "fr": "Téléchargement"
         }
     },
     "bootstrap.installDls.extracting": {
-        "title": {
+        "message": {
             "en": "Extracting",
             "fr": "Extraction"
         }

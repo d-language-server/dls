@@ -80,20 +80,20 @@ shared static this()
     }
 }
 
-string tr(Tr message, string[] args = [])
+string tr(Tr identifier, string[] args = [])
 {
     import std.conv : to;
     import std.range : replace;
 
-    auto title = translations[message]["title"];
-    auto localizedTitle = title[locale in title ? locale : defaultLocale].str;
+    auto message = translations[identifier]["message"];
+    auto localizedMessage = message[locale in message ? locale : defaultLocale].str;
 
     foreach (i; 0 .. args.length)
     {
-        localizedTitle = localizedTitle.replace('$' ~ (i + 1).to!string, args[i]);
+        localizedMessage = localizedMessage.replace('$' ~ (i + 1).to!string, args[i]);
     }
 
-    return localizedTitle;
+    return localizedMessage;
 }
 
 MessageType trType(Tr message)
@@ -101,5 +101,5 @@ MessageType trType(Tr message)
     import std.conv : to;
 
     auto t = translations[message];
-    return "messageType" in t ? t["messageType"].integer.to!MessageType : MessageType.info;
+    return "type" in t ? t["type"].integer.to!MessageType : MessageType.info;
 }
