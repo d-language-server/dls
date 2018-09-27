@@ -391,7 +391,7 @@ class SymbolTool : Tool
         import dls.util.logger : logger;
         import dub.platform : BuildPlatform;
         import std.algorithm : map;
-        import std.array : array;
+        import std.array : appender, array;
         import std.path : baseName, buildNormalizedPath;
 
         logger.infof("Dub project: %s", uri.path);
@@ -417,7 +417,7 @@ class SymbolTool : Tool
         }
 
         _workspaceDependencies[uri.path] = workspaceDeps;
-        auto packages = [d.project.rootPackage];
+        auto packages = appender([d.project.rootPackage]);
 
         foreach (sub; d.project.rootPackage.subPackages)
         {
@@ -430,7 +430,7 @@ class SymbolTool : Tool
             }
         }
 
-        foreach (p; packages)
+        foreach (p; packages.data)
         {
             const desc = p.describe(BuildPlatform.any, null, null);
             importDirectories(desc.importPaths.length > 0
@@ -616,7 +616,7 @@ class SymbolTool : Tool
         const mod = parseModule(tokens, uri.path, &ra, toDelegate(&doNothing));
         auto visitor = new SymbolVisitor!SymbolType(uri, query);
         visitor.visit(mod);
-        return visitor.result;
+        return visitor.result.data;
     }
 
     CompletionItem[] completion(Uri uri, Position position)
@@ -663,6 +663,7 @@ class SymbolTool : Tool
             .uniq!compareCompletionsEqual
             .chunkBy!q{a.identifier == b.identifier}
             .map!((resultGroup) {
+                import std.array : appender;
                 import std.uni : toLower;
 
                 auto firstResult = resultGroup.front;
@@ -670,7 +671,7 @@ class SymbolTool : Tool
                 item.kind = completionKinds[firstResult.kind.to!CompletionKind];
                 item.detail = firstResult.definition;
 
-                string[][] data;
+                auto data = appender!(string[][]);
 
                 foreach (res; resultGroup)
                 {
@@ -680,9 +681,9 @@ class SymbolTool : Tool
                     }
                 }
 
-                if (data.length > 0)
+                if (data.data.length > 0)
                 {
-                    item.data = JSONValue(data);
+                    item.data = JSONValue(data.data);
                 }
 
                 return item;
@@ -736,6 +737,7 @@ class SymbolTool : Tool
         import dparse.lexer : StringCache;
         import dparse.rollback_allocator : RollbackAllocator;
         import std.algorithm : filter;
+        import std.array : appender;
 
         logger.infof("Finding declarations for %s at position %s,%s", uri.path,
                 position.line, position.character);
@@ -751,7 +753,7 @@ class SymbolTool : Tool
             currentFileStuff.destroy();
         }
 
-        Location[] result;
+        auto result = appender!(Location[]);
 
         foreach (symbol; currentFileStuff.symbols.filter!q{a.location > 0})
         {
@@ -774,7 +776,7 @@ class SymbolTool : Tool
             }
         }
 
-        return result;
+        return result.data;
     }
 
     Location[] typeDefinition(Uri uri, Position position)
@@ -786,6 +788,7 @@ class SymbolTool : Tool
         import dparse.lexer : StringCache;
         import dparse.rollback_allocator : RollbackAllocator;
         import std.algorithm : filter, map, uniq;
+        import std.array : appender;
 
         logger.infof("Finding type declaration for %s at position %s,%s",
                 uri.path, position.line, position.character);
@@ -801,7 +804,7 @@ class SymbolTool : Tool
             stuff.destroy();
         }
 
-        Location[] result;
+        auto result = appender!(Location[]);
 
         foreach (type; stuff.symbols
                 .map!q{a.type}
@@ -814,7 +817,7 @@ class SymbolTool : Tool
                     .wordRangeAtByte(type.location));
         }
 
-        return result;
+        return result.data;
     }
 
     Location[] references(Uri uri, Position position, bool includeDeclaration)
@@ -831,6 +834,7 @@ class SymbolTool : Tool
         import dls.protocol.interfaces : DocumentHighlightKind;
         import dls.util.logger : logger;
         import std.algorithm : any;
+        import std.array : appender;
         import std.path : filenameCmp;
         import std.typecons : nullable;
 
@@ -839,7 +843,7 @@ class SymbolTool : Tool
 
         auto sources = referencesForFiles(uri, position, [uri], true, true);
         auto locations = referencesForFiles(uri, position, [uri], true, false);
-        DocumentHighlight[] result;
+        auto result = appender!(DocumentHighlight[]);
 
         foreach (location; locations)
         {
@@ -850,7 +854,7 @@ class SymbolTool : Tool
             result ~= new DocumentHighlight(location.range, kind.nullable);
         }
 
-        return result;
+        return result.data;
     }
 
     WorkspaceEdit rename(Uri uri, Position position, string newName)
@@ -860,6 +864,7 @@ class SymbolTool : Tool
         import dls.protocol.state : initState;
         import dls.util.document : Document;
         import dls.util.logger : logger;
+        import std.array : appender;
         import std.typecons : nullable;
 
         if ((initState.capabilities.textDocument.isNull || initState.capabilities.textDocument.rename.isNull
@@ -881,7 +886,7 @@ class SymbolTool : Tool
         }
 
         TextEdit[][string] changes;
-        TextDocumentEdit[] documentChanges;
+        auto documentChanges = appender!(TextDocumentEdit[]);
 
         foreach (reference; refs)
         {
@@ -895,7 +900,7 @@ class SymbolTool : Tool
             documentChanges ~= new TextDocumentEdit(identifier, textEdits);
         }
 
-        return new WorkspaceEdit(changes.nullable, documentChanges.nullable);
+        return new WorkspaceEdit(changes.nullable, documentChanges.data.nullable);
     }
 
     Range prepareRename(Uri uri, Position position)
@@ -932,6 +937,7 @@ class SymbolTool : Tool
         import dparse.rollback_allocator : RollbackAllocator;
         import dsymbol.string_interning : internString;
         import std.algorithm : filter;
+        import std.array : appender;
         import std.range : zip;
 
         auto request = getPreparedRequest(uri, position, RequestKind.symbolLocation);
@@ -965,9 +971,9 @@ class SymbolTool : Tool
             return null;
         }
 
-        size_t[] sourceSymbolLocations;
-        string[] sourceSymbolFiles;
-        Location[] result;
+        auto sourceSymbolLocations = appender!(size_t[]);
+        auto sourceSymbolFiles = appender!(string[]);
+        auto result = appender!(Location[]);
 
         foreach (symbol; stuff.symbols.filter!q{a.location > 0})
         {
@@ -977,21 +983,23 @@ class SymbolTool : Tool
 
         if (sources)
         {
-            foreach (sourceLocation, sourceFile; zip(sourceSymbolLocations, sourceSymbolFiles))
+            foreach (sourceLocation, sourceFile; zip(sourceSymbolLocations.data,
+                    sourceSymbolFiles.data))
             {
                 auto sourceUri = Uri.fromPath(sourceFile);
                 result ~= new Location(sourceUri.toString(),
                         Document.get(sourceUri).wordRangeAtByte(sourceLocation));
             }
 
-            return result;
+            return result.data;
         }
 
         bool checkFileAndLocation(string file, size_t location)
         {
             import std.path : filenameCmp;
 
-            foreach (sourceLocation, sourceFile; zip(sourceSymbolLocations, sourceSymbolFiles))
+            foreach (sourceLocation, sourceFile; zip(sourceSymbolLocations.data,
+                    sourceSymbolFiles.data))
             {
                 if (location == sourceLocation && filenameCmp(file, sourceFile) == 0)
                 {
@@ -1043,7 +1051,7 @@ class SymbolTool : Tool
             }
         }
 
-        return result;
+        return result.data;
     }
 
     private MarkupContent getDocumentation(string[][] detailsAndDocumentations)
@@ -1140,9 +1148,10 @@ private class SymbolVisitor(SymbolType) : ASTVisitor
     import dls.protocol.definitions : Range;
     import dls.protocol.interfaces : DocumentSymbol;
     import dls.util.uri : Uri;
+    import std.array : Appender;
     import std.typecons : nullable;
 
-    SymbolType[] result;
+    Appender!(SymbolType[]) result;
     private Uri _uri;
     private string _query;
 
@@ -1329,7 +1338,7 @@ private class SymbolVisitor(SymbolType) : ASTVisitor
             }
             else
             {
-                container = (container is null ? result : container.children)[$ - 1];
+                container = (container is null ? result.data : container.children)[$ - 1];
             }
 
             dec.accept(this);
@@ -1372,9 +1381,16 @@ private class SymbolVisitor(SymbolType) : ASTVisitor
                 auto fullRange = endLocation > 0 ? new Range(range.start,
                         Document.get(_uri).positionAtByte(endLocation)) : range;
                 DocumentSymbol[] children;
-                (container is null ? result : container.children) ~= new DocumentSymbol(name,
-                        Nullable!string(), kind, Nullable!bool(), fullRange,
-                        range, children.nullable);
+                DocumentSymbol documentSymbol = new DocumentSymbol(name, Nullable!string(),
+                        kind, Nullable!bool(), fullRange, range, children.nullable);
+                if (container is null)
+                {
+                    result ~= documentSymbol;
+                }
+                else
+                {
+                    container.children ~= documentSymbol;
+                }
             }
         }
     }
