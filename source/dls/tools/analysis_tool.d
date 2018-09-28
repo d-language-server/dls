@@ -98,6 +98,10 @@ class AnalysisTool : Tool
             _analysisConfigs[uri.path] = conf;
             scanAllWorkspaces();
         }
+        else
+        {
+            _analysisConfigs.remove(uri.path);
+        }
     }
 
     Diagnostic[] diagnostics(Uri uri)

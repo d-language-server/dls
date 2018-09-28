@@ -141,8 +141,8 @@ void initialized(JSONValue nothing)
     {
         logger.info("Registering watchers");
         auto watchers = [
-            new FileSystemWatcher("**/dub.selections.json"),
-            new FileSystemWatcher("**/dub.{json,sdl}"), new FileSystemWatcher("**/*.ini")
+            new FileSystemWatcher("**/dub.selections.json"), new FileSystemWatcher("**/dub.{json,sdl}"),
+            new FileSystemWatcher("**/*.ini"), new FileSystemWatcher("**/*.{d,di}")
         ];
         auto registrationOptions = new DidChangeWatchedFilesRegistrationOptions(watchers);
         auto registration = new Registration!DidChangeWatchedFilesRegistrationOptions(

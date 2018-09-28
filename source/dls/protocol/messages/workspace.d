@@ -81,12 +81,14 @@ void didChangeConfiguration(DidChangeConfigurationParams params)
 
 void didChangeWatchedFiles(DidChangeWatchedFilesParams params)
 {
-    import dls.protocol.interfaces : FileChangeType;
+    import dls.protocol.interfaces : FileChangeType, PublishDiagnosticsParams;
+    import dls.protocol.jsonrpc : send;
+    import dls.protocol.messages.methods : TextDocument;
     import dls.tools.analysis_tool : AnalysisTool;
     import dls.tools.symbol_tool : SymbolTool;
     import dls.util.logger : logger;
     import dls.util.uri : Uri;
-    import std.path : baseName, dirName;
+    import std.path : baseName, dirName, extension;
 
     foreach (event; params.changes)
     {
@@ -104,14 +106,32 @@ void didChangeWatchedFiles(DidChangeWatchedFilesParams params)
                 SymbolTool.instance.importDubProject(dirUri);
             }
 
-            break;
+            continue;
 
         case "dub.selections.json":
             SymbolTool.instance.importDubSelections(dirUri);
-            break;
+            continue;
 
         default:
+            break;
+        }
+
+        switch (extension(uri.path))
+        {
+        case ".d", ".di":
+            if (event.type != FileChangeType.deleted)
+            {
+                send(TextDocument.publishDiagnostics, new PublishDiagnosticsParams(uri,
+                        AnalysisTool.instance.diagnostics(uri)));
+            }
+
+            continue;
+
+        case ".ini":
             AnalysisTool.instance.updateAnalysisConfigPath(dirUri);
+            continue;
+
+        default:
             break;
         }
     }
