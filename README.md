@@ -8,24 +8,24 @@
 
 __LSP compliance: `3.13`__
 
-_This is a work in progress. There ~~might~~ will be bugs and crashes..._
+_This is still a work in progress. There ~~might~~ will be bugs and crashes..._
 
 DLS implements the server side of the [Language Server Protocol (LSP)](https://microsoft.github.io/language-server-protocol/) for the [D programming language](https://dlang.org).
-It does not contain any language feature itself (yet), but uses already available components, and provides an interface to work with the LSP.
+It doesn't do much itself (yet), and rather uses already available components, and provides an interface to work with the LSP.
 Current features include:
 
 - Code completion
-- Go to definition
-- Find references
+- Going to symbol definition
+- Finding references
 - Symbol renaming
 - Error checking
-- Code formatting
-- Symbol searching
+- Code formatting (document, range and on-type)
+- Symbol listing (current document and workspace-wide)
 - Symbol highlighting
 - Documentation on hover
 - Random, frustrating crashes
 
-Dub packages used (the stuff doing the actual hard work):
+Packages used (the stuff doing the actual hard work):
 
 - [dcd](http://dcd.dub.pm)
 - [dfmt](http://dfmt.dub.pm)
@@ -69,13 +69,13 @@ Some editors may need DLS to be [installed manually](#installing) (don't worry, 
     }
     ```
 
-DLS should work with other editors, but it may have some quirks.
+DLS should work with other editors, although your mileage may vary since it's moslty tested on the ones above.
 If it's not working with your editor of choice, [submit an issue](https://github.com/d-language-server/dls/issues/new)!
 
 ## Installing
 
 You can run `dub fetch dls` and then `dub run dls:bootstrap` to install dls.
-The second command will output a path that will always point to the latest DLS executable.
+The second command will output a path that will point to the DLS executable.
 DLS will automatically update itself whenever a new version is out.
 
 ## Client side configuration
