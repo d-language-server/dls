@@ -533,20 +533,7 @@ class SymbolTool : Tool
             }
         }
 
-        auto moduleUris = appender!(Uri[]);
-
-        foreach (path; _cache.getImportPaths())
-        {
-            if (_workspaceDependencies.byKey.any!(w => path.startsWith(w)))
-            {
-                foreach (entry; dirEntries(path, "*.{d,di}", SpanMode.breadth))
-                {
-                    moduleUris ~= Uri.fromPath(entry.name);
-                }
-            }
-        }
-
-        foreach (moduleUri; moduleUris.data)
+        foreach (moduleUri; workspacesFilesUris)
         {
             if (Document.uris.map!q{a.path}.canFind(moduleUri.path))
             {
