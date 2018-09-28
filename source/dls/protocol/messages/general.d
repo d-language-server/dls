@@ -26,9 +26,11 @@ import std.json : JSONValue;
 @("")
 InitializeResult initialize(InitializeParams params)
 {
-    import dls.server : Server;
+    import dls.protocol.interfaces : CodeActionKind;
     import dls.protocol.state : initOptions, initState;
+    import dls.server : Server;
     import dls.tools.analysis_tool : AnalysisTool;
+    import dls.tools.command_tool : CommandTool;
     import dls.tools.format_tool : FormatTool;
     import dls.tools.symbol_tool : SymbolTool;
     import dls.util.logger : logger;
@@ -41,6 +43,7 @@ InitializeResult initialize(InitializeParams params)
     initState = params;
     Server.initialized = true;
     AnalysisTool.initialize();
+    CommandTool.initialize();
     FormatTool.initialize();
     SymbolTool.initialize();
 
@@ -97,6 +100,9 @@ InitializeResult initialize(InitializeParams params)
         documentHighlightProvider = initOptions.capabilities.documentHighlight;
         documentSymbolProvider = initOptions.capabilities.documentSymbol;
         workspaceSymbolProvider = initOptions.capabilities.workspaceSymbol;
+        codeActionProvider = initOptions.capabilities.codeAction
+            ? new CodeActionOptions([CodeActionKind.quickfix].nullable)
+            : Nullable!CodeActionOptions();
         documentFormattingProvider = initOptions.capabilities.documentFormatting;
         documentRangeFormattingProvider = initOptions.capabilities.documentRangeFormatting;
         documentOnTypeFormattingProvider = initOptions.capabilities.documentOnTypeFormatting
@@ -104,6 +110,9 @@ InitializeResult initialize(InitializeParams params)
             : Nullable!DocumentOnTypeFormattingOptions();
         renameProvider = initOptions.capabilities.rename
             ? new RenameOptions(true.nullable) : Nullable!RenameOptions();
+        executeCommandProvider = initOptions.capabilities.codeAction
+            ? new ExecuteCommandOptions(CommandTool.instance.commands)
+            : Nullable!ExecuteCommandOptions();
         workspace = new ServerCapabilities.Workspace(new ServerCapabilities.Workspace.WorkspaceFolders(true.nullable,
                 JSONValue(true).nullable).nullable);
     }
@@ -160,6 +169,7 @@ JSONValue shutdown(JSONValue nothing)
 {
     import dls.server : Server;
     import dls.tools.analysis_tool : AnalysisTool;
+    import dls.tools.command_tool : CommandTool;
     import dls.tools.format_tool : FormatTool;
     import dls.tools.symbol_tool : SymbolTool;
     import dls.util.logger : logger;
@@ -167,6 +177,7 @@ JSONValue shutdown(JSONValue nothing)
     logger.info("Shutting down server");
     Server.shutdown = true;
     AnalysisTool.shutdown();
+    CommandTool.shutdown();
     FormatTool.shutdown();
     SymbolTool.shutdown();
     return JSONValue(null);

@@ -80,6 +80,12 @@
             "fr": "Voir les nouveautés"
         }
     },
+    "app.analysisTool.disableWarning": {
+        "message": {
+            "en": "Disable warning $1 (project-wide)",
+            "fr": "Désactiver l'avertissement $1 (pour tout le projet)"
+        }
+    },
     "bootstrap.help.default": {
         "message": {
             "en": "default",

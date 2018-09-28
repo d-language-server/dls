@@ -52,6 +52,7 @@ class InitializeParams
             bool documentHighlight = true;
             bool documentSymbol = true;
             bool workspaceSymbol = true;
+            bool codeAction = true;
             bool documentFormatting = true;
             bool documentRangeFormatting = true;
             bool documentOnTypeFormatting = true;
@@ -475,7 +476,7 @@ class ServerCapabilities
     Nullable!bool documentHighlightProvider;
     Nullable!bool documentSymbolProvider;
     Nullable!bool workspaceSymbolProvider;
-    Nullable!JSONValue codeActionProvider;
+    Nullable!CodeActionOptions codeActionProvider;
     Nullable!CodeLensOptions codeLensProvider;
     Nullable!bool documentFormattingProvider;
     Nullable!bool documentRangeFormattingProvider;

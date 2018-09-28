@@ -146,7 +146,10 @@ SymbolInformation[] symbol(WorkspaceSymbolParams params)
 
 JSONValue executeCommand(ExecuteCommandParams params)
 {
-    return JSONValue(null);
+    import dls.tools.command_tool : CommandTool;
+
+    return CommandTool.instance.executeCommand(params.command,
+            params.arguments.isNull ? [] : params.arguments.get());
 }
 
 void applyEdit(string id, ApplyWorkspaceEditResponse response)

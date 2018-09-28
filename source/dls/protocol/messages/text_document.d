@@ -161,7 +161,12 @@ JSONValue documentSymbol(DocumentSymbolParams params)
 
 CodeAction[] codeAction(CodeActionParams params)
 {
-    return [];
+    import dls.tools.analysis_tool : AnalysisTool;
+    import dls.util.uri : Uri;
+
+    return AnalysisTool.instance.codeAction(new Uri(params.textDocument.uri),
+            params.range, params.context.diagnostics,
+            params.context.only.isNull ? [] : params.context.only.get());
 }
 
 CodeLens[] codeLens(CodeLensParams params)

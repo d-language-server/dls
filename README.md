@@ -123,6 +123,7 @@ interface InitializationOptions: {
         documentHighlight?: boolean;
         documentSymbol?: boolean;
         workspaceSymbol?: boolean;
+        codeAction?: boolean;
         documentFormatting?: boolean;
         documentRangeFormatting?: boolean;
         documentOnTypeFormatting?: boolean;

@@ -44,7 +44,7 @@ template isHandler(func...)
 
 class HandlerNotFoundException : Exception
 {
-    this(string method)
+    this(in string method)
     {
         super("No handler found for method " ~ method);
     }
@@ -56,7 +56,7 @@ if the server should send a request or a notification to the client (if the
 method has a response handler, then the server will expect a response and thus
 send a request instead of a notification).
 +/
-bool hasResponseHandler(string method)
+bool hasResponseHandler(in string method)
 {
     return (method in responseHandlers) !is null;
 }
@@ -65,7 +65,7 @@ bool hasResponseHandler(string method)
 Registers a new handler of any kind (`RequestHandler`, `NotificationHandler` or
 `ResponseHandler`).
 +/
-void pushHandler(F)(string method, F func)
+void pushHandler(F)(in string method, F func)
         if (isSomeFunction!F && !is(F == RequestHandler)
             && !is(F == NotificationHandler) && !is(F == ResponseHandler))
 {
@@ -101,25 +101,25 @@ void pushHandler(F)(string method, F func)
 }
 
 /++ Registers a new static `RequestHandler`. +/
-private void pushHandler(string method, RequestHandler h)
+private void pushHandler(in string method, RequestHandler h)
 {
     requestHandlers[method] = h;
 }
 
 /++ Registers a new static `NotificationHandler`. +/
-private void pushHandler(string method, NotificationHandler h)
+private void pushHandler(in string method, NotificationHandler h)
 {
     notificationHandlers[method] = h;
 }
 
 /++ Registers a new static `ResponseHandler`. +/
-private void pushHandler(string method, ResponseHandler h)
+private void pushHandler(in string method, ResponseHandler h)
 {
     responseHandlers[method] = h;
 }
 
 /++ Registers a new dynamic `ResponseHandler` (used at runtime) +/
-void pushHandler(string id, string method)
+void pushHandler(in string id, in string method)
 {
     runtimeResponseHandlers[id] = responseHandlers[method];
 }
@@ -128,7 +128,7 @@ void pushHandler(string id, string method)
 Returns the `RequestHandler`/`NotificationHandler`/`ResponseHandler`
 corresponding to a specific LSP method.
 +/
-T handler(T)(string methodOrId)
+T handler(T)(in string methodOrId)
         if (is(T == RequestHandler) || is(T == NotificationHandler) || is(T == ResponseHandler))
 {
     static if (is(T == RequestHandler))
