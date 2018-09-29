@@ -592,7 +592,10 @@ class SymbolTool : Tool
         import dparse.rollback_allocator : RollbackAllocator;
         import std.functional : toDelegate;
 
-        logger.infof("Fetching symbols from %s", uri.path);
+        if (query is null)
+        {
+            logger.infof("Fetching symbols from %s", uri.path);
+        }
 
         static void doNothing(string, size_t, size_t, string, bool)
         {
