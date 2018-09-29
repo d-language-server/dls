@@ -53,24 +53,31 @@ class CommandTool : Tool
         return [Commands.codeAction_analysis_disableCheck];
     }
 
-    JSONValue executeCommand(in string command, in JSONValue[] arguments)
+    JSONValue executeCommand(in string commandName, in JSONValue[] arguments)
     {
         import dls.protocol.jsonrpc : InvalidParamsException;
         import dls.tools.analysis_tool : AnalysisTool;
+        import dls.util.json : convertFromJSON;
         import dls.util.logger : logger;
         import dls.util.uri : Uri;
+        import std.json : JSONException;
         import std.format : format;
 
-        logger.infof("Executing command %s with arguments %s", command, arguments);
+        logger.infof("Executing command %s with arguments %s", commandName, arguments);
 
-        switch (command)
+        try
         {
-        case Commands.codeAction_analysis_disableCheck:
-            AnalysisTool.instance.disableCheck(new Uri(arguments[0].str), arguments[1].str);
-            break;
-
-        default:
-            throw new InvalidParamsException(format!"unknown command: %s"(command));
+            final switch (convertFromJSON!Commands(JSONValue(commandName)))
+            {
+            case Commands.codeAction_analysis_disableCheck:
+                AnalysisTool.instance.disableCheck(new Uri(convertFromJSON!string(arguments[0])),
+                        new Uri(convertFromJSON!string(arguments[1])));
+                break;
+            }
+        }
+        catch (JSONException e)
+        {
+            throw new InvalidParamsException(format!"unknown command: %s"(commandName));
         }
 
         return JSONValue(null);
