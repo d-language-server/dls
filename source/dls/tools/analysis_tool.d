@@ -49,14 +49,6 @@ class AnalysisTool : Tool
     }
 
     private StaticAnalysisConfig[string] _analysisConfigs;
-    private StaticAnalysisConfig _tempConfig;
-
-    this()
-    {
-        import dscanner.analysis.config : defaultStaticAnalysisConfig;
-
-        _tempConfig = defaultStaticAnalysisConfig();
-    }
 
     void scanAllWorkspaces()
     {
@@ -185,9 +177,10 @@ class AnalysisTool : Tool
         {
             if (!diagnostic.code.isNull)
             {
+                StaticAnalysisConfig config;
                 auto code = diagnostic.code.get().str;
 
-                if (getDiagnosticParameter(code) !is null)
+                if (getDiagnosticParameter(config, code) !is null)
                 {
                     auto title = tr(Tr.app_analysisTool_disableWarning, [code]);
                     auto args = [JSONValue(uri.toString()), JSONValue(code)];
@@ -209,9 +202,9 @@ class AnalysisTool : Tool
         import inifiled : INI, writeINIFile;
         import std.path : buildNormalizedPath;
 
-        _tempConfig = getConfig(uri);
-        *getDiagnosticParameter(code) = Check.disabled;
-        writeINIFile(_tempConfig, buildNormalizedPath(SymbolTool.instance.getWorkspace(uri)
+        auto config = getConfig(uri);
+        *getDiagnosticParameter(config, code) = Check.disabled;
+        writeINIFile(config, buildNormalizedPath(SymbolTool.instance.getWorkspace(uri)
                 .path, _configuration.analysis.configFile));
     }
 
@@ -226,65 +219,65 @@ class AnalysisTool : Tool
             : defaultStaticAnalysisConfig();
     }
 
-    private string* getDiagnosticParameter(in string code)
+    private string* getDiagnosticParameter(ref StaticAnalysisConfig config, in string code)
     {
         //dfmt off
         switch (code)
         {
-        case "dscanner.bugs.backwards_slices"                       : return &_tempConfig.backwards_range_check;
-        case "dscanner.bugs.if_else_same"                           : return &_tempConfig.if_else_same_check;
-        case "dscanner.bugs.logic_operator_operands"                : return &_tempConfig.if_else_same_check;
-        case "dscanner.bugs.self_assignment"                        : return &_tempConfig.if_else_same_check;
-        case "dscanner.confusing.argument_parameter_mismatch"       : return &_tempConfig.mismatched_args_check;
-        case "dscanner.confusing.brexp"                             : return &_tempConfig.asm_style_check;
-        case "dscanner.confusing.builtin_property_names"            : return &_tempConfig.builtin_property_names_check;
-        case "dscanner.confusing.constructor_args"                  : return &_tempConfig.constructor_check;
-        case "dscanner.confusing.function_attributes"               : return &_tempConfig.function_attribute_check;
-        case "dscanner.confusing.lambda_returns_lambda"             : return &_tempConfig.lambda_return_check;
-        case "dscanner.confusing.logical_precedence"                : return &_tempConfig.logical_precedence_check;
-        case "dscanner.confusing.struct_constructor_default_args"   : return &_tempConfig.constructor_check;
-        case "dscanner.deprecated.delete_keyword"                   : return &_tempConfig.delete_check;
-        case "dscanner.deprecated.floating_point_operators"         : return &_tempConfig.float_operator_check;
-        case "dscanner.if_statement"                                : return &_tempConfig.redundant_if_check;
-        case "dscanner.performance.enum_array_literal"              : return &_tempConfig.enum_array_literal_check;
-        case "dscanner.style.alias_syntax"                          : return &_tempConfig.alias_syntax_check;
-        case "dscanner.style.allman"                                : return &_tempConfig.allman_braces_check;
-        case "dscanner.style.assert_without_msg"                    : return &_tempConfig.assert_without_msg;
-        case "dscanner.style.doc_missing_params"                    : return &_tempConfig.properly_documented_public_functions;
-        case "dscanner.style.doc_missing_returns"                   : return &_tempConfig.properly_documented_public_functions;
-        case "dscanner.style.doc_missing_throw"                     : return &_tempConfig.properly_documented_public_functions;
-        case "dscanner.style.doc_non_existing_params"               : return &_tempConfig.properly_documented_public_functions;
-        case "dscanner.style.explicitly_annotated_unittest"         : return &_tempConfig.explicitly_annotated_unittests;
-        case "dscanner.style.has_public_example"                    : return &_tempConfig.has_public_example;
-        case "dscanner.style.if_constraints_indent"                 : return &_tempConfig.if_constraints_indent;
-        case "dscanner.style.imports_sortedness"                    : return &_tempConfig.imports_sortedness;
-        case "dscanner.style.long_line"                             : return &_tempConfig.long_line_check;
-        case "dscanner.style.number_literals"                       : return &_tempConfig.number_style_check;
-        case "dscanner.style.phobos_naming_convention"              : return &_tempConfig.style_check;
-        case "dscanner.style.undocumented_declaration"              : return &_tempConfig.undocumented_declaration_check;
-        case "dscanner.suspicious.auto_ref_assignment"              : return &_tempConfig.auto_ref_assignment_check;
-        case "dscanner.suspicious.catch_em_all"                     : return &_tempConfig.exception_check;
-        case "dscanner.suspicious.comma_expression"                 : return &_tempConfig.comma_expression_check;
-        case "dscanner.suspicious.incomplete_operator_overloading"  : return &_tempConfig.opequals_tohash_check;
-        case "dscanner.suspicious.incorrect_infinite_range"         : return &_tempConfig.incorrect_infinite_range_check;
-        case "dscanner.suspicious.label_var_same_name"              : return &_tempConfig.label_var_same_name_check;
-        case "dscanner.suspicious.length_subtraction"               : return &_tempConfig.length_subtraction_check;
-        case "dscanner.suspicious.local_imports"                    : return &_tempConfig.local_import_check;
-        case "dscanner.suspicious.missing_return"                   : return &_tempConfig.auto_function_check;
-        case "dscanner.suspicious.object_const"                     : return &_tempConfig.object_const_check;
-        case "dscanner.suspicious.redundant_attributes"             : return &_tempConfig.redundant_attributes_check;
-        case "dscanner.suspicious.redundant_parens"                 : return &_tempConfig.redundant_parens_check;
-        case "dscanner.suspicious.static_if_else"                   : return &_tempConfig.static_if_else_check;
-        case "dscanner.suspicious.unmodified"                       : return &_tempConfig.could_be_immutable_check;
-        case "dscanner.suspicious.unused_label"                     : return &_tempConfig.unused_label_check;
-        case "dscanner.suspicious.unused_parameter"                 : return &_tempConfig.unused_variable_check;
-        case "dscanner.suspicious.unused_variable"                  : return &_tempConfig.unused_variable_check;
-        case "dscanner.suspicious.useless_assert"                   : return &_tempConfig.useless_assert_check;
-        case "dscanner.suspicious.useless-initializer"              : return &_tempConfig.useless_initializer;
-        case "dscanner.trust_too_much"                              : return &_tempConfig.trust_too_much;
-        case "dscanner.unnecessary.duplicate_attribute"             : return &_tempConfig.duplicate_attribute;
-        case "dscanner.useless.final"                               : return &_tempConfig.final_attribute_check;
-        case "dscanner.vcall_ctor"                                  : return &_tempConfig.vcall_in_ctor;
+        case "dscanner.bugs.backwards_slices"                       : return &config.backwards_range_check;
+        case "dscanner.bugs.if_else_same"                           : return &config.if_else_same_check;
+        case "dscanner.bugs.logic_operator_operands"                : return &config.if_else_same_check;
+        case "dscanner.bugs.self_assignment"                        : return &config.if_else_same_check;
+        case "dscanner.confusing.argument_parameter_mismatch"       : return &config.mismatched_args_check;
+        case "dscanner.confusing.brexp"                             : return &config.asm_style_check;
+        case "dscanner.confusing.builtin_property_names"            : return &config.builtin_property_names_check;
+        case "dscanner.confusing.constructor_args"                  : return &config.constructor_check;
+        case "dscanner.confusing.function_attributes"               : return &config.function_attribute_check;
+        case "dscanner.confusing.lambda_returns_lambda"             : return &config.lambda_return_check;
+        case "dscanner.confusing.logical_precedence"                : return &config.logical_precedence_check;
+        case "dscanner.confusing.struct_constructor_default_args"   : return &config.constructor_check;
+        case "dscanner.deprecated.delete_keyword"                   : return &config.delete_check;
+        case "dscanner.deprecated.floating_point_operators"         : return &config.float_operator_check;
+        case "dscanner.if_statement"                                : return &config.redundant_if_check;
+        case "dscanner.performance.enum_array_literal"              : return &config.enum_array_literal_check;
+        case "dscanner.style.alias_syntax"                          : return &config.alias_syntax_check;
+        case "dscanner.style.allman"                                : return &config.allman_braces_check;
+        case "dscanner.style.assert_without_msg"                    : return &config.assert_without_msg;
+        case "dscanner.style.doc_missing_params"                    : return &config.properly_documented_public_functions;
+        case "dscanner.style.doc_missing_returns"                   : return &config.properly_documented_public_functions;
+        case "dscanner.style.doc_missing_throw"                     : return &config.properly_documented_public_functions;
+        case "dscanner.style.doc_non_existing_params"               : return &config.properly_documented_public_functions;
+        case "dscanner.style.explicitly_annotated_unittest"         : return &config.explicitly_annotated_unittests;
+        case "dscanner.style.has_public_example"                    : return &config.has_public_example;
+        case "dscanner.style.if_constraints_indent"                 : return &config.if_constraints_indent;
+        case "dscanner.style.imports_sortedness"                    : return &config.imports_sortedness;
+        case "dscanner.style.long_line"                             : return &config.long_line_check;
+        case "dscanner.style.number_literals"                       : return &config.number_style_check;
+        case "dscanner.style.phobos_naming_convention"              : return &config.style_check;
+        case "dscanner.style.undocumented_declaration"              : return &config.undocumented_declaration_check;
+        case "dscanner.suspicious.auto_ref_assignment"              : return &config.auto_ref_assignment_check;
+        case "dscanner.suspicious.catch_em_all"                     : return &config.exception_check;
+        case "dscanner.suspicious.comma_expression"                 : return &config.comma_expression_check;
+        case "dscanner.suspicious.incomplete_operator_overloading"  : return &config.opequals_tohash_check;
+        case "dscanner.suspicious.incorrect_infinite_range"         : return &config.incorrect_infinite_range_check;
+        case "dscanner.suspicious.label_var_same_name"              : return &config.label_var_same_name_check;
+        case "dscanner.suspicious.length_subtraction"               : return &config.length_subtraction_check;
+        case "dscanner.suspicious.local_imports"                    : return &config.local_import_check;
+        case "dscanner.suspicious.missing_return"                   : return &config.auto_function_check;
+        case "dscanner.suspicious.object_const"                     : return &config.object_const_check;
+        case "dscanner.suspicious.redundant_attributes"             : return &config.redundant_attributes_check;
+        case "dscanner.suspicious.redundant_parens"                 : return &config.redundant_parens_check;
+        case "dscanner.suspicious.static_if_else"                   : return &config.static_if_else_check;
+        case "dscanner.suspicious.unmodified"                       : return &config.could_be_immutable_check;
+        case "dscanner.suspicious.unused_label"                     : return &config.unused_label_check;
+        case "dscanner.suspicious.unused_parameter"                 : return &config.unused_variable_check;
+        case "dscanner.suspicious.unused_variable"                  : return &config.unused_variable_check;
+        case "dscanner.suspicious.useless_assert"                   : return &config.useless_assert_check;
+        case "dscanner.suspicious.useless-initializer"              : return &config.useless_initializer;
+        case "dscanner.trust_too_much"                              : return &config.trust_too_much;
+        case "dscanner.unnecessary.duplicate_attribute"             : return &config.duplicate_attribute;
+        case "dscanner.useless.final"                               : return &config.final_attribute_check;
+        case "dscanner.vcall_ctor"                                  : return &config.vcall_in_ctor;
         default                                                     : return null;
         }
         //dfmt on
