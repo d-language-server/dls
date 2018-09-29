@@ -220,7 +220,8 @@ class SymbolTool : Tool
 
     @property Uri[] workspacesFilesUris()
     {
-        import std.algorithm : filter, map, reduce;
+        import dls.util.document : Document;
+        import std.algorithm : canFind, filter, map, reduce;
         import std.array : array;
         import std.file : SpanMode, dirEntries;
         import std.path : globMatch;
@@ -240,9 +241,10 @@ class SymbolTool : Tool
             return false;
         }
 
-        return reduce!q{a ~ b}(cast(Uri[])[],
+        return reduce!q{a ~ b}(Document.uris.array,
                 _workspaceDependencies.byKey.map!(w => dirEntries(w, SpanMode.depth).map!q{a.name}
                     .filter!(file => globMatch(file, "*.{d,di}"))
+                    .filter!(file => !Document.uris.map!q{a.path}.canFind(file))
                     .map!(Uri.fromPath)
                     .filter!isImported
                     .array));
