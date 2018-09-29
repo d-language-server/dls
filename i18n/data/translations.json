@@ -80,7 +80,13 @@
             "fr": "Voir les nouveautés"
         }
     },
-    "app.analysisTool.disableWarning": {
+    "app.analysisTool.disableCheck.local": {
+        "message": {
+            "en": "Disable warning $1 (current line)",
+            "fr": "Désactiver l'avertissement $1 (pour cette ligne)"
+        }
+    },
+    "app.analysisTool.disableCheck.global": {
         "message": {
             "en": "Disable warning $1 (project-wide)",
             "fr": "Désactiver l'avertissement $1 (pour tout le projet)"

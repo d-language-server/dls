@@ -118,7 +118,9 @@ class AnalysisTool : Tool
         import dscanner.analysis.run : analyze;
         import std.array : appender;
         import std.json : JSONValue;
+        import std.regex : matchFirst, regex;
         import std.typecons : Nullable, nullable;
+        import std.utf : toUTF16;
 
         logger.infof("Fetching diagnostics for document %s", uri.path);
 
@@ -142,9 +144,13 @@ class AnalysisTool : Tool
 
         foreach (result; analysisResults)
         {
-            diagnostics ~= new Diagnostic(document.wordRangeAtLineAndByte(result.line - 1, result.column - 1),
-                    result.message, DiagnosticSeverity.warning.nullable,
-                    JSONValue(result.key).nullable, diagnosticSource.nullable);
+            if (!document.lines[result.line - 1].matchFirst(regex(
+                    `.*//\s*@suppress\s*\(\s*`w ~ result.key.toUTF16() ~ `\s*\)\s*`w)))
+            {
+                diagnostics ~= new Diagnostic(document.wordRangeAtLineAndByte(result.line - 1, result.column - 1),
+                        result.message, DiagnosticSeverity.warning.nullable,
+                        JSONValue(result.key).nullable, diagnosticSource.nullable);
+            }
         }
 
         return diagnostics.data;
@@ -153,9 +159,11 @@ class AnalysisTool : Tool
     CodeAction[] codeAction(in Uri uri, in Range range, Diagnostic[] diagnostics,
             in CodeActionKind[] kinds)
     {
-        import dls.protocol.definitions : Command, WorkspaceEdit;
+        import dls.protocol.definitions : Command, Position, TextDocumentEdit,
+            TextEdit, VersionedTextDocumentIdentifier, WorkspaceEdit;
         import dls.tools.command_tool : Commands;
         import dls.util.constants : Tr;
+        import dls.util.document : Document;
         import dls.util.i18n : tr;
         import dls.util.logger : logger;
         import std.algorithm : canFind;
@@ -182,12 +190,32 @@ class AnalysisTool : Tool
 
                 if (getDiagnosticParameter(config, code) !is null)
                 {
-                    auto title = tr(Tr.app_analysisTool_disableWarning, [code]);
-                    auto args = [JSONValue(uri.toString()), JSONValue(code)];
-                    auto command = new Command(title,
-                            Commands.codeAction_analysis_disableCheck, args.nullable);
-                    result ~= new CodeAction(title, CodeActionKind.quickfix.nullable,
-                            [diagnostic].nullable, Nullable!WorkspaceEdit(), command.nullable);
+                    {
+                        auto document = Document.get(uri);
+                        auto line = document.lines[range.end.line];
+                        auto pos = new Position(range.end.line, line.length);
+
+                        auto textEdit = new TextEdit(new Range(pos, pos),
+                                " // @suppress(" ~ code ~ ")");
+                        auto changes = [uri.toString() : [textEdit]];
+                        auto identifier = new VersionedTextDocumentIdentifier(uri,
+                                document.version_);
+                        auto documentChanges = [new TextDocumentEdit(identifier, changes[uri])];
+
+                        auto title = tr(Tr.app_analysisTool_disableCheck_local, [code]);
+                        auto edit = new WorkspaceEdit(changes.nullable, documentChanges.nullable);
+                        result ~= new CodeAction(title, CodeActionKind.quickfix.nullable,
+                                [diagnostic].nullable, edit.nullable, Nullable!Command());
+                    }
+
+                    {
+                        auto title = tr(Tr.app_analysisTool_disableCheck_global, [code]);
+                        auto args = [JSONValue(uri.toString()), JSONValue(code)];
+                        auto command = new Command(title,
+                                Commands.codeAction_analysis_disableCheck, args.nullable);
+                        result ~= new CodeAction(title, CodeActionKind.quickfix.nullable,
+                                [diagnostic].nullable, Nullable!WorkspaceEdit(), command.nullable);
+                    }
                 }
             }
         }
