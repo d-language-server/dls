@@ -4,6 +4,9 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.13.3
+- Fixed potential crash on go to type definition
+
 #### 0.13.2
 - Fixed diagnostics not being updated for unopened files
 
@@ -21,7 +24,7 @@ Breaking changes will be in bold.
 - Fixed changelog URL
 
 #### 0.12.2
-- Fixed error on go-to-definition
+- Fixed error on go to definition
 
 #### 0.12.1
 - Fixed error on symbol highlighting
@@ -29,8 +32,9 @@ Breaking changes will be in bold.
 ### 0.12.0
 - __Removed custom message using old naming__
 - Added support for automatically picking up `.editorconfig` files when formatting
+- Added go to type definition support
 - Enhanced formatting to only edit specific portions of documents instead of replacing the whole buffer
-- Enhanced go-to-definition, find references and highlighting to work with overloaded methods and such
+- Enhanced go to definition, find references and highlighting to work with overloaded methods and such
 
 #### 0.11.2
 - Fixed crash on file diagnostics generation
@@ -240,7 +244,7 @@ Breaking changes will be in bold.
 
 ### 0.3.0
 - Added linting support on file save, along with support for workspace-local D-Scanner config files
-- Enhanced go-to-definition: the range of the symbol is now used instead of the whole line
+- Enhanced go to definition: the range of the symbol is now used instead of the whole line
 - Enhanced automatic druntime/phobos path detection:
     - On Windows, import paths should be detected regardless of DMD's install location
     - On Linux, DLS will now also try to import paths from the DMD snap package
@@ -258,7 +262,7 @@ Breaking changes will be in bold.
 ### 0.2.0
 - __Changed the naming convention of the tools' configuration for consistency__
 - __Changed from `telemetry/event` to custom `dls/didUpdatePath` notification__
-- Added go-to-definition support
+- Added go to definition support
 - Added guard to prevent debug builds to update
 - Added "See what's new" button to message shown when a new version of DLS has been built
 - Added CHANGELOG file
