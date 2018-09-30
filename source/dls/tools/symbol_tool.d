@@ -768,8 +768,7 @@ class SymbolTool : Tool
 
         foreach (type; stuff.symbols
                 .map!q{a.type}
-                .filter!q{a.location > 0}
-                .filter!q{a !is null && a.symbolFile.length > 0}
+                .filter!q{a !is null && a.location > 0 && a.symbolFile.length > 0}
                 .uniq!q{a.symbolFile == b.symbolFile && a.location == b.location})
         {
             auto symbolUri = type.symbolFile == "stdin" ? uri : Uri.fromPath(type.symbolFile);
