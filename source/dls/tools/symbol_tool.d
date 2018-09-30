@@ -815,7 +815,7 @@ class SymbolTool : Tool
 
         logger.infof("Finding references for %s at position %s,%s", uri.path,
                 position.line, position.character);
-        return referencesForFiles(uri, position, workspacesFilesUris, includeDeclaration, false);
+        return referencesForFiles(uri, position, workspacesFilesUris, includeDeclaration);
     }
 
     DocumentHighlight[] highlight(Uri uri, Position position)
@@ -830,8 +830,8 @@ class SymbolTool : Tool
         logger.infof("Highlighting usages for %s at position %s,%s", uri.path,
                 position.line, position.character);
 
-        auto sources = referencesForFiles(uri, position, [uri], true, true);
-        auto locations = referencesForFiles(uri, position, [uri], true, false);
+        auto sources = referencesForFiles(uri, position, null, true);
+        auto locations = referencesForFiles(uri, position, [uri], true);
         auto result = appender!(DocumentHighlight[]);
 
         foreach (location; locations)
@@ -916,7 +916,7 @@ class SymbolTool : Tool
     }
 
     private Location[] referencesForFiles(Uri uri, Position position, Uri[] files,
-            bool includeDeclaration, bool sources)
+            bool includeDeclaration)
     {
         import dcd.common.messages : CompletionType;
         import dcd.server.autocomplete.util : getSymbolsForCompletion;
@@ -970,7 +970,7 @@ class SymbolTool : Tool
             sourceSymbolFiles ~= symbol.symbolFile == "stdin" ? uri.path : symbol.symbolFile;
         }
 
-        if (sources)
+        if (files is null)
         {
             foreach (sourceLocation, sourceFile; zip(sourceSymbolLocations.data,
                     sourceSymbolFiles.data))
