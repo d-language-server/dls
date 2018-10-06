@@ -82,14 +82,14 @@
     },
     "app.analysisTool.disableCheck.local": {
         "message": {
-            "en": "Disable warning $1 (current line)",
-            "fr": "Désactiver l'avertissement $1 (pour cette ligne)"
+            "en": "Disable $1 (this line)",
+            "fr": "Désactiver $1 (cette ligne)"
         }
     },
     "app.analysisTool.disableCheck.global": {
         "message": {
-            "en": "Disable warning $1 (project-wide)",
-            "fr": "Désactiver l'avertissement $1 (pour tout le projet)"
+            "en": "Disable $1 (project-wide)",
+            "fr": "Désactiver $1 (tout le projet)"
         }
     },
     "bootstrap.help.default": {
