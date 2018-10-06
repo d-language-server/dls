@@ -37,7 +37,7 @@ void workspaceFolders(string id, Nullable!(WorkspaceFolder[]) folders)
         {
             auto uri = new Uri(workspaceFolder.uri);
             SymbolTool.instance.importPath(uri);
-            AnalysisTool.instance.addAnalysisConfigPath(uri);
+            AnalysisTool.instance.addAnalysisConfig(uri);
         }
     }
 }
@@ -55,7 +55,7 @@ void didChangeWorkspaceFolders(DidChangeWorkspaceFoldersParams params)
     {
         auto uri = new Uri(folder.uri);
         SymbolTool.instance.clearPath(uri);
-        AnalysisTool.instance.removeAnalysisConfigPath(uri);
+        AnalysisTool.instance.removeAnalysisConfig(uri);
     }
 }
 
@@ -128,7 +128,7 @@ void didChangeWatchedFiles(DidChangeWatchedFilesParams params)
             continue;
 
         case ".ini":
-            AnalysisTool.instance.updateAnalysisConfigPath(dirUri);
+            AnalysisTool.instance.updateAnalysisConfig(dirUri);
             continue;
 
         default:

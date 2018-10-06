@@ -78,7 +78,7 @@ InitializeResult initialize(InitializeParams params)
             .uniq!q{a.path == b.path})
     {
         SymbolTool.instance.importPath(uri);
-        AnalysisTool.instance.addAnalysisConfigPath(uri);
+        AnalysisTool.instance.addAnalysisConfig(uri);
     }
 
     auto result = new InitializeResult();

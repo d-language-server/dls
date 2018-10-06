@@ -125,15 +125,15 @@ class AnalysisTool : Tool
         });
     }
 
-    void addAnalysisConfigPath(in Uri uri)
+    void addAnalysisConfig(in Uri uri)
     {
         import dscanner.analysis.config : defaultStaticAnalysisConfig;
 
         _analysisConfigs[uri.path] = defaultStaticAnalysisConfig();
-        updateAnalysisConfigPath(uri);
+        updateAnalysisConfig(uri);
     }
 
-    void removeAnalysisConfigPath(in Uri uri)
+    void removeAnalysisConfig(in Uri uri)
     {
         if (uri.path in _analysisConfigs)
         {
@@ -141,7 +141,7 @@ class AnalysisTool : Tool
         }
     }
 
-    void updateAnalysisConfigPath(in Uri uri)
+    void updateAnalysisConfig(in Uri uri)
     {
         import dls.util.logger : logger;
         import dscanner.analysis.config : defaultStaticAnalysisConfig;
@@ -158,12 +158,13 @@ class AnalysisTool : Tool
                 : defaultStaticAnalysisConfig();
             readINIFile(conf, configPath);
             _analysisConfigs[uri.path] = conf;
-            scanAllWorkspaces();
         }
         else
         {
             _analysisConfigs.remove(uri.path);
         }
+
+        scanAllWorkspaces();
     }
 
     Diagnostic[] diagnostics(in Uri uri)
