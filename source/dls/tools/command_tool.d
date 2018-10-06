@@ -24,7 +24,8 @@ import dls.tools.tool : Tool;
 
 enum Commands : string
 {
-    codeAction_analysis_disableCheck = "codeAction.analylis.disableCheck"
+    workspaceEdit = "workspaceEdit",
+    codeAction_analysis_disableCheck = "codeAction.analysis.disableCheck"
 }
 
 class CommandTool : Tool
@@ -55,7 +56,10 @@ class CommandTool : Tool
 
     JSONValue executeCommand(in string commandName, in JSONValue[] arguments)
     {
-        import dls.protocol.jsonrpc : InvalidParamsException;
+        import dls.protocol.definitions : WorkspaceEdit;
+        import dls.protocol.interfaces : ApplyWorkspaceEditParams;
+        import dls.protocol.jsonrpc : InvalidParamsException, send;
+        import dls.protocol.messages.methods : Workspace;
         import dls.tools.analysis_tool : AnalysisTool;
         import dls.util.json : convertFromJSON;
         import dls.util.logger : logger;
@@ -69,6 +73,11 @@ class CommandTool : Tool
         {
             final switch (convertFromJSON!Commands(JSONValue(commandName)))
             {
+            case Commands.workspaceEdit:
+                send(Workspace.applyEdit,
+                        new ApplyWorkspaceEditParams(convertFromJSON!WorkspaceEdit(arguments[0])));
+                break;
+
             case Commands.codeAction_analysis_disableCheck:
                 AnalysisTool.instance.disableCheck(new Uri(convertFromJSON!string(arguments[0])),
                         new Uri(convertFromJSON!string(arguments[1])));

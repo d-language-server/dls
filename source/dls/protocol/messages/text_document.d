@@ -181,7 +181,7 @@ JSONValue codeAction(CodeActionParams params)
             || initState.capabilities.textDocument.codeAction.codeActionLiteralSupport.isNull)
     {
         return convertToJSON(AnalysisTool.instance.codeAction(new Uri(params.textDocument.uri),
-                params.range, params.context.diagnostics));
+                params.range, params.context.diagnostics, true));
     }
     else
     {
