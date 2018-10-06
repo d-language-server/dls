@@ -86,8 +86,10 @@ void didChangeWatchedFiles(DidChangeWatchedFilesParams params)
     import dls.protocol.messages.methods : TextDocument;
     import dls.tools.analysis_tool : AnalysisTool;
     import dls.tools.symbol_tool : SymbolTool;
+    import dls.util.document : Document;
     import dls.util.logger : logger;
     import dls.util.uri : Uri;
+    import std.algorithm : canFind;
     import std.path : baseName, dirName, extension;
 
     foreach (event; params.changes)
@@ -119,7 +121,8 @@ void didChangeWatchedFiles(DidChangeWatchedFilesParams params)
         switch (extension(uri.path))
         {
         case ".d", ".di":
-            if (event.type != FileChangeType.deleted)
+            if (event.type != FileChangeType.deleted
+                    && !Document.uris.canFind!q{a.path == b.path}(uri))
             {
                 send(TextDocument.publishDiagnostics, new PublishDiagnosticsParams(uri,
                         AnalysisTool.instance.diagnostics(uri)));
