@@ -4,6 +4,9 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.14.1
+- Fixed diagnostics for opened documents not being updated with editors that don't support file watching
+
 ### 0.14.0
 - Added code action for project-wide warning disabling
 - Added code action for line-specific warning disabling
