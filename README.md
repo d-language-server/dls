@@ -8,9 +8,9 @@
 
 __LSP compliance: `3.13`__
 
-_This is still a work in progress. There ~~might~~ will be bugs and crashes..._
+_This is still a work in progress; there might still be bugs and crashes_
 
-DLS implements the server side of the [Language Server Protocol (LSP)](https://microsoft.github.io/language-server-protocol/) for the [D programming language](https://dlang.org).
+DLS implements the server side of the [Language Server Protocol (LSP)](https://microsoft.github.io/language-server-protocol) for the [D programming language](https://dlang.org).
 It doesn't do much itself (yet), and rather uses already available components, and provides an interface to work with the LSP.
 Current features include:
 
