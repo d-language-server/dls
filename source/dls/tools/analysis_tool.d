@@ -24,9 +24,70 @@ import dls.tools.tool : Tool;
 
 private immutable diagnosticSource = "D-Scanner";
 
+//dfmt off
+private enum DScannerWarnings : string
+{
+    bugs_backwardsSlices                        = "dscanner.bugs.backwards_slices",
+    bugs_ifElseSame                             = "dscanner.bugs.if_else_same",
+    bugs_logicOperatorOperands                  = "dscanner.bugs.logic_operator_operands",
+    bugs_selfAssignment                         = "dscanner.bugs.self_assignment",
+    confusing_argumentParameter_Mismatch        = "dscanner.confusing.argument_parameter_mismatch",
+    confusing_brexp                             = "dscanner.confusing.brexp",
+    confusing_builtinPropertyNames              = "dscanner.confusing.builtin_property_names",
+    confusing_constructor_args                  = "dscanner.confusing.constructor_args",
+    confusing_functionAttributes                = "dscanner.confusing.function_attributes",
+    confusing_lambdaReturnsLambda               = "dscanner.confusing.lambda_returns_lambda",
+    confusing_logicalPrecedence                 = "dscanner.confusing.logical_precedence",
+    confusing_structConstructorDefaultArgs      = "dscanner.confusing.struct_constructor_default_args",
+    deprecated_deleteKeyword                    = "dscanner.deprecated.delete_keyword",
+    deprecated_floatingPointOperators           = "dscanner.deprecated.floating_point_operators",
+    ifStatement                                 = "dscanner.if_statement",
+    performance_enumArrayLiteral                = "dscanner.performance.enum_array_literal",
+    style_aliasSyntax                           = "dscanner.style.alias_syntax",
+    style_allman                                = "dscanner.style.allman",
+    style_assertWithoutMsg                      = "dscanner.style.assert_without_msg",
+    style_docMissingParams                      = "dscanner.style.doc_missing_params",
+    style_docMissingReturns                     = "dscanner.style.doc_missing_returns",
+    style_docMissingThrow                       = "dscanner.style.doc_missing_throw",
+    style_docNonExistingParams                  = "dscanner.style.doc_non_existing_params",
+    style_explicitlyAnnotatedUnittest           = "dscanner.style.explicitly_annotated_unittest",
+    style_hasPublicExample                      = "dscanner.style.has_public_example",
+    style_ifConstraintsIndent                   = "dscanner.style.if_constraints_indent",
+    style_importsSortedness                     = "dscanner.style.imports_sortedness",
+    style_longLine                              = "dscanner.style.long_line",
+    style_numberLiterals                        = "dscanner.style.number_literals",
+    style_phobosNamingConvention                = "dscanner.style.phobos_naming_convention",
+    style_undocumentedDeclaration               = "dscanner.style.undocumented_declaration",
+    suspicious_autoRefAssignment                = "dscanner.suspicious.auto_ref_assignment",
+    suspicious_catchEmAll                       = "dscanner.suspicious.catch_em_all",
+    suspicious_commaExpression                  = "dscanner.suspicious.comma_expression",
+    suspicious_incompleteOperatorOverloading    = "dscanner.suspicious.incomplete_operator_overloading",
+    suspicious_incorrectInfiniteRange           = "dscanner.suspicious.incorrect_infinite_range",
+    suspicious_labelVarSameName                 = "dscanner.suspicious.label_var_same_name",
+    suspicious_lengthSubtraction                = "dscanner.suspicious.length_subtraction",
+    suspicious_localImports                     = "dscanner.suspicious.local_imports",
+    suspicious_missingReturn                    = "dscanner.suspicious.missing_return",
+    suspicious_objectConst                      = "dscanner.suspicious.object_const",
+    suspicious_redundantAttributes              = "dscanner.suspicious.redundant_attributes",
+    suspicious_redundantParens                  = "dscanner.suspicious.redundant_parens",
+    suspicious_staticIfElse                     = "dscanner.suspicious.static_if_else",
+    suspicious_unmodified                       = "dscanner.suspicious.unmodified",
+    suspicious_unusedLabel                      = "dscanner.suspicious.unused_label",
+    suspicious_unusedParameter                  = "dscanner.suspicious.unused_parameter",
+    suspicious_unusedVariable                   = "dscanner.suspicious.unused_variable",
+    suspicious_uselessAssert                    = "dscanner.suspicious.useless_assert",
+    suspicious_uselessInitializer               = "dscanner.suspicious.useless-initializer",
+    trustTooMuch                                = "dscanner.trust_too_much",
+    unnecessary_duplicateAttribute              = "dscanner.unnecessary.duplicate_attribute",
+    useless_final                               = "dscanner.useless.final",
+    vcallCtor                                   = "dscanner.vcall_ctor"
+}
+//dfmt on
+
 class AnalysisTool : Tool
 {
-    import dls.protocol.definitions : Diagnostic, Range;
+    import dls.protocol.definitions : Diagnostic, Range, TextEdit,
+        WorkspaceEdit;
     import dls.protocol.interfaces : CodeAction, CodeActionKind;
     import dls.util.uri : Uri;
     import dscanner.analysis.config : StaticAnalysisConfig;
@@ -160,7 +221,7 @@ class AnalysisTool : Tool
             in CodeActionKind[] kinds)
     {
         import dls.protocol.definitions : Command, Position, TextDocumentEdit,
-            TextEdit, VersionedTextDocumentIdentifier, WorkspaceEdit;
+            VersionedTextDocumentIdentifier;
         import dls.tools.command_tool : Commands;
         import dls.util.constants : Tr;
         import dls.util.document : Document;
@@ -194,16 +255,10 @@ class AnalysisTool : Tool
                         auto document = Document.get(uri);
                         auto line = document.lines[range.end.line];
                         auto pos = new Position(range.end.line, line.length);
-
                         auto textEdit = new TextEdit(new Range(pos, pos),
                                 " // @suppress(" ~ code ~ ")");
-                        auto changes = [uri.toString() : [textEdit]];
-                        auto identifier = new VersionedTextDocumentIdentifier(uri,
-                                document.version_);
-                        auto documentChanges = [new TextDocumentEdit(identifier, changes[uri])];
-
                         auto title = tr(Tr.app_analysisTool_disableCheck_local, [code]);
-                        auto edit = new WorkspaceEdit(changes.nullable, documentChanges.nullable);
+                        auto edit = makeFileWorkspaceEdit(uri, [textEdit]);
                         result ~= new CodeAction(title, CodeActionKind.quickfix.nullable,
                                 [diagnostic].nullable, edit.nullable, Nullable!Command());
                     }
@@ -252,62 +307,76 @@ class AnalysisTool : Tool
         //dfmt off
         switch (code)
         {
-        case "dscanner.bugs.backwards_slices"                       : return &config.backwards_range_check;
-        case "dscanner.bugs.if_else_same"                           : return &config.if_else_same_check;
-        case "dscanner.bugs.logic_operator_operands"                : return &config.if_else_same_check;
-        case "dscanner.bugs.self_assignment"                        : return &config.if_else_same_check;
-        case "dscanner.confusing.argument_parameter_mismatch"       : return &config.mismatched_args_check;
-        case "dscanner.confusing.brexp"                             : return &config.asm_style_check;
-        case "dscanner.confusing.builtin_property_names"            : return &config.builtin_property_names_check;
-        case "dscanner.confusing.constructor_args"                  : return &config.constructor_check;
-        case "dscanner.confusing.function_attributes"               : return &config.function_attribute_check;
-        case "dscanner.confusing.lambda_returns_lambda"             : return &config.lambda_return_check;
-        case "dscanner.confusing.logical_precedence"                : return &config.logical_precedence_check;
-        case "dscanner.confusing.struct_constructor_default_args"   : return &config.constructor_check;
-        case "dscanner.deprecated.delete_keyword"                   : return &config.delete_check;
-        case "dscanner.deprecated.floating_point_operators"         : return &config.float_operator_check;
-        case "dscanner.if_statement"                                : return &config.redundant_if_check;
-        case "dscanner.performance.enum_array_literal"              : return &config.enum_array_literal_check;
-        case "dscanner.style.alias_syntax"                          : return &config.alias_syntax_check;
-        case "dscanner.style.allman"                                : return &config.allman_braces_check;
-        case "dscanner.style.assert_without_msg"                    : return &config.assert_without_msg;
-        case "dscanner.style.doc_missing_params"                    : return &config.properly_documented_public_functions;
-        case "dscanner.style.doc_missing_returns"                   : return &config.properly_documented_public_functions;
-        case "dscanner.style.doc_missing_throw"                     : return &config.properly_documented_public_functions;
-        case "dscanner.style.doc_non_existing_params"               : return &config.properly_documented_public_functions;
-        case "dscanner.style.explicitly_annotated_unittest"         : return &config.explicitly_annotated_unittests;
-        case "dscanner.style.has_public_example"                    : return &config.has_public_example;
-        case "dscanner.style.if_constraints_indent"                 : return &config.if_constraints_indent;
-        case "dscanner.style.imports_sortedness"                    : return &config.imports_sortedness;
-        case "dscanner.style.long_line"                             : return &config.long_line_check;
-        case "dscanner.style.number_literals"                       : return &config.number_style_check;
-        case "dscanner.style.phobos_naming_convention"              : return &config.style_check;
-        case "dscanner.style.undocumented_declaration"              : return &config.undocumented_declaration_check;
-        case "dscanner.suspicious.auto_ref_assignment"              : return &config.auto_ref_assignment_check;
-        case "dscanner.suspicious.catch_em_all"                     : return &config.exception_check;
-        case "dscanner.suspicious.comma_expression"                 : return &config.comma_expression_check;
-        case "dscanner.suspicious.incomplete_operator_overloading"  : return &config.opequals_tohash_check;
-        case "dscanner.suspicious.incorrect_infinite_range"         : return &config.incorrect_infinite_range_check;
-        case "dscanner.suspicious.label_var_same_name"              : return &config.label_var_same_name_check;
-        case "dscanner.suspicious.length_subtraction"               : return &config.length_subtraction_check;
-        case "dscanner.suspicious.local_imports"                    : return &config.local_import_check;
-        case "dscanner.suspicious.missing_return"                   : return &config.auto_function_check;
-        case "dscanner.suspicious.object_const"                     : return &config.object_const_check;
-        case "dscanner.suspicious.redundant_attributes"             : return &config.redundant_attributes_check;
-        case "dscanner.suspicious.redundant_parens"                 : return &config.redundant_parens_check;
-        case "dscanner.suspicious.static_if_else"                   : return &config.static_if_else_check;
-        case "dscanner.suspicious.unmodified"                       : return &config.could_be_immutable_check;
-        case "dscanner.suspicious.unused_label"                     : return &config.unused_label_check;
-        case "dscanner.suspicious.unused_parameter"                 : return &config.unused_variable_check;
-        case "dscanner.suspicious.unused_variable"                  : return &config.unused_variable_check;
-        case "dscanner.suspicious.useless_assert"                   : return &config.useless_assert_check;
-        case "dscanner.suspicious.useless-initializer"              : return &config.useless_initializer;
-        case "dscanner.trust_too_much"                              : return &config.trust_too_much;
-        case "dscanner.unnecessary.duplicate_attribute"             : return &config.duplicate_attribute;
-        case "dscanner.useless.final"                               : return &config.final_attribute_check;
-        case "dscanner.vcall_ctor"                                  : return &config.vcall_in_ctor;
-        default                                                     : return null;
+        case DScannerWarnings.bugs_backwardsSlices                      : return &config.backwards_range_check;
+        case DScannerWarnings.bugs_ifElseSame                           : return &config.if_else_same_check;
+        case DScannerWarnings.bugs_logicOperatorOperands                : return &config.if_else_same_check;
+        case DScannerWarnings.bugs_selfAssignment                       : return &config.if_else_same_check;
+        case DScannerWarnings.confusing_argumentParameter_Mismatch      : return &config.mismatched_args_check;
+        case DScannerWarnings.confusing_brexp                           : return &config.asm_style_check;
+        case DScannerWarnings.confusing_builtinPropertyNames            : return &config.builtin_property_names_check;
+        case DScannerWarnings.confusing_constructor_args                : return &config.constructor_check;
+        case DScannerWarnings.confusing_functionAttributes              : return &config.function_attribute_check;
+        case DScannerWarnings.confusing_lambdaReturnsLambda             : return &config.lambda_return_check;
+        case DScannerWarnings.confusing_logicalPrecedence               : return &config.logical_precedence_check;
+        case DScannerWarnings.confusing_structConstructorDefaultArgs    : return &config.constructor_check;
+        case DScannerWarnings.deprecated_deleteKeyword                  : return &config.delete_check;
+        case DScannerWarnings.deprecated_floatingPointOperators         : return &config.float_operator_check;
+        case DScannerWarnings.ifStatement                               : return &config.redundant_if_check;
+        case DScannerWarnings.performance_enumArrayLiteral              : return &config.enum_array_literal_check;
+        case DScannerWarnings.style_aliasSyntax                         : return &config.alias_syntax_check;
+        case DScannerWarnings.style_allman                              : return &config.allman_braces_check;
+        case DScannerWarnings.style_assertWithoutMsg                    : return &config.assert_without_msg;
+        case DScannerWarnings.style_docMissingParams                    : return &config.properly_documented_public_functions;
+        case DScannerWarnings.style_docMissingReturns                   : return &config.properly_documented_public_functions;
+        case DScannerWarnings.style_docMissingThrow                     : return &config.properly_documented_public_functions;
+        case DScannerWarnings.style_docNonExistingParams                : return &config.properly_documented_public_functions;
+        case DScannerWarnings.style_explicitlyAnnotatedUnittest         : return &config.explicitly_annotated_unittests;
+        case DScannerWarnings.style_hasPublicExample                    : return &config.has_public_example;
+        case DScannerWarnings.style_ifConstraintsIndent                 : return &config.if_constraints_indent;
+        case DScannerWarnings.style_importsSortedness                   : return &config.imports_sortedness;
+        case DScannerWarnings.style_longLine                            : return &config.long_line_check;
+        case DScannerWarnings.style_numberLiterals                      : return &config.number_style_check;
+        case DScannerWarnings.style_phobosNamingConvention              : return &config.style_check;
+        case DScannerWarnings.style_undocumentedDeclaration             : return &config.undocumented_declaration_check;
+        case DScannerWarnings.suspicious_autoRefAssignment              : return &config.auto_ref_assignment_check;
+        case DScannerWarnings.suspicious_catchEmAll                     : return &config.exception_check;
+        case DScannerWarnings.suspicious_commaExpression                : return &config.comma_expression_check;
+        case DScannerWarnings.suspicious_incompleteOperatorOverloading  : return &config.opequals_tohash_check;
+        case DScannerWarnings.suspicious_incorrectInfiniteRange         : return &config.incorrect_infinite_range_check;
+        case DScannerWarnings.suspicious_labelVarSameName               : return &config.label_var_same_name_check;
+        case DScannerWarnings.suspicious_lengthSubtraction              : return &config.length_subtraction_check;
+        case DScannerWarnings.suspicious_localImports                   : return &config.local_import_check;
+        case DScannerWarnings.suspicious_missingReturn                  : return &config.auto_function_check;
+        case DScannerWarnings.suspicious_objectConst                    : return &config.object_const_check;
+        case DScannerWarnings.suspicious_redundantAttributes            : return &config.redundant_attributes_check;
+        case DScannerWarnings.suspicious_redundantParens                : return &config.redundant_parens_check;
+        case DScannerWarnings.suspicious_staticIfElse                   : return &config.static_if_else_check;
+        case DScannerWarnings.suspicious_unmodified                     : return &config.could_be_immutable_check;
+        case DScannerWarnings.suspicious_unusedLabel                    : return &config.unused_label_check;
+        case DScannerWarnings.suspicious_unusedParameter                : return &config.unused_variable_check;
+        case DScannerWarnings.suspicious_unusedVariable                 : return &config.unused_variable_check;
+        case DScannerWarnings.suspicious_uselessAssert                  : return &config.useless_assert_check;
+        case DScannerWarnings.suspicious_uselessInitializer             : return &config.useless_initializer;
+        case DScannerWarnings.trustTooMuch                              : return &config.trust_too_much;
+        case DScannerWarnings.unnecessary_duplicateAttribute            : return &config.duplicate_attribute;
+        case DScannerWarnings.useless_final                             : return &config.final_attribute_check;
+        case DScannerWarnings.vcallCtor                                 : return &config.vcall_in_ctor;
+        default                                                         : return null;
         }
         //dfmt on
+    }
+
+    private WorkspaceEdit makeFileWorkspaceEdit(in Uri uri, TextEdit[] edits)
+    {
+        import dls.protocol.definitions : TextDocumentEdit,
+            VersionedTextDocumentIdentifier;
+        import dls.util.document : Document;
+        import std.typecons : nullable;
+
+        auto document = Document.get(uri);
+        auto changes = [uri.toString() : edits];
+        auto identifier = new VersionedTextDocumentIdentifier(uri, document.version_);
+        auto documentChanges = [new TextDocumentEdit(identifier, changes[uri])];
+        return new WorkspaceEdit(changes.nullable, documentChanges.nullable);
     }
 }

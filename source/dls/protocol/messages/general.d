@@ -100,9 +100,7 @@ InitializeResult initialize(InitializeParams params)
         documentHighlightProvider = initOptions.capabilities.documentHighlight;
         documentSymbolProvider = initOptions.capabilities.documentSymbol;
         workspaceSymbolProvider = initOptions.capabilities.workspaceSymbol;
-        codeActionProvider = initOptions.capabilities.codeAction
-            ? new CodeActionOptions([CodeActionKind.quickfix].nullable)
-            : Nullable!CodeActionOptions();
+        codeActionProvider = initOptions.capabilities.codeAction;
         documentFormattingProvider = initOptions.capabilities.documentFormatting;
         documentRangeFormattingProvider = initOptions.capabilities.documentRangeFormatting;
         documentOnTypeFormattingProvider = initOptions.capabilities.documentOnTypeFormatting

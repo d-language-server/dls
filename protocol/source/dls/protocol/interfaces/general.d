@@ -476,7 +476,7 @@ class ServerCapabilities
     Nullable!bool documentHighlightProvider;
     Nullable!bool documentSymbolProvider;
     Nullable!bool workspaceSymbolProvider;
-    Nullable!CodeActionOptions codeActionProvider;
+    Nullable!bool codeActionProvider;
     Nullable!CodeLensOptions codeLensProvider;
     Nullable!bool documentFormattingProvider;
     Nullable!bool documentRangeFormattingProvider;
