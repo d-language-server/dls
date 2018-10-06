@@ -59,6 +59,17 @@ TextEdit[] willSaveWaitUntil(WillSaveTextDocumentParams params)
 
 void didSave(DidSaveTextDocumentParams params)
 {
+    import dls.protocol.interfaces : PublishDiagnosticsParams;
+    import dls.protocol.jsonrpc : send;
+    import dls.protocol.messages.methods : TextDocument;
+    import dls.tools.analysis_tool : AnalysisTool;
+    import dls.util.logger : logger;
+    import dls.util.uri : Uri;
+
+    auto uri = new Uri(params.textDocument.uri);
+    logger.infof("Document saved: %s", uri.path);
+    send(TextDocument.publishDiagnostics, new PublishDiagnosticsParams(uri,
+            AnalysisTool.instance.diagnostics(uri)));
 }
 
 void didClose(DidCloseTextDocumentParams params)
