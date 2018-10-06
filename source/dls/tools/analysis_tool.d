@@ -86,7 +86,7 @@ private enum DScannerWarnings : string
 
 class AnalysisTool : Tool
 {
-    import dls.protocol.definitions : Diagnostic, Range, TextEdit,
+    import dls.protocol.definitions : Command, Diagnostic, Range, TextEdit,
         WorkspaceEdit;
     import dls.protocol.interfaces : CodeAction, CodeActionKind;
     import dls.util.uri : Uri;
@@ -217,19 +217,50 @@ class AnalysisTool : Tool
         return diagnostics.data;
     }
 
+    Command[] codeAction(in Uri uri, in Range range, Diagnostic[] diagnostics)
+    {
+        import dls.tools.command_tool : Commands;
+        import dls.util.constants : Tr;
+        import dls.util.i18n : tr;
+        import dls.util.logger : logger;
+        import std.algorithm : filter;
+        import std.array : appender;
+        import std.json : JSONValue;
+        import std.typecons : nullable;
+
+        logger.infof("Fetching commands for document %s at range %s,%s to %s,%s", uri.path,
+                range.start.line, range.start.character, range.end.line, range.end.character);
+
+        auto result = appender!(Command[]);
+
+        foreach (diagnostic; diagnostics.filter!q{!a.code.isNull})
+        {
+            StaticAnalysisConfig config;
+            auto code = diagnostic.code.get().str;
+
+            if (getDiagnosticParameter(config, code) !is null)
+            {
+                auto title = tr(Tr.app_analysisTool_disableCheck_global, [code]);
+                auto args = [JSONValue(uri.toString()), JSONValue(code)];
+                auto command = new Command(title,
+                        Commands.codeAction_analysis_disableCheck, args.nullable);
+                result ~= command;
+            }
+        }
+
+        return result.data;
+    }
+
     CodeAction[] codeAction(in Uri uri, in Range range, Diagnostic[] diagnostics,
             in CodeActionKind[] kinds)
     {
-        import dls.protocol.definitions : Command, Position, TextDocumentEdit,
-            VersionedTextDocumentIdentifier;
-        import dls.tools.command_tool : Commands;
+        import dls.protocol.definitions : Command, Position;
         import dls.util.constants : Tr;
         import dls.util.document : Document;
         import dls.util.i18n : tr;
         import dls.util.logger : logger;
-        import std.algorithm : canFind;
+        import std.algorithm : canFind, filter;
         import std.array : appender;
-        import std.json : JSONValue;
         import std.typecons : Nullable, nullable;
 
         logger.infof("Fetching code actions for document %s at range %s,%s to %s,%s", uri.path,
@@ -242,35 +273,28 @@ class AnalysisTool : Tool
 
         auto result = appender!(CodeAction[]);
 
-        foreach (diagnostic; diagnostics)
+        foreach (diagnostic; diagnostics.filter!q{!a.code.isNull})
         {
-            if (!diagnostic.code.isNull)
+            StaticAnalysisConfig config;
+            auto code = diagnostic.code.get().str;
+
+            if (getDiagnosticParameter(config, code) !is null)
             {
-                StaticAnalysisConfig config;
-                auto code = diagnostic.code.get().str;
-
-                if (getDiagnosticParameter(config, code) !is null)
                 {
-                    {
-                        auto document = Document.get(uri);
-                        auto line = document.lines[range.end.line];
-                        auto pos = new Position(range.end.line, line.length);
-                        auto textEdit = new TextEdit(new Range(pos, pos),
-                                " // @suppress(" ~ code ~ ")");
-                        auto title = tr(Tr.app_analysisTool_disableCheck_local, [code]);
-                        auto edit = makeFileWorkspaceEdit(uri, [textEdit]);
-                        result ~= new CodeAction(title, CodeActionKind.quickfix.nullable,
-                                [diagnostic].nullable, edit.nullable, Nullable!Command());
-                    }
+                    auto document = Document.get(uri);
+                    auto line = document.lines[range.end.line];
+                    auto pos = new Position(range.end.line, line.length);
+                    auto textEdit = new TextEdit(new Range(pos, pos), " // @suppress(" ~ code ~ ")");
+                    auto title = tr(Tr.app_analysisTool_disableCheck_local, [code]);
+                    auto edit = makeFileWorkspaceEdit(uri, [textEdit]);
+                    result ~= new CodeAction(title, CodeActionKind.quickfix.nullable,
+                            [diagnostic].nullable, edit.nullable, Nullable!Command());
+                }
 
-                    {
-                        auto title = tr(Tr.app_analysisTool_disableCheck_global, [code]);
-                        auto args = [JSONValue(uri.toString()), JSONValue(code)];
-                        auto command = new Command(title,
-                                Commands.codeAction_analysis_disableCheck, args.nullable);
-                        result ~= new CodeAction(title, CodeActionKind.quickfix.nullable,
-                                [diagnostic].nullable, Nullable!WorkspaceEdit(), command.nullable);
-                    }
+                foreach (command; codeAction(uri, range, [diagnostic]))
+                {
+                    result ~= new CodeAction(command.title, CodeActionKind.quickfix.nullable,
+                            [diagnostic].nullable, Nullable!WorkspaceEdit(), command.nullable);
                 }
             }
         }

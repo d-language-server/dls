@@ -159,14 +159,25 @@ JSONValue documentSymbol(DocumentSymbolParams params)
     }
 }
 
-CodeAction[] codeAction(CodeActionParams params)
+JSONValue codeAction(CodeActionParams params)
 {
+    import dls.protocol.state : initState;
     import dls.tools.analysis_tool : AnalysisTool;
+    import dls.util.json : convertToJSON;
     import dls.util.uri : Uri;
 
-    return AnalysisTool.instance.codeAction(new Uri(params.textDocument.uri),
-            params.range, params.context.diagnostics,
-            params.context.only.isNull ? [] : params.context.only.get());
+    if (initState.capabilities.textDocument.isNull || initState.capabilities.textDocument.codeAction.isNull
+            || initState.capabilities.textDocument.codeAction.codeActionLiteralSupport.isNull)
+    {
+        return convertToJSON(AnalysisTool.instance.codeAction(new Uri(params.textDocument.uri),
+                params.range, params.context.diagnostics));
+    }
+    else
+    {
+        return convertToJSON(AnalysisTool.instance.codeAction(new Uri(params.textDocument.uri),
+                params.range, params.context.diagnostics,
+                params.context.only.isNull ? [] : params.context.only.get()));
+    }
 }
 
 CodeLens[] codeLens(CodeLensParams params)
