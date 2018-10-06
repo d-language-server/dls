@@ -4,6 +4,12 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+### 0.14.0
+- Added code action for project-wide warning disabling
+- Added code action for line-specific warning disabling
+- Updated libraries:
+    - `stdx-allocator`: `2.77.2` => `2.77.4`
+
 #### 0.13.3
 - Fixed potential crash on go to type definition
 

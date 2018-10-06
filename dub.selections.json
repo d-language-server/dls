@@ -11,6 +11,6 @@
 		"libddoc": "0.3.0-beta.1",
 		"libdparse": "0.8.8",
 		"msgpack-d": "1.0.0-beta.7",
-		"stdx-allocator": "2.77.2"
+		"stdx-allocator": "2.77.4"
 	}
 }
