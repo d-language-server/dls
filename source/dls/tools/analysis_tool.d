@@ -150,20 +150,20 @@ class AnalysisTool : Tool
         import std.path : buildNormalizedPath;
 
         auto configPath = buildNormalizedPath(uri.path, _configuration.analysis.configFile);
+        auto conf = defaultStaticAnalysisConfig();
 
         if (exists(configPath))
         {
+            if (uri.path in _analysisConfigs)
+            {
+                conf = _analysisConfigs[uri.path];
+            }
+
             logger.infof("Updating config from file %s", configPath);
-            auto conf = uri.path in _analysisConfigs ? _analysisConfigs[uri.path]
-                : defaultStaticAnalysisConfig();
             readINIFile(conf, configPath);
-            _analysisConfigs[uri.path] = conf;
-        }
-        else
-        {
-            _analysisConfigs.remove(uri.path);
         }
 
+        _analysisConfigs[uri.path] = conf;
         scanAllWorkspaces();
     }
 
@@ -299,17 +299,19 @@ class AnalysisTool : Tool
         {
             foreach (command; codeAction(uri, range, [diagnostic], false))
             {
+                auto action = new CodeAction(command.title,
+                        CodeActionKind.quickfix.nullable, [diagnostic].nullable);
+
                 if (command.command == Commands.workspaceEdit)
                 {
-                    result ~= new CodeAction(command.title, CodeActionKind.quickfix.nullable, [diagnostic].nullable,
-                            convertFromJSON!WorkspaceEdit(command.arguments[0]).nullable,
-                            Nullable!Command());
+                    action.edit = convertFromJSON!WorkspaceEdit(command.arguments[0]).nullable;
                 }
                 else
                 {
-                    result ~= new CodeAction(command.title, CodeActionKind.quickfix.nullable,
-                            [diagnostic].nullable, Nullable!WorkspaceEdit(), command.nullable);
+                    action.command = command.nullable;
                 }
+
+                result ~= action;
             }
         }
 
