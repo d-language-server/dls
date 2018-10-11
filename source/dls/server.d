@@ -141,74 +141,96 @@ final abstract class Server
         import dls.protocol.jsonrpc : ErrorCodes, InvalidParamsException,
             NotificationMessage, RequestMessage, ResponseMessage, send,
             sendError;
+        import dls.protocol.state : initOptions;
         import dls.util.json : convertFromJSON;
         import dls.util.logger : logger;
         import std.json : JSONException, JSONValue, parseJSON;
 
         RequestMessage request;
 
-        try
+        void findAndExecuteHandler()
         {
-            const json = parseJSON(content);
-
-            if ("method" in json)
+            try
             {
-                if ("id" in json)
-                {
-                    request = convertFromJSON!RequestMessage(json);
+                const json = parseJSON(content);
 
-                    if (!shutdown && (initialized || request.method == "initialize"))
+                if ("method" in json)
+                {
+                    if ("id" in json)
                     {
-                        send(request.id, handler!RequestHandler(request.method)(request.params));
+                        request = convertFromJSON!RequestMessage(json);
+
+                        if (!shutdown && (initialized || request.method == "initialize"))
+                        {
+                            send(request.id,
+                                    handler!RequestHandler(request.method)(request.params));
+                        }
+                        else
+                        {
+                            sendError(ErrorCodes.serverNotInitialized, request, JSONValue());
+                        }
                     }
                     else
                     {
-                        sendError(ErrorCodes.serverNotInitialized, request, JSONValue());
+                        auto notification = convertFromJSON!NotificationMessage(json);
+
+                        if (initialized)
+                        {
+                            handler!NotificationHandler(notification.method)(notification.params);
+                        }
                     }
                 }
                 else
                 {
-                    auto notification = convertFromJSON!NotificationMessage(json);
+                    auto response = convertFromJSON!ResponseMessage(json);
 
-                    if (initialized)
+                    if (response.error.isNull)
                     {
-                        handler!NotificationHandler(notification.method)(notification.params);
+                        handler!ResponseHandler(response.id.str)(response.id.str, response.result);
+                    }
+                    else
+                    {
+                        logger.error(response.error.message);
                     }
                 }
             }
-            else
+            catch (JSONException e)
             {
-                auto response = convertFromJSON!ResponseMessage(json);
-
-                if (response.error.isNull)
-                {
-                    handler!ResponseHandler(response.id.str)(response.id.str, response.result);
-                }
-                else
-                {
-                    logger.error(response.error.message);
-                }
+                logger.errorf("%s: %s", ErrorCodes.parseError[0], e.message);
+                sendError(ErrorCodes.parseError, request, JSONValue(e.message));
+            }
+            catch (HandlerNotFoundException e)
+            {
+                logger.errorf("%s: %s", ErrorCodes.methodNotFound[0], e.message);
+                sendError(ErrorCodes.methodNotFound, request, JSONValue(e.message));
+            }
+            catch (InvalidParamsException e)
+            {
+                logger.errorf("%s: %s", ErrorCodes.invalidParams[0], e.message);
+                sendError(ErrorCodes.invalidParams, request, JSONValue(e.message));
+            }
+            catch (Exception e)
+            {
+                logger.errorf("%s: %s", ErrorCodes.internalError[0], e.message);
+                sendError(ErrorCodes.internalError, request, JSONValue(e.message));
             }
         }
-        catch (JSONException e)
+
+        if (initOptions.catchErrors)
         {
-            logger.errorf("%s: %s", ErrorCodes.parseError[0], e.message);
-            sendError(ErrorCodes.parseError, request, JSONValue(e.message));
+            try
+            {
+                findAndExecuteHandler();
+            }
+            catch (Error e)
+            {
+                logger.errorf("%s: %s", ErrorCodes.internalError[0], e.message);
+                sendError(ErrorCodes.internalError, request, JSONValue(e.message));
+            }
         }
-        catch (HandlerNotFoundException e)
+        else
         {
-            logger.errorf("%s: %s", ErrorCodes.methodNotFound[0], e.message);
-            sendError(ErrorCodes.methodNotFound, request, JSONValue(e.message));
-        }
-        catch (InvalidParamsException e)
-        {
-            logger.errorf("%s: %s", ErrorCodes.invalidParams[0], e.message);
-            sendError(ErrorCodes.invalidParams, request, JSONValue(e.message));
-        }
-        catch (Exception e)
-        {
-            logger.errorf("%s: %s", ErrorCodes.internalError[0], e.message);
-            sendError(ErrorCodes.internalError, request, JSONValue(e.message));
+            findAndExecuteHandler();
         }
     }
 }
