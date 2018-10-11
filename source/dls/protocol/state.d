@@ -26,7 +26,7 @@ private InitializeParams _initState;
 
 @property InitializeParams initState()
 {
-    return _initState;
+    return _initState is null ? new InitializeParams() : _initState;
 }
 
 @property void initState(InitializeParams params)
@@ -47,6 +47,6 @@ private InitializeParams _initState;
 
 @property InitializeParams.InitializationOptions initOptions()
 {
-    return _initState.initializationOptions.isNull
+    return initState.initializationOptions.isNull
         ? new InitializeParams.InitializationOptions() : _initState.initializationOptions;
 }

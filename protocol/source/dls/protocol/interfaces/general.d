@@ -60,6 +60,7 @@ class InitializeParams
         }
 
         bool autoUpdate = true;
+        bool catchErrors = false;
         Capabilities capabilities;
 
         this()
