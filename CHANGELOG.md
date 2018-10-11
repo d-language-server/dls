@@ -4,6 +4,9 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.14.3
+- Added option to forcefully ignore errors (#12)
+
 #### 0.14.2
 - Fixed code action messages overflowing Atom's buttons
 
