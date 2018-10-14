@@ -36,14 +36,14 @@ addons:
       - libcurl4-openssl-dev
       - upx-ucl
 before_install:
-  - if [[ $TRAVIS_OS_NAME = osx ]] && [[ ! -z $TRAVIS_TAG ]]; then brew update && brew install upx dfmt; fi
+  - if [[ $TRAVIS_OS_NAME = osx ]] && [[ ! -z $TRAVIS_TAG ]]; then brew update && brew install upx; fi
 before_script:
   - ln -s /usr/bin/ld.gold ~/ld
+  - rdmd fetch_deps.d
 script:
-  - if [[ $TRAVIS_OS_NAME = osx ]]; then bash .travis-check-dfmt.sh; fi
   - if [[ ! -z $TRAVIS_TAG ]]; then export BUILD=release; fi
   - export PATH="$HOME:$PATH"
-  - dub ${OP:-test} --arch=${ARCH:-x86_64} --compiler=$DC --build=${BUILD:-debug} || dub ${OP:-test} --arch=${ARCH:-x86_64} --compiler=$DC --build=${BUILD:-debug} # work around link error
+  - dub ${OP:-test} --nodeps --arch=${ARCH:-x86_64} --compiler=$DC --build=${BUILD:-debug} || dub ${OP:-test} --nodeps --arch=${ARCH:-x86_64} --compiler=$DC --build=${BUILD:-debug} # work around link error
 before_deploy:
   - if which strip; then strip dls; fi
   - upx --best --ultra-brute dls
