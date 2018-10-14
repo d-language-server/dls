@@ -4,6 +4,16 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+### 0.15.0
+- Added better code action support for editors complying to older LSP specs
+- Fixed missing completions for compiler-generated symbols
+- Updated libraries:
+    - `dcd`: `0.9.10` => `0.9.13`
+    - `dscanner`: `0.5.8` => `0.5.11`
+    - `dsymbol`: `0.3.8` => `0.4.8`
+    - `libddoc`: `0.3.0-beta.1` => `0.4.0`
+    - `libdparse`: `0.8.8` => `0.9.10`
+
 #### 0.14.3
 - Added option to forcefully ignore errors (#12)
 
