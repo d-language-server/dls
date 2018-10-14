@@ -400,7 +400,7 @@ class SymbolTool : Tool
 
         auto d = getDub(uri);
         string[string] workspaceDeps;
-        auto buildSettingsList = d.project.rootPackage.recipe.buildSettings
+        const buildSettingsList = d.project.rootPackage.recipe.buildSettings
             ~ d.project.rootPackage.recipe.configurations.map!q{a.buildSettings}.array;
 
         foreach (buildSettings; buildSettingsList)
@@ -640,7 +640,8 @@ class SymbolTool : Tool
         static bool compareCompletionsEqual(AutocompleteResponse.Completion a,
                 AutocompleteResponse.Completion b)
         {
-            return a.symbolFilePath == b.symbolFilePath && a.symbolLocation == b.symbolLocation;
+            return a.symbolFilePath.length > 0 && a.symbolFilePath == b.symbolFilePath
+                && a.symbolLocation == b.symbolLocation;
         }
 
         auto result = complete(request, _cache);
