@@ -14,8 +14,8 @@
 		"dls:i18n": "*",
 		"dls:protocol": "*",
 		"dub": "1.11.0",
-		"dcd": "0.9.10",
-		"dscanner": "0.5.8",
+		"dcd": "0.9.13",
+		"dscanner": "0.5.11",
 		"dfmt": "0.8.2"
 	},
 	"versions": [
