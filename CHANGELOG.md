@@ -4,6 +4,9 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.15.1
+- Fixed Travis build for dlang/ci
+
 ### 0.15.0
 - Added better code action support for editors complying to older LSP specs
 - Fixed missing completions for compiler-generated symbols
