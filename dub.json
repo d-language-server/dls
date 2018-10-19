@@ -26,6 +26,7 @@
 	],
 	"subPackages": [
 		"bootstrap",
+		"format",
 		"gen",
 		"i18n",
 		"protocol"

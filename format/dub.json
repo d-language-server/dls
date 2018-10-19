@@ -1,0 +1,12 @@
+{
+	"name": "format",
+	"authors": [
+		"Laurent Tréguier"
+	],
+	"description": "DLS formatter",
+	"copyright": "Copyright © 2018, Laurent Tréguier",
+	"license": "GPL-3.0 or later",
+	"dependencies": {
+		"libdparse": "~>0.10.6"
+	}
+}
