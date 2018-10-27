@@ -27,8 +27,7 @@ void cleanup()
 {
     import dls.bootstrap : dubBinDir;
     import dub.semver : compareVersions;
-    import std.file : FileException, SpanMode, dirEntries, isSymlink, remove,
-        rmdirRecurse;
+    import std.file : FileException, SpanMode, dirEntries, isSymlink, remove, rmdirRecurse;
     import std.path : baseName;
     import std.regex : matchFirst;
 
@@ -108,8 +107,7 @@ void update(bool autoUpdate)
     import dls.bootstrap : UpgradeFailedException, apiEndpoint, buildDls,
         canDownloadDls, downloadDls, linkDls;
     static import dls.protocol.jsonrpc;
-    import dls.protocol.interfaces.dls : DlsUpgradeSizeParams,
-        TranslationParams;
+    import dls.protocol.interfaces.dls : DlsUpgradeSizeParams, TranslationParams;
     import dls.protocol.messages.methods : Dls;
     import dls.protocol.messages.window : Util;
     import dls.util.constants : Tr;

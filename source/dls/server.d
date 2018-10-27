@@ -139,8 +139,7 @@ final abstract class Server
         import dls.protocol.handlers : HandlerNotFoundException,
             NotificationHandler, RequestHandler, ResponseHandler, handler;
         import dls.protocol.jsonrpc : ErrorCodes, InvalidParamsException,
-            NotificationMessage, RequestMessage, ResponseMessage, send,
-            sendError;
+            NotificationMessage, RequestMessage, ResponseMessage, send, sendError;
         import dls.protocol.state : initOptions;
         import dls.util.json : convertFromJSON;
         import dls.util.logger : logger;

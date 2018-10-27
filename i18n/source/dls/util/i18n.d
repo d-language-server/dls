@@ -41,8 +41,7 @@ shared static this()
     {
         import core.sys.windows.windef : DWORD, ERROR_SUCCESS, LONG, HKEY;
         import core.sys.windows.winnt : KEY_READ;
-        import core.sys.windows.winreg : HKEY_USERS, RegOpenKeyExA,
-            RegQueryValueExA;
+        import core.sys.windows.winreg : HKEY_USERS, RegOpenKeyExA, RegQueryValueExA;
         import std.string : toStringz;
 
         HKEY hKey;

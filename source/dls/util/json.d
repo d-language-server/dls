@@ -21,8 +21,7 @@
 module dls.util.json;
 
 import std.json : JSONValue;
-import std.traits : isArray, isAssociativeArray, isBoolean, isNumeric,
-    isSomeChar, isSomeString;
+import std.traits : isArray, isAssociativeArray, isBoolean, isNumeric, isSomeChar, isSomeString;
 import std.typecons : Nullable;
 
 /++

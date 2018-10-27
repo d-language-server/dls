@@ -86,8 +86,7 @@ private enum DScannerWarnings : string
 
 class AnalysisTool : Tool
 {
-    import dls.protocol.definitions : Command, Diagnostic, Range, TextEdit,
-        WorkspaceEdit;
+    import dls.protocol.definitions : Command, Diagnostic, Range, TextEdit, WorkspaceEdit;
     import dls.protocol.interfaces : CodeAction, CodeActionKind;
     import dls.util.uri : Uri;
     import dscanner.analysis.config : StaticAnalysisConfig;
@@ -173,8 +172,7 @@ class AnalysisTool : Tool
         import dls.tools.symbol_tool : SymbolTool;
         import dls.util.document : Document;
         import dls.util.logger : logger;
-        import dparse.lexer : LexerConfig, StringBehavior, StringCache,
-            getTokensForParser;
+        import dparse.lexer : LexerConfig, StringBehavior, StringCache, getTokensForParser;
         import dparse.parser : parseModule;
         import dparse.rollback_allocator : RollbackAllocator;
         import dscanner.analysis.run : analyze;
@@ -408,8 +406,7 @@ class AnalysisTool : Tool
 
     private WorkspaceEdit makeFileWorkspaceEdit(in Uri uri, TextEdit[] edits)
     {
-        import dls.protocol.definitions : TextDocumentEdit,
-            VersionedTextDocumentIdentifier;
+        import dls.protocol.definitions : TextDocumentEdit, VersionedTextDocumentIdentifier;
         import dls.util.document : Document;
         import std.typecons : nullable;
 

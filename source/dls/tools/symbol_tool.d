@@ -20,8 +20,7 @@
 
 module dls.tools.symbol_tool;
 
-import dls.protocol.interfaces : CompletionItemKind, SymbolKind,
-    SymbolInformation;
+import dls.protocol.interfaces : CompletionItemKind, SymbolKind, SymbolInformation;
 import dls.tools.tool : Tool;
 import dls.util.uri : Uri;
 import dparse.ast;
@@ -147,10 +146,8 @@ static this()
 class SymbolTool : Tool
 {
     import dcd.common.messages : AutocompleteRequest, RequestKind;
-    import dls.protocol.definitions : Location, MarkupContent, Position, Range,
-        WorkspaceEdit;
-    import dls.protocol.interfaces : CompletionItem, DocumentHighlight,
-        DocumentSymbol, Hover;
+    import dls.protocol.definitions : Location, MarkupContent, Position, Range, WorkspaceEdit;
+    import dls.protocol.interfaces : CompletionItem, DocumentHighlight, DocumentSymbol, Hover;
     import dsymbol.modulecache : ASTAllocator, ModuleCache;
     import dub.dub : Dub;
 
@@ -590,8 +587,7 @@ class SymbolTool : Tool
     {
         import dls.util.document : Document;
         import dls.util.logger : logger;
-        import dparse.lexer : LexerConfig, StringBehavior, StringCache,
-            getTokensForParser;
+        import dparse.lexer : LexerConfig, StringBehavior, StringCache, getTokensForParser;
         import dparse.parser : parseModule;
         import dparse.rollback_allocator : RollbackAllocator;
         import std.functional : toDelegate;
