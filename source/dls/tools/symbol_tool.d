@@ -317,10 +317,14 @@ class SymbolTool : Tool
             const pathSep = ';';
             const ldc = "ldc2.exe";
         }
-        else
+        else version (Posix)
         {
             const pathSep = ':';
             const ldc = "ldc2";
+        }
+        else
+        {
+            static assert(false, "Platform not suported");
         }
 
         if (paths.length == 0)

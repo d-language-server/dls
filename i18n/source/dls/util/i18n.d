@@ -78,6 +78,10 @@ shared static this()
             locale = lang[0 .. 2];
         }
     }
+    else
+    {
+        static assert(false, "Platform not suported");
+    }
 }
 
 string tr(Tr identifier, string[] args = [])

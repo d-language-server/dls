@@ -271,10 +271,14 @@ string linkDls()
         const dubDirPath = environment["LOCALAPPDATA"];
         const dubDirName = "dub";
     }
-    else
+    else version (Posix)
     {
         const dubDirPath = environment["HOME"];
         const dubDirName = ".dub";
+    }
+    else
+    {
+        static assert(false, "Platform not suported");
     }
 
     return buildNormalizedPath(dubDirPath, dubDirName, "packages", ".bin");

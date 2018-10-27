@@ -90,6 +90,10 @@ void cleanup()
                         remove(entry);
                     }
                 }
+                else
+                {
+                    static assert(false, "Platform not suported");
+                }
             }
             catch (Exception e)
             {
