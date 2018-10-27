@@ -340,7 +340,7 @@ class AnalysisTool : Tool
             : defaultStaticAnalysisConfig();
     }
 
-    private string* getDiagnosticParameter(ref StaticAnalysisConfig config, in string code)
+    private string* getDiagnosticParameter(return ref StaticAnalysisConfig config, in string code)
     {
         //dfmt off
         switch (code)
