@@ -137,7 +137,7 @@ package(dls.tools.symbol_tool) class SymbolVisitor(SymbolType) : ASTVisitor
     override void visit(const Invariant dec)
     {
         tryInsert("invariant", SymbolKind.function_, getRange(dec),
-                dec.blockStatement.endLocation);
+                dec.blockStatement is null ? 0 : dec.blockStatement.endLocation);
     }
 
     override void visit(const VariableDeclaration dec)
@@ -190,16 +190,19 @@ package(dls.tools.symbol_tool) class SymbolVisitor(SymbolType) : ASTVisitor
 
     private size_t getFunctionEndLocation(A : ASTNode)(const A dec)
     {
-        size_t endLocation;
-
         if (dec.functionBody !is null)
         {
-            endLocation = dec.functionBody.bodyStatement !is null
-                ? dec.functionBody.bodyStatement.blockStatement.endLocation
+            if (dec.functionBody.bodyStatement !is null)
+            {
+                return dec.functionBody.bodyStatement.blockStatement is null ? 0
+                    : dec.functionBody.bodyStatement.blockStatement.endLocation;
+            }
+
+            return dec.functionBody.blockStatement is null ? 0
                 : dec.functionBody.blockStatement.endLocation;
         }
 
-        return endLocation;
+        return 0;
     }
 
     private void visitSymbol(A : ASTNode)(const A dec, SymbolKind kind,

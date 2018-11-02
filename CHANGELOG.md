@@ -4,6 +4,11 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.15.3
+- Fixed crash with document symbols
+- Updated libraries:
+    - `dub`: `1.11.0` => `1.12.0`
+
 #### 0.15.2
 - Updated libraries:
     - `dfmt`: `0.8.2` => `0.8.3`
