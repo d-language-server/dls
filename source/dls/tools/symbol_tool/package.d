@@ -603,7 +603,7 @@ class SymbolTool : Tool
 
         auto stringCache = StringCache(StringCache.defaultBucketCount);
         auto tokens = getTokensForParser(Document.get(uri).toString(),
-                LexerConfig(uri.path, StringBehavior.source), &stringCache);
+                LexerConfig(uri.path, StringBehavior.compiler), &stringCache);
         RollbackAllocator ra;
         const mod = parseModule(tokens, uri.path, &ra, toDelegate(&doNothing));
         auto visitor = new SymbolVisitor!SymbolType(uri, query);
@@ -739,7 +739,7 @@ class SymbolTool : Tool
         auto stringCache = StringCache(StringCache.defaultBucketCount);
         RollbackAllocator ra;
         auto currentFileStuff = getSymbolsForCompletion(request,
-                CompletionType.location, _allocator, &ra, stringCache, cache);
+                CompletionType.location, _allocator, &ra, stringCache, _cache);
 
         scope (exit)
         {
@@ -756,7 +756,7 @@ class SymbolTool : Tool
             request.sourceCode = cast(ubyte[]) document.toString();
             request.cursorPosition = symbol.location + 1;
             auto stuff = getSymbolsForCompletion(request,
-                    CompletionType.location, _allocator, &ra, stringCache, cache);
+                    CompletionType.location, _allocator, &ra, stringCache, _cache);
 
             scope (exit)
             {
@@ -790,7 +790,7 @@ class SymbolTool : Tool
         auto stringCache = StringCache(StringCache.defaultBucketCount);
         RollbackAllocator ra;
         auto stuff = getSymbolsForCompletion(request, CompletionType.location,
-                _allocator, &ra, stringCache, cache);
+                _allocator, &ra, stringCache, _cache);
 
         scope (exit)
         {
@@ -939,7 +939,7 @@ class SymbolTool : Tool
                 &stringCache);
         RollbackAllocator ra;
         auto stuff = getSymbolsForCompletion(request, CompletionType.location,
-                _allocator, &ra, stringCache, cache);
+                _allocator, &ra, stringCache, _cache);
 
         scope (exit)
         {
@@ -1010,13 +1010,13 @@ class SymbolTool : Tool
             auto tokens = getTokensForParser(request.sourceCode, LexerConfig(fileUri.path,
                     StringBehavior.compiler, WhitespaceBehavior.skip), &stringCache);
 
-            foreach (token; tokens)
+            foreach (ref token; tokens)
             {
                 if (token.type == tok!"identifier" && token.text == sourceToken.text)
                 {
                     request.cursorPosition = token.index + 1;
                     auto candidateStuff = getSymbolsForCompletion(request,
-                            CompletionType.location, _allocator, &ra, stringCache, cache);
+                            CompletionType.location, _allocator, &ra, stringCache, _cache);
 
                     scope (exit)
                     {
