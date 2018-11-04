@@ -1037,6 +1037,7 @@ class SymbolTool : Tool
                         {
                             result ~= new Location(fileUri.toString(),
                                     document.wordRangeAtByte(token.index));
+                            break;
                         }
                     }
                 }

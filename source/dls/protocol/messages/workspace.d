@@ -118,11 +118,14 @@ void didChangeWatchedFiles(DidChangeWatchedFilesParams params)
             break;
         }
 
+        enum pathComp = q{a.path == b.path};
+
         switch (extension(uri.path))
         {
         case ".d", ".di":
             if (event.type != FileChangeType.deleted
-                    && !Document.uris.canFind!q{a.path == b.path}(uri))
+                    && !Document.uris.canFind!pathComp(uri)
+                    && SymbolTool.instance.workspacesFilesUris.canFind!pathComp(uri))
             {
                 send(TextDocument.publishDiagnostics, new PublishDiagnosticsParams(uri,
                         AnalysisTool.instance.diagnostics(uri)));
