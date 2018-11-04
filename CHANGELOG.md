@@ -4,6 +4,11 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.15.4
+- Fixed non-project files being scanned when they change
+- Fixed truncated symbol name when preparing a rename
+- Fixed duplicate ranges when looking for references causing errors during certains renames
+
 #### 0.15.3
 - Fixed crash with document symbols
 - Updated libraries:
