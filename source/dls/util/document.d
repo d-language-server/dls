@@ -159,13 +159,31 @@ class Document
     Range wordRangeAtPosition(in Position position) const
     {
         import std.algorithm : min;
-        import std.regex : matchAll, regex;
 
         const line = _lines[min(position.line, $ - 1)];
-        const startCharacter = min(position.character, line.length);
-        auto word = matchAll(line[startCharacter .. $], regex(`\w+|.`w));
-        return new Range(new Position(position.line, startCharacter),
-                new Position(position.line, startCharacter + (word ? word.hit.length : 0)));
+        const middleIndex = min(position.character, line.length);
+        size_t startIndex = middleIndex;
+        size_t endIndex = middleIndex;
+
+        static bool isIdentifierChar(wchar c)
+        {
+            import std.ascii : isAlphaNum;
+
+            return c == '_' || isAlphaNum(c);
+        }
+
+        while (startIndex > 0 && isIdentifierChar(line[startIndex - 1]))
+        {
+            --startIndex;
+        }
+
+        while (endIndex < line.length && isIdentifierChar(line[endIndex]))
+        {
+            ++endIndex;
+        }
+
+        return new Range(new Position(position.line, startIndex),
+                new Position(position.line, endIndex));
     }
 
     Range wordRangeAtLineAndByte(size_t lineNumber, size_t bytePosition) const
