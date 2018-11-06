@@ -51,7 +51,14 @@ class CommandTool : Tool
 
     @property string[] commands()
     {
-        return [Commands.codeAction_analysis_disableCheck];
+        string[] result;
+
+        foreach (member; __traits(allMembers, Commands))
+        {
+            result ~= mixin("Commands." ~ member);
+        }
+
+        return result;
     }
 
     JSONValue executeCommand(in string commandName, in JSONValue[] arguments)
