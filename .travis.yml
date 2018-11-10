@@ -17,8 +17,6 @@ matrix:
       env: OP=build ARCH=x86
     - d: dmd-beta
       os: linux
-    - d: dmd-nightly
-      os: linux
     - d: ldc-beta
       os: linux
   allow_failures:
@@ -42,7 +40,7 @@ script:
   - rdmd fetch_deps.d
   - if [[ ! -z $TRAVIS_TAG ]]; then export BUILD=release; fi
   - export PATH="$HOME:$PATH"
-  - dub ${OP:-test} --nodeps --arch=${ARCH:-x86_64} --compiler=$DC --build=${BUILD:-debug} || dub ${OP:-test} --nodeps --arch=${ARCH:-x86_64} --compiler=$DC --build=${BUILD:-debug} # work around link error
+  - dub ${OP:-test} --nodeps --arch=${ARCH:-x86_64} --compiler=$DC --build=${BUILD:-debug}
 before_deploy:
   - if which strip; then strip dls; fi
   - upx --best --ultra-brute dls
