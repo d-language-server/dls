@@ -445,15 +445,17 @@ class SymbolTool : Tool
     void importCustomProject(Uri uri)
     {
         import dls.util.logger : logger;
-        import std.algorithm : find;
+        import std.algorithm : find, map;
+        import std.array : array;
         import std.file : exists;
         import std.path : buildNormalizedPath;
 
         logger.infof("Custom project: %s", uri.path);
 
         string[string] deps;
-        const sourceDir = ["source", "src", ""].find!(d => buildNormalizedPath(uri.path,
-                d).exists())[0];
+        const sourceDir = ["source", "src", ""].map!(d => buildNormalizedPath(uri.path, d))
+            .find!exists
+            .front;
         _workspaceDependencies[uri.path] = deps;
         importDirectories([sourceDir]);
     }
