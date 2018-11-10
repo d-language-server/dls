@@ -4,6 +4,9 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.15.5
+- Fixed non-dub project directories not being imported
+
 #### 0.15.4
 - Fixed non-project files being scanned when they change
 - Fixed truncated symbol name when preparing a rename
