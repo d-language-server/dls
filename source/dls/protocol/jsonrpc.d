@@ -20,6 +20,7 @@
 
 module dls.protocol.jsonrpc;
 
+import dls.util.constants : Tr;
 import std.json : JSONValue;
 import std.typecons : Nullable, Tuple, tuple;
 
@@ -53,11 +54,12 @@ class ResponseError
 
     static ResponseError fromErrorCode(ErrorCodes errorCode, JSONValue data)
     {
+        import dls.util.i18n : tr;
         import std.typecons : nullable;
 
         auto response = new ResponseError();
         response.code = errorCode[0];
-        response.message = errorCode[1];
+        response.message = tr(errorCode[1]);
         response.data = data;
         return response.nullable;
     }
@@ -69,22 +71,16 @@ class NotificationMessage : Message
     Nullable!JSONValue params;
 }
 
-enum ErrorCodes : Tuple!(long, string)
+enum ErrorCodes : Tuple!(long, Tr)
 {
-    parseError = tuple(-32_700L, "Parse error"),
-    invalidRequest = tuple(-32_600L,
-            "Invalid Request"),
-    methodNotFound = tuple(
-            -32_601L, "Method not found"),
-    invalidParams = tuple(-32_602L,
-            "Invalid params"),
-    internalError = tuple(-32_603L,
-            "Internal error"),
-    serverNotInitialized = tuple(-32_202L,
-            "Server not initialized"),
-    unknownErrorCode = tuple(
-            -32_201L, "Unknown error"),
-    requestCancelled = tuple(-32_800L, "Request cancelled")
+    parseError = tuple(-32_700L, Tr.app_rpc_errorCodes_parseError),
+    invalidRequest = tuple(-32_600L, Tr.app_rpc_errorCodes_invalidRequest),
+    methodNotFound = tuple(-32_601L, Tr.app_rpc_errorCodes_methodNotFound),
+    invalidParams = tuple(-32_602L, Tr.app_rpc_errorCodes_invalidParams),
+    internalError = tuple(-32_603L, Tr.app_rpc_errorCodes_internalError),
+    serverNotInitialized = tuple(-32_202L, Tr.app_rpc_errorCodes_serverNotInitialized),
+    unknownErrorCode = tuple(-32_201L, Tr.app_rpc_errorCodes_unknownErrorCode),
+    requestCancelled = tuple(-32_800L, Tr.app_rpc_errorCodes_requestCancelled)
 }
 
 class CancelParams

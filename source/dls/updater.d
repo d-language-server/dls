@@ -213,7 +213,7 @@ void update(bool autoUpdate)
 
         if (!upgradeSuccessful)
         {
-            Util.sendMessage(Tr.app_buildError);
+            Util.sendMessage(Tr.app_upgradeDls_buildError);
             return;
         }
     }
@@ -228,7 +228,7 @@ void update(bool autoUpdate)
     }
     catch (UpgradeFailedException e)
     {
-        Util.sendMessage(Tr.app_linkError);
+        Util.sendMessage(Tr.app_upgradeDls_linkError);
     }
 }
 

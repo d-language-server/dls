@@ -1,13 +1,35 @@
 {
-    "app.buildError": {
-        "_type": 1,
-        "en": "DLS could not be built",
-        "fr": "DLS n'a pas pu être compilé"
+    "app.rpc.errorCodes.parseError": {
+        "en": "Parse error",
+        "fr": "Erreur d'analyse"
     },
-    "app.linkError": {
-        "_type": 1,
-        "en": "DLS could not be linked",
-        "fr": "DLS n'a pas pu être lié"
+    "app.rpc.errorCodes.invalidRequest": {
+        "en": "Invalid request",
+        "fr": "Requête invalide"
+    },
+    "app.rpc.errorCodes.methodNotFound": {
+        "en": "Method not found",
+        "fr": "Méthode non trouvée"
+    },
+    "app.rpc.errorCodes.invalidParams": {
+        "en": "Invalid parameters",
+        "fr": "paramètres invalides"
+    },
+    "app.rpc.errorCodes.internalError": {
+        "en": "Internal error",
+        "fr": "Erreur interne"
+    },
+    "app.rpc.errorCodes.serverNotInitialized": {
+        "en": "Server not initialized",
+        "fr": "Serveur non initialisé"
+    },
+    "app.rpc.errorCodes.unknownErrorCode": {
+        "en": "Unknown error code",
+        "fr": "Code d'erreur inconnu"
+    },
+    "app.rpc.errorCodes.requestCancelled": {
+        "en": "Request cancelled",
+        "fr": "Requête annulée"
     },
     "app.upgradeSelections": {
         "en": "Dependencies for project $1 changed",
@@ -45,6 +67,16 @@
     "app.upgradeDls.extracting": {
         "en": "Extracting",
         "fr": "Extraction"
+    },
+    "app.upgradeDls.buildError": {
+        "_type": 1,
+        "en": "DLS could not be built",
+        "fr": "DLS n'a pas pu être compilé"
+    },
+    "app.upgradeDls.linkError": {
+        "_type": 1,
+        "en": "DLS could not be linked",
+        "fr": "DLS n'a pas pu être lié"
     },
     "app.showChangelog": {
         "en": "DLS upgraded to version $1",
