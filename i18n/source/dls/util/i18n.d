@@ -88,7 +88,7 @@ string tr(Tr identifier, string[] args = [])
     import std.conv : to;
     import std.range : replace;
 
-    auto message = translations[identifier]["message"];
+    auto message = translations[identifier];
     auto localizedMessage = message[locale in message ? locale : defaultLocale].str;
 
     foreach (i; 0 .. args.length)
@@ -104,5 +104,5 @@ MessageType trType(Tr message)
     import std.conv : to;
 
     auto t = translations[message];
-    return "type" in t ? t["type"].integer.to!MessageType : MessageType.info;
+    return "_type" in t ? t["_type"].integer.to!MessageType : MessageType.info;
 }
