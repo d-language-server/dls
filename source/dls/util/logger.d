@@ -24,6 +24,7 @@ import dls.protocol.interfaces : InitializeParams;
 
 shared auto logger = new shared LspLogger();
 private immutable int[InitializeParams.Trace] traceToType;
+private immutable logMessageFormat = "[%.24s] %s";
 
 shared static this()
 {
@@ -94,13 +95,22 @@ private shared class LspLogger
         import dls.protocol.interfaces : LogMessageParams;
         import dls.protocol.jsonrpc : send;
         import dls.protocol.messages.methods : Window;
+        import dls.protocol.state : initOptions;
         import std.datetime : Clock;
         import std.format : format;
+        import std.stdio : File;
+
+        if (initOptions.logFile.length > 0)
+        {
+            auto log = File(initOptions.logFile, "a");
+            log.writefln(logMessageFormat, Clock.currTime.toString(), message);
+            log.flush();
+        }
 
         if (type <= _messageType)
         {
             send(Window.logMessage, new LogMessageParams(type,
-                    format!"[%.24s] %s"(Clock.currTime.toString(), message)));
+                    format(logMessageFormat, Clock.currTime.toString(), message)));
         }
     }
 }

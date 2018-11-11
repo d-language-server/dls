@@ -39,8 +39,8 @@ InitializeResult initialize(InitializeParams params)
     import std.array : array;
     import std.typecons : Nullable, nullable;
 
-    logger.info("Initializing server");
     initState = params;
+    logger.info("Initializing server");
     Server.initialized = true;
     AnalysisTool.initialize();
     CommandTool.initialize();
