@@ -114,6 +114,8 @@ DLS supports a few custom initialization options in the `InitializeParams.initia
 ```typescript
 interface InitializationOptions: {
     autoUpdate?: boolean;
+    catchErrors?: boolean;
+    logFile?: string;
     capabilities?: {
         hover?: boolean;
         completion?: boolean;

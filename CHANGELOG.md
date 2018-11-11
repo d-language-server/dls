@@ -4,6 +4,12 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.16.0
+- Added option to log operations to a file
+- Enhanced out-of-source-tree diagnostic handling
+- Enhanced Linux x86 binary release by using LDC instead of DMD
+- Enhanced error messages to show full stacktrace
+
 #### 0.15.5
 - Fixed non-dub project directories not being imported
 
