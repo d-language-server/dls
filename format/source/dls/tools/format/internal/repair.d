@@ -18,7 +18,7 @@
  *
  */
 
-module dls.tools.internal.format.repair;
+module dls.tools.format.internal.repair;
 
 import dparse.lexer : Token, StringCache;
 import std.container : SList;
@@ -74,7 +74,7 @@ private SList!size_t findEmptyLines(in string inputText)
 private string browseTokens(in Token[] inputTokens, in Token[] outputTokens,
         ref SList!size_t emptyLines, ref string outputText)
 {
-    import dls.tools.internal.format.util : tokenString;
+    import dls.tools.format.internal.util : tokenString;
     import dparse.lexer : tok;
     import std.array : insertInPlace;
 

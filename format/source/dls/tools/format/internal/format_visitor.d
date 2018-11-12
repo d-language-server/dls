@@ -18,7 +18,7 @@
  *
  */
 
-module dls.tools.internal.format.format_visitor;
+module dls.tools.format.internal.format_visitor;
 
 import dparse.ast;
 import dparse.lexer;
@@ -58,7 +58,7 @@ private enum BraceKind
 
 class FormatVisitor : ASTVisitor
 {
-    import dls.tools.internal.format.config : FormatConfig, IndentStyle;
+    import dls.tools.format.internal.config : FormatConfig, IndentStyle;
     import std.container : SList;
     import std.outbuffer : OutBuffer;
 
@@ -76,7 +76,7 @@ class FormatVisitor : ASTVisitor
 
     this(in Token[] inputTokens, in FormatConfig config)
     {
-        import dls.tools.internal.format.config : EndOfLine;
+        import dls.tools.format.internal.config : EndOfLine;
         import std.algorithm : filter;
         import std.array : array;
 
@@ -1566,7 +1566,7 @@ class FormatVisitor : ASTVisitor
     // TODO
     override void visit(const Token token)
     {
-        import dls.tools.internal.format.util : tokenString;
+        import dls.tools.format.internal.util : tokenString;
 
         write(tokenString(token));
     }
@@ -1746,7 +1746,7 @@ class FormatVisitor : ASTVisitor
 
     private size_t indentLength()
     {
-        import dls.tools.internal.format.config : IndentStyle;
+        import dls.tools.format.internal.config : IndentStyle;
 
         return _indentLevel * (_config.indentStyle == IndentStyle.space
                 ? _config.indentSize : _config.tabWidth);
@@ -1809,7 +1809,7 @@ class FormatVisitor : ASTVisitor
 
     private void writeIndents()
     {
-        import dls.tools.internal.format.config : IndentStyle;
+        import dls.tools.format.internal.config : IndentStyle;
 
         static char[] indents;
         indents.length = (_indentLevel + _tempIndentLevel) * (
@@ -1820,7 +1820,7 @@ class FormatVisitor : ASTVisitor
 
     private void writeBraces(in BraceKind kind)
     {
-        import dls.tools.internal.format.config : BraceStyle;
+        import dls.tools.format.internal.config : BraceStyle;
 
         final switch (kind)
         {

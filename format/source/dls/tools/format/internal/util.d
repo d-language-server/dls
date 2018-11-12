@@ -18,38 +18,13 @@
  *
  */
 
-module dls.tools.internal.format.config;
+module dls.tools.format.internal.util;
 
-enum IndentStyle
+import dparse.lexer : Token;
+
+string tokenString(in Token token)
 {
-    tab = '\t',
-    space = ' '
-}
+    import dparse.lexer : str;
 
-enum EndOfLine
-{
-    osDefault = "",
-    lf = "\n",
-    crlf = "\r\n",
-    cr = "\r"
-}
-
-enum BraceStyle
-{
-    allman,
-    otbs
-}
-
-struct FormatConfig
-{
-    // EditorConfig settings
-    IndentStyle indentStyle = IndentStyle.space;
-    size_t indentSize = 4;
-    size_t tabWidth = 4;
-    EndOfLine endOfLine = EndOfLine.osDefault;
-    size_t maxLineLength = 120;
-
-    // DFMT settings
-    BraceStyle braceStyle = BraceStyle.allman;
-    size_t softMaxLineLength = 80;
+    return token.text.length > 0 ? token.text : str(token.type);
 }
