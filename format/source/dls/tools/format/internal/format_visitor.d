@@ -332,27 +332,32 @@ class FormatVisitor : ASTVisitor
     // TODO
     override void visit(const AtAttribute atAttribute)
     {
-        writeCurrentStyle(true);
         write('@');
 
         if (atAttribute.argumentList is null && atAttribute.templateInstance is null)
             visit(atAttribute.identifier);
 
         super.visit(atAttribute);
-        writeCurrentStyle(false);
     }
 
     // TODO
     override void visit(const Attribute attribute)
     {
+        writeCurrentStyle(true);
+
         if (attribute.attribute != tok!"")
-        {
-            writeCurrentStyle(true);
             visit(attribute.attribute);
-            writeCurrentStyle(false);
-        }
 
         super.visit(attribute);
+
+        if (attribute.identifierChain !is null)
+        {
+            write('(');
+            visit(attribute.identifierChain);
+            write(')');
+        }
+
+        writeCurrentStyle(false);
     }
 
     // TODO
@@ -516,21 +521,27 @@ class FormatVisitor : ASTVisitor
     {
         foreach (field; declarationTypes)
         {
-            if (mixin("declaration." ~ field ~ " !is null"))
+            if (mixin("declaration." ~ field) !is null)
             {
-                _styles.insertFront(Style.newLine);
                 writeIndents();
-                tryVisit(declaration.attributes);
+                writeAttributes(declaration.attributes);
                 visit(mixin("declaration." ~ field));
-                _styles.removeFront();
                 return;
             }
         }
 
-        _styles.insertFront(declaration.declarations.length > 0 ? Style.none : Style.none);
         writeIndents();
-        tryVisit(declaration.attributes);
-        _styles.removeFront();
+
+        if (declaration.attributes !is null)
+        {
+            foreach (attr; declaration.attributes)
+            {
+                _styles.insertFront(attr is declaration.attributes[0]
+                        ? Style.none : Style.spaceBefore);
+                visit(attr);
+                _styles.removeFront();
+            }
+        }
 
         if (declaration.attributes.length > 0 || declaration.declarations.length > 0)
         {
@@ -591,7 +602,6 @@ class FormatVisitor : ASTVisitor
     // DONE
     override void visit(const Deprecated deprecated_)
     {
-        writeCurrentStyle(true);
         write("deprecated");
 
         if (deprecated_.assignExpression !is null)
@@ -600,8 +610,6 @@ class FormatVisitor : ASTVisitor
             super.visit(deprecated_);
             write(')');
         }
-
-        writeCurrentStyle(false);
     }
 
     // TODO
@@ -644,7 +652,9 @@ class FormatVisitor : ASTVisitor
     override void visit(const EnumMemberAttribute enumMemberAttribute)
     {
         _styles.insertFront(Style.spaceAfter);
+        writeCurrentStyle(true);
         super.visit(enumMemberAttribute);
+        writeCurrentStyle(false);
         _styles.removeFront();
     }
 
@@ -728,7 +738,9 @@ class FormatVisitor : ASTVisitor
     override void visit(const FunctionAttribute functionAttribute)
     {
         _styles.insertFront(Style.spaceBefore);
+        writeCurrentStyle(true);
         super.visit(functionAttribute);
+        writeCurrentStyle(false);
         _styles.removeFront();
     }
 
@@ -1047,17 +1059,19 @@ class FormatVisitor : ASTVisitor
         }
 
         write(')');
-        writeCurrentStyle(false);
     }
 
     // DONE
     override void visit(const MemberFunctionAttribute memberFunctionAttribute)
     {
-        if (memberFunctionAttribute.tokenType != tok!"")
-            writef(" %s", str(memberFunctionAttribute.tokenType));
-
         _styles.insertFront(Style.spaceBefore);
+        writeCurrentStyle(true);
+
+        if (memberFunctionAttribute.tokenType != tok!"")
+            write(str(memberFunctionAttribute.tokenType));
+
         tryVisit(memberFunctionAttribute.atAttribute);
+        writeCurrentStyle(false);
         _styles.removeFront();
     }
 
@@ -1180,11 +1194,14 @@ class FormatVisitor : ASTVisitor
     // TODO
     override void visit(const ParameterAttribute parameterAttribute)
     {
-        if (parameterAttribute.idType != tok!"")
-            writef("%s ", str(parameterAttribute.idType));
-
         _styles.insertFront(Style.spaceAfter);
+        writeCurrentStyle(true);
+
+        if (parameterAttribute.idType != tok!"")
+            write(str(parameterAttribute.idType));
+
         super.visit(parameterAttribute);
+        writeCurrentStyle(false);
         _styles.removeFront();
     }
 
@@ -1242,7 +1259,6 @@ class FormatVisitor : ASTVisitor
     // DONE
     override void visit(const PragmaExpression pragmaExpression)
     {
-        writeCurrentStyle(true);
         write("pragma(");
         visit(pragmaExpression.identifier);
 
@@ -1250,7 +1266,6 @@ class FormatVisitor : ASTVisitor
             writeList(pragmaExpression.argumentList.items, true);
 
         write(")");
-        writeCurrentStyle(false);
     }
 
     // TODO
@@ -1401,11 +1416,9 @@ class FormatVisitor : ASTVisitor
     override void visit(const StorageClass storageClass)
     {
         _styles.insertFront(Style.spaceAfter);
+        writeCurrentStyle(true);
         super.visit(storageClass);
-
-        if (storageClass.token.type != tok!"")
-            writeCurrentStyle(false);
-
+        writeCurrentStyle(false);
         _styles.removeFront();
     }
 
@@ -1927,6 +1940,25 @@ class FormatVisitor : ASTVisitor
 
         case Style.none:
             break;
+        }
+    }
+
+    private void writeAttributes(in Attribute[] attributes)
+    {
+        import std.algorithm : filter;
+
+        if (attributes is null)
+            return;
+
+        foreach (style; [Style.newLine, Style.spaceAfter])
+        {
+            _styles.insertFront(style);
+
+            foreach (attr; attributes.filter!(a => style == Style.newLine
+                    ? (a.atAttribute !is null) : (a.atAttribute is null)))
+                visit(attr);
+
+            _styles.removeFront();
         }
     }
 
