@@ -182,7 +182,7 @@ class AnalysisTool : Tool
         import std.typecons : Nullable, nullable;
         import std.utf : toUTF16;
 
-        logger.infof("Fetching diagnostics for document %s", uri.path);
+        logger.infof("Fetching diagnostics for %s", uri.path);
 
         auto stringCache = StringCache(StringCache.defaultBucketCount);
         auto tokens = getTokensForParser(Document.get(uri).toString(),
@@ -233,7 +233,7 @@ class AnalysisTool : Tool
 
         if (commandCompat)
         {
-            logger.infof("Fetching commands for document %s at range %s,%s to %s,%s", uri.path,
+            logger.infof("Fetching commands for %s at range %s,%s to %s,%s", uri.path,
                     range.start.line, range.start.character, range.end.line, range.end.character);
         }
 
@@ -247,7 +247,7 @@ class AnalysisTool : Tool
             if (getDiagnosticParameter(config, code) !is null)
             {
                 {
-                    auto title = tr(Tr.app_analysisTool_disableCheck_local, [code]);
+                    auto title = tr(Tr.app_command_diagnostic_disableCheck_local, [code]);
                     auto document = Document.get(uri);
                     auto line = document.lines[range.end.line].stripRight();
                     auto pos = new Position(range.end.line, line.length);
@@ -258,7 +258,7 @@ class AnalysisTool : Tool
                 }
 
                 {
-                    auto title = tr(Tr.app_analysisTool_disableCheck_global, [code]);
+                    auto title = tr(Tr.app_command_diagnostic_disableCheck_global, [code]);
                     auto args = [JSONValue(uri.toString()), JSONValue(code)];
                     result ~= new Command(title,
                             Commands.codeAction_analysis_disableCheck, args.nullable);
@@ -283,7 +283,7 @@ class AnalysisTool : Tool
         import std.array : appender;
         import std.typecons : Nullable, nullable;
 
-        logger.infof("Fetching code actions for document %s at range %s,%s to %s,%s", uri.path,
+        logger.infof("Fetching code actions for %s at range %s,%s to %s,%s", uri.path,
                 range.start.line, range.start.character, range.end.line, range.end.character);
 
         if (kinds.length > 0 && !kinds.canFind(CodeActionKind.quickfix))

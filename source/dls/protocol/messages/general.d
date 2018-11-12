@@ -92,8 +92,8 @@ InitializeResult initialize(InitializeParams params)
                 TextDocumentSyncKind.incremental.nullable);
         textDocumentSync.save = new SaveOptions(false.nullable);
         hoverProvider = initOptions.capabilities.hover;
-        completionProvider = initOptions.capabilities.completion ? new CompletionOptions(true.nullable,
-                ["."].nullable).nullable : Nullable!CompletionOptions();
+        completionProvider = initOptions.capabilities.completion
+            ? new CompletionOptions(true.nullable, ["."].nullable) : Nullable!CompletionOptions();
         definitionProvider = initOptions.capabilities.definition;
         typeDefinitionProvider = initOptions.capabilities.definition;
         referencesProvider = initOptions.capabilities.references;
@@ -104,8 +104,7 @@ InitializeResult initialize(InitializeParams params)
         documentFormattingProvider = initOptions.capabilities.documentFormatting;
         documentRangeFormattingProvider = initOptions.capabilities.documentRangeFormatting;
         documentOnTypeFormattingProvider = initOptions.capabilities.documentOnTypeFormatting
-            ? new DocumentOnTypeFormattingOptions(";").nullable
-            : Nullable!DocumentOnTypeFormattingOptions();
+            ? new DocumentOnTypeFormattingOptions(";") : Nullable!DocumentOnTypeFormattingOptions();
         renameProvider = initOptions.capabilities.rename
             ? new RenameOptions(true.nullable) : Nullable!RenameOptions();
         executeCommandProvider = initOptions.capabilities.codeAction

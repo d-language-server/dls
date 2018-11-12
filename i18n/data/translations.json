@@ -86,11 +86,11 @@
         "en": "See what's new",
         "fr": "Voir les nouveautés"
     },
-    "app.analysisTool.disableCheck.local": {
+    "app.command.diagnostic.disableCheck.local": {
         "en": "Disable $1 (this line)",
         "fr": "Désactiver $1 (cette ligne)"
     },
-    "app.analysisTool.disableCheck.global": {
+    "app.command.diagnostic.disableCheck.global": {
         "en": "Disable $1 (project-wide)",
         "fr": "Désactiver $1 (tout le projet)"
     },
