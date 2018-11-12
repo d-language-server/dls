@@ -368,8 +368,8 @@ class FormatVisitor : ASTVisitor
     // DONE
     override void visit(const AutoDeclaration autoDeclaration)
     {
-        super.visit(autoDeclaration);
-        writeSemicolon();
+        tryVisit(autoDeclaration.storageClasses);
+        writeList(autoDeclaration.parts);
     }
 
     // TODO
@@ -559,10 +559,13 @@ class FormatVisitor : ASTVisitor
         super.visit(declarationsAndStatements);
     }
 
-    // TODO
+    // DONE
     override void visit(const Declarator declarator)
     {
-        super.visit(declarator);
+        tryVisit(declarator.cstyle);
+        visit(declarator.name);
+        tryVisit(declarator.templateParameters);
+        tryVisit(declarator.initializer);
     }
 
     // TODO
@@ -1676,10 +1679,20 @@ class FormatVisitor : ASTVisitor
         super.visit(unittest_);
     }
 
-    // TODO
+    // DONE
     override void visit(const VariableDeclaration variableDeclaration)
     {
-        super.visit(variableDeclaration);
+        if (variableDeclaration.autoDeclaration is null)
+        {
+            tryVisit(variableDeclaration.storageClasses);
+            tryVisit(variableDeclaration.type);
+            write(' ');
+            writeList(variableDeclaration.declarators);
+        }
+        else
+            visit(variableDeclaration.autoDeclaration);
+
+        writeSemicolon();
     }
 
     // TODO
