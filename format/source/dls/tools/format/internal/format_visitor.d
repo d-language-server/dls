@@ -1243,7 +1243,8 @@ class FormatVisitor : ASTVisitor
     override void visit(const PragmaExpression pragmaExpression)
     {
         writeCurrentStyle(true);
-        writef("pragma(%s", pragmaExpression.identifier.text);
+        write("pragma(");
+        visit(pragmaExpression.identifier);
 
         if (pragmaExpression.argumentList !is null)
             writeList(pragmaExpression.argumentList.items, true);
@@ -1507,19 +1508,15 @@ class FormatVisitor : ASTVisitor
     // DONE
     override void visit(const TemplateParameterList templateParameterList)
     {
-        if (templateParameterList.items.length > 0)
-            write('(');
-
         writeList(templateParameterList.items);
-
-        if (templateParameterList.items.length > 0)
-            write(')');
     }
 
-    // TODO
+    // DONE
     override void visit(const TemplateParameters templateParameters)
     {
+        write('(');
         super.visit(templateParameters);
+        write(')');
     }
 
     // TODO
