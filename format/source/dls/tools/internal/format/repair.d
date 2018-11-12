@@ -23,17 +23,31 @@ module dls.tools.internal.format.repair;
 import dparse.lexer : Token, StringCache;
 import std.container : SList;
 
+class FormatException : Exception
+{
+    private this(size_t inTokens, size_t outTokens)
+    {
+        import std.format : format;
+
+        super(format!"More tokens in output (%s) than in input (%s)"(inTokens, outTokens));
+    }
+}
+
 string repair(in string inputText, in Token[] inputTokens,
         ref StringCache stringCache, ref string outputText)
 {
-    import dparse.lexer : LexerConfig, StringBehavior, WhitespaceBehavior,
-        byToken;
+    import dparse.lexer : LexerConfig, StringBehavior, WhitespaceBehavior, byToken;
     import std.algorithm : endsWith;
     import std.array : array;
 
     auto emptyLines = findEmptyLines(inputText);
     auto outputTokens = byToken(outputText, LexerConfig("",
             StringBehavior.source, WhitespaceBehavior.skip), &stringCache).array;
+
+    if (inputTokens.length < outputTokens.length)
+    {
+        throw new FormatException(inputTokens.length, outputTokens.length);
+    }
 
     return browseTokens(inputTokens, outputTokens, emptyLines, outputText);
 }
