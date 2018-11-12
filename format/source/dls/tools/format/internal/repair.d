@@ -109,7 +109,7 @@ private string browseTokens(in Token[] inputTokens, in Token[] outputTokens,
     size_t i;
     size_t j;
 
-    while (i < inputTokens.length || j < outputTokens.length)
+    while (i < inputTokens.length)
     {
         if (i >= inputTokens.length)
             --i;
