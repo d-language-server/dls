@@ -376,7 +376,7 @@ class FormatVisitor : ASTVisitor
     override void visit(const AutoDeclarationPart autoDeclarationPart)
     {
         visit(autoDeclarationPart.identifier);
-        super.visit(autoDeclarationPart);
+        visit(autoDeclarationPart.initializer);
     }
 
     // DONE
@@ -978,10 +978,15 @@ class FormatVisitor : ASTVisitor
         super.visit(initialize);
     }
 
-    // TODO
+    // DONE
     override void visit(const Initializer initializer)
     {
-        super.visit(initializer);
+        write(" = ");
+
+        if (initializer.nonVoidInitializer is null)
+            write("void");
+        else
+            visit(initializer.nonVoidInitializer);
     }
 
     // TODO
@@ -1129,10 +1134,9 @@ class FormatVisitor : ASTVisitor
         super.visit(newExpression);
     }
 
-    // TODO
+    // DONE
     override void visit(const NonVoidInitializer nonVoidInitializer)
     {
-        write(" = ");
         super.visit(nonVoidInitializer);
     }
 
