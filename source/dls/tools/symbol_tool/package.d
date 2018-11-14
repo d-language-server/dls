@@ -211,7 +211,7 @@ class SymbolTool : Tool
     }
 
     private string[string][string] _workspaceDependencies;
-    private string[] _dependenciesPaths;
+    private string[][string] _workspaceDependenciesPaths;
     private ASTAllocator _allocator;
     private ModuleCache _cache;
 
@@ -482,8 +482,10 @@ class SymbolTool : Tool
         }
 
         string[] pathsToRemove;
+        const dependenciesPaths = uri.path in _workspaceDependenciesPaths
+            ? _workspaceDependenciesPaths[uri.path] : [];
 
-        foreach (path; _dependenciesPaths)
+        foreach (path; dependenciesPaths)
         {
             if (!newDependenciesPaths.canFind(path))
             {
@@ -491,13 +493,14 @@ class SymbolTool : Tool
             }
         }
 
-        _dependenciesPaths = newDependenciesPaths;
+        _workspaceDependenciesPaths[uri.path] = newDependenciesPaths;
         clearDirectories(pathsToRemove);
     }
 
     void clearPath(Uri uri)
     {
         _workspaceDependencies.remove(uri.path);
+        _workspaceDependenciesPaths.remove(uri.path);
         clearDirectories([uri.path]);
     }
 
