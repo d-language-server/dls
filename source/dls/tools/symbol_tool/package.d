@@ -211,6 +211,7 @@ class SymbolTool : Tool
     }
 
     private string[string][string] _workspaceDependencies;
+    private string[] _dependenciesPaths;
     private ASTAllocator _allocator;
     private ModuleCache _cache;
 
@@ -396,7 +397,7 @@ class SymbolTool : Tool
         import std.array : appender, array;
         import std.path : baseName, buildNormalizedPath;
 
-        logger.infof("Dub project: %s", uri.path);
+        logger.infof("Importing dub project: %s", uri.path);
 
         auto d = getDub(uri);
         string[string] workspaceDeps;
@@ -450,7 +451,7 @@ class SymbolTool : Tool
         import std.file : exists;
         import std.path : buildNormalizedPath;
 
-        logger.infof("Custom project: %s", uri.path);
+        logger.infof("Importing custom project: %s", uri.path);
 
         string[string] deps;
         const sourceDir = ["source", "src", ""].map!(d => buildNormalizedPath(uri.path, d))
@@ -462,28 +463,42 @@ class SymbolTool : Tool
 
     void importDubSelections(Uri uri)
     {
-        import std.algorithm : map, reduce;
+        import dls.util.uri : normalized;
+        import std.algorithm : canFind, map, reduce;
         import std.array : array;
         import std.path : buildNormalizedPath;
 
         const d = getDub(uri);
+        string[] newDependenciesPaths;
 
         foreach (dep; d.project.dependencies)
         {
-            auto paths = reduce!(q{a ~ b})(cast(string[])[],
+            auto paths = reduce!q{a ~ b}(cast(string[])[],
                     dep.recipe.buildSettings.sourcePaths.values);
-            importDirectories(paths.map!(path => buildNormalizedPath(dep.path.toString(),
-                    path)).array);
+            auto pathsToImport = paths.map!(path => buildNormalizedPath(dep.path.toString(),
+                    path).normalized).array;
+            newDependenciesPaths ~= pathsToImport;
+            importDirectories(pathsToImport);
         }
+
+        string[] pathsToRemove;
+
+        foreach (path; _dependenciesPaths)
+        {
+            if (!newDependenciesPaths.canFind(path))
+            {
+                pathsToRemove ~= path;
+            }
+        }
+
+        _dependenciesPaths = newDependenciesPaths;
+        clearDirectories(pathsToRemove);
     }
 
     void clearPath(Uri uri)
     {
-        // import dls.util.logger : logger;
-
-        // logger.infof("Clearing imports from %s", uri.path);
-        // Implement ModuleCache.clear() in DCD
         _workspaceDependencies.remove(uri.path);
+        clearDirectories([uri.path]);
     }
 
     void upgradeSelections(Uri uri)
@@ -915,9 +930,23 @@ class SymbolTool : Tool
     private void importDirectories(string[] paths)
     {
         import dls.util.logger : logger;
+        import dls.util.uri : normalized;
+        import std.algorithm : map;
+        import std.array : array;
 
         logger.infof("Importing directories: %s", paths);
-        _cache.addImportPaths(paths);
+        _cache.addImportPaths(paths.map!normalized.array);
+    }
+
+    private void clearDirectories(string[] paths)
+    {
+        import dls.util.logger : logger;
+        import dls.util.uri : normalized;
+        import std.algorithm : map;
+        import std.array : array;
+
+        logger.infof("Clearing import directories: %s", paths);
+        _cache.removeImportPaths(paths.map!normalized.array);
     }
 
     private Location[] referencesForFiles(Uri uri, Position position, Uri[] files,
