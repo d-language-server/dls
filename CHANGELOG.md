@@ -4,6 +4,9 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.16.3
+- Fixed buggy import paths clearing
+
 #### 0.16.2
 - Fixed unneeded import paths not being cleared
 
