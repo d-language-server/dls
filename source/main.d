@@ -25,10 +25,11 @@ shared static this()
     initialSetup();
 }
 
-int main()
+void main()
 {
     import dls.server : Server;
+    import dls.util.communicator : StdioCommunicator, communicator;
 
+    communicator = new shared StdioCommunicator();
     Server.loop();
-    return 0;
 }

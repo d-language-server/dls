@@ -162,9 +162,9 @@ private void send(T : Message)(JSONValue id, string method,
 
 private void send(T : Message)(T m)
 {
+    import dls.util.communicator : communicator;
     import dls.util.json : convertToJSON;
     import std.conv : to;
-    import std.stdio : stdout;
     import std.utf : toUTF8;
 
     auto message = convertToJSON(m);
@@ -175,9 +175,9 @@ private void send(T : Message)(T m)
         foreach (chunk; ["Content-Length: ", messageString.length.to!string,
                 eol, eol, messageString])
         {
-            stdout.rawWrite(chunk.toUTF8());
+            communicator.write(chunk.toUTF8());
         }
 
-        stdout.flush();
+        communicator.flush();
     }
 }

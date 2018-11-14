@@ -64,19 +64,18 @@ final abstract class Server
 
     static void loop()
     {
+        import dls.util.communicator : communicator;
         import dls.util.logger : logger;
         import std.algorithm : findSplit;
         import std.array : appender;
         import std.conv : to;
-        import std.stdio : stdin;
         import std.string : strip, stripRight;
 
         auto lineAppender = appender!(char[]);
-        auto charBuffer = new char[1];
         string[string] headers;
         string line;
 
-        while (!stdin.eof && !exit)
+        while (communicator.hasData() && !exit)
         {
             headers.clear();
 
@@ -89,7 +88,7 @@ final abstract class Server
 
                 do
                 {
-                    auto res = stdin.rawRead(charBuffer);
+                    auto res = communicator.read(1);
 
                     if (res.length == 0)
                     {
@@ -128,9 +127,7 @@ final abstract class Server
                 continue;
             }
 
-            static char[] buffer;
-            buffer.length = headers["Content-Length"].strip().to!size_t;
-            handleJSON(stdin.rawRead(buffer));
+            handleJSON(communicator.read(headers["Content-Length"].strip().to!size_t));
         }
     }
 
