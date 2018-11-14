@@ -22,7 +22,7 @@ module dls.util.logger;
 
 import dls.protocol.interfaces : InitializeParams;
 
-shared auto logger = new shared LspLogger();
+private shared _logger = new shared LspLogger();
 private immutable int[InitializeParams.Trace] traceToType;
 private immutable logMessageFormat = "[%.24s] %s";
 
@@ -36,11 +36,16 @@ shared static this()
 
     //dfmt off
     traceToType = [
-        InitializeParams.Trace.off: 0,
-        InitializeParams.Trace.messages: MessageType.warning.to!int,
-        InitializeParams.Trace.verbose: MessageType.log.to!int
+        InitializeParams.Trace.off      : 0,
+        InitializeParams.Trace.messages : MessageType.warning.to!int,
+        InitializeParams.Trace.verbose  : MessageType.log.to!int
     ];
     //dfmt on
+}
+
+@property shared(LspLogger) logger()
+{
+    return _logger;
 }
 
 private shared class LspLogger
