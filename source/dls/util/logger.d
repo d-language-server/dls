@@ -107,9 +107,12 @@ private shared class LspLogger
 
         if (initOptions.logFile.length > 0)
         {
-            auto log = File(initOptions.logFile, "a");
-            log.writefln(logMessageFormat, Clock.currTime.toString(), message);
-            log.flush();
+            synchronized
+            {
+                auto log = File(initOptions.logFile, "a");
+                log.writefln(logMessageFormat, Clock.currTime.toString(), message);
+                log.flush();
+            }
         }
 
         if (type <= _messageType)
