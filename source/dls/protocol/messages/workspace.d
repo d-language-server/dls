@@ -90,6 +90,7 @@ void didChangeWatchedFiles(DidChangeWatchedFilesParams params)
     import dls.util.logger : logger;
     import dls.util.uri : Uri;
     import std.algorithm : canFind;
+    import std.file : exists, isFile;
     import std.path : baseName, dirName, extension;
 
     foreach (event; params.changes)
@@ -97,7 +98,12 @@ void didChangeWatchedFiles(DidChangeWatchedFilesParams params)
         auto uri = new Uri(event.uri);
         auto dirUri = Uri.fromPath(dirName(uri.path));
 
-        logger.infof("File changed: %s", uri.path);
+        logger.infof("Resource changed: %s", uri.path);
+
+        if (exists(uri.path) && !isFile(uri.path))
+        {
+            continue;
+        }
 
         switch (baseName(uri.path))
         {
@@ -111,7 +117,11 @@ void didChangeWatchedFiles(DidChangeWatchedFilesParams params)
             continue;
 
         case "dub.selections.json":
-            SymbolTool.instance.importDubSelections(dirUri);
+            if (event.type != FileChangeType.deleted)
+            {
+                SymbolTool.instance.importDubSelections(dirUri);
+            }
+
             continue;
 
         default:
