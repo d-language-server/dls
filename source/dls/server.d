@@ -23,12 +23,15 @@ module dls.server;
 shared static this()
 {
     import dls.protocol.handlers : isHandler, pushHandler;
+    import dls.util.setup : initialSetup;
     import std.algorithm : map;
     import std.array : join, split;
     import std.meta : AliasSeq;
     import std.traits : hasUDA, select;
     import std.typecons : tuple;
     import std.string : capitalize;
+
+    initialSetup();
 
     foreach (modName; AliasSeq!("general", "client", "text_document", "window", "workspace"))
     {
@@ -59,7 +62,6 @@ final abstract class Server
     import dls.protocol.interfaces : InitializeParams;
 
     static bool initialized;
-    static bool shutdown;
     static bool exit;
 
     static void loop()
@@ -140,6 +142,7 @@ final abstract class Server
         import dls.protocol.state : initOptions;
         import dls.util.json : convertFromJSON;
         import dls.util.logger : logger;
+        import std.algorithm : among;
         import std.json : JSONException, JSONValue, parseJSON;
 
         RequestMessage request;
@@ -156,7 +159,7 @@ final abstract class Server
                     {
                         request = convertFromJSON!RequestMessage(json);
 
-                        if (!shutdown && (initialized || request.method == "initialize"))
+                        if (initialized || request.method.among("initialize", "shutdown"))
                         {
                             send(request.id,
                                     handler!RequestHandler(request.method)(request.params));
@@ -170,7 +173,7 @@ final abstract class Server
                     {
                         auto notification = convertFromJSON!NotificationMessage(json);
 
-                        if (initialized)
+                        if (initialized || notification.method == "exit")
                         {
                             handler!NotificationHandler(notification.method)(notification.params);
                         }

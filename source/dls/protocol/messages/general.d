@@ -164,19 +164,27 @@ void initialized(JSONValue nothing)
 @("")
 JSONValue shutdown(JSONValue nothing)
 {
+    import dls.protocol.definitions : TextDocumentIdentifier;
     import dls.server : Server;
     import dls.tools.analysis_tool : AnalysisTool;
     import dls.tools.command_tool : CommandTool;
     import dls.tools.format_tool : FormatTool;
     import dls.tools.symbol_tool : SymbolTool;
+    import dls.util.document : Document;
     import dls.util.logger : logger;
 
     logger.info("Shutting down server");
-    Server.shutdown = true;
+    Server.initialized = false;
     AnalysisTool.shutdown();
     CommandTool.shutdown();
     FormatTool.shutdown();
     SymbolTool.shutdown();
+
+    foreach (uri; Document.uris)
+    {
+        Document.close(new TextDocumentIdentifier(uri));
+    }
+
     return JSONValue(null);
 }
 

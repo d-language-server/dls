@@ -21,7 +21,7 @@ after_build:
   - if defined APPVEYOR_REPO_TAG_NAME (set TAG_NAME=%APPVEYOR_REPO_TAG_NAME%) else (set TAG_NAME=untagged)
   - 7z -mx=9 a dls-%TAG_NAME%.windows.%ARCH%.zip dls.exe LICENSE.txt
 test_script:
-  - dub test --arch=%ARCH% --compiler=ldc2
+  - dub test --arch=%ARCH% --compiler=ldc2 --main-file=tests\main.d
 artifacts:
   - path: dls-*.zip
 deploy:

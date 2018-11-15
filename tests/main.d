@@ -18,11 +18,38 @@
  *
  */
 
+import dls.util.communicator : Communicator;
+
+private shared class TestCommunicator : Communicator
+{
+    private string _currentOutput;
+
+    bool hasData()
+    {
+        return false;
+    }
+
+    char[] read(size_t size)
+    {
+        return new char[size];
+    }
+
+    void write(in char[] buffer)
+    {
+        _currentOutput ~= buffer;
+    }
+
+    void flush()
+    {
+        _currentOutput = "";
+    }
+}
+
 void main()
 {
     import dls.server : Server;
-    import dls.util.communicator : StdioCommunicator, communicator;
+    import dls.util.communicator : communicator;
 
-    communicator = new shared StdioCommunicator();
+    communicator = new shared TestCommunicator();
     Server.loop();
 }

@@ -156,13 +156,14 @@ class SymbolTool : Tool
     {
         _instance = new SymbolTool();
         _instance.importDirectories(defaultImportPaths);
-        addConfigHook(() {
+        addConfigHook(_instance.toString(), {
             _instance.importDirectories(_configuration.symbol.importPaths);
         });
     }
 
     static void shutdown()
     {
+        removeConfigHook(_instance.toString());
         destroy(_instance);
     }
 

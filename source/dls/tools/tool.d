@@ -27,7 +27,7 @@ abstract class Tool
     import dls.tools.configuration : Configuration;
 
     protected static Configuration _configuration;
-    private static Hook[] _configHooks;
+    private static Hook[string] _configHooks;
 
     @property static void configuration(Configuration config)
     {
@@ -44,9 +44,14 @@ abstract class Tool
         configuration = new Configuration();
     }
 
-    protected static void addConfigHook(Hook hook)
+    protected static void addConfigHook(string name, Hook hook)
     {
-        _configHooks ~= hook;
+        _configHooks[name] = hook;
+    }
+
+    protected static void removeConfigHook(string name)
+    {
+        _configHooks.remove(name);
     }
 
     static void initialize();
