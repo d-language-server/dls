@@ -220,7 +220,7 @@ class SymbolTool : Tool
         import dls.util.document : Document;
         import std.algorithm : canFind, filter, map, reduce;
         import std.array : array;
-        import std.file : SpanMode, dirEntries;
+        import std.file : SpanMode, dirEntries, isFile;
         import std.path : globMatch;
 
         bool isImported(in Uri uri)
@@ -242,6 +242,7 @@ class SymbolTool : Tool
                 _workspaceDependencies.byKey.map!(w => dirEntries(w, SpanMode.depth).map!q{a.name}
                     .filter!(file => globMatch(file, "*.{d,di}"))
                     .filter!(file => !Document.uris.map!q{a.path}.canFind(file))
+                    .filter!isFile
                     .map!(Uri.fromPath)
                     .filter!isImported
                     .array));
