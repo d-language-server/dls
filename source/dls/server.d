@@ -142,10 +142,11 @@ final abstract class Server
         import dls.protocol.state : initOptions;
         import dls.util.json : convertFromJSON;
         import dls.util.logger : logger;
-        import std.algorithm : among;
+        import std.algorithm : among, startsWith;
         import std.json : JSONException, JSONValue, parseJSON;
 
         RequestMessage request;
+        NotificationMessage notification;
 
         void findAndExecuteHandler()
         {
@@ -171,7 +172,7 @@ final abstract class Server
                     }
                     else
                     {
-                        auto notification = convertFromJSON!NotificationMessage(json);
+                        notification = convertFromJSON!NotificationMessage(json);
 
                         if (initialized || notification.method == "exit")
                         {
@@ -200,8 +201,11 @@ final abstract class Server
             }
             catch (HandlerNotFoundException e)
             {
-                logger.errorf("%s: %s", ErrorCodes.methodNotFound[0], e.toString());
-                sendError(ErrorCodes.methodNotFound, request, JSONValue(e.toString()));
+                if (notification is null || !notification.method.startsWith("$/"))
+                {
+                    logger.errorf("%s: %s", ErrorCodes.methodNotFound[0], e.toString());
+                    sendError(ErrorCodes.methodNotFound, request, JSONValue(e.toString()));
+                }
             }
             catch (InvalidParamsException e)
             {
