@@ -5,16 +5,16 @@ matrix:
   include:
     - d: ldc
       os: linux
-      env: OP=build ARCH=x86_64
+      env: ARCH=x86_64
     - d: ldc
       os: linux
-      env: OP=build ARCH=x86
+      env: ARCH=x86
     - d: ldc
       os: osx
-      env: OP=build ARCH=x86_64
+      env: ARCH=x86_64
     - d: ldc
       os: osx
-      env: OP=build ARCH=x86
+      env: ARCH=x86
     - d: dmd-beta
       os: linux
     - d: ldc-beta
@@ -37,9 +37,9 @@ before_script:
   - ln -s /usr/bin/ld.gold ~/ld
 script:
   - if [[ ! -z $TRAVIS_TAG ]]; then export BUILD=release; fi
-  - if [[ ${OP:-test} = test ]]; then export MAIN_FILE="--main-file=tests/main.d"; fi
+  - if [[ ! -z $TRAVIS_TAG ]]; then export OP=build; fi
   - export PATH="$HOME:$PATH"
-  - dub ${OP:-test} --arch=${ARCH:-x86_64} --compiler=$DC --build=${BUILD:-debug} $MAIN_FILE
+  - dub ${OP:-test --main-file=tests/main.d} --arch=${ARCH:-x86_64} --compiler=$DC --build=${BUILD:-debug} $MAIN_FILE
 before_deploy:
   - if which strip; then strip dls; fi
   - upx --best --ultra-brute dls
