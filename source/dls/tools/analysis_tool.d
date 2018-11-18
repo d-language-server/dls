@@ -132,15 +132,15 @@ class AnalysisTool : Tool
         updateAnalysisConfig(uri);
     }
 
-    void removeAnalysisConfig(in Uri uri)
+    void removeAnalysisConfig(in Uri workspaceUri)
     {
-        if (uri.path in _analysisConfigs)
+        if (workspaceUri.path in _analysisConfigs)
         {
-            _analysisConfigs.remove(uri.path);
+            _analysisConfigs.remove(workspaceUri.path);
         }
     }
 
-    void updateAnalysisConfig(in Uri uri)
+    void updateAnalysisConfig(in Uri workspaceUri)
     {
         import dls.util.logger : logger;
         import dscanner.analysis.config : defaultStaticAnalysisConfig;
@@ -148,21 +148,21 @@ class AnalysisTool : Tool
         import std.file : exists;
         import std.path : buildNormalizedPath;
 
-        auto configPath = buildNormalizedPath(uri.path, _configuration.analysis.configFile);
+        auto configPath = getConfigUri(workspaceUri).path;
         auto conf = defaultStaticAnalysisConfig();
 
         if (exists(configPath))
         {
-            if (uri.path in _analysisConfigs)
+            if (workspaceUri.path in _analysisConfigs)
             {
-                conf = _analysisConfigs[uri.path];
+                conf = _analysisConfigs[workspaceUri.path];
             }
 
             logger.infof("Updating config from file %s", configPath);
             readINIFile(conf, configPath);
         }
 
-        _analysisConfigs[uri.path] = conf;
+        _analysisConfigs[workspaceUri.path] = conf;
         scanAllWorkspaces();
     }
 
@@ -325,8 +325,20 @@ class AnalysisTool : Tool
 
         auto config = getConfig(uri);
         *getDiagnosticParameter(config, code) = Check.disabled;
-        writeINIFile(config, buildNormalizedPath(SymbolTool.instance.getWorkspace(uri)
-                .path, _configuration.analysis.configFile));
+        writeINIFile(config, getConfigUri(SymbolTool.instance.getWorkspace(uri)).path);
+    }
+
+    private Uri getConfigUri(in Uri workspaceUri)
+    {
+        import std.algorithm : filter, map;
+        import std.array : array;
+        import std.file : exists;
+        import std.path : buildNormalizedPath;
+
+        auto possibleFiles = [_configuration.analysis.configFile, "dscanner.ini", ".dscanner.ini"].map!(
+                file => buildNormalizedPath(workspaceUri.path, file));
+        return Uri.fromPath((possibleFiles.filter!exists.array ~ buildNormalizedPath(workspaceUri.path,
+                "dscanner.ini"))[0]);
     }
 
     private StaticAnalysisConfig getConfig(in Uri uri)
@@ -334,9 +346,9 @@ class AnalysisTool : Tool
         import dls.tools.symbol_tool : SymbolTool;
         import dscanner.analysis.config : defaultStaticAnalysisConfig;
 
-        const configUri = SymbolTool.instance.getWorkspace(uri);
-        const configPath = configUri is null ? "" : configUri.path;
-        return (configPath in _analysisConfigs) ? _analysisConfigs[configPath]
+        const workspaceUri = SymbolTool.instance.getWorkspace(uri);
+        const workspacePath = workspaceUri is null ? "" : workspaceUri.path;
+        return (workspacePath in _analysisConfigs) ? _analysisConfigs[workspacePath]
             : defaultStaticAnalysisConfig();
     }
 
