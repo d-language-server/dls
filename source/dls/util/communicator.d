@@ -20,28 +20,31 @@
 
 module dls.util.communicator;
 
-private shared Communicator _communicator;
+// Socket can't be used with a shared aliasing.
+// However, the communicator's methods are all called either from the main
+// thread, or from inside a synchronized block, so __gshared is ok.
+private __gshared Communicator _communicator;
 
-@property shared(Communicator) communicator()
+@property Communicator communicator()
 {
     return _communicator;
 }
 
-@property void communicator(shared(Communicator) c)
+@property void communicator(Communicator c)
 {
     assert(_communicator is null);
     _communicator = c;
 }
 
-shared interface Communicator
+interface Communicator
 {
     bool hasData();
     char[] read(size_t size);
-    void write(in char[]);
+    void write(in char[] data);
     void flush();
 }
 
-shared class StdioCommunicator : Communicator
+class StdioCommunicator : Communicator
 {
     import std.stdio : stdin, stdout;
 
@@ -52,7 +55,9 @@ shared class StdioCommunicator : Communicator
 
     char[] read(size_t size)
     {
-        return stdin.rawRead(new char[size]);
+        static char[] buffer;
+        buffer.length = size;
+        return stdin.rawRead(buffer);
     }
 
     void write(in char[] data)
@@ -63,5 +68,59 @@ shared class StdioCommunicator : Communicator
     void flush()
     {
         stdout.flush();
+    }
+}
+
+class SocketCommunicator : Communicator
+{
+    import std.socket : Socket;
+
+    private Socket _socket;
+
+    this(ushort port)
+    {
+        import std.socket : AddressFamily, AddressInfo, InternetAddress, ProtocolType, SocketType;
+
+        _socket = new Socket(AddressFamily.INET, SocketType.STREAM, ProtocolType.TCP);
+        _socket.connect(new InternetAddress("127.0.0.1", port));
+    }
+
+    bool hasData()
+    {
+        synchronized (_socket)
+        {
+            return _socket.isAlive;
+        }
+    }
+
+    char[] read(size_t size)
+    {
+        static char[] buffer;
+        buffer.length = size;
+        ptrdiff_t result;
+
+        synchronized (_socket)
+        {
+            result = _socket.receive(buffer);
+        }
+
+        if (result == 0 || result == Socket.ERROR)
+        {
+            buffer.length = 0;
+        }
+
+        return buffer;
+    }
+
+    void write(in char[] data)
+    {
+        synchronized (_socket)
+        {
+            _socket.send(data);
+        }
+    }
+
+    void flush()
+    {
     }
 }

@@ -20,7 +20,7 @@
 
 import dls.util.communicator : Communicator;
 
-private shared class TestCommunicator : Communicator
+private class TestCommunicator : Communicator
 {
     private string _currentOutput;
 

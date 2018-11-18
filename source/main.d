@@ -18,11 +18,32 @@
  *
  */
 
-void main()
+int main(string[] args)
 {
     import dls.server : Server;
-    import dls.util.communicator : StdioCommunicator, communicator;
+    import dls.util.communicator : Communicator, SocketCommunicator,
+        StdioCommunicator, communicator;
+    import std.getopt : getopt;
+    import std.stdio : stdout;
 
-    communicator = new shared StdioCommunicator();
+    bool stdio = true;
+    ushort port;
+
+    getopt(args, "stdio", &stdio, "socket|tcp", &port);
+
+    if (port > 0)
+    {
+        communicator = new SocketCommunicator(port);
+    }
+    else if (stdio)
+    {
+        communicator = new StdioCommunicator();
+    }
+    else
+    {
+        return -1;
+    }
+
     Server.loop();
+    return 0;
 }
