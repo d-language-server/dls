@@ -204,8 +204,8 @@ class AnalysisTool : Tool
 
         foreach (result; analysisResults)
         {
-            if (!document.lines[result.line - 1].matchFirst(regex(
-                    `.*//\s*@suppress\s*\(\s*`w ~ result.key.toUTF16() ~ `\s*\)\s*`w)))
+            if (!document.lines[result.line - 1].matchFirst(
+                    regex(`//.*@suppress\s*\(\s*`w ~ result.key.toUTF16() ~ `\s*\)`w)))
             {
                 diagnostics ~= new Diagnostic(document.wordRangeAtLineAndByte(result.line - 1, result.column - 1),
                         result.message, DiagnosticSeverity.warning.nullable,
