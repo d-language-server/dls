@@ -51,6 +51,6 @@ deploy:
   file: dls-*.zip
   skip_cleanup: true
   on:
-    condition: $OP = build
+    condition: $OP = build && ! -z $ARCH
     repo: d-language-server/dls
     tags: true
