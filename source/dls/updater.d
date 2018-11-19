@@ -20,7 +20,7 @@
 
 module dls.updater;
 
-private enum descriptionJson = import("description.json");
+private immutable currentVersion = import("version.txt");
 private immutable changelogUrl = "https://github.com/d-language-server/dls/blob/v%s/CHANGELOG.md";
 
 void cleanup()
@@ -230,13 +230,4 @@ void update(bool autoUpdate)
     {
         Util.sendMessage(Tr.app_upgradeDls_linkError);
     }
-}
-
-@property private string currentVersion()
-{
-    import std.algorithm : find;
-    import std.json : parseJSON;
-
-    const desc = parseJSON(descriptionJson);
-    return desc["packages"].array.find!(p => p["name"] == desc["rootPackage"])[0]["version"].str;
 }
