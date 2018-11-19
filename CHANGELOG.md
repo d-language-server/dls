@@ -4,6 +4,14 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+### 0.17.0
+- Added ability to use DLS using sockets instead of stdio
+- Enhanced unknown custom notification handling to ignore them instead of producing an error
+- Enhanced diagnostic publishing to pick up `.dscanner.ini` files automatically
+- Fixed comment handling with multiple `@suppress()`
+- Updated libraries:
+    - `emsi_containers`: `0.8.0-alpha.10` => `0.8.0-alpha.11`
+
 #### 0.16.4
 - Fixed crash for workspaces containing directories ending in `.d` (#16)
 
@@ -38,6 +46,7 @@ Breaking changes will be in bold.
 #### 0.15.2
 - Updated libraries:
     - `dfmt`: `0.8.2` => `0.8.3`
+    - `emsi_containers`: `0.8.0-alpha.9` => `0.8.0-alpha.10`
 
 #### 0.15.1
 - Fixed Travis build for dlang/ci

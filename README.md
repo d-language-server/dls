@@ -43,6 +43,8 @@ Packages used (the stuff doing the actual hard work):
 
 Some editors may need DLS to be [installed manually](#installing) (don't worry, it's easy).
 
+### Some common editors
+
 - Visual Studio Code: [install the extension](https://marketplace.visualstudio.com/items?itemName=LaurentTreguier.vscode-dls)
 - Atom: [install the package](https://atom.io/packages/ide-dlang)
 - Sublime Text (using [tomv654's LSP client](https://github.com/tomv564/LSP)):
@@ -71,6 +73,12 @@ Some editors may need DLS to be [installed manually](#installing) (don't worry, 
 
 DLS should work with other editors, although your mileage may vary since it's moslty tested on the ones above.
 If it's not working with your editor of choice, [submit an issue](https://github.com/d-language-server/dls/issues/new)!
+
+### Command line options
+
+Some command line options exist to control the behavior of DLS:
+- `--stdio`: use standard input and output streams for communication
+- `--socket=PORT` or `--tcp=PORT`: use a socket connecting on the specified port for communication
 
 ## Installing
 
