@@ -120,10 +120,13 @@ class FormatVisitor : ASTVisitor
         super.visit(aliasInitializer);
     }
 
-    // TODO
+    // DONE
     override void visit(const AliasThisDeclaration aliasThisDeclaration)
     {
+        write("alias ");
         super.visit(aliasThisDeclaration);
+        write(" this");
+        writeSemicolon();
     }
 
     // TODO
@@ -461,7 +464,11 @@ class FormatVisitor : ASTVisitor
     // TODO
     override void visit(const ClassDeclaration classDeclaration)
     {
-        super.visit(classDeclaration);
+        write("class ");
+        visit(classDeclaration.name);
+        // base classes
+        // constraints
+        tryVisit(classDeclaration.structBody);
     }
 
     // DONE
@@ -1430,7 +1437,16 @@ class FormatVisitor : ASTVisitor
     // TODO
     override void visit(const StructBody structBody)
     {
-        super.visit(structBody);
+        if (structBody.declarations.length > 0)
+        {
+            writeBraces(BraceKind.start);
+            super.visit(structBody);
+            writeBraces(BraceKind.end);
+        }
+        else
+            writeBraces(BraceKind.empty);
+
+        writeNewLine();
     }
 
     // TODO
