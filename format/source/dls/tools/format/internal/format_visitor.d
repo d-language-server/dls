@@ -1295,10 +1295,14 @@ class FormatVisitor : ASTVisitor
             visit(pragmaStatement.blockStatement);
     }
 
-    // DONE
+    // TODO
     override void visit(const PrimaryExpression primaryExpression)
     {
+        if (primaryExpression.expression !is null)
+            write('(');
         super.visit(primaryExpression);
+        if (primaryExpression.expression !is null)
+            write(')');
     }
 
     // TODO
