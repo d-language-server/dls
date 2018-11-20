@@ -757,7 +757,7 @@ class FormatVisitor : ASTVisitor
         super.visit(functionCallExpression);
     }
 
-    // TODO
+    // DONE
     override void visit(const FunctionContract functionContract)
     {
         super.visit(functionContract);
@@ -1075,10 +1075,11 @@ class FormatVisitor : ASTVisitor
         _styles.removeFront();
     }
 
-    // TODO
+    // DONE
     override void visit(const MissingFunctionBody missingFunctionBody)
     {
         super.visit(missingFunctionBody);
+        writeSemicolon();
     }
 
     // TODO
@@ -1362,7 +1363,7 @@ class FormatVisitor : ASTVisitor
         super.visit(index);
     }
 
-    // TODO
+    // DONE
     override void visit(const SpecifiedFunctionBody specifiedFunctionBody)
     {
         super.visit(specifiedFunctionBody);
