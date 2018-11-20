@@ -1813,22 +1813,9 @@ class FormatVisitor : ASTVisitor
         return nodeString;
     }
 
-    private string getString(void delegate() dg, in Style style)
-    {
-        _styles.insertFront(style);
-        const res = getString(dg);
-        _styles.removeFront();
-        return res;
-    }
-
     private string getString(T)(in T node)
     {
         return getString({ tryVisit(node); });
-    }
-
-    private string getString(T)(in T node, in Style style)
-    {
-        return getString({ tryVisit(node); }, style);
     }
 
     private bool canAddToCurrentLine(size_t length)
@@ -2006,7 +1993,7 @@ class FormatVisitor : ASTVisitor
         if (enumMembers.length > 0)
         {
             _isOneLiner = true;
-            const enumBodyText = getString({ writeEnumMembers(enumMembers); }, Style.spaceAfter);
+            const enumBodyText = getString({ writeEnumMembers(enumMembers); });
             _isOneLiner = false;
 
             if (canAddToCurrentLine(enumBodyText.length))
@@ -2015,11 +2002,7 @@ class FormatVisitor : ASTVisitor
                 writeNewLine();
             }
             else
-            {
-                _styles.insertFront(Style.newLine);
                 writeEnumMembers(enumMembers);
-                _styles.removeFront();
-            }
         }
         else
         {
@@ -2040,9 +2023,10 @@ class FormatVisitor : ASTVisitor
             if (i + 1 < enumMembers.length)
             {
                 write(',');
-                writeCurrentStyle(false);
+                writeNewLine();
+                writeIndents();
             }
-            else if (!_isOneLiner)
+            else
                 writeNewLine();
         }
 
