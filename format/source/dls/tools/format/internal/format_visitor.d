@@ -396,6 +396,8 @@ class FormatVisitor : ASTVisitor
         }
         else
             writeBraces(BraceKind.empty);
+
+        writeNewLine();
     }
 
     // TODO
@@ -553,6 +555,8 @@ class FormatVisitor : ASTVisitor
             }
             else
                 writeBraces(BraceKind.empty);
+
+            writeNewLine();
         }
         else
             writeSemicolon();
@@ -1839,6 +1843,12 @@ class FormatVisitor : ASTVisitor
     {
         import dls.tools.format.internal.config : IndentStyle;
 
+        if (_isOneLiner)
+        {
+            write(' ');
+            return;
+        }
+
         static char[] indents;
         indents.length = (_indentLevel + _tempIndentLevel) * (
                 _config.indentStyle == IndentStyle.space ? _config.indentSize : 1);
@@ -1857,7 +1867,7 @@ class FormatVisitor : ASTVisitor
             break;
 
         case BraceKind.start:
-            if (_isOneLiner || _config.braceStyle == BraceStyle.otbs)
+            if (_config.braceStyle == BraceStyle.otbs)
                 write(' ');
             else
             {
@@ -1866,27 +1876,16 @@ class FormatVisitor : ASTVisitor
             }
 
             write('{');
-
-            if (_isOneLiner)
-                write(' ');
-
+            writeNewLine();
             ++_indentLevel;
             break;
 
         case BraceKind.end:
             --_indentLevel;
-
-            if (_isOneLiner)
-                write(' ');
-            else
-                writeIndents();
-
+            writeIndents();
             write('}');
             break;
         }
-
-        if (!_isOneLiner)
-            writeNewLine();
     }
 
     private void writeSemicolon()
@@ -1898,8 +1897,11 @@ class FormatVisitor : ASTVisitor
 
     private void writeNewLine()
     {
-        write(_config.endOfLine);
-        _lineLength = 0;
+        if (!_isOneLiner)
+        {
+            write(_config.endOfLine);
+            _lineLength = 0;
+        }
     }
 
     private void writeList(T)(T[] list, bool startWithComma = false)
@@ -2000,15 +2002,16 @@ class FormatVisitor : ASTVisitor
             }
         }
         else
+        {
             writeBraces(BraceKind.empty);
+            writeNewLine();
+        }
     }
 
     private void writeEnumMembers(T)(const T[] enumMembers)
     {
         writeBraces(BraceKind.start);
-
-        if (!_isOneLiner)
-            writeIndents();
+        writeIndents();
 
         foreach (i, member; enumMembers)
         {
@@ -2024,6 +2027,7 @@ class FormatVisitor : ASTVisitor
         }
 
         writeBraces(BraceKind.end);
+        writeNewLine();
     }
 
     private void writeEnumMember(T)(const T enumMember)
