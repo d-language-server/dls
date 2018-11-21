@@ -71,7 +71,7 @@ class FormatVisitor : ASTVisitor
     private size_t _lineLength;
     private size_t _tempLineLength;
     private SList!Style _styles;
-    private bool _isOneLiner;
+    private size_t _inlineDepth;
     private size_t[] _doubleNewLines;
 
     this(in Token[] inputTokens, in FormatConfig config)
@@ -1876,7 +1876,7 @@ class FormatVisitor : ASTVisitor
     {
         import dls.tools.format.internal.config : IndentStyle;
 
-        if (_isOneLiner)
+        if (_inlineDepth > 0)
         {
             write(' ');
             return;
@@ -1930,7 +1930,7 @@ class FormatVisitor : ASTVisitor
 
     private void writeNewLine()
     {
-        if (!_isOneLiner)
+        if (_inlineDepth == 0)
         {
             write(_config.endOfLine);
             _lineLength = 0;
@@ -2018,9 +2018,9 @@ class FormatVisitor : ASTVisitor
     {
         if (enumMembers.length > 0)
         {
-            _isOneLiner = true;
+            ++_inlineDepth;
             const enumBodyText = getString({ writeEnumMembers(enumMembers); });
-            _isOneLiner = false;
+            --_inlineDepth;
 
             if (canAddToCurrentLine(enumBodyText.length))
             {
