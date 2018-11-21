@@ -49,7 +49,8 @@ string repair(in string inputText, in Token[] inputTokens,
         throw new FormatException(inputTokens.length, outputTokens.length);
     }
 
-    return browseTokens(inputTokens, outputTokens, emptyLines, outputText);
+    // return browseTokens(inputTokens, outputTokens, emptyLines, outputText);
+    return outputText;
 }
 
 private SList!size_t findEmptyLines(in string inputText)
