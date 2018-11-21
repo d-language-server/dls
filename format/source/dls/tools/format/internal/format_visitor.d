@@ -528,18 +528,17 @@ class FormatVisitor : ASTVisitor
     // DONE
     override void visit(const Declaration declaration)
     {
+        writeIndents();
+
         foreach (field; declarationTypes)
         {
             if (mixin("declaration." ~ field) !is null)
             {
-                writeIndents();
                 writeAttributes(declaration.attributes);
                 visit(mixin("declaration." ~ field));
                 return;
             }
         }
-
-        writeIndents();
 
         if (declaration.attributes !is null)
         {
@@ -662,11 +661,8 @@ class FormatVisitor : ASTVisitor
     // DONE
     override void visit(const EnumMemberAttribute enumMemberAttribute)
     {
-        _styles.insertFront(Style.spaceAfter);
-        writeCurrentStyle(true);
         super.visit(enumMemberAttribute);
-        writeCurrentStyle(false);
-        _styles.removeFront();
+        write(' ');
     }
 
     // TODO
@@ -748,11 +744,8 @@ class FormatVisitor : ASTVisitor
     // TODO
     override void visit(const FunctionAttribute functionAttribute)
     {
-        _styles.insertFront(Style.spaceBefore);
-        writeCurrentStyle(true);
+        write(' ');
         super.visit(functionAttribute);
-        writeCurrentStyle(false);
-        _styles.removeFront();
     }
 
     // DONE
@@ -1101,15 +1094,12 @@ class FormatVisitor : ASTVisitor
     // DONE
     override void visit(const MemberFunctionAttribute memberFunctionAttribute)
     {
-        _styles.insertFront(Style.spaceBefore);
-        writeCurrentStyle(true);
+        write(' ');
 
         if (memberFunctionAttribute.tokenType != tok!"")
             write(str(memberFunctionAttribute.tokenType));
 
         tryVisit(memberFunctionAttribute.atAttribute);
-        writeCurrentStyle(false);
-        _styles.removeFront();
     }
 
     // DONE
@@ -1160,9 +1150,8 @@ class FormatVisitor : ASTVisitor
     override void visit(const ModuleDeclaration moduleDeclaration)
     {
         writeIndents();
-        _styles.insertFront(Style.newLine);
         tryVisit(moduleDeclaration.deprecated_);
-        _styles.removeFront();
+        writeNewLine();
         writeIndents();
         write("module ");
         visit(moduleDeclaration.moduleName);
@@ -1232,15 +1221,11 @@ class FormatVisitor : ASTVisitor
     // TODO
     override void visit(const ParameterAttribute parameterAttribute)
     {
-        _styles.insertFront(Style.spaceAfter);
-        writeCurrentStyle(true);
-
         if (parameterAttribute.idType != tok!"")
             write(str(parameterAttribute.idType));
 
         super.visit(parameterAttribute);
-        writeCurrentStyle(false);
-        _styles.removeFront();
+        write(' ');
     }
 
     // DONE
@@ -1288,10 +1273,8 @@ class FormatVisitor : ASTVisitor
     // DONE
     override void visit(const PragmaDeclaration pragmaDeclaration)
     {
-        _styles.insertFront(Style.none);
         super.visit(pragmaDeclaration);
         writeSemicolon();
-        _styles.removeFront();
     }
 
     // DONE
@@ -1457,11 +1440,8 @@ class FormatVisitor : ASTVisitor
     // DONE
     override void visit(const StorageClass storageClass)
     {
-        _styles.insertFront(Style.spaceAfter);
-        writeCurrentStyle(true);
         super.visit(storageClass);
-        writeCurrentStyle(false);
-        _styles.removeFront();
+        write(' ');
     }
 
     // TODO
