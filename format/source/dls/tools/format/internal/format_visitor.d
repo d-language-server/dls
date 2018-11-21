@@ -857,9 +857,29 @@ class FormatVisitor : ASTVisitor
         visit(identityExpression.right);
     }
 
-    // BLOCKED #289 PR #290
+    // TODO
     override void visit(const IfStatement ifStatement)
     {
+        static bool isBlock(const DeclarationOrStatement dos)
+        {
+            return dos.statement !is null && dos.statement.statementNoCaseNoDefault !is null
+                && dos.statement.statementNoCaseNoDefault.blockStatement !is null;
+        }
+
+        void visitDOS(const DeclarationOrStatement dos)
+        {
+            if (!isBlock(dos))
+            {
+                writeNewLine();
+                ++_indentLevel;
+            }
+
+            visit(dos);
+
+            if (!isBlock(dos))
+                --_indentLevel;
+        }
+
         writeIndents();
         write("if (");
 
@@ -886,8 +906,14 @@ class FormatVisitor : ASTVisitor
 
         visit(ifStatement.expression);
         write(')');
-        writeBraces(BraceKind.start);
-        writeBraces(BraceKind.end);
+        visitDOS(ifStatement.thenStatement);
+
+        if (ifStatement.elseStatement !is null)
+        {
+            writeIndents();
+            write("else");
+            visitDOS(ifStatement.elseStatement);
+        }
     }
 
     // DONE
