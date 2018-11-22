@@ -121,7 +121,7 @@ InitializeResult initialize(InitializeParams params)
 void initialized(JSONValue nothing)
 {
     import dls.protocol.interfaces : DidChangeWatchedFilesRegistrationOptions,
-        FileSystemWatcher, Registration, RegistrationParams;
+        FileSystemWatcher, Registration, RegistrationParams, WatchKind;
     import dls.protocol.jsonrpc : send;
     import dls.protocol.messages.methods : Client;
     import dls.protocol.state : initOptions, initState;
@@ -142,13 +142,16 @@ void initialized(JSONValue nothing)
     }
 
     const didChangeWatchedFiles = initState.capabilities.workspace.didChangeWatchedFiles;
+    ushort watchAllEvents = WatchKind.create + WatchKind.change + WatchKind.delete_;
 
     if (!didChangeWatchedFiles.isNull && didChangeWatchedFiles.dynamicRegistration)
     {
         logger.info("Registering watchers");
         auto watchers = [
-            new FileSystemWatcher("**/dub.selections.json"), new FileSystemWatcher("**/dub.{json,sdl}"),
-            new FileSystemWatcher("**/*.ini"), new FileSystemWatcher("**/*.{d,di}")
+            new FileSystemWatcher("**/dub.selections.json", watchAllEvents.nullable),
+            new FileSystemWatcher("**/dub.{json,sdl}", watchAllEvents.nullable),
+            new FileSystemWatcher("**/*.ini", watchAllEvents.nullable),
+            new FileSystemWatcher("**/*.{d,di}", watchAllEvents.nullable)
         ];
         auto registrationOptions = new DidChangeWatchedFilesRegistrationOptions(watchers);
         auto registration = new Registration!DidChangeWatchedFilesRegistrationOptions(

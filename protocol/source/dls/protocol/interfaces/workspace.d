@@ -106,16 +106,16 @@ class FileSystemWatcher
     import std.typecons : Nullable;
 
     string globPattern;
-    Nullable!WatchKind kind;
+    Nullable!ushort kind;
 
-    this(string globPattern = string.init, Nullable!WatchKind kind = Nullable!WatchKind.init)
+    this(string globPattern = string.init, Nullable!ushort kind = Nullable!ushort.init)
     {
         this.globPattern = globPattern;
         this.kind = kind;
     }
 }
 
-enum WatchKind : uint
+enum WatchKind : ushort
 {
     create = 1,
     change = 2,
