@@ -107,11 +107,18 @@ private shared class LspLogger
 
         if (initOptions.logFile.length > 0)
         {
+            static bool firstLog = true;
+
             synchronized
             {
-                auto log = File(initOptions.logFile, "a");
+                auto log = File(initOptions.logFile, firstLog ? "w" : "a");
                 log.writefln(logMessageFormat, Clock.currTime.toString(), message);
                 log.flush();
+            }
+
+            if (firstLog)
+            {
+                firstLog = false;
             }
         }
 
