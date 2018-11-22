@@ -4,6 +4,10 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.17.1
+- Fixed logger not cleaning up the log file before writing to it
+- Fixed directories not being cleared from DCD's cache after being deleted
+
 ### 0.17.0
 - Added ability to use DLS using sockets instead of stdio
 - Enhanced unknown custom notification handling to ignore them instead of producing an error
