@@ -31,6 +31,7 @@ class InitializeParams
 {
     import dls.protocol.definitions : DocumentUri;
     import dls.protocol.interfaces.workspace : WorkspaceFolder;
+    import std.json : JSONValue;
     import std.typecons : Nullable;
 
     static enum Trace : string
@@ -70,7 +71,7 @@ class InitializeParams
         }
     }
 
-    Nullable!ulong processId;
+    JSONValue processId;
     Nullable!string rootPath;
     Nullable!DocumentUri rootUri;
     Nullable!InitializationOptions initializationOptions;
