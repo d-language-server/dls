@@ -34,15 +34,7 @@ private InitializeParams _initState;
     import dls.util.logger : logger;
 
     _initState = params;
-
-    debug
-    {
-        logger.trace = InitializeParams.Trace.verbose;
-    }
-    else
-    {
-        logger.trace = params.trace;
-    }
+    logger.trace = params.trace;
 }
 
 @property InitializeParams.InitializationOptions initOptions()
