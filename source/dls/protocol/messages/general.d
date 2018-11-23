@@ -141,18 +141,22 @@ void initialized(JSONValue nothing)
         spawn(&update, initOptions.autoUpdate);
     }
 
-    const didChangeWatchedFiles = initState.capabilities.workspace.didChangeWatchedFiles;
+    const didChangeWatchedFiles = !initState.capabilities.workspace.isNull
+        && !initState.capabilities.workspace.didChangeWatchedFiles.isNull
+        && initState.capabilities.workspace.didChangeWatchedFiles.dynamicRegistration;
     ushort watchAllEvents = WatchKind.create + WatchKind.change + WatchKind.delete_;
 
-    if (!didChangeWatchedFiles.isNull && didChangeWatchedFiles.dynamicRegistration)
+    if (didChangeWatchedFiles)
     {
         logger.info("Registering watchers");
+        //dfmt off
         auto watchers = [
             new FileSystemWatcher("**/dub.selections.json", watchAllEvents.nullable),
             new FileSystemWatcher("**/dub.{json,sdl}", watchAllEvents.nullable),
             new FileSystemWatcher("**/*.ini", watchAllEvents.nullable),
             new FileSystemWatcher("**/*.{d,di}", watchAllEvents.nullable)
         ];
+        //dfmt on
         auto registrationOptions = new DidChangeWatchedFilesRegistrationOptions(watchers);
         auto registration = new Registration!DidChangeWatchedFilesRegistrationOptions(
                 "dls-registration-watch-dub-files",
