@@ -113,7 +113,7 @@ final abstract class Server
 
                 if (parts[1].length > 0)
                 {
-                    headers[parts[0].to!string] = parts[2].to!string;
+                    headers[parts[0]] = parts[2];
                 }
             }
             while (line.length > 0);
