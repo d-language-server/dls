@@ -24,7 +24,7 @@ import dls.protocol.definitions;
 import dls.protocol.interfaces.client : TextDocumentRegistrationOptions;
 import std.json : JSONValue;
 
-class DidOpenTextDocumentParams
+final class DidOpenTextDocumentParams
 {
     TextDocumentItem textDocument;
 
@@ -34,7 +34,7 @@ class DidOpenTextDocumentParams
     }
 }
 
-class DidChangeTextDocumentParams
+final class DidChangeTextDocumentParams
 {
     VersionedTextDocumentIdentifier textDocument;
     TextDocumentContentChangeEvent[] contentChanges;
@@ -45,7 +45,7 @@ class DidChangeTextDocumentParams
     }
 }
 
-class TextDocumentContentChangeEvent
+final class TextDocumentContentChangeEvent
 {
     import std.typecons : Nullable;
 
@@ -54,7 +54,7 @@ class TextDocumentContentChangeEvent
     string text;
 }
 
-class TextDocumentChangeRegistrationOptions : TextDocumentRegistrationOptions
+final class TextDocumentChangeRegistrationOptions : TextDocumentRegistrationOptions
 {
     import dls.protocol.interfaces.general : TextDocumentSyncKind;
 
@@ -76,7 +76,7 @@ private class ParamsBase
     }
 }
 
-class WillSaveTextDocumentParams : ParamsBase
+final class WillSaveTextDocumentParams : ParamsBase
 {
     TextDocumentSaveReason reason;
 }
@@ -88,14 +88,14 @@ enum TextDocumentSaveReason : uint
     focusOut = 3
 }
 
-class DidSaveTextDocumentParams : ParamsBase
+final class DidSaveTextDocumentParams : ParamsBase
 {
     import std.typecons : Nullable;
 
     Nullable!string text;
 }
 
-class TextDocumentSaveRegistrationOptions : TextDocumentRegistrationOptions
+final class TextDocumentSaveRegistrationOptions : TextDocumentRegistrationOptions
 {
     import std.typecons : Nullable;
 
@@ -109,7 +109,7 @@ class TextDocumentSaveRegistrationOptions : TextDocumentRegistrationOptions
 
 alias DidCloseTextDocumentParams = ParamsBase;
 
-class PublishDiagnosticsParams
+final class PublishDiagnosticsParams
 {
     DocumentUri uri;
     Diagnostic[] diagnostics;
@@ -121,14 +121,14 @@ class PublishDiagnosticsParams
     }
 }
 
-class CompletionParams : TextDocumentPositionParams
+final class CompletionParams : TextDocumentPositionParams
 {
     import std.typecons : Nullable;
 
     Nullable!CompletionContext context;
 }
 
-class CompletionContext
+final class CompletionContext
 {
     import std.typecons : Nullable;
 
@@ -143,7 +143,7 @@ enum CompletionTriggerKind : uint
     triggerForIncompleteCompletions = 3
 }
 
-class CompletionList
+final class CompletionList
 {
     bool isIncomplete;
     CompletionItem[] items;
@@ -161,7 +161,7 @@ enum InsertTextFormat : uint
     snippet = 2
 }
 
-class CompletionItem
+final class CompletionItem
 {
     import std.typecons : Nullable;
 
@@ -239,7 +239,7 @@ enum CompletionItemKind : uint
     typeParameter = 25
 }
 
-class CompletionRegistrationOptions : TextDocumentRegistrationOptions
+final class CompletionRegistrationOptions : TextDocumentRegistrationOptions
 {
     import std.typecons : Nullable;
 
@@ -254,7 +254,7 @@ class CompletionRegistrationOptions : TextDocumentRegistrationOptions
     }
 }
 
-class Hover
+final class Hover
 {
     import std.typecons : Nullable;
 
@@ -268,7 +268,7 @@ class Hover
     }
 }
 
-class SignatureHelp
+final class SignatureHelp
 {
     import std.typecons : Nullable;
 
@@ -294,7 +294,7 @@ private class InformationBase
     Nullable!string documentation;
 }
 
-class SignatureInformation : InformationBase
+final class SignatureInformation : InformationBase
 {
     import std.typecons : Nullable;
 
@@ -308,7 +308,7 @@ class SignatureInformation : InformationBase
 
 alias ParameterInformation = InformationBase;
 
-class SignatureHelpRegistrationOptions : TextDocumentRegistrationOptions
+final class SignatureHelpRegistrationOptions : TextDocumentRegistrationOptions
 {
     import std.typecons : Nullable;
 
@@ -320,7 +320,7 @@ class SignatureHelpRegistrationOptions : TextDocumentRegistrationOptions
     }
 }
 
-class ReferenceParams : TextDocumentPositionParams
+final class ReferenceParams : TextDocumentPositionParams
 {
     ReferenceContext context;
 
@@ -330,12 +330,12 @@ class ReferenceParams : TextDocumentPositionParams
     }
 }
 
-class ReferenceContext
+final class ReferenceContext
 {
     bool includeDeclaration;
 }
 
-class DocumentHighlight
+final class DocumentHighlight
 {
     import std.typecons : Nullable;
 
@@ -359,7 +359,7 @@ enum DocumentHighlightKind : uint
 
 alias DocumentSymbolParams = ParamsBase;
 
-class DocumentSymbol
+final class DocumentSymbol
 {
     import std.typecons : Nullable;
 
@@ -386,7 +386,7 @@ class DocumentSymbol
     }
 }
 
-class SymbolInformation
+final class SymbolInformation
 {
     import std.typecons : Nullable;
 
@@ -436,7 +436,7 @@ enum SymbolKind : uint
     typeParameter = 26
 }
 
-class CodeActionParams : ParamsBase
+final class CodeActionParams : ParamsBase
 {
     Range range;
     CodeActionContext context;
@@ -458,7 +458,7 @@ enum CodeActionKind : string
     sourceOrganizeImports = "source.organizeImports"
 }
 
-class CodeActionContext
+final class CodeActionContext
 {
     import std.typecons : Nullable;
 
@@ -466,7 +466,7 @@ class CodeActionContext
     Nullable!(CodeActionKind[]) only;
 }
 
-class CodeAction
+final class CodeAction
 {
     import std.typecons : Nullable;
 
@@ -493,7 +493,7 @@ alias CodeActionRegistrationOptions = JSONValue;
 
 alias CodeLensParams = ParamsBase;
 
-class CodeLens
+final class CodeLens
 {
     import std.typecons : Nullable;
 
@@ -510,7 +510,7 @@ class CodeLens
     }
 }
 
-class CodeLensRegistrationOptions : TextDocumentRegistrationOptions
+final class CodeLensRegistrationOptions : TextDocumentRegistrationOptions
 {
     import std.typecons : Nullable;
 
@@ -524,7 +524,7 @@ class CodeLensRegistrationOptions : TextDocumentRegistrationOptions
 
 alias DocumentLinkParams = ParamsBase;
 
-class DocumentLink
+final class DocumentLink
 {
     import std.typecons : Nullable;
 
@@ -538,7 +538,7 @@ class DocumentLink
     }
 }
 
-class DocumentLinkRegistrationOptions : TextDocumentRegistrationOptions
+final class DocumentLinkRegistrationOptions : TextDocumentRegistrationOptions
 {
     import std.typecons : Nullable;
 
@@ -552,7 +552,7 @@ class DocumentLinkRegistrationOptions : TextDocumentRegistrationOptions
 
 alias DocumentColorParams = ParamsBase;
 
-class ColorInformation
+final class ColorInformation
 {
     Range range;
     Color color;
@@ -564,7 +564,7 @@ class ColorInformation
     }
 }
 
-class Color
+final class Color
 {
     float red;
     float green;
@@ -580,7 +580,7 @@ class Color
     }
 }
 
-class ColorPresentationParams : ParamsBase
+final class ColorPresentationParams : ParamsBase
 {
     Color color;
     Range range;
@@ -593,7 +593,7 @@ class ColorPresentationParams : ParamsBase
     }
 }
 
-class ColorPresentation
+final class ColorPresentation
 {
     import std.typecons : Nullable;
 
@@ -620,13 +620,13 @@ class DocumentFormattingParams : ParamsBase
     }
 }
 
-class FormattingOptions
+final class FormattingOptions
 {
     size_t tabSize;
     bool insertSpaces;
 }
 
-class DocumentRangeFormattingParams : DocumentFormattingParams
+final class DocumentRangeFormattingParams : DocumentFormattingParams
 {
     Range range;
 
@@ -636,7 +636,7 @@ class DocumentRangeFormattingParams : DocumentFormattingParams
     }
 }
 
-class DocumentOnTypeFormattingParams : DocumentFormattingParams
+final class DocumentOnTypeFormattingParams : DocumentFormattingParams
 {
     Position position;
     string ch;
@@ -647,7 +647,7 @@ class DocumentOnTypeFormattingParams : DocumentFormattingParams
     }
 }
 
-class DocumentOnTypeFormattingRegistrationOptions : TextDocumentRegistrationOptions
+final class DocumentOnTypeFormattingRegistrationOptions : TextDocumentRegistrationOptions
 {
     import std.typecons : Nullable;
 
@@ -662,7 +662,7 @@ class DocumentOnTypeFormattingRegistrationOptions : TextDocumentRegistrationOpti
     }
 }
 
-class RenameParams : ParamsBase
+final class RenameParams : ParamsBase
 {
     Position position;
     string newName;
@@ -673,7 +673,7 @@ class RenameParams : ParamsBase
     }
 }
 
-class RenameRegistrationOptions : TextDocumentRegistrationOptions
+final class RenameRegistrationOptions : TextDocumentRegistrationOptions
 {
     import std.typecons : Nullable;
 
@@ -689,7 +689,7 @@ enum FoldingRangeKind : string
     region = "region"
 }
 
-class FoldingRange
+final class FoldingRange
 {
     import std.typecons : Nullable;
 

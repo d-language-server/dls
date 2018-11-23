@@ -36,7 +36,7 @@ package interface RegistrationOptionsBase
 {
 }
 
-class Registration(R : RegistrationOptionsBase) : RegistrationBase
+final class Registration(R : RegistrationOptionsBase) : RegistrationBase
 {
     import std.typecons : Nullable;
 
@@ -63,7 +63,7 @@ class TextDocumentRegistrationOptions : RegistrationOptionsBase
     }
 }
 
-class RegistrationParams(R)
+final class RegistrationParams(R)
 {
     Registration!R[] registrations;
 
@@ -73,7 +73,7 @@ class RegistrationParams(R)
     }
 }
 
-class Unregistration : RegistrationBase
+final class Unregistration : RegistrationBase
 {
     this(string id = string.init, string method = string.init)
     {
@@ -81,7 +81,7 @@ class Unregistration : RegistrationBase
     }
 }
 
-class UnregistrationParams
+final class UnregistrationParams
 {
     Unregistration[] unregistrations;
 

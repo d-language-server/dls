@@ -27,7 +27,7 @@ private class WithDynamicRegistration
     Nullable!bool dynamicRegistration;
 }
 
-class InitializeParams
+final class InitializeParams
 {
     import dls.protocol.definitions : DocumentUri;
     import dls.protocol.interfaces.workspace : WorkspaceFolder;
@@ -41,9 +41,9 @@ class InitializeParams
         verbose = "verbose"
     }
 
-    static class InitializationOptions
+    static final class InitializationOptions
     {
-        static class Capabilities
+        static final class Capabilities
         {
             bool hover = true;
             bool completion = true;
@@ -100,20 +100,20 @@ enum FailureHandlingKind : string
     undo = "undo"
 }
 
-class WorkspaceClientCapabilities
+final class WorkspaceClientCapabilities
 {
     import std.typecons : Nullable;
 
-    static class WorkspaceEdit
+    static final class WorkspaceEdit
     {
         Nullable!bool documentChanges;
         Nullable!(ResourceOperationKind[]) resourceOperations;
         Nullable!FailureHandlingKind failureHandling;
     }
 
-    static class Symbol : WithDynamicRegistration
+    static final class Symbol : WithDynamicRegistration
     {
-        static class SymbolKind
+        static final class SymbolKind
         {
             import dls.protocol.interfaces.text_document : SymbolKind;
 
@@ -133,20 +133,20 @@ class WorkspaceClientCapabilities
     Nullable!bool configuration;
 }
 
-class TextDocumentClientCapabilities
+final class TextDocumentClientCapabilities
 {
     import std.typecons : Nullable;
 
-    static class Synchronisation : WithDynamicRegistration
+    static final class Synchronisation : WithDynamicRegistration
     {
         Nullable!bool willSave;
         Nullable!bool willSaveWaitUntil;
         Nullable!bool didSave;
     }
 
-    static class Completion : WithDynamicRegistration
+    static final class Completion : WithDynamicRegistration
     {
-        static class CompletionItem
+        static final class CompletionItem
         {
             import dls.protocol.definitions : MarkupKind;
 
@@ -157,7 +157,7 @@ class TextDocumentClientCapabilities
             Nullable!bool preselectSupport;
         }
 
-        static class CompletionItemKind
+        static final class CompletionItemKind
         {
             import dls.protocol.interfaces.text_document : CompletionItemKind;
 
@@ -169,16 +169,16 @@ class TextDocumentClientCapabilities
         Nullable!bool contextSupport;
     }
 
-    static class Hover : WithDynamicRegistration
+    static final class Hover : WithDynamicRegistration
     {
         import dls.protocol.definitions : MarkupKind;
 
         Nullable!(MarkupKind[]) contentFormat;
     }
 
-    static class SignatureHelp : WithDynamicRegistration
+    static final class SignatureHelp : WithDynamicRegistration
     {
-        static class SignatureInformation
+        static final class SignatureInformation
         {
             import dls.protocol.definitions : MarkupKind;
 
@@ -188,9 +188,9 @@ class TextDocumentClientCapabilities
         Nullable!SignatureInformation signatureHelp;
     }
 
-    static class DocumentSymbol : WithDynamicRegistration
+    static final class DocumentSymbol : WithDynamicRegistration
     {
-        static class SymbolKind
+        static final class SymbolKind
         {
             import dls.protocol.interfaces.text_document : SymbolKind;
 
@@ -201,11 +201,11 @@ class TextDocumentClientCapabilities
         Nullable!bool hierarchicalDocumentSymbolSupport;
     }
 
-    static class CodeAction : WithDynamicRegistration
+    static final class CodeAction : WithDynamicRegistration
     {
-        static class CodeActionLiteralSupport
+        static final class CodeActionLiteralSupport
         {
-            static class CodeActionKind
+            static final class CodeActionKind
             {
                 import dls.protocol.interfaces.text_document : CodeActionKind;
 
@@ -223,17 +223,17 @@ class TextDocumentClientCapabilities
         Nullable!CodeActionLiteralSupport codeActionLiteralSupport;
     }
 
-    static class Rename : WithDynamicRegistration
+    static final class Rename : WithDynamicRegistration
     {
         Nullable!bool prepareSupport;
     }
 
-    static class PublishDiagnostics
+    static final class PublishDiagnostics
     {
         Nullable!bool relatedInformation;
     }
 
-    static class FoldingRange : WithDynamicRegistration
+    static final class FoldingRange : WithDynamicRegistration
     {
         Nullable!size_t rangeLimit;
         Nullable!bool lineFoldingOnly;
@@ -261,7 +261,7 @@ class TextDocumentClientCapabilities
     Nullable!FoldingRange foldingRange;
 }
 
-class ClientCapabilities
+final class ClientCapabilities
 {
     import std.json : JSONValue;
     import std.typecons : Nullable;
@@ -271,7 +271,7 @@ class ClientCapabilities
     Nullable!JSONValue experimental;
 }
 
-class InitializeResult
+final class InitializeResult
 {
     ServerCapabilities capabilities;
 
@@ -281,7 +281,7 @@ class InitializeResult
     }
 }
 
-class InitializeErrorData
+final class InitializeErrorData
 {
     bool retry;
 }
@@ -305,7 +305,7 @@ private class OptionsBase
     }
 }
 
-class CompletionOptions : OptionsBase
+final class CompletionOptions : OptionsBase
 {
     import std.typecons : Nullable;
 
@@ -319,7 +319,7 @@ class CompletionOptions : OptionsBase
     }
 }
 
-class SignatureHelpOptions
+final class SignatureHelpOptions
 {
     import std.typecons : Nullable;
 
@@ -331,7 +331,7 @@ class SignatureHelpOptions
     }
 }
 
-class CodeActionOptions
+final class CodeActionOptions
 {
     import dls.protocol.interfaces.text_document : CodeActionKind;
     import std.typecons : Nullable;
@@ -346,7 +346,7 @@ class CodeActionOptions
 
 alias CodeLensOptions = OptionsBase;
 
-class DocumentOnTypeFormattingOptions
+final class DocumentOnTypeFormattingOptions
 {
     import std.typecons : Nullable;
 
@@ -361,7 +361,7 @@ class DocumentOnTypeFormattingOptions
     }
 }
 
-class RenameOptions
+final class RenameOptions
 {
     import std.typecons : Nullable;
 
@@ -375,7 +375,7 @@ class RenameOptions
 
 alias DocumentLinkOptions = OptionsBase;
 
-class ExecuteCommandOptions
+final class ExecuteCommandOptions
 {
     string[] commands;
 
@@ -385,7 +385,7 @@ class ExecuteCommandOptions
     }
 }
 
-class SaveOptions
+final class SaveOptions
 {
     import std.typecons : Nullable;
 
@@ -397,15 +397,15 @@ class SaveOptions
     }
 }
 
-class ColorProviderOptions
+final class ColorProviderOptions
 {
 }
 
-class FoldingRangeProviderOptions
+final class FoldingRangeProviderOptions
 {
 }
 
-class TextDocumentSyncOptions
+final class TextDocumentSyncOptions
 {
     import std.typecons : Nullable;
 
@@ -428,7 +428,7 @@ class TextDocumentSyncOptions
     }
 }
 
-class StaticRegistrationOptions
+final class StaticRegistrationOptions
 {
     import std.typecons : Nullable;
 
@@ -440,14 +440,14 @@ class StaticRegistrationOptions
     }
 }
 
-class ServerCapabilities
+final class ServerCapabilities
 {
     import std.json : JSONValue;
     import std.typecons : Nullable;
 
-    static class Workspace
+    static final class Workspace
     {
-        static class WorkspaceFolders
+        static final class WorkspaceFolders
         {
             Nullable!bool supported;
             Nullable!JSONValue changeNotifications;
@@ -493,7 +493,7 @@ class ServerCapabilities
     Nullable!JSONValue experimental;
 }
 
-class CancelParams
+final class CancelParams
 {
     import std.json : JSONValue;
 
