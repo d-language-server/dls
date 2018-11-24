@@ -142,7 +142,7 @@ final abstract class Server
         import dls.protocol.state : initOptions;
         import dls.util.json : convertFromJSON;
         import dls.util.logger : logger;
-        import std.algorithm : among, startsWith;
+        import std.algorithm : startsWith;
         import std.json : JSONException, JSONValue, parseJSON;
 
         RequestMessage request;
@@ -160,7 +160,7 @@ final abstract class Server
                     {
                         request = convertFromJSON!RequestMessage(json);
 
-                        if (initialized || request.method.among("initialize", "shutdown"))
+                        if (initialized || request.method == "initialize")
                         {
                             send(request.id,
                                     handler!RequestHandler(request.method)(request.params));
