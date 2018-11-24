@@ -73,14 +73,18 @@ class NotificationMessage : Message
 
 enum ErrorCodes : Tuple!(long, Tr)
 {
+    //dfmt off
     parseError = tuple(-32_700L, Tr.app_rpc_errorCodes_parseError),
     invalidRequest = tuple(-32_600L, Tr.app_rpc_errorCodes_invalidRequest),
     methodNotFound = tuple(-32_601L, Tr.app_rpc_errorCodes_methodNotFound),
     invalidParams = tuple(-32_602L, Tr.app_rpc_errorCodes_invalidParams),
     internalError = tuple(-32_603L, Tr.app_rpc_errorCodes_internalError),
-    serverNotInitialized = tuple(-32_202L, Tr.app_rpc_errorCodes_serverNotInitialized),
-    unknownErrorCode = tuple(-32_201L, Tr.app_rpc_errorCodes_unknownErrorCode),
-    requestCancelled = tuple(-32_800L, Tr.app_rpc_errorCodes_requestCancelled)
+    serverErrorStart = tuple(-32_099L, Tr._),
+    serverErrorEnd = tuple(-32_000L, Tr._),
+    serverNotInitialized = tuple(-32_002L, Tr.app_rpc_errorCodes_serverNotInitialized),
+    unknownErrorCode = tuple(-32_001L, Tr.app_rpc_errorCodes_unknownErrorCode),
+    requestCancelled = tuple(-32_800L, Tr.app_rpc_errorCodes_requestCancelled),
+    //dfmt on
 }
 
 class CancelParams
