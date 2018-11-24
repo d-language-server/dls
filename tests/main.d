@@ -210,11 +210,14 @@ private auto getOrderedMessageNames(in string directory)
 
 private JSONValue getJSON(in string directory, in string name, in MessageFileType type)
 {
-    import std.json : parseJSON;
+    import std.algorithm : sort;
+    import std.array : array;
+    import std.json : JSONValue, parseJSON;
     import std.file : exists, readText;
 
     const path = getMessagePath(directory, name, type);
-    return parseJSON(exists(path) ? readText(path).expandTestUris(directory) : "[]");
+    auto rawJSON = parseJSON(exists(path) ? readText(path).expandTestUris(directory) : "[]");
+    return JSONValue(rawJSON.array.sort!((a, b) => a.toString() < b.toString()).array);
 }
 
 private string getMessagePath(in string directory, in string name, in MessageFileType type)
