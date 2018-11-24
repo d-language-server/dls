@@ -37,9 +37,9 @@ private struct Message
 
 private class TestCommunicator : Communicator
 {
-    string[] testedWorkspaces;
-    private Message[][string] _workspacesMessages;
-    private string _workspace;
+    string[] testedDirectories;
+    private Message[][string] _directoriesMessages;
+    private string _directory;
     private string _lastReadMessageName;
     private string _currentOutput;
     private JSONValue[] _outputMessages;
@@ -50,52 +50,52 @@ private class TestCommunicator : Communicator
         import std.file : SpanMode, dirEntries, getcwd, isDir;
         import std.path : buildPath;
 
-        foreach (workspace; dirEntries(buildPath(getcwd(), "tests"), SpanMode.shallow).filter!(
+        foreach (directory; dirEntries(buildPath(getcwd(), "tests"), SpanMode.shallow).filter!(
                 entry => isDir(entry.name)))
         {
-            _workspacesMessages[workspace] = [];
+            _directoriesMessages[directory] = [];
 
-            if (_workspace.length == 0)
+            if (_directory.length == 0)
             {
-                _workspace = workspace;
+                _directory = directory;
             }
         }
 
-        fillWorkspaceMessages();
+        fillDirectoryMessages();
     }
 
     bool hasData()
     {
-        return _workspacesMessages.keys.length > 0;
+        return _directoriesMessages.keys.length > 0;
     }
 
     char[] read(size_t size)
     {
-        auto currentMessage = _workspacesMessages[_workspace][0];
+        auto currentMessage = _directoriesMessages[_directory][0];
         auto result = currentMessage.content[0 .. size];
 
         if (currentMessage.content.length > size)
         {
-            _workspacesMessages[_workspace][0].content = currentMessage.content[size .. $];
+            _directoriesMessages[_directory][0].content = currentMessage.content[size .. $];
         }
         else
         {
             _lastReadMessageName = currentMessage.name;
             _outputMessages = [];
 
-            if (_workspacesMessages[_workspace].length > 1)
+            if (_directoriesMessages[_directory].length > 1)
             {
-                _workspacesMessages[_workspace] = _workspacesMessages[_workspace][1 .. $];
+                _directoriesMessages[_directory] = _directoriesMessages[_directory][1 .. $];
             }
             else
             {
-                testedWorkspaces ~= _workspace;
-                _workspacesMessages.remove(_workspace);
+                testedDirectories ~= _directory;
+                _directoriesMessages.remove(_directory);
 
-                if (_workspacesMessages.keys.length > 0)
+                if (_directoriesMessages.keys.length > 0)
                 {
-                    _workspace = _workspacesMessages.keys[0];
-                    fillWorkspaceMessages();
+                    _directory = _directoriesMessages.keys[0];
+                    fillDirectoryMessages();
                 }
             }
         }
@@ -116,25 +116,25 @@ private class TestCommunicator : Communicator
 
         _currentOutput.findSkip("\r\n\r\n");
         _outputMessages ~= parseJSON(_currentOutput);
-        const outputPath = getMessagePath(_workspace, _lastReadMessageName,
+        const outputPath = getMessagePath(_directory, _lastReadMessageName,
                 MessageFileType.output);
         write(outputPath, JSONValue(_outputMessages)
                 .toPrettyString(JSONOptions.doNotEscapeSlashes));
         _currentOutput = "";
     }
 
-    private void fillWorkspaceMessages()
+    private void fillDirectoryMessages()
     {
         import std.file : readText;
         import std.format : format;
 
-        foreach (line; getOrderedMessageNames(_workspace))
+        foreach (line; getOrderedMessageNames(_directory))
         {
-            const inputPath = getMessagePath(_workspace, line, MessageFileType.input);
-            auto input = readText!(char[])(inputPath).expandTestUris(_workspace);
+            const inputPath = getMessagePath(_directory, line, MessageFileType.input);
+            auto input = readText!(char[])(inputPath).expandTestUris(_directory);
             auto message = Message(line);
             message.content ~= format("Content-Length: %s\r\n\r\n%s", input.length, input);
-            _workspacesMessages[_workspace] ~= message;
+            _directoriesMessages[_directory] ~= message;
         }
     }
 }
@@ -147,10 +147,10 @@ int main()
     auto testCommunicator = new TestCommunicator();
     communicator = testCommunicator;
     Server.loop();
-    return checkResults(testCommunicator.testedWorkspaces);
+    return checkResults(testCommunicator.testedDirectories);
 }
 
-private int checkResults(in string[] workspaces)
+private int checkResults(in string[] directories)
 {
     import std.algorithm : reduce;
     import std.array : array;
@@ -160,24 +160,24 @@ private int checkResults(in string[] workspaces)
 
     size_t diffCount;
 
-    foreach (workspace; workspaces)
+    foreach (directory; directories)
     {
-        stderr.writefln("#### Workspace %s", workspace);
+        stderr.writefln("#### Test directory %s", directory);
 
-        auto orderedMessageNames = getOrderedMessageNames(workspace).array;
+        auto orderedMessageNames = getOrderedMessageNames(directory).array;
         const maxNameLength = reduce!((a, b) => a.length > b.length ? a : b)("",
                 orderedMessageNames).length;
 
         foreach (name; orderedMessageNames)
         {
-            auto output = getJSON(workspace, name, MessageFileType.output);
-            auto reference = getJSON(workspace, name, MessageFileType.reference);
+            auto output = getJSON(directory, name, MessageFileType.output);
+            auto reference = getJSON(directory, name, MessageFileType.reference);
             stderr.writef("     Message %s%s: ", name, repeat(' ', maxNameLength - name.length));
 
             if (output != reference)
             {
                 ++diffCount;
-                stderr.writefln("FAIL");
+                stderr.writeln("FAIL");
                 stderr.writeln(">>>> expected result:");
                 stderr.writeln(reference.toPrettyString(JSONOptions.doNotEscapeSlashes));
                 stderr.writeln(">>>> actual result:");
@@ -185,7 +185,7 @@ private int checkResults(in string[] workspaces)
             }
             else
             {
-                stderr.writefln("SUCCESS");
+                stderr.writeln("SUCCESS");
             }
         }
     }
@@ -193,36 +193,36 @@ private int checkResults(in string[] workspaces)
     return diffCount > 0 ? 1 : 0;
 }
 
-private auto getOrderedMessageNames(in string workspace)
+private auto getOrderedMessageNames(in string directory)
 {
     import std.algorithm : map;
     import std.stdio : File;
     import std.string : strip;
 
-    return File(getMessagePath(workspace, "_order", MessageFileType.order), "r")
+    return File(getMessagePath(directory, "_order", MessageFileType.order), "r")
         .byLineCopy.map!strip;
 }
 
-private JSONValue getJSON(in string workspace, in string name, in MessageFileType type)
+private JSONValue getJSON(in string directory, in string name, in MessageFileType type)
 {
     import std.json : parseJSON;
     import std.file : exists, readText;
 
-    const path = getMessagePath(workspace, name, type);
-    return parseJSON(exists(path) ? readText(path).expandTestUris(workspace) : "[]");
+    const path = getMessagePath(directory, name, type);
+    return parseJSON(exists(path) ? readText(path).expandTestUris(directory) : "[]");
 }
 
-private string getMessagePath(in string workspace, in string name, in MessageFileType type)
+private string getMessagePath(in string directory, in string name, in MessageFileType type)
 {
     import std.path : buildPath;
 
-    return buildPath(workspace, "messages", name ~ "." ~ type);
+    return buildPath(directory, "messages", name ~ "." ~ type);
 }
 
-private inout(char[]) expandTestUris(inout(char[]) text, in string workspace)
+private inout(char[]) expandTestUris(inout(char[]) text, in string directory)
 {
     import dls.util.uri : Uri;
     import std.array : replace;
 
-    return text.replace("testFile://", Uri.fromPath(workspace).toString());
+    return text.replace("testFile://", Uri.fromPath(directory).toString());
 }
