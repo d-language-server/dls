@@ -23,10 +23,10 @@ import std.json : JSONValue;
 
 private enum MessageFileType : string
 {
-    order = "txt",
-    input = "in.json",
-    output = "out.json",
-    reference = "ref.json"
+    order = ".txt",
+    input = ".in.json",
+    output = ".out.json",
+    reference = ".ref.json"
 }
 
 private struct Message
@@ -183,10 +183,8 @@ private int checkResults(in string[] directories)
             {
                 ++diffCount;
                 stderr.writeln("\u274C FAILURE");
-                stderr.writeln(">>>> expected result:");
-                stderr.writeln(reference.toPrettyString(JSONOptions.doNotEscapeSlashes));
-                stderr.writeln(">>>> actual result:");
-                stderr.writeln(output.toPrettyString(JSONOptions.doNotEscapeSlashes));
+                printDiff(reference.toPrettyString(JSONOptions.doNotEscapeSlashes),
+                        output.toPrettyString(JSONOptions.doNotEscapeSlashes));
             }
             else
             {
@@ -224,7 +222,7 @@ private string getMessagePath(in string directory, in string name, in MessageFil
 {
     import std.path : buildPath;
 
-    return buildPath(directory, "messages", name ~ "." ~ type);
+    return buildPath(directory, "messages", name ~ type);
 }
 
 private inout(char[]) expandTestUris(inout(char[]) text, in string directory)
@@ -233,4 +231,43 @@ private inout(char[]) expandTestUris(inout(char[]) text, in string directory)
     import std.array : replace;
 
     return text.replace("testFile://", Uri.fromPath(directory).toString());
+}
+
+private void printDiff(in string reference, in string output)
+{
+    import std.conv : to;
+    import std.file : remove, tempDir, write;
+    import std.path : buildPath;
+    import std.process : Config, execute;
+    import std.stdio : stderr;
+    import std.uuid : randomUUID;
+
+    const mainPath = buildPath(tempDir, randomUUID().toString());
+    const refPath = mainPath ~ MessageFileType.reference;
+    const outPath = mainPath ~ MessageFileType.output;
+
+    write(refPath, reference);
+    write(outPath, output);
+
+    scope (exit)
+    {
+        remove(refPath);
+        remove(outPath);
+    }
+
+    version (Windows)
+    {
+        const args = ["fc.exe", refPath, outPath];
+    }
+    else version (Posix)
+    {
+        const args = ["diff", "-U", size_t.max.to!string, refPath, outPath];
+    }
+    else
+    {
+        string[] args;
+    }
+
+    stderr.write(args.length > 0 ? execute(args, null, Config.suppressConsole)
+            .output : "No diff output available on this platform");
 }
