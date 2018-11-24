@@ -154,6 +154,7 @@ private int checkResults(in string[] directories)
 {
     import std.algorithm : reduce;
     import std.array : array;
+    import std.format : format;
     import std.json : JSONOptions;
     import std.range : repeat;
     import std.stdio : stderr;
@@ -162,7 +163,11 @@ private int checkResults(in string[] directories)
 
     foreach (directory; directories)
     {
-        stderr.writefln("#### Test directory %s", directory);
+        const header = format("Test directory %s", directory);
+        auto headerLine = repeat('=', header.length);
+        stderr.writeln(headerLine);
+        stderr.writeln(header);
+        stderr.writeln(headerLine);
 
         auto orderedMessageNames = getOrderedMessageNames(directory).array;
         const maxNameLength = reduce!((a, b) => a.length > b.length ? a : b)("",
@@ -172,12 +177,12 @@ private int checkResults(in string[] directories)
         {
             auto output = getJSON(directory, name, MessageFileType.output);
             auto reference = getJSON(directory, name, MessageFileType.reference);
-            stderr.writef("     Message %s%s: ", name, repeat(' ', maxNameLength - name.length));
+            stderr.writef(" * Message %s%s: ", name, repeat(' ', maxNameLength - name.length));
 
             if (output != reference)
             {
                 ++diffCount;
-                stderr.writeln("FAIL");
+                stderr.writeln("\u274C FAILURE");
                 stderr.writeln(">>>> expected result:");
                 stderr.writeln(reference.toPrettyString(JSONOptions.doNotEscapeSlashes));
                 stderr.writeln(">>>> actual result:");
@@ -185,7 +190,7 @@ private int checkResults(in string[] directories)
             }
             else
             {
-                stderr.writeln("SUCCESS");
+                stderr.writeln("\u2714 SUCCESS");
             }
         }
     }
