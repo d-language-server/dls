@@ -142,6 +142,7 @@ class AnalysisTool : Tool
 
     void updateAnalysisConfig(in Uri workspaceUri)
     {
+        import dls.server : Server;
         import dls.util.logger : logger;
         import dscanner.analysis.config : defaultStaticAnalysisConfig;
         import inifiled : readINIFile;
@@ -163,7 +164,11 @@ class AnalysisTool : Tool
         }
 
         _analysisConfigs[workspaceUri.path] = conf;
-        scanAllWorkspaces();
+
+        if (Server.initialized)
+        {
+            scanAllWorkspaces();
+        }
     }
 
     Diagnostic[] diagnostics(in Uri uri)

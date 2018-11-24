@@ -41,7 +41,6 @@ InitializeResult initialize(InitializeParams params)
 
     initState = params;
     logger.info("Initializing server");
-    Server.initialized = true;
     AnalysisTool.initialize();
     CommandTool.initialize();
     FormatTool.initialize();
@@ -114,6 +113,7 @@ InitializeResult initialize(InitializeParams params)
                 JSONValue(true).nullable).nullable);
     }
 
+    Server.initialized = true;
     return result;
 }
 
