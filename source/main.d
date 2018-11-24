@@ -45,5 +45,5 @@ int main(string[] args)
     }
 
     Server.loop();
-    return 0;
+    return Server.initialized ? 1 : 0;
 }
