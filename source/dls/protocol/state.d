@@ -34,7 +34,11 @@ private InitializeParams _initState;
     import dls.util.logger : logger;
 
     _initState = params;
-    logger.trace = params.trace;
+
+    if (!params.trace.isNull)
+    {
+        logger.trace = params.trace;
+    }
 }
 
 @property InitializeParams.InitializationOptions initOptions()
