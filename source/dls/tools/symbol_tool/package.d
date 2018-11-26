@@ -447,6 +447,7 @@ class SymbolTool : Tool
 
     void importCustomProject(Uri uri)
     {
+        import dls.protocol.jsonrpc : InvalidParamsException;
         import dls.util.logger : logger;
         import std.algorithm : find, map;
         import std.array : array;
@@ -456,11 +457,17 @@ class SymbolTool : Tool
         logger.infof("Importing custom project: %s", uri.path);
 
         string[string] deps;
-        const sourceDir = ["source", "src", ""].map!(d => buildNormalizedPath(uri.path, d))
-            .find!exists
-            .front;
+        auto possibleSourceDirs = ["source", "src", ""].map!(
+                d => buildNormalizedPath(uri.path, d))
+            .find!exists;
+
+        if (possibleSourceDirs.empty)
+        {
+            throw new InvalidParamsException("invalid uri: " ~ uri);
+        }
+
         _workspaceDependencies[uri.path] = deps;
-        importDirectories([sourceDir]);
+        importDirectories([possibleSourceDirs.front]);
     }
 
     void importDubSelections(Uri uri)
