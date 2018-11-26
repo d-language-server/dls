@@ -4,6 +4,14 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+### 0.18.0
+- Added test suite skeleton to start fighting against regressions
+- Fixed diagnostics being sent before responding to the initialization request
+- Fixed some initialization properties assumed to not be unspecified, potentially leading to crashes
+- Fixed exit code always being one even if exiting without a shutdown request
+- Fixed some wrong error codes
+- Fixed possible crash upon receiving an invalid worksapce URI
+
 #### 0.17.1
 - Fixed logger not cleaning up the log file before writing to it
 - Fixed directories not being cleared from DCD's cache after being deleted
