@@ -20,6 +20,8 @@
 
 module dls.bootstrap;
 
+import std.json : JSONValue;
+
 immutable apiEndpoint = "https://api.github.com/repos/d-language-server/dls/%s";
 
 version (Windows)
@@ -76,24 +78,29 @@ shared static this()
     dlsArchiveName = format("dls-%%s.%s.%s.zip", os, arch);
 }
 
+@property JSONValue[] allReleases()
+{
+    import std.format : format;
+    import std.json : parseJSON;
+    import std.net.curl : get;
+
+    return parseJSON(get(format!apiEndpoint("releases"))).array;
+}
+
 @property bool canDownloadDls()
 {
     import core.time : hours;
     import std.algorithm : min;
     import std.datetime : Clock, SysTime;
     import std.format : format;
-    import std.json : parseJSON;
-    import std.net.curl : get;
 
     try
     {
-        const releases = parseJSON(get(format!apiEndpoint("releases"))).array;
-
-        foreach (release; releases[0 .. min($, 5)])
+        foreach (release; allReleases)
         {
             const releaseDate = SysTime.fromISOExtString(release["published_at"].str);
 
-            if (Clock.currTime.toUTC() - releaseDate > 1.hours)
+            if (Clock.currTime.toUTC() - releaseDate > 1.hours && !release["prerelease"].boolean)
             {
                 foreach (asset; release["assets"].array)
                 {

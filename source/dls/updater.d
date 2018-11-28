@@ -104,27 +104,35 @@ void cleanup()
 void update(bool autoUpdate)
 {
     import core.time : hours;
-    import dls.bootstrap : UpgradeFailedException, apiEndpoint, buildDls,
-        canDownloadDls, downloadDls, linkDls;
+    import dls.bootstrap : UpgradeFailedException, buildDls, canDownloadDls,
+        downloadDls, allReleases, linkDls;
     static import dls.protocol.jsonrpc;
     import dls.protocol.interfaces.dls : DlsUpgradeSizeParams, TranslationParams;
     import dls.protocol.messages.methods : Dls;
     import dls.protocol.messages.window : Util;
+    import dls.protocol.state : initOptions;
     import dls.util.constants : Tr;
     import dls.util.logger : logger;
     import dub.dependency : Dependency;
     import dub.dub : Dub, FetchOptions;
     import dub.semver : compareVersions;
-    import std.algorithm : stripLeft;
+    import std.algorithm : filter, stripLeft;
     import std.concurrency : ownerTid, receiveOnly, register, send, thisTid;
     import std.conv : to;
     import std.datetime : Clock, SysTime;
     import std.format : format;
-    import std.json : parseJSON;
-    import std.net.curl : get;
     import std.path : asNormalizedPath;
 
-    const latestRelease = parseJSON(get(format!apiEndpoint("releases/latest")));
+    auto validReleases = allReleases.filter!(r => !r["prerelease"].boolean
+            || initOptions.preReleaseBuilds);
+
+    if (validReleases.empty)
+    {
+        logger.warning("Unable to find any valid release");
+        return;
+    }
+
+    const latestRelease = validReleases.front;
     const latestVersion = latestRelease["tag_name"].str.stripLeft('v');
     const releaseTime = SysTime.fromISOExtString(latestRelease["published_at"].str);
 
