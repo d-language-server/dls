@@ -42,6 +42,7 @@ private class TestCommunicator : Communicator
     string[] testedDirectories;
     private Message[][string] _directoriesMessages;
     private string _directory;
+    private string _lastDirectory;
     private string _lastReadMessageName;
     private string _currentOutput;
     private JSONValue[] _outputMessages;
@@ -82,6 +83,7 @@ private class TestCommunicator : Communicator
         }
         else
         {
+            _lastDirectory = _directory;
             _lastReadMessageName = currentMessage.name;
             _outputMessages = [];
 
@@ -118,7 +120,7 @@ private class TestCommunicator : Communicator
 
         _currentOutput.findSkip("\r\n\r\n");
         _outputMessages ~= parseJSON(_currentOutput);
-        const outputPath = getMessagePath(_directory, _lastReadMessageName,
+        const outputPath = getMessagePath(_lastDirectory, _lastReadMessageName,
                 MessageFileType.output);
         write(outputPath, JSONValue(_outputMessages)
                 .toPrettyString(JSONOptions.doNotEscapeSlashes));
