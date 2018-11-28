@@ -4,6 +4,10 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.18.1
+- Fixed dub dependency for the BuilKite CI (#17)
+- Fixed completions when the cursor is at the very end of a source file
+
 ### 0.18.0
 - Added test suite skeleton to start fighting against regressions
 - Fixed diagnostics being sent before responding to the initialization request
