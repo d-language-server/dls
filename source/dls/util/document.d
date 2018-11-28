@@ -121,7 +121,7 @@ class Document
         const linesBytes = reduce!((s, i) => s + codeLength!char(_lines[i]))(cast(size_t) 0,
                 iota(position.line));
 
-        if (position.character >= _lines[position.line].length)
+        if (position.character > _lines[position.line].length)
         {
             return 0;
         }
