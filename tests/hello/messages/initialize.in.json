@@ -5,7 +5,6 @@
     "params": {
         "processId": null,
         "rootUri": "testFile:///",
-        "capabilities": {},
-        "trace": "off"
+        "capabilities": {}
     }
 }
