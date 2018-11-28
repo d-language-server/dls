@@ -121,9 +121,10 @@ void update(bool autoUpdate)
     import std.conv : to;
     import std.datetime : Clock, SysTime;
     import std.format : format;
+    import std.json : JSONType;
     import std.path : asNormalizedPath;
 
-    auto validReleases = allReleases.filter!(r => !r["prerelease"].boolean
+    auto validReleases = allReleases.filter!(r => r["prerelease"].type == JSONType.false_
             || initOptions.preReleaseBuilds);
 
     if (validReleases.empty)
