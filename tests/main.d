@@ -159,15 +159,20 @@ private int checkResults(in string[] directories)
     import std.range : repeat;
     import std.stdio : stderr;
 
-    size_t diffCount;
-
-    foreach (directory; directories)
+    static void writeHeader(in string header)
     {
-        const header = format("Test directory %s", directory);
         auto headerLine = repeat('=', header.length);
         stderr.writeln(headerLine);
         stderr.writeln(header);
         stderr.writeln(headerLine);
+    }
+
+    size_t testCount;
+    size_t passCount;
+
+    foreach (directory; directories)
+    {
+        writeHeader(format("Test directory %s", directory));
 
         auto orderedMessageNames = getOrderedMessageNames(directory).array;
         const maxNameLength = reduce!((a, b) => a.length > b.length ? a : b)("",
@@ -178,22 +183,24 @@ private int checkResults(in string[] directories)
             auto output = getJSON(directory, name, MessageFileType.output);
             auto reference = getJSON(directory, name, MessageFileType.reference);
             stderr.writef(" * Message %s%s: ", name, repeat(' ', maxNameLength - name.length));
+            ++testCount;
 
             if (output != reference)
             {
-                ++diffCount;
-                stderr.writeln("\u274C FAILURE");
-                printDiff(reference.toPrettyString(JSONOptions.doNotEscapeSlashes),
+                stderr.writeln("FAIL \u2718");
+                writeDiff(reference.toPrettyString(JSONOptions.doNotEscapeSlashes),
                         output.toPrettyString(JSONOptions.doNotEscapeSlashes));
             }
             else
             {
-                stderr.writeln("\u2714 SUCCESS");
+                stderr.writeln("PASS \u2714");
+                ++passCount;
             }
         }
     }
 
-    return diffCount > 0 ? 1 : 0;
+    writeHeader(format("Passed message tests: %s/%s", passCount, testCount));
+    return passCount > 0 ? 1 : 0;
 }
 
 private auto getOrderedMessageNames(in string directory)
@@ -233,7 +240,7 @@ private inout(char[]) expandTestUris(inout(char[]) text, in string directory)
     return text.replace("testFile://", Uri.fromPath(directory).toString());
 }
 
-private void printDiff(in string reference, in string output)
+private void writeDiff(in string reference, in string output)
 {
     import std.conv : to;
     import std.file : remove, tempDir, write;
@@ -269,5 +276,5 @@ private void printDiff(in string reference, in string output)
     }
 
     stderr.write(args.length > 0 ? execute(args, null, Config.suppressConsole)
-            .output : "No diff output available on this platform");
+            .output : "No diff output available on this platform\n");
 }
