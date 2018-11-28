@@ -121,24 +121,24 @@ DLS supports a few custom initialization options in the `InitializeParams.initia
 
 ```typescript
 interface InitializationOptions: {
-    autoUpdate?: boolean;
-    preReleaseBuilds?: boolean;
-    catchErrors?: boolean;
-    logFile?: string;
+    autoUpdate?: boolean = true;
+    preReleaseBuilds?: boolean = false;
+    catchErrors?: boolean = false;
+    logFile?: string = "";
     capabilities?: {
-        hover?: boolean;
-        completion?: boolean;
-        definition?: boolean;
-        typeDefinition?: boolean;
-        references?: boolean;
-        documentHighlight?: boolean;
-        documentSymbol?: boolean;
-        workspaceSymbol?: boolean;
-        codeAction?: boolean;
-        documentFormatting?: boolean;
-        documentRangeFormatting?: boolean;
-        documentOnTypeFormatting?: boolean;
-        rename?: boolean;
+        hover?: boolean = true;
+        completion?: boolean = true;
+        definition?: boolean = true;
+        typeDefinition?: boolean = true;
+        references?: boolean = true;
+        documentHighlight?: boolean = true;
+        documentSymbol?: boolean = true;
+        workspaceSymbol?: boolean = true;
+        codeAction?: boolean = true;
+        documentFormatting?: boolean = true;
+        documentRangeFormatting?: boolean = true;
+        documentOnTypeFormatting?: boolean = true;
+        rename?: boolean = true;
     }
 }
 ```
