@@ -1,0 +1,24 @@
+{
+    "jsonrpc": "2.0",
+    "id": "textDocument/rangeFormatting",
+    "method": "textDocument/rangeFormatting",
+    "params": {
+        "textDocument": {
+            "uri": "testFile:///source/app.d"
+        },
+        "range": {
+            "start": {
+                "line": 0,
+                "character": 24
+            },
+            "end": {
+                "line": 0,
+                "character": 32
+            }
+        },
+        "options": {
+            "tabSize": 4,
+            "insertSpaces": true
+        }
+    }
+}
