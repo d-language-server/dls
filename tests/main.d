@@ -21,6 +21,8 @@
 import dls.util.communicator : Communicator;
 import std.json : JSONValue;
 
+private immutable orderFileName = "_order";
+
 private enum MessageFileType : string
 {
     order = ".txt",
@@ -51,7 +53,7 @@ private class TestCommunicator : Communicator
         import std.path : buildPath;
 
         foreach (directory; dirEntries(buildPath(getcwd(), "tests"), SpanMode.shallow).filter!(
-                entry => isDir(entry.name)))
+                entry => isDir(entry.name) && hasMessages(entry.name)))
         {
             _directoriesMessages[directory] = [];
 
@@ -203,13 +205,20 @@ private int checkResults(in string[] directories)
     return passCount > 0 ? 1 : 0;
 }
 
+private bool hasMessages(in string directory)
+{
+    import std.file : exists;
+
+    return exists(getMessagePath(directory, orderFileName, MessageFileType.order));
+}
+
 private auto getOrderedMessageNames(in string directory)
 {
     import std.algorithm : map;
     import std.stdio : File;
     import std.string : strip;
 
-    return File(getMessagePath(directory, "_order", MessageFileType.order), "r")
+    return File(getMessagePath(directory, orderFileName, MessageFileType.order), "r")
         .byLineCopy.map!strip;
 }
 
