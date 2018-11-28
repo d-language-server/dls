@@ -116,10 +116,13 @@ class FormatTool : Tool
         import std.array : array;
         import std.string : stripRight;
 
-        return position.character == stripRight(Document.get(uri)
-                .lines[position.line]).length ? formatting(uri, options)
-            .filter!(edit => edit.range.start.line == position.line
-                    || edit.range.end.line == position.line).array : [];
+        if (position.character != stripRight(Document.get(uri).lines[position.line]).length)
+        {
+            return [];
+        }
+
+        return formatting(uri, options).filter!(edit => edit.range.start.line == position.line
+                || edit.range.end.line == position.line).array;
     }
 
     private Config getConfig(in Uri uri, in FormattingOptions options)
@@ -222,32 +225,30 @@ class FormatTool : Tool
                     text = "";
                 }
             }
-            else
+
+            if (startIndex == stopIndex)
             {
-                if (startIndex == stopIndex)
-                {
-                    startIndex = i;
-                    stopIndex = i;
-                }
+                startIndex = i;
+                stopIndex = i;
+            }
 
-                auto addition = !isWhite(beforeChar) && isWhite(afterChar);
-                auto deletion = isWhite(beforeChar) && !isWhite(afterChar);
+            auto addition = !isWhite(beforeChar) && isWhite(afterChar);
+            const deletion = isWhite(beforeChar) && !isWhite(afterChar);
 
-                if (!addition && !deletion)
-                {
-                    addition = before.length - i < after.length - j;
-                }
+            if (!addition && !deletion)
+            {
+                addition = before.length - i < after.length - j;
+            }
 
-                if (addition && j < after.length)
-                {
-                    text ~= after[j .. newJ];
-                    j = newJ;
-                }
-                else if (i < before.length)
-                {
-                    stopIndex = newI;
-                    i = newI;
-                }
+            if (addition && j < after.length)
+            {
+                text ~= after[j .. newJ];
+                j = newJ;
+            }
+            else if (i < before.length)
+            {
+                stopIndex = newI;
+                i = newI;
             }
         }
 
