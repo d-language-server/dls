@@ -39,7 +39,7 @@ script:
   - if [[ ! -z $TRAVIS_TAG ]]; then export BUILD=release; fi
   - if [[ ! -z $TRAVIS_TAG ]]; then export OP=build; fi
   - export PATH="$HOME:$PATH"
-  - dub ${OP:-test --main-file=tests/main.d} --arch=${ARCH:-x86_64} --compiler=$DC --build=${BUILD:-debug} $MAIN_FILE
+  - dub ${OP:-test --main-file=tests/main.d} --arch=${ARCH:-x86_64} --compiler=$DC --build=${BUILD:-debug}
 before_deploy:
   - if which strip; then strip dls; fi
   - upx --best --ultra-brute dls
@@ -47,6 +47,7 @@ before_deploy:
 deploy:
   provider: releases
   api_key: $GITHUB_API_KEY
+  target_commitish: $(git branch --contains HEAD | grep release | sort -r | head -n 1 | tr -d [:space:])
   file_glob: true
   file: dls-*.zip
   skip_cleanup: true
