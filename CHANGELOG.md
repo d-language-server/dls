@@ -4,6 +4,10 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.18.2
+- Updated libraries:
+    - `dub`: `1.12.0` => `1.12.1-rc.1` (#17)
+
 #### 0.18.1
 - Fixed dub dependency for the BuilKite CI (#17)
 - Fixed completions when the cursor is at the very end of a source file
