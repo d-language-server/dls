@@ -97,11 +97,16 @@ class FormatTool : Tool
 
     TextEdit[] rangeFormatting(in Uri uri, in Range range, in FormattingOptions options)
     {
+        import dls.util.document : Document;
         import std.algorithm : filter;
         import std.array : array;
 
-        return formatting(uri, options).filter!(edit => edit.range.start.line >= range.start.line
-                && edit.range.end.line <= range.end.line).array;
+        return formatting(uri, options).filter!((edit) {
+            const doc = Document.get(uri);
+
+            return doc.byteAtPosition(edit.range.start) < doc.byteAtPosition(range.end)
+                && doc.byteAtPosition(edit.range.end) > doc.byteAtPosition(range.start);
+        }).array;
     }
 
     TextEdit[] onTypeFormatting(in Uri uri, in Position position, in FormattingOptions options)
