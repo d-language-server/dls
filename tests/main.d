@@ -202,7 +202,7 @@ private int checkResults(in string[] directories)
     }
 
     writeHeader(format("Passed message tests: %s/%s", passCount, testCount));
-    return passCount > 0 ? 1 : 0;
+    return passCount == testCount ? 0 : 1;
 }
 
 private bool hasMessages(in string directory)
