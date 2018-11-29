@@ -1147,19 +1147,12 @@ class SymbolTool : Tool
     private static AutocompleteRequest getPreparedRequest(Uri uri,
             Position position, RequestKind kind)
     {
-        import dls.protocol.jsonrpc : InvalidParamsException;
         import dls.util.document : Document;
-        import std.format : format;
 
         auto request = AutocompleteRequest();
         auto document = Document.get(uri);
 
-        if (!document.validatePosition(position))
-        {
-            throw new InvalidParamsException(format!"invalid position: %s %s,%s"(uri,
-                    position.line, position.character));
-        }
-
+        document.validatePosition(position);
         request.fileName = uri.path;
         request.kind = kind;
         request.sourceCode = cast(ubyte[]) document.toString();

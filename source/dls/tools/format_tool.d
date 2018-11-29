@@ -101,11 +101,13 @@ class FormatTool : Tool
         import std.algorithm : filter;
         import std.array : array;
 
-        return formatting(uri, options).filter!((edit) {
-            const doc = Document.get(uri);
+        const document = Document.get(uri);
+        document.validatePosition(range.start);
+        document.validatePosition(range.end);
 
-            return doc.byteAtPosition(edit.range.start) < doc.byteAtPosition(range.end)
-                && doc.byteAtPosition(edit.range.end) > doc.byteAtPosition(range.start);
+        return formatting(uri, options).filter!((edit) {
+            return document.byteAtPosition(edit.range.start) < document.byteAtPosition(range.end)
+                && document.byteAtPosition(edit.range.end) > document.byteAtPosition(range.start);
         }).array;
     }
 
@@ -116,7 +118,10 @@ class FormatTool : Tool
         import std.array : array;
         import std.string : stripRight;
 
-        if (position.character != stripRight(Document.get(uri).lines[position.line]).length)
+        const document = Document.get(uri);
+        document.validatePosition(position);
+
+        if (position.character != stripRight(document.lines[position.line]).length)
         {
             return [];
         }

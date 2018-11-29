@@ -29,6 +29,7 @@ class Document
     import std.json : JSONValue;
 
     private static Document[string] _documents;
+    private string _uri;
     private wstring[] _lines;
     private JSONValue _version;
 
@@ -36,14 +37,14 @@ class Document
     {
         import std.algorithm : map;
 
-        return _documents.keys.map!(path => Uri.fromPath(path));
+        return _documents.byValue.map!(doc => new Uri(doc._uri));
     }
 
     static Document get(in Uri uri)
     {
         import std.file : readText;
 
-        return uri.path in _documents ? _documents[uri.path] : new Document(readText(uri.path));
+        return uri.path in _documents ? _documents[uri.path] : new Document(uri, readText(uri.path));
     }
 
     static void open(in TextDocumentItem textDocument)
@@ -52,7 +53,7 @@ class Document
 
         if (uri.path !in _documents)
         {
-            _documents[uri.path] = new Document(textDocument.text);
+            _documents[uri.path] = new Document(uri, textDocument.text);
             _documents[uri.path]._version = textDocument.version_;
         }
     }
@@ -89,8 +90,9 @@ class Document
         return _version;
     }
 
-    private this(in string text)
+    private this(in Uri uri, in string text)
     {
+        _uri = uri;
         _lines = getText(text);
     }
 
@@ -102,9 +104,16 @@ class Document
         return _lines.join().toUTF8();
     }
 
-    bool validatePosition(in Position position) const
+    void validatePosition(in Position position) const
     {
-        return position.line < _lines.length && position.character <= _lines[position.line].length;
+        import dls.protocol.jsonrpc : InvalidParamsException;
+        import std.format : format;
+
+        if (position.line >= _lines.length || position.character > _lines[position.line].length)
+        {
+            throw new InvalidParamsException(format!"invalid position: %s %s,%s"(_uri,
+                    position.line, position.character));
+        }
     }
 
     size_t byteAtPosition(in Position position) const
