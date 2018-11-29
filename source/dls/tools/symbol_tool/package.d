@@ -467,6 +467,7 @@ class SymbolTool : Tool
 
         _workspaceDependencies[uri.path] = deps;
         importDirectories([possibleSourceDirs.front]);
+        importGitSubmodules(uri);
     }
 
     void importDubSelections(const Uri uri)
@@ -506,6 +507,32 @@ class SymbolTool : Tool
         }
 
         clearDirectories(pathsToRemove);
+    }
+
+    void importGitSubmodules(const Uri uri)
+    {
+        import std.algorithm : filter, map, findSkip, startsWith;
+        import std.file : exists;
+        import std.path : buildPath;
+        import std.stdio : File;
+        import std.string : strip, stripLeft;
+
+        const gitModulesPath = buildPath(uri.path, ".gitmodules");
+
+        if (!exists(gitModulesPath))
+        {
+            return;
+        }
+
+        auto pathLines = File(gitModulesPath, "r").byLine
+            .map!strip
+            .filter!(line => line.startsWith("path"));
+
+        foreach (line; pathLines)
+        {
+            line.findSkip("=");
+            importPath(Uri.fromPath(buildPath(uri.path, stripLeft(line))));
+        }
     }
 
     void clearPath(const Uri uri)
