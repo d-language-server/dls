@@ -23,13 +23,13 @@ module dls.util.document;
 class Document
 {
     import dls.util.uri : Uri;
-    import dls.protocol.definitions : Position, Range, TextDocumentIdentifier,
-        TextDocumentItem, VersionedTextDocumentIdentifier;
+    import dls.protocol.definitions : DocumentUri, Position, Range,
+        TextDocumentIdentifier, TextDocumentItem, VersionedTextDocumentIdentifier;
     import dls.protocol.interfaces : TextDocumentContentChangeEvent;
     import std.json : JSONValue;
 
-    private static Document[string] _documents;
-    private string _uri;
+    private static Document[DocumentUri] _documents;
+    private DocumentUri _uri;
     private wstring[] _lines;
     private JSONValue _version;
 
