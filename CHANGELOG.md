@@ -4,12 +4,15 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.18.3
+- Fixed import paths being cleared when removed from a project even if another still used it
+
 #### 0.18.2
 - Updated libraries:
-    - `dub`: `1.12.0` => `1.12.1-rc.1` (#17)
+    - `dub`: `1.12.0` => `1.12.1-rc.1` ([#17](https://github.com/d-language-server/dls/issues/17))
 
 #### 0.18.1
-- Fixed dub dependency for the BuilKite CI (#17)
+- Fixed dub dependency for the BuilKite CI ([#17](https://github.com/d-language-server/dls/issues/17))
 - Fixed completions when the cursor is at the very end of a source file
 
 ### 0.18.0
@@ -33,7 +36,7 @@ Breaking changes will be in bold.
     - `emsi_containers`: `0.8.0-alpha.10` => `0.8.0-alpha.11`
 
 #### 0.16.4
-- Fixed crash for workspaces containing directories ending in `.d` (#16)
+- Fixed crash for workspaces containing directories ending in `.d` ([#16](https://github.com/d-language-server/dls/issues/16))
 
 #### 0.16.3
 - Fixed buggy import paths clearing
@@ -42,7 +45,7 @@ Breaking changes will be in bold.
 - Fixed unneeded import paths not being cleared
 
 #### 0.16.1
-- Fixed Travis build for dlang/ci
+- Fixed Travis build for dlang/ci ([#15](https://github.com/d-language-server/dls/issues/15))
 
 ### 0.16.0
 - Added option to log operations to a file
@@ -82,7 +85,7 @@ Breaking changes will be in bold.
     - `libdparse`: `0.8.8` => `0.9.10`
 
 #### 0.14.3
-- Added option to forcefully ignore errors (#12)
+- Added option to forcefully ignore errors ([#12](https://github.com/d-language-server/dls/issues/12))
 
 #### 0.14.2
 - Fixed code action messages overflowing Atom's buttons
@@ -109,10 +112,10 @@ Breaking changes will be in bold.
 - Added range formatting support
 - Added on type formatting support
 - Enhanced diagnostics to show errors and warnings on whole projects instead of only open documents
-- Enhanced handling on non-dub projects
+- Enhanced handling of non-dub projects ([#11](https://github.com/d-language-server/dls/issues/11))
 
 #### 0.12.3
-- Fixed manual path importing (#10)
+- Fixed manual path importing ([#10](https://github.com/d-language-server/dls/issues/10))
 - Fixed changelog URL
 
 #### 0.12.2
@@ -204,7 +207,7 @@ Breaking changes will be in bold.
 
 #### 0.6.9
 - Enhanced binary releases by compressing them with UPX on Posix platforms
-- Fixed issues with dependency handling (#5)
+- Fixed issues with dependency handling ([#5](https://github.com/d-language-server/dls/issues/5))
 - Updated libraries:
     - `dub`: `1.9.0` => `1.10.0`
 
@@ -219,7 +222,7 @@ Breaking changes will be in bold.
 #### 0.6.6
 - Stopped removing older `dls` dub packages as binaries are now used
 - Fixed `Upgrade selections` popup appearing when building
-- Fixed subpackages missing completions from libraries (#4)
+- Fixed subpackages missing completions from libraries ([#4](https://github.com/d-language-server/dls/issues/4))
 
 #### 0.6.5
 - Fixed instant crash at server startup
@@ -239,7 +242,7 @@ Breaking changes will be in bold.
 - Fixed issue with subpackages importing other subpackages
 
 #### 0.6.1
-- Fixed error when trying to fetch completions right after a parenthesis (#2)
+- Fixed error when trying to fetch completions right after a parenthesis ([#2](https://github.com/d-language-server/dls/issues/2))
 - Updated libraries:
     - `dcd`: `0.9.8` => `0.9.9`
     - `dscanner`: `0.5.6` => `0.5.7`

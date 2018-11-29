@@ -457,8 +457,7 @@ class SymbolTool : Tool
         logger.infof("Importing custom project: %s", uri.path);
 
         string[string] deps;
-        auto possibleSourceDirs = ["source", "src", ""].map!(
-                d => buildNormalizedPath(uri.path, d))
+        auto possibleSourceDirs = ["source", "src", ""].map!(d => buildNormalizedPath(uri.path, d))
             .find!exists;
 
         if (possibleSourceDirs.empty)
@@ -482,9 +481,9 @@ class SymbolTool : Tool
 
         foreach (dep; d.project.dependencies)
         {
-            auto paths = reduce!q{a ~ b}(cast(string[])[],
+            auto sourcePaths = reduce!q{a ~ b}(cast(string[])[],
                     dep.recipe.buildSettings.sourcePaths.values);
-            auto pathsToImport = paths.map!(path => buildNormalizedPath(dep.path.toString(),
+            auto pathsToImport = sourcePaths.map!(path => buildNormalizedPath(dep.path.toString(),
                     path).normalized).array;
             newDependenciesPaths ~= pathsToImport;
             importDirectories(pathsToImport);
@@ -494,15 +493,18 @@ class SymbolTool : Tool
         const dependenciesPaths = uri.path in _workspaceDependenciesPaths
             ? _workspaceDependenciesPaths[uri.path] : [];
 
+        _workspaceDependenciesPaths[uri.path] = newDependenciesPaths;
+        const allDependenciesPaths = reduce!q{a ~ b}(cast(string[])[],
+                _workspaceDependenciesPaths.byValue);
+
         foreach (path; dependenciesPaths)
         {
-            if (!newDependenciesPaths.canFind(path))
+            if (!allDependenciesPaths.canFind(path))
             {
                 pathsToRemove ~= path;
             }
         }
 
-        _workspaceDependenciesPaths[uri.path] = newDependenciesPaths;
         clearDirectories(pathsToRemove);
     }
 
