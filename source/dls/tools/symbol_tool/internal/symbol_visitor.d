@@ -32,7 +32,7 @@ package(dls.tools.symbol_tool) class SymbolVisitor(SymbolType) : ASTVisitor
 
     Appender!(SymbolType[]) result;
     private Uri _uri;
-    private string _query;
+    private const string _query;
 
     static if (is(SymbolType == SymbolInformation))
     {
@@ -43,7 +43,7 @@ package(dls.tools.symbol_tool) class SymbolVisitor(SymbolType) : ASTVisitor
         private DocumentSymbol container;
     }
 
-    this(Uri uri, string query)
+    this(Uri uri, const string query)
     {
         _uri = uri;
         _query = query;
@@ -228,11 +228,11 @@ package(dls.tools.symbol_tool) class SymbolVisitor(SymbolType) : ASTVisitor
         }
     }
 
-    private Range getRange(T)(T t)
+    private Range getRange(T)(const T t)
     {
         import dls.util.document : Document;
 
-        auto document = Document.get(_uri);
+        const document = Document.get(_uri);
 
         static if (__traits(hasMember, T, "line") && __traits(hasMember, T, "column"))
         {
@@ -244,7 +244,7 @@ package(dls.tools.symbol_tool) class SymbolVisitor(SymbolType) : ASTVisitor
         }
     }
 
-    private void tryInsert(string name, SymbolKind kind, Range range, size_t endLocation = 0)
+    private void tryInsert(const string name, SymbolKind kind, Range range, size_t endLocation = 0)
     {
         import dls.protocol.definitions : Location, Position;
         import dls.util.document : Document;
@@ -277,7 +277,7 @@ package(dls.tools.symbol_tool) class SymbolVisitor(SymbolType) : ASTVisitor
         }
     }
 
-    private void tryInsertFunction(A : ASTNode)(const A dec, string name)
+    private void tryInsertFunction(A : ASTNode)(const A dec, const string name)
     {
         tryInsert(name, SymbolKind.function_, getRange(dec), getFunctionEndLocation(dec));
     }

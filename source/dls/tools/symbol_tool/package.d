@@ -373,7 +373,7 @@ class SymbolTool : Tool
             ? Uri.fromPath(buildNormalizedPath(workspacePathParts)) : null;
     }
 
-    void importPath(Uri uri)
+    void importPath(const Uri uri)
     {
         import std.algorithm : any;
         import std.file : exists;
@@ -389,7 +389,7 @@ class SymbolTool : Tool
         }
     }
 
-    void importDubProject(Uri uri)
+    void importDubProject(const Uri uri)
     {
         import dls.protocol.messages.window : Util;
         import dls.util.constants : Tr;
@@ -445,7 +445,7 @@ class SymbolTool : Tool
         }
     }
 
-    void importCustomProject(Uri uri)
+    void importCustomProject(const Uri uri)
     {
         import dls.protocol.jsonrpc : InvalidParamsException;
         import dls.util.logger : logger;
@@ -469,7 +469,7 @@ class SymbolTool : Tool
         importDirectories([possibleSourceDirs.front]);
     }
 
-    void importDubSelections(Uri uri)
+    void importDubSelections(const Uri uri)
     {
         import dls.util.uri : normalized;
         import std.algorithm : canFind, map, reduce;
@@ -508,14 +508,14 @@ class SymbolTool : Tool
         clearDirectories(pathsToRemove);
     }
 
-    void clearPath(Uri uri)
+    void clearPath(const Uri uri)
     {
         _workspaceDependencies.remove(uri.path);
         _workspaceDependenciesPaths.remove(uri.path);
         clearDirectories([uri.path]);
     }
 
-    void upgradeSelections(Uri uri)
+    void upgradeSelections(const Uri uri)
     {
         import dls.util.logger : logger;
         import std.concurrency : spawn;
@@ -549,7 +549,7 @@ class SymbolTool : Tool
         }, uri.toString());
     }
 
-    SymbolInformation[] symbol(string query)
+    SymbolInformation[] symbol(const string query)
     {
         import dls.util.document : Document;
         import dls.util.logger : logger;
@@ -612,8 +612,8 @@ class SymbolTool : Tool
         return result.array;
     }
 
-    SymbolType[] symbol(SymbolType)(Uri uri, string query)
-            if (is(SymbolType == SymbolInformation) || is(SymbolType == DocumentSymbol))
+    SymbolType[] symbol(SymbolType)(Uri uri, const string query) // TODO: make uri const
+    if (is(SymbolType == SymbolInformation) || is(SymbolType == DocumentSymbol))
     {
         import dls.tools.symbol_tool.internal.symbol_visitor : SymbolVisitor;
         import dls.util.document : Document;
@@ -642,7 +642,7 @@ class SymbolTool : Tool
         return visitor.result.data;
     }
 
-    CompletionItem[] completion(Uri uri, Position position)
+    CompletionItem[] completion(const Uri uri, const Position position)
     {
         import dcd.common.messages : AutocompleteResponse, CompletionType;
         import dcd.server.autocomplete : complete;
@@ -656,8 +656,8 @@ class SymbolTool : Tool
                 position.line, position.character);
 
         auto request = getPreparedRequest(uri, position, RequestKind.autocomplete);
-        static bool compareCompletionsLess(AutocompleteResponse.Completion a,
-                AutocompleteResponse.Completion b)
+        static bool compareCompletionsLess(const AutocompleteResponse.Completion a,
+                const AutocompleteResponse.Completion b)
         {
             //dfmt off
             return a.identifier < b.identifier ? true
@@ -668,8 +668,8 @@ class SymbolTool : Tool
             //dfmt on
         }
 
-        static bool compareCompletionsEqual(AutocompleteResponse.Completion a,
-                AutocompleteResponse.Completion b)
+        static bool compareCompletionsEqual(const AutocompleteResponse.Completion a,
+                const AutocompleteResponse.Completion b)
         {
             return a.symbolFilePath.length > 0 && a.symbolFilePath == b.symbolFilePath
                 && a.symbolLocation == b.symbolLocation;
@@ -730,7 +730,7 @@ class SymbolTool : Tool
         return item;
     }
 
-    Hover hover(Uri uri, Position position)
+    Hover hover(const Uri uri, const Position position)
     {
         import dcd.server.autocomplete : getDoc;
         import dls.util.logger : logger;
@@ -752,7 +752,7 @@ class SymbolTool : Tool
             : new Hover(getDocumentation(completions.map!q{ ["", a] }.array));
     }
 
-    Location[] definition(Uri uri, Position position)
+    Location[] definition(const Uri uri, const Position position)
     {
         import dcd.common.messages : CompletionType;
         import dcd.server.autocomplete.util : getSymbolsForCompletion;
@@ -803,7 +803,7 @@ class SymbolTool : Tool
         return result.data;
     }
 
-    Location[] typeDefinition(Uri uri, Position position)
+    Location[] typeDefinition(const Uri uri, const Position position)
     {
         import dcd.common.messages : CompletionType;
         import dcd.server.autocomplete.util : getSymbolsForCompletion;
@@ -843,7 +843,7 @@ class SymbolTool : Tool
         return result.data;
     }
 
-    Location[] references(Uri uri, Position position, bool includeDeclaration)
+    Location[] references(const Uri uri, const Position position, bool includeDeclaration)
     {
         import dls.util.logger : logger;
 
@@ -852,7 +852,7 @@ class SymbolTool : Tool
         return referencesForFiles(uri, position, workspacesFilesUris, includeDeclaration);
     }
 
-    DocumentHighlight[] highlight(Uri uri, Position position)
+    DocumentHighlight[] highlight(const Uri uri, const Position position)
     {
         import dls.protocol.interfaces : DocumentHighlightKind;
         import dls.util.logger : logger;
@@ -880,7 +880,7 @@ class SymbolTool : Tool
         return result.data;
     }
 
-    WorkspaceEdit rename(Uri uri, Position position, string newName)
+    WorkspaceEdit rename(const Uri uri, const Position position, const string newName)
     {
         import dls.protocol.definitions : TextDocumentEdit, TextEdit,
             VersionedTextDocumentIdentifier;
@@ -926,7 +926,7 @@ class SymbolTool : Tool
         return new WorkspaceEdit(changes.nullable, documentChanges.data.nullable);
     }
 
-    Range prepareRename(Uri uri, Position position)
+    Range prepareRename(const Uri uri, const Position position)
     {
         import dls.util.document : Document;
         import dls.util.logger : logger;
@@ -941,7 +941,7 @@ class SymbolTool : Tool
             : Document.get(uri).wordRangeAtPosition(position);
     }
 
-    private void importDirectories(string[] paths)
+    private void importDirectories(const string[] paths)
     {
         import dls.util.logger : logger;
         import dls.util.uri : normalized;
@@ -952,7 +952,7 @@ class SymbolTool : Tool
         _cache.addImportPaths(paths.map!normalized.array);
     }
 
-    private void clearDirectories(string[] paths)
+    private void clearDirectories(const string[] paths)
     {
         import dls.util.logger : logger;
         import dls.util.uri : normalized;
@@ -963,8 +963,8 @@ class SymbolTool : Tool
         _cache.removeImportPaths(paths.map!normalized.array);
     }
 
-    private Location[] referencesForFiles(Uri uri, Position position, Uri[] files,
-            bool includeDeclaration)
+    private Location[] referencesForFiles(const Uri uri, const Position position,
+            const Uri[] files, bool includeDeclaration)
     {
         import dcd.common.messages : CompletionType;
         import dcd.server.autocomplete.util : getSymbolsForCompletion;
@@ -1031,7 +1031,7 @@ class SymbolTool : Tool
             return result.data;
         }
 
-        bool checkFileAndLocation(string file, size_t location)
+        bool checkFileAndLocation(const string file, size_t location)
         {
             import std.path : filenameCmp;
 
@@ -1092,7 +1092,7 @@ class SymbolTool : Tool
         return result.data;
     }
 
-    private MarkupContent getDocumentation(string[][] detailsAndDocumentations)
+    private MarkupContent getDocumentation(const string[][] detailsAndDocumentations)
     {
         import ddoc : Lexer, expand;
         import dls.protocol.definitions : MarkupKind;
@@ -1146,8 +1146,8 @@ class SymbolTool : Tool
         return new MarkupContent(MarkupKind.markdown, result.data);
     }
 
-    private static AutocompleteRequest getPreparedRequest(Uri uri,
-            Position position, RequestKind kind)
+    private static AutocompleteRequest getPreparedRequest(const Uri uri,
+            const Position position, RequestKind kind)
     {
         import dls.util.document : Document;
 
@@ -1163,7 +1163,7 @@ class SymbolTool : Tool
         return request;
     }
 
-    private static Dub getDub(Uri uri)
+    private static Dub getDub(const Uri uri)
     {
         import std.file : isFile;
         import std.path : dirName;
