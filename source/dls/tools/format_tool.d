@@ -78,7 +78,7 @@ class FormatTool : Tool
         return _instance;
     }
 
-    TextEdit[] formatting(in Uri uri, in FormattingOptions options)
+    TextEdit[] formatting(const Uri uri, const FormattingOptions options)
     {
         import dfmt.formatter : format;
         import dls.util.document : Document;
@@ -95,7 +95,7 @@ class FormatTool : Tool
         return diff(uri, buffer.toString());
     }
 
-    TextEdit[] rangeFormatting(in Uri uri, in Range range, in FormattingOptions options)
+    TextEdit[] rangeFormatting(const Uri uri, const Range range, const FormattingOptions options)
     {
         import dls.util.document : Document;
         import std.algorithm : filter;
@@ -111,7 +111,8 @@ class FormatTool : Tool
         }).array;
     }
 
-    TextEdit[] onTypeFormatting(in Uri uri, in Position position, in FormattingOptions options)
+    TextEdit[] onTypeFormatting(const Uri uri, const Position position,
+            const FormattingOptions options)
     {
         import dls.util.document : Document;
         import std.algorithm : filter;
@@ -130,7 +131,7 @@ class FormatTool : Tool
                 || edit.range.end.line == position.line).array;
     }
 
-    private Config getConfig(in Uri uri, in FormattingOptions options)
+    private Config getConfig(const Uri uri, const FormattingOptions options)
     {
         import dfmt.editorconfig : IndentStyle, OptionalBoolean, getConfigFor;
         import dls.tools.symbol_tool : SymbolTool;
@@ -174,7 +175,7 @@ class FormatTool : Tool
         return config;
     }
 
-    private TextEdit[] diff(in Uri uri, in string after)
+    private TextEdit[] diff(const Uri uri, const string after)
     {
         import dls.util.document : Document;
         import std.ascii : isWhite;

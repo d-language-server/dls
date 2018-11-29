@@ -77,7 +77,7 @@ class Uri
     alias toString this;
 }
 
-string normalized(in string path)
+string normalized(const string path)
 {
     import std.conv : to;
     import std.path : asNormalizedPath;

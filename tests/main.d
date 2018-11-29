@@ -107,7 +107,7 @@ private class TestCommunicator : Communicator
         return result;
     }
 
-    void write(in char[] buffer)
+    void write(const char[] buffer)
     {
         _currentOutput ~= buffer;
     }
@@ -154,7 +154,7 @@ int main()
     return checkResults(testCommunicator.testedDirectories);
 }
 
-private int checkResults(in string[] directories)
+private int checkResults(const string[] directories)
 {
     import std.algorithm : reduce;
     import std.array : array;
@@ -163,7 +163,7 @@ private int checkResults(in string[] directories)
     import std.range : repeat;
     import std.stdio : stderr;
 
-    static void writeHeader(in string header)
+    static void writeHeader(const string header)
     {
         auto headerLine = repeat('=', header.length);
         stderr.writeln(headerLine);
@@ -207,14 +207,14 @@ private int checkResults(in string[] directories)
     return passCount == testCount ? 0 : 1;
 }
 
-private bool hasMessages(in string directory)
+private bool hasMessages(const string directory)
 {
     import std.file : exists;
 
     return exists(getMessagePath(directory, orderFileName, MessageFileType.order));
 }
 
-private auto getOrderedMessageNames(in string directory)
+private auto getOrderedMessageNames(const string directory)
 {
     import std.algorithm : map;
     import std.stdio : File;
@@ -224,7 +224,7 @@ private auto getOrderedMessageNames(in string directory)
         .byLineCopy.map!strip;
 }
 
-private JSONValue getJSON(in string directory, in string name, in MessageFileType type)
+private JSONValue getJSON(const string directory, const string name, const MessageFileType type)
 {
     import std.algorithm : sort;
     import std.array : array;
@@ -236,14 +236,14 @@ private JSONValue getJSON(in string directory, in string name, in MessageFileTyp
     return JSONValue(rawJSON.array.sort!((a, b) => a.toString() < b.toString()).array);
 }
 
-private string getMessagePath(in string directory, in string name, in MessageFileType type)
+private string getMessagePath(const string directory, const string name, const MessageFileType type)
 {
     import std.path : buildPath;
 
     return buildPath(directory, "messages", name ~ type);
 }
 
-private inout(char[]) expandTestUris(inout(char[]) text, in string directory)
+private inout(char[]) expandTestUris(inout(char[]) text, const string directory)
 {
     import dls.util.uri : Uri;
     import std.array : replace;
@@ -251,7 +251,7 @@ private inout(char[]) expandTestUris(inout(char[]) text, in string directory)
     return text.replace("testFile://", Uri.fromPath(directory).toString());
 }
 
-private void writeDiff(in string reference, in string output)
+private void writeDiff(const string reference, const string output)
 {
     import std.conv : to;
     import std.file : remove, tempDir, write;

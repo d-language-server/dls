@@ -44,7 +44,7 @@ template isHandler(func...)
 
 class HandlerNotFoundException : Exception
 {
-    this(in string method)
+    this(const string method)
     {
         super("No handler found for method " ~ method);
     }
@@ -56,7 +56,7 @@ if the server should send a request or a notification to the client (if the
 method has a response handler, then the server will expect a response and thus
 send a request instead of a notification).
 +/
-bool hasResponseHandler(in string method)
+bool hasResponseHandler(const string method)
 {
     return (method in responseHandlers) !is null;
 }
@@ -65,7 +65,7 @@ bool hasResponseHandler(in string method)
 Registers a new handler of any kind (`RequestHandler`, `NotificationHandler` or
 `ResponseHandler`).
 +/
-void pushHandler(F)(in string method, F func)
+void pushHandler(F)(const string method, F func)
         if (isSomeFunction!F && !is(F == RequestHandler)
             && !is(F == NotificationHandler) && !is(F == ResponseHandler))
 {
@@ -101,25 +101,25 @@ void pushHandler(F)(in string method, F func)
 }
 
 /++ Registers a new static `RequestHandler`. +/
-private void pushHandler(in string method, RequestHandler h)
+private void pushHandler(const string method, RequestHandler h)
 {
     requestHandlers[method] = h;
 }
 
 /++ Registers a new static `NotificationHandler`. +/
-private void pushHandler(in string method, NotificationHandler h)
+private void pushHandler(const string method, NotificationHandler h)
 {
     notificationHandlers[method] = h;
 }
 
 /++ Registers a new static `ResponseHandler`. +/
-private void pushHandler(in string method, ResponseHandler h)
+private void pushHandler(const string method, ResponseHandler h)
 {
     responseHandlers[method] = h;
 }
 
 /++ Registers a new dynamic `ResponseHandler` (used at runtime) +/
-void pushHandler(in string id, in string method)
+void pushHandler(const string id, const string method)
 {
     runtimeResponseHandlers[id] = responseHandlers[method];
 }
@@ -128,7 +128,7 @@ void pushHandler(in string id, in string method)
 Returns the `RequestHandler`/`NotificationHandler`/`ResponseHandler`
 corresponding to a specific LSP method.
 +/
-T handler(T)(in string methodOrId)
+T handler(T)(const string methodOrId)
         if (is(T == RequestHandler) || is(T == NotificationHandler) || is(T == ResponseHandler))
 {
     static if (is(T == RequestHandler))

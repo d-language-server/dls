@@ -224,7 +224,7 @@ class SymbolTool : Tool
         import std.file : SpanMode, dirEntries, isFile;
         import std.path : globMatch;
 
-        bool isImported(in Uri uri)
+        bool isImported(const Uri uri)
         {
             import std.algorithm : startsWith;
 
@@ -346,7 +346,7 @@ class SymbolTool : Tool
         _cache = ModuleCache(_allocator);
     }
 
-    Uri getWorkspace(in Uri uri)
+    Uri getWorkspace(const Uri uri)
     {
         import std.algorithm : startsWith;
         import std.array : array;

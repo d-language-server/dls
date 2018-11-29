@@ -61,7 +61,7 @@ class CommandTool : Tool
         return result;
     }
 
-    JSONValue executeCommand(in string commandName, in JSONValue[] arguments)
+    JSONValue executeCommand(const string commandName, const JSONValue[] arguments)
     {
         import dls.protocol.definitions : WorkspaceEdit;
         import dls.protocol.interfaces : ApplyWorkspaceEditParams;

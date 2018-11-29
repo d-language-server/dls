@@ -133,7 +133,7 @@ final abstract class Server
         }
     }
 
-    private static void handleJSON(in char[] content)
+    private static void handleJSON(const char[] content)
     {
         import dls.protocol.handlers : HandlerNotFoundException,
             NotificationHandler, RequestHandler, ResponseHandler, handler;

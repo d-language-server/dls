@@ -40,7 +40,7 @@ interface Communicator
 {
     bool hasData();
     char[] read(size_t size);
-    void write(in char[] data);
+    void write(const char[] data);
     void flush();
 }
 
@@ -60,7 +60,7 @@ class StdioCommunicator : Communicator
         return stdin.rawRead(buffer);
     }
 
-    void write(in char[] data)
+    void write(const char[] data)
     {
         stdout.rawWrite(data);
     }
@@ -112,7 +112,7 @@ class SocketCommunicator : Communicator
         return buffer;
     }
 
-    void write(in char[] data)
+    void write(const char[] data)
     {
         synchronized (_socket)
         {

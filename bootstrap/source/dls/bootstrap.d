@@ -124,9 +124,9 @@ shared static this()
     return false;
 }
 
-void downloadDls(in void function(size_t size) totalSizeCallback = null,
-        in void function(size_t size) chunkSizeCallback = null,
-        in void function() extractCallback = null)
+void downloadDls(const void function(size_t size) totalSizeCallback = null,
+        const void function(size_t size) chunkSizeCallback = null,
+        const void function() extractCallback = null)
 {
     import std.array : appender;
     import std.net.curl : HTTP;
@@ -155,7 +155,7 @@ void downloadDls(in void function(size_t size) totalSizeCallback = null,
 
         mkdirRecurse(dlsDir);
 
-        request.onReceive = (in ubyte[] data) {
+        request.onReceive = (const ubyte[] data) {
             archiveData ~= data;
             return data.length;
         };
@@ -226,7 +226,7 @@ void downloadDls(in void function(size_t size) totalSizeCallback = null,
     }
 }
 
-void buildDls(in string dlsDir, in string[] additionalArgs = [])
+void buildDls(const string dlsDir, const string[] additionalArgs = [])
 {
     import core.cpuid : isX86_64;
     import std.path : buildNormalizedPath;
@@ -293,7 +293,7 @@ string linkDls()
     return buildNormalizedPath(dubDirPath, dubDirName, "packages", ".bin");
 }
 
-private void makeLink(in string target, in string link, bool directory)
+private void makeLink(const string target, const string link, bool directory)
 {
     version (Windows)
     {
@@ -344,7 +344,7 @@ private void makeLink(in string target, in string link, bool directory)
 
 class UpgradeFailedException : Exception
 {
-    this(in string message)
+    this(const string message)
     {
         super(message);
     }

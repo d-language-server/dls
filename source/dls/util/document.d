@@ -40,14 +40,14 @@ class Document
         return _documents.byKey.map!(uri => new Uri(uri));
     }
 
-    static Document get(in Uri uri)
+    static Document get(const Uri uri)
     {
         import std.file : readText;
 
         return uri in _documents ? _documents[uri] : new Document(uri, readText(uri.path));
     }
 
-    static void open(in TextDocumentItem textDocument)
+    static void open(const TextDocumentItem textDocument)
     {
         auto uri = new Uri(textDocument.uri);
 
@@ -58,7 +58,7 @@ class Document
         }
     }
 
-    static void close(in TextDocumentIdentifier textDocument)
+    static void close(const TextDocumentIdentifier textDocument)
     {
         auto uri = new Uri(textDocument.uri);
 
@@ -68,7 +68,7 @@ class Document
         }
     }
 
-    static void change(in VersionedTextDocumentIdentifier textDocument,
+    static void change(const VersionedTextDocumentIdentifier textDocument,
             TextDocumentContentChangeEvent[] events)
     {
         auto uri = new Uri(textDocument.uri);
@@ -90,7 +90,7 @@ class Document
         return _version;
     }
 
-    private this(in Uri uri, in string text)
+    private this(const Uri uri, const string text)
     {
         _uri = uri;
         _lines = getText(text);
@@ -104,7 +104,7 @@ class Document
         return _lines.join().toUTF8();
     }
 
-    void validatePosition(in Position position) const
+    void validatePosition(const Position position) const
     {
         import dls.protocol.jsonrpc : InvalidParamsException;
         import std.format : format;
@@ -116,7 +116,7 @@ class Document
         }
     }
 
-    size_t byteAtPosition(in Position position) const
+    size_t byteAtPosition(const Position position) const
     {
         import std.algorithm : reduce;
         import std.range : iota;
@@ -165,7 +165,7 @@ class Document
         return wordRangeAtPosition(positionAtByte(bytePosition));
     }
 
-    Range wordRangeAtPosition(in Position position) const
+    Range wordRangeAtPosition(const Position position) const
     {
         import std.algorithm : min;
 
@@ -203,7 +203,7 @@ class Document
                 toUCSindex(_lines[lineNumber], bytePosition)));
     }
 
-    private void change(in TextDocumentContentChangeEvent[] events)
+    private void change(const TextDocumentContentChangeEvent[] events)
     {
         foreach (event; events)
         {
@@ -239,7 +239,7 @@ class Document
         }
     }
 
-    private wstring[] getText(in string text) const
+    private wstring[] getText(const string text) const
     {
         import std.algorithm : endsWith;
         import std.array : replaceFirst;

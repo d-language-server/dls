@@ -124,7 +124,7 @@ class AnalysisTool : Tool
         });
     }
 
-    void addAnalysisConfig(in Uri uri)
+    void addAnalysisConfig(const Uri uri)
     {
         import dscanner.analysis.config : defaultStaticAnalysisConfig;
 
@@ -132,7 +132,7 @@ class AnalysisTool : Tool
         updateAnalysisConfig(uri);
     }
 
-    void removeAnalysisConfig(in Uri workspaceUri)
+    void removeAnalysisConfig(const Uri workspaceUri)
     {
         if (workspaceUri.path in _analysisConfigs)
         {
@@ -140,7 +140,7 @@ class AnalysisTool : Tool
         }
     }
 
-    void updateAnalysisConfig(in Uri workspaceUri)
+    void updateAnalysisConfig(const Uri workspaceUri)
     {
         import dls.server : Server;
         import dls.util.logger : logger;
@@ -171,7 +171,7 @@ class AnalysisTool : Tool
         }
     }
 
-    Diagnostic[] diagnostics(in Uri uri)
+    Diagnostic[] diagnostics(const Uri uri)
     {
         import dls.protocol.definitions : DiagnosticSeverity;
         import dls.tools.symbol_tool : SymbolTool;
@@ -221,7 +221,8 @@ class AnalysisTool : Tool
         return diagnostics.data;
     }
 
-    Command[] codeAction(in Uri uri, in Range range, Diagnostic[] diagnostics, bool commandCompat)
+    Command[] codeAction(const Uri uri, const Range range,
+            Diagnostic[] diagnostics, bool commandCompat)
     {
         import dls.protocol.definitions : Position;
         import dls.tools.command_tool : Commands;
@@ -274,8 +275,8 @@ class AnalysisTool : Tool
         return result.data;
     }
 
-    CodeAction[] codeAction(in Uri uri, in Range range, Diagnostic[] diagnostics,
-            in CodeActionKind[] kinds)
+    CodeAction[] codeAction(const Uri uri, const Range range,
+            Diagnostic[] diagnostics, const CodeActionKind[] kinds)
     {
         import dls.protocol.definitions : Command, Position;
         import dls.tools.command_tool : Commands;
@@ -321,7 +322,7 @@ class AnalysisTool : Tool
         return result.data;
     }
 
-    package void disableCheck(in Uri uri, in string code)
+    package void disableCheck(const Uri uri, const string code)
     {
         import dls.tools.symbol_tool : SymbolTool;
         import dscanner.analysis.config : Check;
@@ -333,7 +334,7 @@ class AnalysisTool : Tool
         writeINIFile(config, getConfigUri(SymbolTool.instance.getWorkspace(uri)).path);
     }
 
-    private Uri getConfigUri(in Uri workspaceUri)
+    private Uri getConfigUri(const Uri workspaceUri)
     {
         import std.algorithm : filter, map;
         import std.array : array;
@@ -346,7 +347,7 @@ class AnalysisTool : Tool
                 "dscanner.ini"))[0]);
     }
 
-    private StaticAnalysisConfig getConfig(in Uri uri)
+    private StaticAnalysisConfig getConfig(const Uri uri)
     {
         import dls.tools.symbol_tool : SymbolTool;
         import dscanner.analysis.config : defaultStaticAnalysisConfig;
@@ -357,7 +358,7 @@ class AnalysisTool : Tool
             : defaultStaticAnalysisConfig();
     }
 
-    private string* getDiagnosticParameter(return ref StaticAnalysisConfig config, in string code)
+    private string* getDiagnosticParameter(return ref StaticAnalysisConfig config, const string code)
     {
         //dfmt off
         switch (code)
@@ -421,7 +422,7 @@ class AnalysisTool : Tool
         //dfmt on
     }
 
-    private WorkspaceEdit makeFileWorkspaceEdit(in Uri uri, TextEdit[] edits)
+    private WorkspaceEdit makeFileWorkspaceEdit(const Uri uri, TextEdit[] edits)
     {
         import dls.protocol.definitions : TextDocumentEdit, VersionedTextDocumentIdentifier;
         import dls.util.document : Document;
