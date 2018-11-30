@@ -79,10 +79,9 @@ class SocketCommunicator : Communicator
 
     this(ushort port)
     {
-        import std.socket : AddressFamily, AddressInfo, InternetAddress, ProtocolType, SocketType;
+        import std.socket : AddressInfo, InternetAddress, TcpSocket;
 
-        _socket = new Socket(AddressFamily.INET, SocketType.STREAM, ProtocolType.TCP);
-        _socket.connect(new InternetAddress("127.0.0.1", port));
+        _socket = new TcpSocket(new InternetAddress("localhost", port));
     }
 
     bool hasData()
@@ -97,27 +96,49 @@ class SocketCommunicator : Communicator
     {
         static char[] buffer;
         buffer.length = size;
-        ptrdiff_t result;
+        ptrdiff_t totalBytesReceived;
+        ptrdiff_t bytesReceived;
 
-        synchronized (_socket)
+        do
         {
-            result = _socket.receive(buffer);
-        }
+            synchronized (_socket)
+            {
+                bytesReceived = _socket.receive(buffer);
+            }
 
-        if (result == 0 || result == Socket.ERROR)
-        {
-            buffer.length = 0;
+            if (bytesReceived != Socket.ERROR)
+            {
+                totalBytesReceived += bytesReceived;
+            }
+            else if (bytesReceived == 0)
+            {
+                buffer.length = totalBytesReceived;
+                break;
+            }
         }
+        while (bytesReceived == Socket.ERROR || totalBytesReceived < size);
 
         return buffer;
     }
 
     void write(const char[] data)
     {
-        synchronized (_socket)
+        ptrdiff_t totalBytesSent;
+        ptrdiff_t bytesSent;
+
+        do
         {
-            _socket.send(data);
+            synchronized (_socket)
+            {
+                bytesSent = _socket.send(data);
+            }
+
+            if (bytesSent != Socket.ERROR)
+            {
+                totalBytesSent += bytesSent;
+            }
         }
+        while (bytesSent == Socket.ERROR || totalBytesSent < data.length);
     }
 
     void flush()
