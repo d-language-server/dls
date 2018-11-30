@@ -983,11 +983,24 @@ class SymbolTool : Tool
     {
         import dls.util.logger : logger;
         import dls.util.uri : normalized;
-        import std.algorithm : map;
-        import std.array : array;
+        import std.algorithm : map, startsWith;
 
         logger.infof("Clearing import directories: %s", paths);
-        _cache.removeImportPaths(paths.map!normalized.array);
+
+        string[] pathsToRemove;
+
+        foreach (path; paths.map!normalized)
+        {
+            foreach (importPath; _cache.getImportPaths())
+            {
+                if (importPath.startsWith(path))
+                {
+                    pathsToRemove ~= importPath;
+                }
+            }
+        }
+
+        _cache.removeImportPaths(pathsToRemove);
     }
 
     private Location[] referencesForFiles(const Uri uri, const Position position,
