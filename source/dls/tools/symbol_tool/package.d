@@ -456,7 +456,6 @@ class SymbolTool : Tool
 
         logger.infof("Importing custom project: %s", uri.path);
 
-        string[string] deps;
         auto possibleSourceDirs = ["source", "src", ""].map!(d => buildNormalizedPath(uri.path, d))
             .find!exists;
 
@@ -465,6 +464,7 @@ class SymbolTool : Tool
             throw new InvalidParamsException("invalid uri: " ~ uri);
         }
 
+        string[string] deps;
         _workspaceDependencies[uri.path] = deps;
         importDirectories([possibleSourceDirs.front]);
         importGitSubmodules(uri);
@@ -487,9 +487,9 @@ class SymbolTool : Tool
             auto pathsToImport = sourcePaths.map!(path => buildNormalizedPath(dep.path.toString(),
                     path).normalized).array;
             newDependenciesPaths ~= pathsToImport;
-            importDirectories(pathsToImport);
         }
 
+        importDirectories(newDependenciesPaths);
         clearUnusedDirectories(uri, newDependenciesPaths);
     }
 
