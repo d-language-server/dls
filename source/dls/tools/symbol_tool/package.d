@@ -473,7 +473,7 @@ class SymbolTool : Tool
     void importDubSelections(const Uri uri)
     {
         import dls.util.uri : normalized;
-        import std.algorithm : canFind, map, reduce;
+        import std.algorithm : map, reduce;
         import std.array : array;
         import std.path : buildNormalizedPath;
 
@@ -490,23 +490,7 @@ class SymbolTool : Tool
             importDirectories(pathsToImport);
         }
 
-        string[] pathsToRemove;
-        const dependenciesPaths = uri.path in _workspaceDependenciesPaths
-            ? _workspaceDependenciesPaths[uri.path] : [];
-
-        _workspaceDependenciesPaths[uri.path] = newDependenciesPaths;
-        const allDependenciesPaths = reduce!q{a ~ b}(cast(string[])[],
-                _workspaceDependenciesPaths.byValue);
-
-        foreach (path; dependenciesPaths)
-        {
-            if (!allDependenciesPaths.canFind(path))
-            {
-                pathsToRemove ~= path;
-            }
-        }
-
-        clearDirectories(pathsToRemove);
+        clearUnusedDirectories(uri, newDependenciesPaths);
     }
 
     void importGitSubmodules(const Uri uri)
@@ -1001,6 +985,29 @@ class SymbolTool : Tool
         }
 
         _cache.removeImportPaths(pathsToRemove);
+    }
+
+    private void clearUnusedDirectories(const Uri uri, ref string[] newDependenciesPaths)
+    {
+        import std.algorithm : canFind, reduce;
+
+        string[] pathsToRemove;
+        const dependenciesPaths = uri.path in _workspaceDependenciesPaths
+            ? _workspaceDependenciesPaths[uri.path] : [];
+
+        _workspaceDependenciesPaths[uri.path] = newDependenciesPaths;
+        const allDependenciesPaths = reduce!q{a ~ b}(cast(string[])[],
+                _workspaceDependenciesPaths.byValue);
+
+        foreach (path; dependenciesPaths)
+        {
+            if (!allDependenciesPaths.canFind(path))
+            {
+                pathsToRemove ~= path;
+            }
+        }
+
+        clearDirectories(pathsToRemove);
     }
 
     private Location[] referencesForFiles(const Uri uri, const Position position,
