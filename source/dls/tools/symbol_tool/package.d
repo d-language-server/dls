@@ -45,6 +45,12 @@ private string[string] macros;
 private immutable CompletionItemKind[CompletionKind] completionKinds;
 private immutable SymbolKind[CompletionKind] symbolKinds;
 
+private enum ProjectType : int
+{
+    dub,
+    custom
+}
+
 shared static this()
 {
     import dub.internal.vibecompat.core.log : LogLevel, setLogLevel;
@@ -211,6 +217,7 @@ class SymbolTool : Tool
         private static immutable string[] _compilerConfigPaths;
     }
 
+    private ProjectType[string] _workspaceProjectTypes;
     private string[string][string] _workspaceDependencies;
     private string[][string] _workspaceDependenciesPaths;
     private ASTAllocator _allocator;
@@ -399,6 +406,11 @@ class SymbolTool : Tool
         import std.array : appender, array;
         import std.path : baseName, buildNormalizedPath;
 
+        if (!validateProjectType(uri, ProjectType.dub))
+        {
+            return;
+        }
+
         logger.infof("Importing dub project: %s", uri.path);
 
         auto d = getDub(uri);
@@ -454,6 +466,11 @@ class SymbolTool : Tool
         import std.file : exists;
         import std.path : buildNormalizedPath;
 
+        if (!validateProjectType(uri, ProjectType.custom))
+        {
+            return;
+        }
+
         logger.infof("Importing custom project: %s", uri.path);
 
         auto possibleSourceDirs = ["source", "src", ""].map!(d => buildNormalizedPath(uri.path, d))
@@ -476,6 +493,11 @@ class SymbolTool : Tool
         import std.algorithm : map, reduce;
         import std.array : array;
         import std.path : buildNormalizedPath;
+
+        if (!validateProjectType(uri, ProjectType.dub))
+        {
+            return;
+        }
 
         const d = getDub(uri);
         string[] newDependenciesPaths;
@@ -501,6 +523,11 @@ class SymbolTool : Tool
         import std.stdio : File;
         import std.string : strip, stripLeft;
 
+        if (!validateProjectType(uri, ProjectType.custom))
+        {
+            return;
+        }
+
         const gitModulesPath = buildPath(uri.path, ".gitmodules");
 
         if (!exists(gitModulesPath))
@@ -521,6 +548,7 @@ class SymbolTool : Tool
 
     void clearPath(const Uri uri)
     {
+        _workspaceProjectTypes.remove(uri.path);
         _workspaceDependencies.remove(uri.path);
         _workspaceDependenciesPaths.remove(uri.path);
         clearDirectories([uri.path]);
@@ -950,6 +978,20 @@ class SymbolTool : Tool
         return defs.length == 0
             || defs.any!(d => getWorkspace(new Uri(d.uri)) is null) ? null
             : Document.get(uri).wordRangeAtPosition(position);
+    }
+
+    private bool validateProjectType(const Uri uri, ProjectType type)
+    {
+        if (uri.path !in _workspaceProjectTypes)
+        {
+            _workspaceProjectTypes[uri.path] = type;
+        }
+        else if (_workspaceProjectTypes[uri.path] != type)
+        {
+            return false;
+        }
+
+        return true;
     }
 
     private void importDirectories(const string[] paths)
