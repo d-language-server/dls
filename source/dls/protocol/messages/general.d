@@ -144,7 +144,7 @@ void initialized(JSONValue nothing)
     const didChangeWatchedFiles = !initState.capabilities.workspace.isNull
         && !initState.capabilities.workspace.didChangeWatchedFiles.isNull
         && initState.capabilities.workspace.didChangeWatchedFiles.dynamicRegistration;
-    ushort watchAllEvents = WatchKind.create + WatchKind.change + WatchKind.delete_;
+    ubyte watchAllEvents = WatchKind.create + WatchKind.change + WatchKind.delete_;
 
     if (didChangeWatchedFiles)
     {

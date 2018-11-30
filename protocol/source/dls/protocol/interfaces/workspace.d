@@ -84,7 +84,7 @@ final class FileEvent
     FileChangeType type;
 }
 
-enum FileChangeType : uint
+enum FileChangeType : ubyte
 {
     created = 1,
     changed = 2,
@@ -106,16 +106,16 @@ final class FileSystemWatcher
     import std.typecons : Nullable;
 
     string globPattern;
-    Nullable!ushort kind;
+    Nullable!ubyte kind;
 
-    this(string globPattern = string.init, Nullable!ushort kind = Nullable!ushort.init)
+    this(string globPattern = string.init, Nullable!ubyte kind = Nullable!ubyte.init)
     {
         this.globPattern = globPattern;
         this.kind = kind;
     }
 }
 
-enum WatchKind : ushort
+enum WatchKind : ubyte
 {
     create = 1,
     change = 2,

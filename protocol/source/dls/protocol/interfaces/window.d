@@ -32,7 +32,7 @@ class ShowMessageParams
     }
 }
 
-enum MessageType : uint
+enum MessageType : ubyte
 {
     error = 1,
     warning = 2,

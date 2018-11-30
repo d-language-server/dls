@@ -287,7 +287,7 @@ final class InitializeErrorData
     bool retry;
 }
 
-enum TextDocumentSyncKind : uint
+enum TextDocumentSyncKind : ubyte
 {
     none = 0,
     full = 1,

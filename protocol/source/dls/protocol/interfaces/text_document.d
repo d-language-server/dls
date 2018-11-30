@@ -81,7 +81,7 @@ final class WillSaveTextDocumentParams : ParamsBase
     TextDocumentSaveReason reason;
 }
 
-enum TextDocumentSaveReason : uint
+enum TextDocumentSaveReason : ubyte
 {
     manual = 1,
     afterDelay = 2,
@@ -136,7 +136,7 @@ final class CompletionContext
     Nullable!string triggerCharacter;
 }
 
-enum CompletionTriggerKind : uint
+enum CompletionTriggerKind : ubyte
 {
     invoked = 1,
     triggerCharacter = 2,
@@ -155,7 +155,7 @@ final class CompletionList
     }
 }
 
-enum InsertTextFormat : uint
+enum InsertTextFormat : ubyte
 {
     plainText = 1,
     snippet = 2
@@ -210,7 +210,7 @@ final class CompletionItem
     }
 }
 
-enum CompletionItemKind : uint
+enum CompletionItemKind : ubyte
 {
     text = 1,
     method = 2,
@@ -350,7 +350,7 @@ final class DocumentHighlight
     }
 }
 
-enum DocumentHighlightKind : uint
+enum DocumentHighlightKind : ubyte
 {
     text = 1,
     read = 2,
@@ -406,7 +406,7 @@ final class SymbolInformation
     }
 }
 
-enum SymbolKind : uint
+enum SymbolKind : ubyte
 {
     file = 1,
     module_ = 2,
