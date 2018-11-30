@@ -4,6 +4,14 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+### 0.19.0
+- Added ability to ignore pre-release builds unless the pre-release init option is set
+- Added ability to automatically import git submodules in non-dub projects
+- Enhanced range formatting to apply edits affecting the range and not the line containing the range
+- Enhanced Linux builds by upgrading the Travis image from trusty to Xenial
+- Enhanced file logging by ensuring its parent directory is created at startup
+- Fixed socket communication quickly going awry
+
 #### 0.18.3
 - Fixed import paths being cleared when removed from a project even if another still used it
 
@@ -28,7 +36,7 @@ Breaking changes will be in bold.
 - Fixed directories not being cleared from DCD's cache after being deleted
 
 ### 0.17.0
-- Added ability to use DLS using sockets instead of stdio
+- Added ability to use DLS with sockets instead of stdio
 - Enhanced unknown custom notification handling to ignore them instead of producing an error
 - Enhanced diagnostic publishing to pick up `.dscanner.ini` files automatically
 - Fixed comment handling with multiple `@suppress()`
