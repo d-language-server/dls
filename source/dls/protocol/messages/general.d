@@ -151,8 +151,9 @@ void initialized(JSONValue nothing)
         logger.info("Registering watchers");
         //dfmt off
         auto watchers = [
-            new FileSystemWatcher("**/dub.selections.json", watchAllEvents.nullable),
             new FileSystemWatcher("**/dub.{json,sdl}", watchAllEvents.nullable),
+            new FileSystemWatcher("**/dub.selections.json", watchAllEvents.nullable),
+            new FileSystemWatcher("**/.gitmodules", watchAllEvents.nullable),
             new FileSystemWatcher("**/*.ini", watchAllEvents.nullable),
             new FileSystemWatcher("**/*.{d,di}", watchAllEvents.nullable)
         ];

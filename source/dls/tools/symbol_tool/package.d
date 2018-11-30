@@ -489,6 +489,7 @@ class SymbolTool : Tool
 
     void importDubSelections(const Uri uri)
     {
+        import dls.util.logger : logger;
         import dls.util.uri : normalized;
         import std.algorithm : map, reduce;
         import std.array : array;
@@ -498,6 +499,8 @@ class SymbolTool : Tool
         {
             return;
         }
+
+        logger.infof("Importing dub selections for project: %s", uri.path);
 
         const d = getDub(uri);
         string[] newDependenciesPaths;
@@ -517,11 +520,12 @@ class SymbolTool : Tool
 
     void importGitSubmodules(const Uri uri)
     {
-        import std.algorithm : filter, map, findSkip, startsWith;
+        import dls.util.logger : logger;
+        import std.algorithm : findSplit;
         import std.file : exists;
         import std.path : buildPath;
         import std.stdio : File;
-        import std.string : strip, stripLeft;
+        import std.string : strip;
 
         if (!validateProjectType(uri, ProjectType.custom))
         {
@@ -535,15 +539,33 @@ class SymbolTool : Tool
             return;
         }
 
-        auto pathLines = File(gitModulesPath, "r").byLine
-            .map!strip
-            .filter!(line => line.startsWith("path"));
+        logger.infof("Importing git submodules for project: %s", uri.path);
 
-        foreach (line; pathLines)
+        string[string] newWorkspaceDeps;
+        string[] newDependenciesPaths;
+
+        foreach (line; File(gitModulesPath, "r").byLineCopy)
         {
-            line.findSkip("=");
-            importPath(Uri.fromPath(buildPath(uri.path, stripLeft(line))));
+            auto parts = findSplit(line, "=");
+
+            switch (strip(parts[0]))
+            {
+            case "path":
+                const fullModUri = Uri.fromPath(buildPath(uri.path, strip(parts[2])));
+                importCustomProject(fullModUri);
+                newDependenciesPaths ~= fullModUri.path;
+                break;
+
+            case "url":
+                newWorkspaceDeps[strip(parts[2])] = "";
+                break;
+
+            default:
+                continue;
+            }
         }
+
+        clearUnusedDirectories(uri, newDependenciesPaths);
     }
 
     void clearPath(const Uri uri)

@@ -134,6 +134,14 @@ void didChangeWatchedFiles(DidChangeWatchedFilesParams params)
 
             continue;
 
+        case ".gitmodules":
+            if (event.type != FileChangeType.deleted)
+            {
+                SymbolTool.instance.importGitSubmodules(dirUri);
+            }
+
+            continue;
+
         default:
             break;
         }
