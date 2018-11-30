@@ -102,12 +102,19 @@ private shared class LspLogger
         import dls.protocol.messages.methods : Window;
         import dls.protocol.state : initOptions;
         import std.datetime : Clock;
+        import std.file : mkdirRecurse;
         import std.format : format;
+        import std.path : dirName;
         import std.stdio : File;
 
         if (initOptions.logFile.length > 0)
         {
             static bool firstLog = true;
+
+            if (firstLog)
+            {
+                mkdirRecurse(dirName(initOptions.logFile));
+            }
 
             synchronized
             {
