@@ -86,6 +86,17 @@ You can run `dub fetch dls` and then `dub run dls:bootstrap` to install dls.
 The second command will output a path that will point to the DLS executable.
 DLS will automatically update itself whenever a new version is out.
 
+### Notes about FreeBSD
+
+DLS should be usable using FreeBSD's Linux binary compatibility system.
+The main steps to enable Linux binary compatibility are:
+- Adding `enable_linux="YES"` to `/etc/rc.conf`
+- `kldload linux` (even on x86_64 systems; the 64bit Linux binaries segfault on FreeBSD)
+- `pkg install emulators/linux_base-c7`
+- `pkg install ftp/linux-c7-curl`
+
+More detailed information can be found in the [FreeBSD documentation](https://www.freebsd.org/doc/en_US.ISO8859-1/books/handbook/linuxemu-lbc-install.html).
+
 ## Client side configuration
 
 All these keys should be formatted as `d.dls.[section].[key]` (e.g. `d.dls.format.endOfLine`).

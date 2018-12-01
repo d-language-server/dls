@@ -36,6 +36,10 @@ else version (linux)
 {
     private immutable os = "linux";
 }
+else version (FreeBSD)
+{
+    private immutable os = "linux";
+}
 else
 {
     private immutable os = "none";
@@ -60,7 +64,11 @@ shared static this()
 {
     import std.format : format;
 
-    version (X86_64)
+    version (FreeBSD)
+    {
+        immutable arch = "x86";
+    }
+    else version (X86_64)
     {
         immutable arch = "x86_64";
     }
@@ -68,7 +76,18 @@ shared static this()
     {
         import core.cpuid : isX86_64;
 
-        immutable arch = isX86_64 ? "x86_64" : "x86";
+        version (Posix)
+        {
+            import std.process : execute;
+            import std.string : strip;
+
+            immutable arch = execute("uname").output.strip() != "FreeBSD"
+                && isX86_64 ? "x86_64" : "x86";
+        }
+        else
+        {
+            immutable arch = isX86_64 ? "x86_64" : "x86";
+        }
     }
     else
     {
