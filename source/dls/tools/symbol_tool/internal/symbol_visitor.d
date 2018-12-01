@@ -208,7 +208,9 @@ package(dls.tools.symbol_tool) class SymbolVisitor(SymbolType) : ASTVisitor
     private void visitSymbol(A : ASTNode)(const A dec, SymbolKind kind,
             bool accept, size_t endLocation = 0)
     {
-        tryInsert(dec.name.text.dup, kind, getRange(dec.name), endLocation);
+        const name = dec.name.text.length > 0 ? dec.name.text
+            : "<anonymous " ~ __traits(identifier, A) ~ ">";
+        tryInsert(name, kind, getRange(dec.name), endLocation);
 
         if (accept)
         {
