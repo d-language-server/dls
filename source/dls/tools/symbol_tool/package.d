@@ -160,8 +160,12 @@ class SymbolTool : Tool
 
     static void initialize()
     {
+        import std.algorithm : filter;
+        import std.array : array;
+        import std.file : exists;
+
         _instance = new SymbolTool();
-        _instance.importDirectories(defaultImportPaths);
+        _instance.importDirectories(defaultImportPaths.filter!exists.array);
         addConfigHook(_instance.toString(), {
             _instance.importDirectories(_configuration.symbol.importPaths);
         });
@@ -263,60 +267,126 @@ class SymbolTool : Tool
 
     @property private static string[] defaultImportPaths()
     {
-        import std.algorithm : each, filter, sort, splitter, uniq;
+        import std.algorithm : each, sort, uniq;
         import std.array : array, replace;
         import std.conv : to;
         import std.file : FileException, exists, readText;
-        import std.path : asNormalizedPath, buildNormalizedPath, dirName;
-        import std.process : environment;
+        import std.path : asNormalizedPath, dirName;
         import std.regex : matchAll;
 
         string[] paths;
 
         foreach (confPath; _compilerConfigPaths)
         {
-            if (exists(confPath))
+            if (!exists(confPath))
             {
-                try
-                {
-                    readText(confPath).matchAll(`-I[^\s"]+`)
-                        .each!(m => paths ~= m.hit[2 .. $].replace("%@P%",
-                                confPath.dirName).asNormalizedPath().to!string);
-                    break;
-                }
-                catch (FileException e)
-                {
-                    // File doesn't exist or could't be read
-                }
+                continue;
             }
+
+            try
+            {
+                readText(confPath).matchAll(`-I[^\s"]+`)
+                    .each!(m => paths ~= m.hit[2 .. $].replace("%@P%",
+                            dirName(confPath)).asNormalizedPath().to!string);
+                break;
+            }
+            catch (FileException e)
+            {
+                // File could't be read
+            }
+        }
+
+        if (paths.length > 0)
+        {
+            return paths.sort().uniq().array;
         }
 
         version (linux)
         {
             import std.algorithm : map;
+            import std.path : buildPath;
 
-            if (paths.length == 0)
+            foreach (path; ["/snap", "/var/lib/snapd/snap"])
             {
-                foreach (path; ["/snap", "/var/lib/snapd/snap"])
-                {
-                    const dmdSnapPath = buildNormalizedPath(path, "dmd");
-                    const ldcSnapIncludePath = buildNormalizedPath(path,
-                            "ldc2", "current", "include", "d");
+                const dmdSnapPath = buildPath(path, "dmd");
+                const ldcSnapIncludePath = buildPath(path, "ldc2", "current", "include", "d");
 
-                    if (exists(dmdSnapPath))
-                    {
-                        paths = ["druntime", "phobos"].map!(end => buildNormalizedPath(dmdSnapPath,
-                                "current", "import", end)).array;
-                        break;
-                    }
-                    else if (exists(ldcSnapIncludePath))
-                    {
-                        paths = [ldcSnapIncludePath];
-                        break;
-                    }
+                if (exists(dmdSnapPath))
+                {
+                    return ["druntime", "phobos"].map!(end => buildPath(dmdSnapPath,
+                            "current", "import", end)).array;
+                }
+                else if (exists(ldcSnapIncludePath))
+                {
+                    return [ldcSnapIncludePath];
                 }
             }
         }
+
+        paths = homeDlangImportPaths;
+        return paths.length > 0 ? paths : customLdcImportPaths;
+    }
+
+    @property private static string[] homeDlangImportPaths()
+    {
+        import std.algorithm : filter, map, sort;
+        import std.array : array;
+        import std.file : SpanMode, dirEntries, exists, isDir;
+        import std.path : buildPath;
+        import std.process : environment;
+
+        version (Posix)
+        {
+            static bool less(const string a, const string b)
+            {
+                import dub.semver : compareVersions;
+                import std.algorithm : findSplit;
+                import std.path : baseName;
+
+                return compareVersions(findSplit(baseName(a), "-")[2],
+                        findSplit(baseName(b), "-")[2]) == 1;
+            }
+
+            const dlangPath = buildPath(environment["HOME"], "dlang");
+
+            if (!exists(dlangPath))
+            {
+                return [];
+            }
+
+            auto dmds = dirEntries(dlangPath, "dmd-*.*.*", SpanMode.shallow).map!(
+                    entry => entry.name)
+                .filter!isDir
+                .array
+                .sort!less;
+
+            if (!dmds.empty)
+            {
+                return [buildPath(dmds.front, "src", "druntime", "src"),
+                    buildPath(dmds.front, "src", "phobos")];
+            }
+
+            auto ldcs = dirEntries(dlangPath, "ldc-*.*.*", SpanMode.shallow).map!(
+                    entry => entry.name)
+                .filter!isDir
+                .array
+                .sort!less;
+
+            if (!ldcs.empty)
+            {
+                return [buildPath(ldcs.front, "import")];
+            }
+        }
+
+        return [];
+    }
+
+    @property private static string[] customLdcImportPaths()
+    {
+        import std.algorithm : each, sort, splitter, uniq;
+        import std.file : exists;
+        import std.path : buildPath, dirName;
+        import std.process : environment;
 
         version (Windows)
         {
@@ -333,18 +403,15 @@ class SymbolTool : Tool
             static assert(false, "Platform not suported");
         }
 
-        if (paths.length == 0)
+        foreach (path; splitter(environment["PATH"], pathSep))
         {
-            foreach (path; splitter(environment["PATH"], pathSep))
+            if (exists(buildPath(path, ldc)))
             {
-                if (exists(buildNormalizedPath(path, ldc)))
-                {
-                    paths = [buildNormalizedPath(path, "..", "import")];
-                }
+                return [buildPath(dirName(path), "import")];
             }
         }
 
-        return paths.sort().uniq().filter!exists.array;
+        return [];
     }
 
     this()
