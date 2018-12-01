@@ -130,7 +130,7 @@ class SocketCommunicator : Communicator
         {
             synchronized (_socket)
             {
-                bytesSent = _socket.send(data);
+                bytesSent = _socket.send(data[totalBytesSent .. $]);
             }
 
             if (bytesSent != Socket.ERROR)
