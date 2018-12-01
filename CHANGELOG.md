@@ -4,6 +4,11 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.19.1
+- Fixed data possibly being sent in socket multiple times
+- Fixed symbol list being empty when encountering an anonymous symbol
+- Fixed symbol list sometimes containing garbage instead of correct names
+
 ### 0.19.0
 - Added ability to ignore pre-release builds unless the pre-release init option is set
 - Added ability to automatically import git submodules in non-dub projects
