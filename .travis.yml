@@ -48,7 +48,6 @@ before_deploy:
 deploy:
   provider: releases
   api_key: $GITHUB_API_KEY
-  target_commitish: $(echo release/$TRAVIS_TAG | sed 's/\.[0-9]*$/.x/g')
   file_glob: true
   file: dls-*.zip
   skip_cleanup: true
