@@ -619,11 +619,12 @@ class SymbolTool : Tool
         import std.algorithm : any, canFind, map, startsWith;
         import std.array : appender, array;
         import std.file : SpanMode, dirEntries;
-        import std.regex : matchFirst, regex;
+        import std.uni : toUpper;
 
         logger.infof(`Fetching symbols from workspace with query "%s"`, query);
 
         auto result = new SymbolInformationTree();
+        const upperQuery = toUpper(query);
 
         void collectSymbolInformations(Uri symbolUri, const(DSymbol)* symbol,
                 string containerName = "")
@@ -637,7 +638,7 @@ class SymbolTool : Tool
 
             auto name = symbol.name == "*constructor*" ? "this" : symbol.name;
 
-            if (name.matchFirst(regex(query, "i")))
+            if (toUpper(name).canFind(upperQuery))
             {
                 auto location = new Location(symbolUri, Document.get(symbolUri)
                         .wordRangeAtByte(symbol.location));

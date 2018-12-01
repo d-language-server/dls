@@ -32,7 +32,7 @@ package(dls.tools.symbol_tool) class SymbolVisitor(SymbolType) : ASTVisitor
 
     Appender!(SymbolType[]) result;
     private Uri _uri;
-    private const string _query;
+    private const string _upperQuery;
 
     static if (is(SymbolType == SymbolInformation))
     {
@@ -45,8 +45,10 @@ package(dls.tools.symbol_tool) class SymbolVisitor(SymbolType) : ASTVisitor
 
     this(Uri uri, const string query)
     {
+        import std.uni : toUpper;
+
         _uri = uri;
-        _query = query;
+        _upperQuery = toUpper(query);
     }
 
     override void visit(const ModuleDeclaration dec)
@@ -250,10 +252,11 @@ package(dls.tools.symbol_tool) class SymbolVisitor(SymbolType) : ASTVisitor
     {
         import dls.protocol.definitions : Location, Position;
         import dls.util.document : Document;
-        import std.regex : matchFirst, regex;
+        import std.algorithm : canFind;
         import std.typecons : Nullable, nullable;
+        import std.uni : toUpper;
 
-        if (_query is null || name.matchFirst(regex(_query, "i")))
+        if (_upperQuery is null || toUpper(name).canFind(_upperQuery))
         {
             static if (is(SymbolType == SymbolInformation))
             {
