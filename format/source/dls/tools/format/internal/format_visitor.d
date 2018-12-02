@@ -74,7 +74,7 @@ class FormatVisitor : ASTVisitor
     private size_t _inlineDepth;
     private size_t[] _doubleNewLines;
 
-    this(in Token[] inputTokens, in FormatConfig config)
+    this(const Token[] inputTokens, const FormatConfig config)
     {
         import dls.tools.format.internal.config : EndOfLine;
         import std.algorithm : filter;
@@ -1819,7 +1819,7 @@ class FormatVisitor : ASTVisitor
         return nodeString;
     }
 
-    private string getString(T)(in T node)
+    private string getString(T)(const T node)
     {
         return getString({ tryVisit(node); });
     }
@@ -1830,13 +1830,13 @@ class FormatVisitor : ASTVisitor
                 ? _config.maxLineLength : _config.softMaxLineLength);
     }
 
-    private void write(in char character)
+    private void write(const char character)
     {
         result.write(character);
         _lineLength += character == '\t' ? _config.tabWidth : 1;
     }
 
-    private void write(in char[] text)
+    private void write(const char[] text)
     {
         import std.algorithm : count;
 
@@ -1845,7 +1845,7 @@ class FormatVisitor : ASTVisitor
         _lineLength += text.length - numTabs + (numTabs * _config.tabWidth);
     }
 
-    private void writef(Args...)(in char[] text, in Args args)
+    private void writef(Args...)(const char[] text, const Args args)
     {
         import std.format : format;
 
@@ -1869,7 +1869,7 @@ class FormatVisitor : ASTVisitor
         write(indents);
     }
 
-    private void writeBraces(in BraceKind kind)
+    private void writeBraces(const BraceKind kind)
     {
         import dls.tools.format.internal.config : BraceStyle;
 
@@ -1959,7 +1959,7 @@ class FormatVisitor : ASTVisitor
         }
     }
 
-    private void writeAttributes(in Attribute[] attributes)
+    private void writeAttributes(const Attribute[] attributes)
     {
         import std.algorithm : filter;
 
@@ -1978,7 +1978,7 @@ class FormatVisitor : ASTVisitor
         }
     }
 
-    private void writeEnumHeader(in string name, in Type type)
+    private void writeEnumHeader(const string name, const Type type)
     {
         auto enumAndName = "enum";
 
@@ -1994,7 +1994,7 @@ class FormatVisitor : ASTVisitor
         }
     }
 
-    private void writeEnumBody(T)(in T[] enumMembers)
+    private void writeEnumBody(T)(const T[] enumMembers)
     {
         if (enumMembers.length > 0)
         {
