@@ -1966,15 +1966,28 @@ class FormatVisitor : ASTVisitor
         if (attributes is null)
             return;
 
-        foreach (style; [Style.newLine, Style.spaceAfter])
+        const(Attribute)[] firstAttributes;
+        const(Attribute)[] otherAttributes;
+
+        foreach (attr; attributes)
         {
-            _styles.insertFront(style);
+            if (attr.atAttribute is null && attr.linkageAttribute is null)
+                otherAttributes ~= attr;
+            else
+                firstAttributes ~= attr;
+        }
 
-            foreach (attr; attributes.filter!(a => style == Style.newLine
-                    ? (a.atAttribute !is null) : (a.atAttribute is null)))
-                visit(attr);
+        foreach (attr; firstAttributes)
+        {
+            visit(attr);
+            writeNewLine();
+            writeIndents();
+        }
 
-            _styles.removeFront();
+        foreach (attr; otherAttributes)
+        {
+            visit(attr);
+            write(' ');
         }
     }
 
