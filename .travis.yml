@@ -1,27 +1,27 @@
 sudo: required
+dist: xenial
 language: d
 matrix:
   fast_finish: true
   include:
     - d: ldc
       os: linux
-      env: OP=build ARCH=x86_64
+      env: ARCH=x86_64
     - d: ldc
       os: linux
-      env: OP=build ARCH=x86
+      env: ARCH=x86
     - d: ldc
       os: osx
-      env: OP=build ARCH=x86_64
+      env: ARCH=x86_64
     - d: ldc
       os: osx
-      env: OP=build ARCH=x86
+      env: ARCH=x86
     - d: dmd-beta
       os: linux
     - d: ldc-beta
       os: linux
   allow_failures:
     - d: dmd-beta
-    - d: dmd-nightly
     - d: ldc-beta
 cache:
   directories:
@@ -38,8 +38,9 @@ before_script:
   - ln -s /usr/bin/ld.gold ~/ld
 script:
   - if [[ ! -z $TRAVIS_TAG ]]; then export BUILD=release; fi
+  - if [[ ! -z $TRAVIS_TAG ]]; then export OP=build; fi
   - export PATH="$HOME:$PATH"
-  - dub ${OP:-test} --arch=${ARCH:-x86_64} --compiler=$DC --build=${BUILD:-debug}
+  - dub ${OP:-test --main-file=tests/main.d} --arch=${ARCH:-x86_64} --compiler=$DC --build=${BUILD:-debug}
 before_deploy:
   - if which strip; then strip dls; fi
   - upx --best --ultra-brute dls
@@ -51,6 +52,6 @@ deploy:
   file: dls-*.zip
   skip_cleanup: true
   on:
-    condition: $OP = build
+    condition: -n "$ARCH"
     repo: d-language-server/dls
     tags: true

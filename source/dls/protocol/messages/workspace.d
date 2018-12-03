@@ -89,15 +89,31 @@ void didChangeWatchedFiles(DidChangeWatchedFilesParams params)
     import dls.util.document : Document;
     import dls.util.logger : logger;
     import dls.util.uri : Uri;
-    import std.algorithm : canFind;
+    import std.algorithm : canFind, filter;
+    import std.file : exists, isFile;
     import std.path : baseName, dirName, extension;
+
+    foreach (event; params.changes.filter!(event => event.type == FileChangeType.deleted))
+    {
+        auto workspaceUri = SymbolTool.instance.getWorkspace(new Uri(event.uri));
+
+        if (workspaceUri !is null && !exists(workspaceUri.path))
+        {
+            SymbolTool.instance.clearPath(workspaceUri);
+        }
+    }
 
     foreach (event; params.changes)
     {
         auto uri = new Uri(event.uri);
         auto dirUri = Uri.fromPath(dirName(uri.path));
 
-        logger.infof("File changed: %s", uri.path);
+        logger.infof("Resource %s: %s", event.type, uri.path);
+
+        if (exists(uri.path) && !isFile(uri.path))
+        {
+            continue;
+        }
 
         switch (baseName(uri.path))
         {
@@ -111,7 +127,19 @@ void didChangeWatchedFiles(DidChangeWatchedFilesParams params)
             continue;
 
         case "dub.selections.json":
-            SymbolTool.instance.importDubSelections(dirUri);
+            if (event.type != FileChangeType.deleted)
+            {
+                SymbolTool.instance.importDubSelections(dirUri);
+            }
+
+            continue;
+
+        case ".gitmodules":
+            if (event.type != FileChangeType.deleted)
+            {
+                SymbolTool.instance.importGitSubmodules(dirUri);
+            }
+
             continue;
 
         default:

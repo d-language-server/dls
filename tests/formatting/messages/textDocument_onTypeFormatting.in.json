@@ -1,0 +1,19 @@
+{
+    "jsonrpc": "2.0",
+    "id": "textDocument/onTypeFormatting",
+    "method": "textDocument/onTypeFormatting",
+    "params": {
+        "textDocument": {
+            "uri": "testFile:///source/app.d"
+        },
+        "position": {
+            "line": 0,
+            "character": 81
+        },
+        "ch": ";",
+        "options": {
+            "tabSize": 4,
+            "insertSpaces": true
+        }
+    }
+}

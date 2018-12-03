@@ -22,31 +22,31 @@ module dls.protocol.interfaces.workspace;
 
 import dls.protocol.interfaces.client : RegistrationOptionsBase;
 
-class WorkspaceFolder
+final class WorkspaceFolder
 {
     string uri;
     string name;
 }
 
-class DidChangeWorkspaceFoldersParams
+final class DidChangeWorkspaceFoldersParams
 {
     WorkspaceFoldersChangeEvent event;
 }
 
-class WorkspaceFoldersChangeEvent
+final class WorkspaceFoldersChangeEvent
 {
     WorkspaceFolder[] added;
     WorkspaceFolder[] removed;
 }
 
-class DidChangeConfigurationParams
+final class DidChangeConfigurationParams
 {
     import std.json : JSONValue;
 
     JSONValue settings;
 }
 
-class ConfigurationParams
+final class ConfigurationParams
 {
     ConfigurationItem[] items;
 
@@ -56,7 +56,7 @@ class ConfigurationParams
     }
 }
 
-class ConfigurationItem
+final class ConfigurationItem
 {
     import std.typecons : Nullable;
 
@@ -71,12 +71,12 @@ class ConfigurationItem
     }
 }
 
-class DidChangeWatchedFilesParams
+final class DidChangeWatchedFilesParams
 {
     FileEvent[] changes;
 }
 
-class FileEvent
+final class FileEvent
 {
     import dls.protocol.definitions : DocumentUri;
 
@@ -84,14 +84,14 @@ class FileEvent
     FileChangeType type;
 }
 
-enum FileChangeType : uint
+enum FileChangeType : ubyte
 {
     created = 1,
     changed = 2,
     deleted = 3
 }
 
-class DidChangeWatchedFilesRegistrationOptions : RegistrationOptionsBase
+final class DidChangeWatchedFilesRegistrationOptions : RegistrationOptionsBase
 {
     FileSystemWatcher[] watchers;
 
@@ -101,33 +101,33 @@ class DidChangeWatchedFilesRegistrationOptions : RegistrationOptionsBase
     }
 }
 
-class FileSystemWatcher
+final class FileSystemWatcher
 {
     import std.typecons : Nullable;
 
     string globPattern;
-    Nullable!WatchKind kind;
+    Nullable!ubyte kind;
 
-    this(string globPattern = string.init, Nullable!WatchKind kind = Nullable!WatchKind.init)
+    this(string globPattern = string.init, Nullable!ubyte kind = Nullable!ubyte.init)
     {
         this.globPattern = globPattern;
         this.kind = kind;
     }
 }
 
-enum WatchKind : uint
+enum WatchKind : ubyte
 {
     create = 1,
     change = 2,
     delete_ = 4
 }
 
-class WorkspaceSymbolParams
+final class WorkspaceSymbolParams
 {
     string query;
 }
 
-class ExecuteCommandParams
+final class ExecuteCommandParams
 {
     import std.json : JSONValue;
     import std.typecons : Nullable;
@@ -136,7 +136,7 @@ class ExecuteCommandParams
     Nullable!(JSONValue[]) arguments;
 }
 
-class ExecuteCommandRegistrationOptions : RegistrationOptionsBase
+final class ExecuteCommandRegistrationOptions : RegistrationOptionsBase
 {
     string[] commands;
 
@@ -146,7 +146,7 @@ class ExecuteCommandRegistrationOptions : RegistrationOptionsBase
     }
 }
 
-class ApplyWorkspaceEditParams
+final class ApplyWorkspaceEditParams
 {
     import dls.protocol.definitions : WorkspaceEdit;
 
@@ -158,7 +158,7 @@ class ApplyWorkspaceEditParams
     }
 }
 
-class ApplyWorkspaceEditResponse
+final class ApplyWorkspaceEditResponse
 {
     bool applied;
 }

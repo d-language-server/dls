@@ -23,12 +23,13 @@ module dls.util.document;
 class Document
 {
     import dls.util.uri : Uri;
-    import dls.protocol.definitions : Position, Range, TextDocumentIdentifier,
-        TextDocumentItem, VersionedTextDocumentIdentifier;
+    import dls.protocol.definitions : DocumentUri, Position, Range,
+        TextDocumentIdentifier, TextDocumentItem, VersionedTextDocumentIdentifier;
     import dls.protocol.interfaces : TextDocumentContentChangeEvent;
     import std.json : JSONValue;
 
-    private static Document[string] _documents;
+    private static Document[DocumentUri] _documents;
+    private DocumentUri _uri;
     private wstring[] _lines;
     private JSONValue _version;
 
@@ -36,46 +37,46 @@ class Document
     {
         import std.algorithm : map;
 
-        return _documents.keys.map!(path => Uri.fromPath(path));
+        return _documents.byKey.map!(uri => new Uri(uri));
     }
 
-    static Document get(in Uri uri)
+    static Document get(const Uri uri)
     {
         import std.file : readText;
 
-        return uri.path in _documents ? _documents[uri.path] : new Document(readText(uri.path));
+        return uri in _documents ? _documents[uri] : new Document(uri, readText(uri.path));
     }
 
-    static void open(in TextDocumentItem textDocument)
+    static void open(const TextDocumentItem textDocument)
     {
         auto uri = new Uri(textDocument.uri);
 
-        if (uri.path !in _documents)
+        if (uri !in _documents)
         {
-            _documents[uri.path] = new Document(textDocument.text);
-            _documents[uri.path]._version = textDocument.version_;
+            _documents[uri] = new Document(uri, textDocument.text);
+            _documents[uri]._version = textDocument.version_;
         }
     }
 
-    static void close(in TextDocumentIdentifier textDocument)
+    static void close(const TextDocumentIdentifier textDocument)
     {
         auto uri = new Uri(textDocument.uri);
 
-        if (uri.path in _documents)
+        if (uri in _documents)
         {
-            _documents.remove(uri.path);
+            _documents.remove(uri);
         }
     }
 
-    static void change(in VersionedTextDocumentIdentifier textDocument,
+    static void change(const VersionedTextDocumentIdentifier textDocument,
             TextDocumentContentChangeEvent[] events)
     {
         auto uri = new Uri(textDocument.uri);
 
-        if (uri.path in _documents)
+        if (uri in _documents)
         {
-            _documents[uri.path].change(events);
-            _documents[uri.path]._version = textDocument.version_;
+            _documents[uri].change(events);
+            _documents[uri]._version = textDocument.version_;
         }
     }
 
@@ -89,8 +90,9 @@ class Document
         return _version;
     }
 
-    private this(in string text)
+    private this(const Uri uri, const string text)
     {
+        _uri = uri;
         _lines = getText(text);
     }
 
@@ -102,12 +104,19 @@ class Document
         return _lines.join().toUTF8();
     }
 
-    bool validatePosition(in Position position) const
+    void validatePosition(const Position position) const
     {
-        return position.line < _lines.length && position.character <= _lines[position.line].length;
+        import dls.protocol.jsonrpc : InvalidParamsException;
+        import std.format : format;
+
+        if (position.line >= _lines.length || position.character > _lines[position.line].length)
+        {
+            throw new InvalidParamsException(format!"invalid position: %s %s,%s"(_uri,
+                    position.line, position.character));
+        }
     }
 
-    size_t byteAtPosition(in Position position) const
+    size_t byteAtPosition(const Position position) const
     {
         import std.algorithm : reduce;
         import std.range : iota;
@@ -121,7 +130,7 @@ class Document
         const linesBytes = reduce!((s, i) => s + codeLength!char(_lines[i]))(cast(size_t) 0,
                 iota(position.line));
 
-        if (position.character >= _lines[position.line].length)
+        if (position.character > _lines[position.line].length)
         {
             return 0;
         }
@@ -156,7 +165,7 @@ class Document
         return wordRangeAtPosition(positionAtByte(bytePosition));
     }
 
-    Range wordRangeAtPosition(in Position position) const
+    Range wordRangeAtPosition(const Position position) const
     {
         import std.algorithm : min;
 
@@ -194,7 +203,7 @@ class Document
                 toUCSindex(_lines[lineNumber], bytePosition)));
     }
 
-    private void change(in TextDocumentContentChangeEvent[] events)
+    private void change(const TextDocumentContentChangeEvent[] events)
     {
         foreach (event; events)
         {
@@ -230,7 +239,7 @@ class Document
         }
     }
 
-    private wstring[] getText(in string text) const
+    private wstring[] getText(const string text) const
     {
         import std.algorithm : endsWith;
         import std.array : replaceFirst;

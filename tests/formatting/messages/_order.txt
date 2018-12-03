@@ -1,0 +1,6 @@
+initialize
+initialized
+textDocument_formatting
+textDocument_rangeFormatting
+textDocument_onTypeFormatting
+shutdown

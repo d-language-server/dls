@@ -41,7 +41,6 @@ InitializeResult initialize(InitializeParams params)
 
     initState = params;
     logger.info("Initializing server");
-    Server.initialized = true;
     AnalysisTool.initialize();
     CommandTool.initialize();
     FormatTool.initialize();
@@ -114,6 +113,7 @@ InitializeResult initialize(InitializeParams params)
                 JSONValue(true).nullable).nullable);
     }
 
+    Server.initialized = true;
     return result;
 }
 
@@ -121,7 +121,7 @@ InitializeResult initialize(InitializeParams params)
 void initialized(JSONValue nothing)
 {
     import dls.protocol.interfaces : DidChangeWatchedFilesRegistrationOptions,
-        FileSystemWatcher, Registration, RegistrationParams;
+        FileSystemWatcher, Registration, RegistrationParams, WatchKind;
     import dls.protocol.jsonrpc : send;
     import dls.protocol.messages.methods : Client;
     import dls.protocol.state : initOptions, initState;
@@ -141,15 +141,23 @@ void initialized(JSONValue nothing)
         spawn(&update, initOptions.autoUpdate);
     }
 
-    const didChangeWatchedFiles = initState.capabilities.workspace.didChangeWatchedFiles;
+    const didChangeWatchedFiles = !initState.capabilities.workspace.isNull
+        && !initState.capabilities.workspace.didChangeWatchedFiles.isNull
+        && initState.capabilities.workspace.didChangeWatchedFiles.dynamicRegistration;
+    ubyte watchAllEvents = WatchKind.create + WatchKind.change + WatchKind.delete_;
 
-    if (!didChangeWatchedFiles.isNull && didChangeWatchedFiles.dynamicRegistration)
+    if (didChangeWatchedFiles)
     {
         logger.info("Registering watchers");
+        //dfmt off
         auto watchers = [
-            new FileSystemWatcher("**/dub.selections.json"), new FileSystemWatcher("**/dub.{json,sdl}"),
-            new FileSystemWatcher("**/*.ini"), new FileSystemWatcher("**/*.{d,di}")
+            new FileSystemWatcher("**/dub.{json,sdl}", watchAllEvents.nullable),
+            new FileSystemWatcher("**/dub.selections.json", watchAllEvents.nullable),
+            new FileSystemWatcher("**/.gitmodules", watchAllEvents.nullable),
+            new FileSystemWatcher("**/*.ini", watchAllEvents.nullable),
+            new FileSystemWatcher("**/*.{d,di}", watchAllEvents.nullable)
         ];
+        //dfmt on
         auto registrationOptions = new DidChangeWatchedFilesRegistrationOptions(watchers);
         auto registration = new Registration!DidChangeWatchedFilesRegistrationOptions(
                 "dls-registration-watch-dub-files",
@@ -164,19 +172,27 @@ void initialized(JSONValue nothing)
 @("")
 JSONValue shutdown(JSONValue nothing)
 {
+    import dls.protocol.definitions : TextDocumentIdentifier;
     import dls.server : Server;
     import dls.tools.analysis_tool : AnalysisTool;
     import dls.tools.command_tool : CommandTool;
     import dls.tools.format_tool : FormatTool;
     import dls.tools.symbol_tool : SymbolTool;
+    import dls.util.document : Document;
     import dls.util.logger : logger;
 
     logger.info("Shutting down server");
-    Server.shutdown = true;
+    Server.initialized = false;
     AnalysisTool.shutdown();
     CommandTool.shutdown();
     FormatTool.shutdown();
     SymbolTool.shutdown();
+
+    foreach (uri; Document.uris)
+    {
+        Document.close(new TextDocumentIdentifier(uri));
+    }
+
     return JSONValue(null);
 }
 

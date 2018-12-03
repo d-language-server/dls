@@ -18,17 +18,32 @@
  *
  */
 
-shared static this()
-{
-    import dls.util.setup : initialSetup;
-
-    initialSetup();
-}
-
-int main()
+int main(string[] args)
 {
     import dls.server : Server;
+    import dls.util.communicator : Communicator, SocketCommunicator,
+        StdioCommunicator, communicator;
+    import std.getopt : getopt;
+    import std.stdio : stdout;
+
+    bool stdio = true;
+    ushort port;
+
+    getopt(args, "stdio", &stdio, "socket|tcp", &port);
+
+    if (port > 0)
+    {
+        communicator = new SocketCommunicator(port);
+    }
+    else if (stdio)
+    {
+        communicator = new StdioCommunicator();
+    }
+    else
+    {
+        return -1;
+    }
 
     Server.loop();
-    return 0;
+    return Server.initialized ? 1 : 0;
 }

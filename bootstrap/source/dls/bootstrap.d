@@ -20,6 +20,8 @@
 
 module dls.bootstrap;
 
+import std.json : JSONValue;
+
 immutable apiEndpoint = "https://api.github.com/repos/d-language-server/dls/%s";
 
 version (Windows)
@@ -76,24 +78,31 @@ shared static this()
     dlsArchiveName = format("dls-%%s.%s.%s.zip", os, arch);
 }
 
+@property JSONValue[] allReleases()
+{
+    import std.format : format;
+    import std.json : parseJSON;
+    import std.net.curl : get;
+
+    return parseJSON(get(format!apiEndpoint("releases"))).array;
+}
+
 @property bool canDownloadDls()
 {
     import core.time : hours;
     import std.algorithm : min;
     import std.datetime : Clock, SysTime;
     import std.format : format;
-    import std.json : parseJSON;
-    import std.net.curl : get;
+    import std.json : JSONType;
 
     try
     {
-        const releases = parseJSON(get(format!apiEndpoint("releases"))).array;
-
-        foreach (release; releases[0 .. min($, 5)])
+        foreach (release; allReleases)
         {
             const releaseDate = SysTime.fromISOExtString(release["published_at"].str);
 
-            if (Clock.currTime.toUTC() - releaseDate > 1.hours)
+            if (Clock.currTime.toUTC() - releaseDate > 1.hours
+                    && release["prerelease"].type == JSONType.false_)
             {
                 foreach (asset; release["assets"].array)
                 {
@@ -115,9 +124,9 @@ shared static this()
     return false;
 }
 
-void downloadDls(in void function(size_t size) totalSizeCallback = null,
-        in void function(size_t size) chunkSizeCallback = null,
-        in void function() extractCallback = null)
+void downloadDls(const void function(size_t size) totalSizeCallback = null,
+        const void function(size_t size) chunkSizeCallback = null,
+        const void function() extractCallback = null)
 {
     import std.array : appender;
     import std.net.curl : HTTP;
@@ -146,7 +155,7 @@ void downloadDls(in void function(size_t size) totalSizeCallback = null,
 
         mkdirRecurse(dlsDir);
 
-        request.onReceive = (in ubyte[] data) {
+        request.onReceive = (const ubyte[] data) {
             archiveData ~= data;
             return data.length;
         };
@@ -217,7 +226,7 @@ void downloadDls(in void function(size_t size) totalSizeCallback = null,
     }
 }
 
-void buildDls(in string dlsDir, in string[] additionalArgs = [])
+void buildDls(const string dlsDir, const string[] additionalArgs = [])
 {
     import core.cpuid : isX86_64;
     import std.path : buildNormalizedPath;
@@ -284,7 +293,7 @@ string linkDls()
     return buildNormalizedPath(dubDirPath, dubDirName, "packages", ".bin");
 }
 
-private void makeLink(in string target, in string link, bool directory)
+private void makeLink(const string target, const string link, bool directory)
 {
     version (Windows)
     {
@@ -335,7 +344,7 @@ private void makeLink(in string target, in string link, bool directory)
 
 class UpgradeFailedException : Exception
 {
-    this(in string message)
+    this(const string message)
     {
         super(message);
     }

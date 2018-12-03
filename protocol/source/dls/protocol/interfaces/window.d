@@ -32,7 +32,7 @@ class ShowMessageParams
     }
 }
 
-enum MessageType : uint
+enum MessageType : ubyte
 {
     error = 1,
     warning = 2,
@@ -40,7 +40,7 @@ enum MessageType : uint
     log = 4
 }
 
-class ShowMessageRequestParams : ShowMessageParams
+final class ShowMessageRequestParams : ShowMessageParams
 {
     import std.typecons : Nullable;
 
@@ -54,7 +54,7 @@ class ShowMessageRequestParams : ShowMessageParams
     }
 }
 
-class MessageActionItem
+final class MessageActionItem
 {
     string title;
 

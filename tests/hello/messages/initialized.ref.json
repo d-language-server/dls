@@ -1,0 +1,10 @@
+[
+    {
+        "jsonrpc": "2.0",
+        "method": "textDocument/publishDiagnostics",
+        "params": {
+            "diagnostics": [],
+            "uri": "testFile:///source/app.d"
+        }
+    }
+]

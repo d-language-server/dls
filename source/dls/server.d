@@ -23,12 +23,15 @@ module dls.server;
 shared static this()
 {
     import dls.protocol.handlers : isHandler, pushHandler;
+    import dls.util.setup : initialSetup;
     import std.algorithm : map;
     import std.array : join, split;
     import std.meta : AliasSeq;
     import std.traits : hasUDA, select;
     import std.typecons : tuple;
     import std.string : capitalize;
+
+    initialSetup();
 
     foreach (modName; AliasSeq!("general", "client", "text_document", "window", "workspace"))
     {
@@ -59,24 +62,22 @@ final abstract class Server
     import dls.protocol.interfaces : InitializeParams;
 
     static bool initialized;
-    static bool shutdown;
     static bool exit;
 
     static void loop()
     {
+        import dls.util.communicator : communicator;
         import dls.util.logger : logger;
         import std.algorithm : findSplit;
         import std.array : appender;
         import std.conv : to;
-        import std.stdio : stdin;
         import std.string : strip, stripRight;
 
         auto lineAppender = appender!(char[]);
-        auto charBuffer = new char[1];
         string[string] headers;
         string line;
 
-        while (!stdin.eof && !exit)
+        while (communicator.hasData() && !exit)
         {
             headers.clear();
 
@@ -89,7 +90,7 @@ final abstract class Server
 
                 do
                 {
-                    auto res = stdin.rawRead(charBuffer);
+                    auto res = communicator.read(1);
 
                     if (res.length == 0)
                     {
@@ -112,7 +113,7 @@ final abstract class Server
 
                 if (parts[1].length > 0)
                 {
-                    headers[parts[0].to!string] = parts[2].to!string;
+                    headers[parts[0]] = parts[2];
                 }
             }
             while (line.length > 0);
@@ -128,13 +129,11 @@ final abstract class Server
                 continue;
             }
 
-            static char[] buffer;
-            buffer.length = headers["Content-Length"].strip().to!size_t;
-            handleJSON(stdin.rawRead(buffer));
+            handleJSON(communicator.read(headers["Content-Length"].strip().to!size_t));
         }
     }
 
-    private static void handleJSON(in char[] content)
+    private static void handleJSON(const char[] content)
     {
         import dls.protocol.handlers : HandlerNotFoundException,
             NotificationHandler, RequestHandler, ResponseHandler, handler;
@@ -143,9 +142,11 @@ final abstract class Server
         import dls.protocol.state : initOptions;
         import dls.util.json : convertFromJSON;
         import dls.util.logger : logger;
+        import std.algorithm : startsWith;
         import std.json : JSONException, JSONValue, parseJSON;
 
         RequestMessage request;
+        NotificationMessage notification;
 
         void findAndExecuteHandler()
         {
@@ -159,7 +160,7 @@ final abstract class Server
                     {
                         request = convertFromJSON!RequestMessage(json);
 
-                        if (!shutdown && (initialized || request.method == "initialize"))
+                        if (initialized || request.method == "initialize")
                         {
                             send(request.id,
                                     handler!RequestHandler(request.method)(request.params));
@@ -171,9 +172,9 @@ final abstract class Server
                     }
                     else
                     {
-                        auto notification = convertFromJSON!NotificationMessage(json);
+                        notification = convertFromJSON!NotificationMessage(json);
 
-                        if (initialized)
+                        if (initialized || notification.method == "exit")
                         {
                             handler!NotificationHandler(notification.method)(notification.params);
                         }
@@ -200,8 +201,11 @@ final abstract class Server
             }
             catch (HandlerNotFoundException e)
             {
-                logger.errorf("%s: %s", ErrorCodes.methodNotFound[0], e.toString());
-                sendError(ErrorCodes.methodNotFound, request, JSONValue(e.toString()));
+                if (notification is null || !notification.method.startsWith("$/"))
+                {
+                    logger.errorf("%s: %s", ErrorCodes.methodNotFound[0], e.toString());
+                    sendError(ErrorCodes.methodNotFound, request, JSONValue(e.toString()));
+                }
             }
             catch (InvalidParamsException e)
             {

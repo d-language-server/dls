@@ -21,7 +21,7 @@
 void main()
 {
     import std.algorithm : sort;
-    import std.file : append, readText, thisExePath, write;
+    import std.file : readText, thisExePath, write;
     import std.format : format;
     import std.json : parseJSON;
     import std.path : buildNormalizedPath;
@@ -30,19 +30,26 @@ void main()
     immutable i18nDir = buildNormalizedPath(thisExePath, "..", "..", "i18n");
     immutable translationsPath = buildNormalizedPath(i18nDir, "data", "translations.json");
     immutable trModulePath = buildNormalizedPath(i18nDir, "source", "dls", "util", "constants.d");
+    immutable trModuleContent = readText(trModulePath);
     auto translations = parseJSON(readText(translationsPath));
+    string content;
 
-    write(trModulePath, q{module dls.util.constants;});
-    append(trModulePath, "\n\n");
-    append(trModulePath, q{enum Tr : string});
-    append(trModulePath, "\n{\n");
-    append(trModulePath, q{_ = "### BAD TRANSLATION KEY ###",});
-    append(trModulePath, "\n");
+    content ~= q{module dls.util.constants;};
+    content ~= "\n\n";
+    content ~= q{enum Tr : string};
+    content ~= "\n{\n";
+    content ~= q{_ = "### BAD TRANSLATION KEY ###",};
+    content ~= "\n";
 
     foreach (key; sort(translations.object.keys))
     {
-        append(trModulePath, format!"%s = \"%s\"%s\n"(key.replace(".", "_"), key, ","));
+        content ~= format!"%s = \"%s\"%s\n"(key.replace(".", "_"), key, ",");
     }
 
-    append(trModulePath, "}\n");
+    content ~= "}\n";
+
+    if (content != trModuleContent)
+    {
+        write(trModulePath, content);
+    }
 }

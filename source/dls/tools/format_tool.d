@@ -78,7 +78,7 @@ class FormatTool : Tool
         return _instance;
     }
 
-    TextEdit[] formatting(in Uri uri, in FormattingOptions options)
+    TextEdit[] formatting(const Uri uri, const FormattingOptions options)
     {
         import dfmt.formatter : format;
         import dls.util.document : Document;
@@ -95,29 +95,43 @@ class FormatTool : Tool
         return diff(uri, buffer.toString());
     }
 
-    TextEdit[] rangeFormatting(in Uri uri, in Range range, in FormattingOptions options)
+    TextEdit[] rangeFormatting(const Uri uri, const Range range, const FormattingOptions options)
     {
+        import dls.util.document : Document;
         import std.algorithm : filter;
         import std.array : array;
 
-        return formatting(uri, options).filter!(edit => edit.range.start.line >= range.start.line
-                && edit.range.end.line <= range.end.line).array;
+        const document = Document.get(uri);
+        document.validatePosition(range.start);
+        document.validatePosition(range.end);
+
+        return formatting(uri, options).filter!((edit) {
+            return document.byteAtPosition(edit.range.start) < document.byteAtPosition(range.end)
+                && document.byteAtPosition(edit.range.end) > document.byteAtPosition(range.start);
+        }).array;
     }
 
-    TextEdit[] onTypeFormatting(in Uri uri, in Position position, in FormattingOptions options)
+    TextEdit[] onTypeFormatting(const Uri uri, const Position position,
+            const FormattingOptions options)
     {
         import dls.util.document : Document;
         import std.algorithm : filter;
         import std.array : array;
         import std.string : stripRight;
 
-        return position.character == stripRight(Document.get(uri)
-                .lines[position.line]).length ? formatting(uri, options)
-            .filter!(edit => edit.range.start.line == position.line
-                    || edit.range.end.line == position.line).array : [];
+        const document = Document.get(uri);
+        document.validatePosition(position);
+
+        if (position.character != stripRight(document.lines[position.line]).length)
+        {
+            return [];
+        }
+
+        return formatting(uri, options).filter!(edit => edit.range.start.line == position.line
+                || edit.range.end.line == position.line).array;
     }
 
-    private Config getConfig(in Uri uri, in FormattingOptions options)
+    private Config getConfig(const Uri uri, const FormattingOptions options)
     {
         import dfmt.editorconfig : IndentStyle, OptionalBoolean, getConfigFor;
         import dls.tools.symbol_tool : SymbolTool;
@@ -161,7 +175,7 @@ class FormatTool : Tool
         return config;
     }
 
-    private TextEdit[] diff(in Uri uri, in string after)
+    private TextEdit[] diff(const Uri uri, const string after)
     {
         import dls.util.document : Document;
         import std.ascii : isWhite;
@@ -217,32 +231,30 @@ class FormatTool : Tool
                     text = "";
                 }
             }
-            else
+
+            if (startIndex == stopIndex)
             {
-                if (startIndex == stopIndex)
-                {
-                    startIndex = i;
-                    stopIndex = i;
-                }
+                startIndex = i;
+                stopIndex = i;
+            }
 
-                auto addition = !isWhite(beforeChar) && isWhite(afterChar);
-                auto deletion = isWhite(beforeChar) && !isWhite(afterChar);
+            auto addition = !isWhite(beforeChar) && isWhite(afterChar);
+            const deletion = isWhite(beforeChar) && !isWhite(afterChar);
 
-                if (!addition && !deletion)
-                {
-                    addition = before.length - i < after.length - j;
-                }
+            if (!addition && !deletion)
+            {
+                addition = before.length - i < after.length - j;
+            }
 
-                if (addition && j < after.length)
-                {
-                    text ~= after[j .. newJ];
-                    j = newJ;
-                }
-                else if (i < before.length)
-                {
-                    stopIndex = newI;
-                    i = newI;
-                }
+            if (addition && j < after.length)
+            {
+                text ~= after[j .. newJ];
+                j = newJ;
+            }
+            else if (i < before.length)
+            {
+                stopIndex = newI;
+                i = newI;
             }
         }
 

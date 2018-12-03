@@ -13,16 +13,16 @@
 		"dls:bootstrap": "*",
 		"dls:i18n": "*",
 		"dls:protocol": "*",
-		"dub": "1.12.0",
-		"dcd": "0.9.13",
-		"dscanner": "0.5.11",
-		"dfmt": "0.8.3"
+		"dub": "~>1.12.0",
+		"dcd": "~>0.9.13",
+		"dscanner": "~>0.5.11",
+		"dfmt": "~>0.8.3"
 	},
 	"versions": [
 		"StdLoggerDisableFatal"
 	],
 	"preGenerateCommands": [
-		"dub describe --quiet > data/description.json"
+		"rdmd data/version.d"
 	],
 	"subPackages": [
 		"bootstrap",

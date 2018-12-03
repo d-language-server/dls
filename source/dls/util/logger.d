@@ -22,7 +22,7 @@ module dls.util.logger;
 
 import dls.protocol.interfaces : InitializeParams;
 
-shared auto logger = new shared LspLogger();
+private shared _logger = new shared LspLogger();
 private immutable int[InitializeParams.Trace] traceToType;
 private immutable logMessageFormat = "[%.24s] %s";
 
@@ -36,11 +36,16 @@ shared static this()
 
     //dfmt off
     traceToType = [
-        InitializeParams.Trace.off: 0,
-        InitializeParams.Trace.messages: MessageType.warning.to!int,
-        InitializeParams.Trace.verbose: MessageType.log.to!int
+        InitializeParams.Trace.off      : 0,
+        InitializeParams.Trace.messages : MessageType.warning.to!int,
+        InitializeParams.Trace.verbose  : MessageType.log.to!int
     ];
     //dfmt on
+}
+
+@property shared(LspLogger) logger()
+{
+    return _logger;
 }
 
 private shared class LspLogger
@@ -49,62 +54,79 @@ private shared class LspLogger
 
     private int _messageType;
 
-    @property void trace(in InitializeParams.Trace t)
+    @property void trace(const InitializeParams.Trace t)
     {
         _messageType = traceToType[t];
     }
 
-    void info(in string message) const
+    void info(const string message) const
     {
         sendMessage(message, MessageType.info);
     }
 
-    void infof(Args...)(in string message, in Args args) const
+    void infof(Args...)(const string message, const Args args) const
     {
         import std.format : format;
 
         info(format(message, args));
     }
 
-    void warning(in string message) const
+    void warning(const string message) const
     {
         sendMessage(message, MessageType.warning);
     }
 
-    void warningf(Args...)(in string message, in Args args) const
+    void warningf(Args...)(const string message, const Args args) const
     {
         import std.format : format;
 
         warning(format(message, args));
     }
 
-    void error(in string message) const
+    void error(const string message) const
     {
         sendMessage(message, MessageType.error);
     }
 
-    void errorf(Args...)(in string message, in Args args) const
+    void errorf(Args...)(const string message, const Args args) const
     {
         import std.format : format;
 
         error(format(message, args));
     }
 
-    private void sendMessage(in string message, in MessageType type) const
+    private void sendMessage(const string message, const MessageType type) const
     {
         import dls.protocol.interfaces : LogMessageParams;
         import dls.protocol.jsonrpc : send;
         import dls.protocol.messages.methods : Window;
         import dls.protocol.state : initOptions;
         import std.datetime : Clock;
+        import std.file : mkdirRecurse;
         import std.format : format;
+        import std.path : dirName;
         import std.stdio : File;
 
         if (initOptions.logFile.length > 0)
         {
-            auto log = File(initOptions.logFile, "a");
-            log.writefln(logMessageFormat, Clock.currTime.toString(), message);
-            log.flush();
+            static bool firstLog = true;
+
+            if (firstLog)
+            {
+                mkdirRecurse(dirName(initOptions.logFile));
+            }
+
+            synchronized
+            {
+                auto log = File(initOptions.logFile, firstLog ? "w" : "a");
+                log.writefln(logMessageFormat, Clock.currTime.toString(), message);
+                log.flush();
+            }
+
+            if (firstLog)
+            {
+                firstLog = false;
+            }
         }
 
         if (type <= _messageType)

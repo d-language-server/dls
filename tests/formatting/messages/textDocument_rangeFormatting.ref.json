@@ -1,0 +1,34 @@
+[
+    {
+        "id": "textDocument/rangeFormatting",
+        "jsonrpc": "2.0",
+        "result": [
+            {
+                "newText": "\n",
+                "range": {
+                    "end": {
+                        "character": 28,
+                        "line": 0
+                    },
+                    "start": {
+                        "character": 28,
+                        "line": 0
+                    }
+                }
+            },
+            {
+                "newText": "\n    ",
+                "range": {
+                    "end": {
+                        "character": 29,
+                        "line": 0
+                    },
+                    "start": {
+                        "character": 29,
+                        "line": 0
+                    }
+                }
+            }
+        ]
+    }
+]

@@ -43,6 +43,8 @@ Packages used (the stuff doing the actual hard work):
 
 Some editors may need DLS to be [installed manually](#installing) (don't worry, it's easy).
 
+### Some common editors
+
 - Visual Studio Code: [install the extension](https://marketplace.visualstudio.com/items?itemName=LaurentTreguier.vscode-dls)
 - Atom: [install the package](https://atom.io/packages/ide-dlang)
 - Sublime Text (using [tomv654's LSP client](https://github.com/tomv564/LSP)):
@@ -71,6 +73,12 @@ Some editors may need DLS to be [installed manually](#installing) (don't worry, 
 
 DLS should work with other editors, although your mileage may vary since it's moslty tested on the ones above.
 If it's not working with your editor of choice, [submit an issue](https://github.com/d-language-server/dls/issues/new)!
+
+### Command line options
+
+Some command line options exist to control the behavior of DLS:
+- `--stdio`: use standard input and output streams for communication
+- `--socket=PORT` or `--tcp=PORT`: use a socket connecting on the specified port for communication
 
 ## Installing
 
@@ -113,23 +121,24 @@ DLS supports a few custom initialization options in the `InitializeParams.initia
 
 ```typescript
 interface InitializationOptions: {
-    autoUpdate?: boolean;
-    catchErrors?: boolean;
-    logFile?: string;
+    autoUpdate?: boolean = true;
+    preReleaseBuilds?: boolean = false;
+    catchErrors?: boolean = false;
+    logFile?: string = "";
     capabilities?: {
-        hover?: boolean;
-        completion?: boolean;
-        definition?: boolean;
-        typeDefinition?: boolean;
-        references?: boolean;
-        documentHighlight?: boolean;
-        documentSymbol?: boolean;
-        workspaceSymbol?: boolean;
-        codeAction?: boolean;
-        documentFormatting?: boolean;
-        documentRangeFormatting?: boolean;
-        documentOnTypeFormatting?: boolean;
-        rename?: boolean;
+        hover?: boolean = true;
+        completion?: boolean = true;
+        definition?: boolean = true;
+        typeDefinition?: boolean = true;
+        references?: boolean = true;
+        documentHighlight?: boolean = true;
+        documentSymbol?: boolean = true;
+        workspaceSymbol?: boolean = true;
+        codeAction?: boolean = true;
+        documentFormatting?: boolean = true;
+        documentRangeFormatting?: boolean = true;
+        documentOnTypeFormatting?: boolean = true;
+        rename?: boolean = true;
     }
 }
 ```
@@ -180,3 +189,8 @@ interface DlsUpgradeSizeParams extends TranslationParams {
 
 The file `i18n/data/translations.json` contains localization strings.
 Adding new strings is straightforward, simply add new entries in the `message` objects with the locale identifier as key and the translated string as value.
+
+### Which branch should be targeted by pull requests ?
+
+Is it work on an upcoming new feature ? Then the `master` branch should be targeted.
+Is it a fix for a bug you've encountered ? Then the latest `release/v[MAJOR].[MINOR].x` branch should be targeted.

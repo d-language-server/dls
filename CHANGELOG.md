@@ -4,8 +4,61 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.19.1
+- Fixed data possibly being sent in socket multiple times
+- Fixed symbol list being empty when encountering an anonymous symbol
+- Fixed symbol list sometimes containing garbage instead of correct names
+
+### 0.19.0
+- Added ability to ignore pre-release builds unless the pre-release init option is set
+- Added ability to automatically import git submodules in non-dub projects
+- Enhanced range formatting to apply edits affecting the range and not the line containing the range
+- Enhanced Linux builds by upgrading the Travis image from trusty to Xenial
+- Enhanced file logging by ensuring its parent directory is created at startup
+- Fixed socket communication quickly going awry
+
+#### 0.18.3
+- Fixed import paths being cleared when removed from a project even if another still used it
+
+#### 0.18.2
+- Updated libraries:
+    - `dub`: `1.12.0` => `1.12.1-rc.1` ([#17](https://github.com/d-language-server/dls/issues/17))
+
+#### 0.18.1
+- Fixed dub dependency for the BuilKite CI ([#17](https://github.com/d-language-server/dls/issues/17))
+- Fixed completions when the cursor is at the very end of a source file
+
+### 0.18.0
+- Added test suite skeleton to start fighting against regressions
+- Fixed diagnostics being sent before responding to the initialization request
+- Fixed some initialization properties assumed to not be unspecified, potentially leading to crashes
+- Fixed exit code always being one even if exiting without a shutdown request
+- Fixed some wrong error codes
+- Fixed possible crash upon receiving an invalid worksapce URI
+
+#### 0.17.1
+- Fixed logger not cleaning up the log file before writing to it
+- Fixed directories not being cleared from DCD's cache after being deleted
+
+### 0.17.0
+- Added ability to use DLS with sockets instead of stdio
+- Enhanced unknown custom notification handling to ignore them instead of producing an error
+- Enhanced diagnostic publishing to pick up `.dscanner.ini` files automatically
+- Fixed comment handling with multiple `@suppress()`
+- Updated libraries:
+    - `emsi_containers`: `0.8.0-alpha.10` => `0.8.0-alpha.11`
+
+#### 0.16.4
+- Fixed crash for workspaces containing directories ending in `.d` ([#16](https://github.com/d-language-server/dls/issues/16))
+
+#### 0.16.3
+- Fixed buggy import paths clearing
+
+#### 0.16.2
+- Fixed unneeded import paths not being cleared
+
 #### 0.16.1
-- Fixed Travis build for dlang/ci
+- Fixed Travis build for dlang/ci ([#15](https://github.com/d-language-server/dls/issues/15))
 
 ### 0.16.0
 - Added option to log operations to a file
@@ -29,6 +82,7 @@ Breaking changes will be in bold.
 #### 0.15.2
 - Updated libraries:
     - `dfmt`: `0.8.2` => `0.8.3`
+    - `emsi_containers`: `0.8.0-alpha.9` => `0.8.0-alpha.10`
 
 #### 0.15.1
 - Fixed Travis build for dlang/ci
@@ -44,7 +98,7 @@ Breaking changes will be in bold.
     - `libdparse`: `0.8.8` => `0.9.10`
 
 #### 0.14.3
-- Added option to forcefully ignore errors (#12)
+- Added option to forcefully ignore errors ([#12](https://github.com/d-language-server/dls/issues/12))
 
 #### 0.14.2
 - Fixed code action messages overflowing Atom's buttons
@@ -71,10 +125,10 @@ Breaking changes will be in bold.
 - Added range formatting support
 - Added on type formatting support
 - Enhanced diagnostics to show errors and warnings on whole projects instead of only open documents
-- Enhanced handling on non-dub projects
+- Enhanced handling of non-dub projects ([#11](https://github.com/d-language-server/dls/issues/11))
 
 #### 0.12.3
-- Fixed manual path importing (#10)
+- Fixed manual path importing ([#10](https://github.com/d-language-server/dls/issues/10))
 - Fixed changelog URL
 
 #### 0.12.2
@@ -166,7 +220,7 @@ Breaking changes will be in bold.
 
 #### 0.6.9
 - Enhanced binary releases by compressing them with UPX on Posix platforms
-- Fixed issues with dependency handling (#5)
+- Fixed issues with dependency handling ([#5](https://github.com/d-language-server/dls/issues/5))
 - Updated libraries:
     - `dub`: `1.9.0` => `1.10.0`
 
@@ -181,7 +235,7 @@ Breaking changes will be in bold.
 #### 0.6.6
 - Stopped removing older `dls` dub packages as binaries are now used
 - Fixed `Upgrade selections` popup appearing when building
-- Fixed subpackages missing completions from libraries (#4)
+- Fixed subpackages missing completions from libraries ([#4](https://github.com/d-language-server/dls/issues/4))
 
 #### 0.6.5
 - Fixed instant crash at server startup
@@ -201,7 +255,7 @@ Breaking changes will be in bold.
 - Fixed issue with subpackages importing other subpackages
 
 #### 0.6.1
-- Fixed error when trying to fetch completions right after a parenthesis (#2)
+- Fixed error when trying to fetch completions right after a parenthesis ([#2](https://github.com/d-language-server/dls/issues/2))
 - Updated libraries:
     - `dcd`: `0.9.8` => `0.9.9`
     - `dscanner`: `0.5.6` => `0.5.7`

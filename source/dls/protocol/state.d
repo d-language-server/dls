@@ -35,11 +35,7 @@ private InitializeParams _initState;
 
     _initState = params;
 
-    debug
-    {
-        logger.trace = InitializeParams.Trace.verbose;
-    }
-    else
+    if (!params.trace.isNull)
     {
         logger.trace = params.trace;
     }

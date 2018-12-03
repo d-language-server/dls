@@ -73,14 +73,18 @@ class NotificationMessage : Message
 
 enum ErrorCodes : Tuple!(long, Tr)
 {
+    //dfmt off
     parseError = tuple(-32_700L, Tr.app_rpc_errorCodes_parseError),
     invalidRequest = tuple(-32_600L, Tr.app_rpc_errorCodes_invalidRequest),
     methodNotFound = tuple(-32_601L, Tr.app_rpc_errorCodes_methodNotFound),
     invalidParams = tuple(-32_602L, Tr.app_rpc_errorCodes_invalidParams),
     internalError = tuple(-32_603L, Tr.app_rpc_errorCodes_internalError),
-    serverNotInitialized = tuple(-32_202L, Tr.app_rpc_errorCodes_serverNotInitialized),
-    unknownErrorCode = tuple(-32_201L, Tr.app_rpc_errorCodes_unknownErrorCode),
-    requestCancelled = tuple(-32_800L, Tr.app_rpc_errorCodes_requestCancelled)
+    serverErrorStart = tuple(-32_099L, Tr._),
+    serverErrorEnd = tuple(-32_000L, Tr._),
+    serverNotInitialized = tuple(-32_002L, Tr.app_rpc_errorCodes_serverNotInitialized),
+    unknownErrorCode = tuple(-32_001L, Tr.app_rpc_errorCodes_unknownErrorCode),
+    requestCancelled = tuple(-32_800L, Tr.app_rpc_errorCodes_requestCancelled),
+    //dfmt on
 }
 
 class CancelParams
@@ -162,9 +166,9 @@ private void send(T : Message)(JSONValue id, string method,
 
 private void send(T : Message)(T m)
 {
+    import dls.util.communicator : communicator;
     import dls.util.json : convertToJSON;
     import std.conv : to;
-    import std.stdio : stdout;
     import std.utf : toUTF8;
 
     auto message = convertToJSON(m);
@@ -175,9 +179,9 @@ private void send(T : Message)(T m)
         foreach (chunk; ["Content-Length: ", messageString.length.to!string,
                 eol, eol, messageString])
         {
-            stdout.rawWrite(chunk.toUTF8());
+            communicator.write(chunk.toUTF8());
         }
 
-        stdout.flush();
+        communicator.flush();
     }
 }

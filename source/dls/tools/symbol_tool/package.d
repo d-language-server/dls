@@ -45,6 +45,12 @@ private string[string] macros;
 private immutable CompletionItemKind[CompletionKind] completionKinds;
 private immutable SymbolKind[CompletionKind] symbolKinds;
 
+private enum ProjectType : int
+{
+    dub,
+    custom
+}
+
 shared static this()
 {
     import dub.internal.vibecompat.core.log : LogLevel, setLogLevel;
@@ -156,13 +162,14 @@ class SymbolTool : Tool
     {
         _instance = new SymbolTool();
         _instance.importDirectories(defaultImportPaths);
-        addConfigHook(() {
+        addConfigHook(_instance.toString(), {
             _instance.importDirectories(_configuration.symbol.importPaths);
         });
     }
 
     static void shutdown()
     {
+        removeConfigHook(_instance.toString());
         destroy(_instance);
     }
 
@@ -210,7 +217,9 @@ class SymbolTool : Tool
         private static immutable string[] _compilerConfigPaths;
     }
 
+    private ProjectType[string] _workspaceProjectTypes;
     private string[string][string] _workspaceDependencies;
+    private string[][string] _workspaceDependenciesPaths;
     private ASTAllocator _allocator;
     private ModuleCache _cache;
 
@@ -219,10 +228,10 @@ class SymbolTool : Tool
         import dls.util.document : Document;
         import std.algorithm : canFind, filter, map, reduce;
         import std.array : array;
-        import std.file : SpanMode, dirEntries;
+        import std.file : SpanMode, dirEntries, isFile;
         import std.path : globMatch;
 
-        bool isImported(in Uri uri)
+        bool isImported(const Uri uri)
         {
             import std.algorithm : startsWith;
 
@@ -241,6 +250,7 @@ class SymbolTool : Tool
                 _workspaceDependencies.byKey.map!(w => dirEntries(w, SpanMode.depth).map!q{a.name}
                     .filter!(file => globMatch(file, "*.{d,di}"))
                     .filter!(file => !Document.uris.map!q{a.path}.canFind(file))
+                    .filter!isFile
                     .map!(Uri.fromPath)
                     .filter!isImported
                     .array));
@@ -343,7 +353,7 @@ class SymbolTool : Tool
         _cache = ModuleCache(_allocator);
     }
 
-    Uri getWorkspace(in Uri uri)
+    Uri getWorkspace(const Uri uri)
     {
         import std.algorithm : startsWith;
         import std.array : array;
@@ -370,7 +380,7 @@ class SymbolTool : Tool
             ? Uri.fromPath(buildNormalizedPath(workspacePathParts)) : null;
     }
 
-    void importPath(Uri uri)
+    void importPath(const Uri uri)
     {
         import std.algorithm : any;
         import std.file : exists;
@@ -386,7 +396,7 @@ class SymbolTool : Tool
         }
     }
 
-    void importDubProject(Uri uri)
+    void importDubProject(const Uri uri)
     {
         import dls.protocol.messages.window : Util;
         import dls.util.constants : Tr;
@@ -396,7 +406,12 @@ class SymbolTool : Tool
         import std.array : appender, array;
         import std.path : baseName, buildNormalizedPath;
 
-        logger.infof("Dub project: %s", uri.path);
+        if (!validateProjectType(uri, ProjectType.dub))
+        {
+            return;
+        }
+
+        logger.infof("Importing dub project: %s", uri.path);
 
         auto d = getDub(uri);
         string[string] workspaceDeps;
@@ -442,51 +457,126 @@ class SymbolTool : Tool
         }
     }
 
-    void importCustomProject(Uri uri)
+    void importCustomProject(const Uri uri)
     {
+        import dls.protocol.jsonrpc : InvalidParamsException;
         import dls.util.logger : logger;
         import std.algorithm : find, map;
         import std.array : array;
         import std.file : exists;
         import std.path : buildNormalizedPath;
 
-        logger.infof("Custom project: %s", uri.path);
+        if (!validateProjectType(uri, ProjectType.custom))
+        {
+            return;
+        }
+
+        logger.infof("Importing custom project: %s", uri.path);
+
+        auto possibleSourceDirs = ["source", "src", ""].map!(d => buildNormalizedPath(uri.path, d))
+            .find!exists;
+
+        if (possibleSourceDirs.empty)
+        {
+            throw new InvalidParamsException("invalid uri: " ~ uri);
+        }
 
         string[string] deps;
-        const sourceDir = ["source", "src", ""].map!(d => buildNormalizedPath(uri.path, d))
-            .find!exists
-            .front;
         _workspaceDependencies[uri.path] = deps;
-        importDirectories([sourceDir]);
+        importDirectories([possibleSourceDirs.front]);
+        importGitSubmodules(uri);
     }
 
-    void importDubSelections(Uri uri)
+    void importDubSelections(const Uri uri)
     {
+        import dls.util.logger : logger;
+        import dls.util.uri : normalized;
         import std.algorithm : map, reduce;
         import std.array : array;
         import std.path : buildNormalizedPath;
 
+        if (!validateProjectType(uri, ProjectType.dub))
+        {
+            return;
+        }
+
+        logger.infof("Importing dub selections for project: %s", uri.path);
+
         const d = getDub(uri);
+        string[] newDependenciesPaths;
 
         foreach (dep; d.project.dependencies)
         {
-            auto paths = reduce!(q{a ~ b})(cast(string[])[],
+            auto sourcePaths = reduce!q{a ~ b}(cast(string[])[],
                     dep.recipe.buildSettings.sourcePaths.values);
-            importDirectories(paths.map!(path => buildNormalizedPath(dep.path.toString(),
-                    path)).array);
+            auto pathsToImport = sourcePaths.map!(path => buildNormalizedPath(dep.path.toString(),
+                    path).normalized).array;
+            newDependenciesPaths ~= pathsToImport;
         }
+
+        importDirectories(newDependenciesPaths);
+        clearUnusedDirectories(uri, newDependenciesPaths);
     }
 
-    void clearPath(Uri uri)
+    void importGitSubmodules(const Uri uri)
     {
-        // import dls.util.logger : logger;
+        import dls.util.logger : logger;
+        import std.algorithm : findSplit;
+        import std.file : exists;
+        import std.path : buildPath;
+        import std.stdio : File;
+        import std.string : strip;
 
-        // logger.infof("Clearing imports from %s", uri.path);
-        // Implement ModuleCache.clear() in DCD
-        _workspaceDependencies.remove(uri.path);
+        if (!validateProjectType(uri, ProjectType.custom))
+        {
+            return;
+        }
+
+        const gitModulesPath = buildPath(uri.path, ".gitmodules");
+
+        if (!exists(gitModulesPath))
+        {
+            return;
+        }
+
+        logger.infof("Importing git submodules for project: %s", uri.path);
+
+        string[string] newWorkspaceDeps;
+        string[] newDependenciesPaths;
+
+        foreach (line; File(gitModulesPath, "r").byLineCopy)
+        {
+            auto parts = findSplit(line, "=");
+
+            switch (strip(parts[0]))
+            {
+            case "path":
+                const fullModUri = Uri.fromPath(buildPath(uri.path, strip(parts[2])));
+                importCustomProject(fullModUri);
+                newDependenciesPaths ~= fullModUri.path;
+                break;
+
+            case "url":
+                newWorkspaceDeps[strip(parts[2])] = "";
+                break;
+
+            default:
+                continue;
+            }
+        }
+
+        clearUnusedDirectories(uri, newDependenciesPaths);
     }
 
-    void upgradeSelections(Uri uri)
+    void clearPath(const Uri uri)
+    {
+        _workspaceProjectTypes.remove(uri.path);
+        _workspaceDependencies.remove(uri.path);
+        _workspaceDependenciesPaths.remove(uri.path);
+        clearDirectories([uri.path]);
+    }
+
+    void upgradeSelections(const Uri uri)
     {
         import dls.util.logger : logger;
         import std.concurrency : spawn;
@@ -520,7 +610,7 @@ class SymbolTool : Tool
         }, uri.toString());
     }
 
-    SymbolInformation[] symbol(string query)
+    SymbolInformation[] symbol(const string query)
     {
         import dls.util.document : Document;
         import dls.util.logger : logger;
@@ -583,8 +673,8 @@ class SymbolTool : Tool
         return result.array;
     }
 
-    SymbolType[] symbol(SymbolType)(Uri uri, string query)
-            if (is(SymbolType == SymbolInformation) || is(SymbolType == DocumentSymbol))
+    SymbolType[] symbol(SymbolType)(Uri uri, const string query) // TODO: make uri const
+    if (is(SymbolType == SymbolInformation) || is(SymbolType == DocumentSymbol))
     {
         import dls.tools.symbol_tool.internal.symbol_visitor : SymbolVisitor;
         import dls.util.document : Document;
@@ -613,7 +703,7 @@ class SymbolTool : Tool
         return visitor.result.data;
     }
 
-    CompletionItem[] completion(Uri uri, Position position)
+    CompletionItem[] completion(const Uri uri, const Position position)
     {
         import dcd.common.messages : AutocompleteResponse, CompletionType;
         import dcd.server.autocomplete : complete;
@@ -627,8 +717,8 @@ class SymbolTool : Tool
                 position.line, position.character);
 
         auto request = getPreparedRequest(uri, position, RequestKind.autocomplete);
-        static bool compareCompletionsLess(AutocompleteResponse.Completion a,
-                AutocompleteResponse.Completion b)
+        static bool compareCompletionsLess(const AutocompleteResponse.Completion a,
+                const AutocompleteResponse.Completion b)
         {
             //dfmt off
             return a.identifier < b.identifier ? true
@@ -639,8 +729,8 @@ class SymbolTool : Tool
             //dfmt on
         }
 
-        static bool compareCompletionsEqual(AutocompleteResponse.Completion a,
-                AutocompleteResponse.Completion b)
+        static bool compareCompletionsEqual(const AutocompleteResponse.Completion a,
+                const AutocompleteResponse.Completion b)
         {
             return a.symbolFilePath.length > 0 && a.symbolFilePath == b.symbolFilePath
                 && a.symbolLocation == b.symbolLocation;
@@ -701,7 +791,7 @@ class SymbolTool : Tool
         return item;
     }
 
-    Hover hover(Uri uri, Position position)
+    Hover hover(const Uri uri, const Position position)
     {
         import dcd.server.autocomplete : getDoc;
         import dls.util.logger : logger;
@@ -723,7 +813,7 @@ class SymbolTool : Tool
             : new Hover(getDocumentation(completions.map!q{ ["", a] }.array));
     }
 
-    Location[] definition(Uri uri, Position position)
+    Location[] definition(const Uri uri, const Position position)
     {
         import dcd.common.messages : CompletionType;
         import dcd.server.autocomplete.util : getSymbolsForCompletion;
@@ -774,7 +864,7 @@ class SymbolTool : Tool
         return result.data;
     }
 
-    Location[] typeDefinition(Uri uri, Position position)
+    Location[] typeDefinition(const Uri uri, const Position position)
     {
         import dcd.common.messages : CompletionType;
         import dcd.server.autocomplete.util : getSymbolsForCompletion;
@@ -814,7 +904,7 @@ class SymbolTool : Tool
         return result.data;
     }
 
-    Location[] references(Uri uri, Position position, bool includeDeclaration)
+    Location[] references(const Uri uri, const Position position, bool includeDeclaration)
     {
         import dls.util.logger : logger;
 
@@ -823,7 +913,7 @@ class SymbolTool : Tool
         return referencesForFiles(uri, position, workspacesFilesUris, includeDeclaration);
     }
 
-    DocumentHighlight[] highlight(Uri uri, Position position)
+    DocumentHighlight[] highlight(const Uri uri, const Position position)
     {
         import dls.protocol.interfaces : DocumentHighlightKind;
         import dls.util.logger : logger;
@@ -851,7 +941,7 @@ class SymbolTool : Tool
         return result.data;
     }
 
-    WorkspaceEdit rename(Uri uri, Position position, string newName)
+    WorkspaceEdit rename(const Uri uri, const Position position, const string newName)
     {
         import dls.protocol.definitions : TextDocumentEdit, TextEdit,
             VersionedTextDocumentIdentifier;
@@ -897,7 +987,7 @@ class SymbolTool : Tool
         return new WorkspaceEdit(changes.nullable, documentChanges.data.nullable);
     }
 
-    Range prepareRename(Uri uri, Position position)
+    Range prepareRename(const Uri uri, const Position position)
     {
         import dls.util.document : Document;
         import dls.util.logger : logger;
@@ -912,16 +1002,80 @@ class SymbolTool : Tool
             : Document.get(uri).wordRangeAtPosition(position);
     }
 
-    private void importDirectories(string[] paths)
+    private bool validateProjectType(const Uri uri, ProjectType type)
     {
-        import dls.util.logger : logger;
+        if (uri.path !in _workspaceProjectTypes)
+        {
+            _workspaceProjectTypes[uri.path] = type;
+        }
+        else if (_workspaceProjectTypes[uri.path] != type)
+        {
+            return false;
+        }
 
-        logger.infof("Importing directories: %s", paths);
-        _cache.addImportPaths(paths);
+        return true;
     }
 
-    private Location[] referencesForFiles(Uri uri, Position position, Uri[] files,
-            bool includeDeclaration)
+    private void importDirectories(const string[] paths)
+    {
+        import dls.util.logger : logger;
+        import dls.util.uri : normalized;
+        import std.algorithm : map;
+        import std.array : array;
+
+        logger.infof("Importing directories: %s", paths);
+        _cache.addImportPaths(paths.map!normalized.array);
+    }
+
+    private void clearDirectories(const string[] paths)
+    {
+        import dls.util.logger : logger;
+        import dls.util.uri : normalized;
+        import std.algorithm : map, startsWith;
+
+        logger.infof("Clearing import directories: %s", paths);
+
+        string[] pathsToRemove;
+
+        foreach (path; paths.map!normalized)
+        {
+            foreach (importPath; _cache.getImportPaths())
+            {
+                if (importPath.startsWith(path))
+                {
+                    pathsToRemove ~= importPath;
+                }
+            }
+        }
+
+        _cache.removeImportPaths(pathsToRemove);
+    }
+
+    private void clearUnusedDirectories(const Uri uri, ref string[] newDependenciesPaths)
+    {
+        import std.algorithm : canFind, reduce;
+
+        string[] pathsToRemove;
+        const dependenciesPaths = uri.path in _workspaceDependenciesPaths
+            ? _workspaceDependenciesPaths[uri.path] : [];
+
+        _workspaceDependenciesPaths[uri.path] = newDependenciesPaths;
+        const allDependenciesPaths = reduce!q{a ~ b}(cast(string[])[],
+                _workspaceDependenciesPaths.byValue);
+
+        foreach (path; dependenciesPaths)
+        {
+            if (!allDependenciesPaths.canFind(path))
+            {
+                pathsToRemove ~= path;
+            }
+        }
+
+        clearDirectories(pathsToRemove);
+    }
+
+    private Location[] referencesForFiles(const Uri uri, const Position position,
+            const Uri[] files, bool includeDeclaration)
     {
         import dcd.common.messages : CompletionType;
         import dcd.server.autocomplete.util : getSymbolsForCompletion;
@@ -988,7 +1142,7 @@ class SymbolTool : Tool
             return result.data;
         }
 
-        bool checkFileAndLocation(string file, size_t location)
+        bool checkFileAndLocation(const string file, size_t location)
         {
             import std.path : filenameCmp;
 
@@ -1049,7 +1203,7 @@ class SymbolTool : Tool
         return result.data;
     }
 
-    private MarkupContent getDocumentation(string[][] detailsAndDocumentations)
+    private MarkupContent getDocumentation(const string[][] detailsAndDocumentations)
     {
         import ddoc : Lexer, expand;
         import dls.protocol.definitions : MarkupKind;
@@ -1103,22 +1257,15 @@ class SymbolTool : Tool
         return new MarkupContent(MarkupKind.markdown, result.data);
     }
 
-    private static AutocompleteRequest getPreparedRequest(Uri uri,
-            Position position, RequestKind kind)
+    private static AutocompleteRequest getPreparedRequest(const Uri uri,
+            const Position position, RequestKind kind)
     {
-        import dls.protocol.jsonrpc : InvalidParamsException;
         import dls.util.document : Document;
-        import std.format : format;
 
         auto request = AutocompleteRequest();
         auto document = Document.get(uri);
 
-        if (!document.validatePosition(position))
-        {
-            throw new InvalidParamsException(format!"invalid position: %s %s,%s"(uri,
-                    position.line, position.character));
-        }
-
+        document.validatePosition(position);
         request.fileName = uri.path;
         request.kind = kind;
         request.sourceCode = cast(ubyte[]) document.toString();
@@ -1127,7 +1274,7 @@ class SymbolTool : Tool
         return request;
     }
 
-    private static Dub getDub(Uri uri)
+    private static Dub getDub(const Uri uri)
     {
         import std.file : isFile;
         import std.path : dirName;

@@ -61,7 +61,7 @@ class CommandTool : Tool
         return result;
     }
 
-    JSONValue executeCommand(in string commandName, in JSONValue[] arguments)
+    JSONValue executeCommand(const string commandName, const JSONValue[] arguments)
     {
         import dls.protocol.definitions : WorkspaceEdit;
         import dls.protocol.interfaces : ApplyWorkspaceEditParams;
@@ -87,7 +87,7 @@ class CommandTool : Tool
 
             case Commands.codeAction_analysis_disableCheck:
                 AnalysisTool.instance.disableCheck(new Uri(convertFromJSON!string(arguments[0])),
-                        new Uri(convertFromJSON!string(arguments[1])));
+                        convertFromJSON!string(arguments[1]));
                 break;
             }
         }

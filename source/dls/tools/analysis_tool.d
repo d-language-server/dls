@@ -124,7 +124,7 @@ class AnalysisTool : Tool
         });
     }
 
-    void addAnalysisConfig(in Uri uri)
+    void addAnalysisConfig(const Uri uri)
     {
         import dscanner.analysis.config : defaultStaticAnalysisConfig;
 
@@ -132,41 +132,46 @@ class AnalysisTool : Tool
         updateAnalysisConfig(uri);
     }
 
-    void removeAnalysisConfig(in Uri uri)
+    void removeAnalysisConfig(const Uri workspaceUri)
     {
-        if (uri.path in _analysisConfigs)
+        if (workspaceUri.path in _analysisConfigs)
         {
-            _analysisConfigs.remove(uri.path);
+            _analysisConfigs.remove(workspaceUri.path);
         }
     }
 
-    void updateAnalysisConfig(in Uri uri)
+    void updateAnalysisConfig(const Uri workspaceUri)
     {
+        import dls.server : Server;
         import dls.util.logger : logger;
         import dscanner.analysis.config : defaultStaticAnalysisConfig;
         import inifiled : readINIFile;
         import std.file : exists;
         import std.path : buildNormalizedPath;
 
-        auto configPath = buildNormalizedPath(uri.path, _configuration.analysis.configFile);
+        auto configPath = getConfigUri(workspaceUri).path;
         auto conf = defaultStaticAnalysisConfig();
 
         if (exists(configPath))
         {
-            if (uri.path in _analysisConfigs)
+            if (workspaceUri.path in _analysisConfigs)
             {
-                conf = _analysisConfigs[uri.path];
+                conf = _analysisConfigs[workspaceUri.path];
             }
 
             logger.infof("Updating config from file %s", configPath);
             readINIFile(conf, configPath);
         }
 
-        _analysisConfigs[uri.path] = conf;
-        scanAllWorkspaces();
+        _analysisConfigs[workspaceUri.path] = conf;
+
+        if (Server.initialized)
+        {
+            scanAllWorkspaces();
+        }
     }
 
-    Diagnostic[] diagnostics(in Uri uri)
+    Diagnostic[] diagnostics(const Uri uri)
     {
         import dls.protocol.definitions : DiagnosticSeverity;
         import dls.tools.symbol_tool : SymbolTool;
@@ -204,8 +209,8 @@ class AnalysisTool : Tool
 
         foreach (result; analysisResults)
         {
-            if (!document.lines[result.line - 1].matchFirst(regex(
-                    `.*//\s*@suppress\s*\(\s*`w ~ result.key.toUTF16() ~ `\s*\)\s*`w)))
+            if (!document.lines[result.line - 1].matchFirst(
+                    regex(`//.*@suppress\s*\(\s*`w ~ result.key.toUTF16() ~ `\s*\)`w)))
             {
                 diagnostics ~= new Diagnostic(document.wordRangeAtLineAndByte(result.line - 1, result.column - 1),
                         result.message, DiagnosticSeverity.warning.nullable,
@@ -216,7 +221,8 @@ class AnalysisTool : Tool
         return diagnostics.data;
     }
 
-    Command[] codeAction(in Uri uri, in Range range, Diagnostic[] diagnostics, bool commandCompat)
+    Command[] codeAction(const Uri uri, const Range range,
+            Diagnostic[] diagnostics, bool commandCompat)
     {
         import dls.protocol.definitions : Position;
         import dls.tools.command_tool : Commands;
@@ -269,8 +275,8 @@ class AnalysisTool : Tool
         return result.data;
     }
 
-    CodeAction[] codeAction(in Uri uri, in Range range, Diagnostic[] diagnostics,
-            in CodeActionKind[] kinds)
+    CodeAction[] codeAction(const Uri uri, const Range range,
+            Diagnostic[] diagnostics, const CodeActionKind[] kinds)
     {
         import dls.protocol.definitions : Command, Position;
         import dls.tools.command_tool : Commands;
@@ -316,7 +322,7 @@ class AnalysisTool : Tool
         return result.data;
     }
 
-    package void disableCheck(in Uri uri, in string code)
+    package void disableCheck(const Uri uri, const string code)
     {
         import dls.tools.symbol_tool : SymbolTool;
         import dscanner.analysis.config : Check;
@@ -325,22 +331,34 @@ class AnalysisTool : Tool
 
         auto config = getConfig(uri);
         *getDiagnosticParameter(config, code) = Check.disabled;
-        writeINIFile(config, buildNormalizedPath(SymbolTool.instance.getWorkspace(uri)
-                .path, _configuration.analysis.configFile));
+        writeINIFile(config, getConfigUri(SymbolTool.instance.getWorkspace(uri)).path);
     }
 
-    private StaticAnalysisConfig getConfig(in Uri uri)
+    private Uri getConfigUri(const Uri workspaceUri)
+    {
+        import std.algorithm : filter, map;
+        import std.array : array;
+        import std.file : exists;
+        import std.path : buildNormalizedPath;
+
+        auto possibleFiles = [_configuration.analysis.configFile, "dscanner.ini", ".dscanner.ini"].map!(
+                file => buildNormalizedPath(workspaceUri.path, file));
+        return Uri.fromPath((possibleFiles.filter!exists.array ~ buildNormalizedPath(workspaceUri.path,
+                "dscanner.ini"))[0]);
+    }
+
+    private StaticAnalysisConfig getConfig(const Uri uri)
     {
         import dls.tools.symbol_tool : SymbolTool;
         import dscanner.analysis.config : defaultStaticAnalysisConfig;
 
-        const configUri = SymbolTool.instance.getWorkspace(uri);
-        const configPath = configUri is null ? "" : configUri.path;
-        return (configPath in _analysisConfigs) ? _analysisConfigs[configPath]
+        const workspaceUri = SymbolTool.instance.getWorkspace(uri);
+        const workspacePath = workspaceUri is null ? "" : workspaceUri.path;
+        return (workspacePath in _analysisConfigs) ? _analysisConfigs[workspacePath]
             : defaultStaticAnalysisConfig();
     }
 
-    private string* getDiagnosticParameter(return ref StaticAnalysisConfig config, in string code)
+    private string* getDiagnosticParameter(return ref StaticAnalysisConfig config, const string code)
     {
         //dfmt off
         switch (code)
@@ -404,7 +422,7 @@ class AnalysisTool : Tool
         //dfmt on
     }
 
-    private WorkspaceEdit makeFileWorkspaceEdit(in Uri uri, TextEdit[] edits)
+    private WorkspaceEdit makeFileWorkspaceEdit(const Uri uri, TextEdit[] edits)
     {
         import dls.protocol.definitions : TextDocumentEdit, VersionedTextDocumentIdentifier;
         import dls.util.document : Document;
