@@ -22,7 +22,7 @@ module dls.tools.format.internal.util;
 
 import dparse.lexer : Token;
 
-string tokenString(in Token token)
+string tokenString(const Token token)
 {
     import dparse.lexer : str;
 

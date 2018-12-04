@@ -22,7 +22,7 @@ module dls.tools.format;
 
 public import dls.tools.format.internal.config;
 
-string format(in string sourceText, in FormatConfig config = FormatConfig())
+string format(const string sourceText, const FormatConfig config = FormatConfig())
 {
     import dls.tools.format.internal.format_visitor : FormatVisitor;
     import dls.tools.format.internal.repair : repair;

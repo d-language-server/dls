@@ -33,7 +33,7 @@ class FormatException : Exception
     }
 }
 
-string repair(in string inputText, in Token[] inputTokens,
+string repair(const string inputText, const Token[] inputTokens,
         ref StringCache stringCache, ref string outputText)
 {
     import dparse.lexer : LexerConfig, StringBehavior, WhitespaceBehavior, byToken;
@@ -53,7 +53,7 @@ string repair(in string inputText, in Token[] inputTokens,
     return outputText;
 }
 
-private SList!size_t findEmptyLines(in string inputText)
+private SList!size_t findEmptyLines(const string inputText)
 {
     import std.string : splitLines, strip;
     import std.typecons : Yes;
@@ -72,7 +72,7 @@ private SList!size_t findEmptyLines(in string inputText)
     return result;
 }
 
-private string browseTokens(in Token[] inputTokens, in Token[] outputTokens,
+private string browseTokens(const Token[] inputTokens, const Token[] outputTokens,
         ref SList!size_t emptyLines, ref string outputText)
 {
     import dls.tools.format.internal.util : tokenString;
