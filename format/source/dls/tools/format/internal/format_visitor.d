@@ -853,15 +853,16 @@ class FormatVisitor : ASTVisitor
     // TODO
     override void visit(const IfStatement ifStatement)
     {
-        static bool isBlock(const DeclarationOrStatement dos)
+        static bool isBlockOrIf(const DeclarationOrStatement dos)
         {
             return dos.statement !is null && dos.statement.statementNoCaseNoDefault !is null
-                && dos.statement.statementNoCaseNoDefault.blockStatement !is null;
+                && (dos.statement.statementNoCaseNoDefault.blockStatement !is null
+                        || dos.statement.statementNoCaseNoDefault.ifStatement !is null);
         }
 
         void visitDOS(const DeclarationOrStatement dos)
         {
-            if (!isBlock(dos))
+            if (!isBlockOrIf(dos))
             {
                 writeNewLine();
                 ++_indentLevel;
@@ -869,7 +870,7 @@ class FormatVisitor : ASTVisitor
 
             visit(dos);
 
-            if (!isBlock(dos))
+            if (!isBlockOrIf(dos))
                 --_indentLevel;
         }
 
@@ -1856,7 +1857,7 @@ class FormatVisitor : ASTVisitor
     {
         import dls.tools.format.internal.config : IndentStyle;
 
-        if (_inlineDepth > 0)
+        if (_inlineDepth > 0 || _lineLength > 0)
         {
             write(' ');
             return;
