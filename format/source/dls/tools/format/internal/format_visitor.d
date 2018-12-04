@@ -399,8 +399,6 @@ class FormatVisitor : ASTVisitor
         }
         else
             writeBraces(BraceKind.empty);
-
-        writeNewLine();
     }
 
     // TODO
@@ -561,8 +559,6 @@ class FormatVisitor : ASTVisitor
             }
             else
                 writeBraces(BraceKind.empty);
-
-            writeNewLine();
         }
         else
             writeSemicolon();
@@ -1456,8 +1452,6 @@ class FormatVisitor : ASTVisitor
         }
         else
             writeBraces(BraceKind.empty);
-
-        writeNewLine();
     }
 
     // TODO
@@ -1890,7 +1884,6 @@ class FormatVisitor : ASTVisitor
             }
 
             write('{');
-            writeNewLine();
             ++_indentLevel;
             break;
 
@@ -1900,6 +1893,8 @@ class FormatVisitor : ASTVisitor
             write('}');
             break;
         }
+
+        writeNewLine();
     }
 
     private void writeSemicolon()
@@ -2027,7 +2022,6 @@ class FormatVisitor : ASTVisitor
         else
         {
             writeBraces(BraceKind.empty);
-            writeNewLine();
         }
     }
 
@@ -2051,7 +2045,6 @@ class FormatVisitor : ASTVisitor
         }
 
         writeBraces(BraceKind.end);
-        writeNewLine();
     }
 
     private void writeEnumMember(T)(const T enumMember)
