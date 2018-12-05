@@ -22,6 +22,7 @@ module dls.tools.format;
 
 public import dls.tools.format.internal.config;
 import dparse.lexer : Token;
+import dls.tools.format.internal.format_visitor : TokenInfo;
 
 string format(const string sourceText, const FormatConfig config = FormatConfig())
 {
@@ -40,28 +41,27 @@ string format(const string sourceText, const FormatConfig config = FormatConfig(
     const inputTokens = byToken(sourceText, lexerConfig, &stringCache).array;
     RollbackAllocator ra;
     const mod = parseModule(parserTokens, "", &ra, toDelegate(&doNothing));
-    auto visitor = new FormatVisitor(inputTokens, config, getEmptyLines(inputTokens));
+    auto visitor = new FormatVisitor(inputTokens, config, getTokenInfo(inputTokens));
     visitor.visit(mod);
     auto result = visitor.result.toString();
     return repair(sourceText, inputTokens, stringCache, result);
 }
 
-private bool[] getEmptyLines(const Token[] tokens)
+private TokenInfo getTokenInfo(const Token[] tokens)
 {
     import dparse.lexer : tok;
     import std.algorithm : max;
-    import std.array : appender;
 
-    auto result = appender!(bool[]);
+    TokenInfo result;
 
     foreach (i, ref token; tokens[0 .. max(0, $ - 1)])
     {
         if (token.type == tok!";" || token.type == tok!"}")
-            result ~= tokens[i + 1].line - token.line > 1;
+            result.emptyLines ~= tokens[i + 1].line - token.line > 1;
     }
 
-    result ~= false;
-    return result.data;
+    result.emptyLines ~= false;
+    return result;
 }
 
 private void doNothing(string, size_t, size_t, string, bool)

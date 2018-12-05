@@ -56,10 +56,39 @@ private enum BraceKind
     empty
 }
 
-class FormatVisitor : ASTVisitor
+package(dls.tools.format) struct TokenInfo
+{
+    import dls.tools.format.internal.util : RollbackRange;
+
+    RollbackRange!bool emptyLines;
+
+    void save()
+    {
+        import std.traits : isSomeFunction;
+
+        foreach (member; __traits(allMembers, typeof(this)))
+        {
+            static if (!isSomeFunction!(__traits(getMember, typeof(this), member)))
+                mixin(member ~ ".index.save();");
+        }
+    }
+
+    void load()
+    {
+        import std.traits : isSomeFunction;
+
+        foreach (member; __traits(allMembers, typeof(this)))
+        {
+            static if (!isSomeFunction!(__traits(getMember, typeof(this), member)))
+                mixin(member ~ ".index.load();");
+        }
+    }
+}
+
+package(dls.tools.format) class FormatVisitor : ASTVisitor
 {
     import dls.tools.format.internal.config : FormatConfig, IndentStyle;
-    import dls.tools.format.internal.util : Memento;
+    import dls.tools.format.internal.util : Memento, RollbackRange;
     import std.container : SList;
     import std.outbuffer : OutBuffer;
 
@@ -71,15 +100,14 @@ class FormatVisitor : ASTVisitor
     private Memento!size_t _lineLength;
     private SList!Style _styles;
     private size_t _inlineDepth;
-    private bool[] _emptyLines;
-    private Memento!size_t _emptyLinesIndex;
+    private TokenInfo _tokenInfo;
 
     @property OutBuffer result()
     {
         return _result.data;
     }
 
-    this(const Token[] inputTokens, const FormatConfig config, bool[] emptyLines)
+    this(const Token[] inputTokens, const FormatConfig config, TokenInfo tokenInfo)
     {
         import dls.tools.format.internal.config : EndOfLine;
         import std.algorithm : filter;
@@ -89,7 +117,7 @@ class FormatVisitor : ASTVisitor
         _inputTokens = inputTokens.filter!(t => t.type == tok!"comment").array;
         _config = config;
         _styles.insertFront(Style.none);
-        _emptyLines = emptyLines;
+        _tokenInfo = tokenInfo;
 
         if (_config.endOfLine == EndOfLine.osDefault)
         {
@@ -1793,7 +1821,7 @@ class FormatVisitor : ASTVisitor
     {
         _result.save();
         _lineLength.save();
-        _emptyLinesIndex.save();
+        _tokenInfo.save();
         _result = new OutBuffer();
     }
 
@@ -1808,7 +1836,7 @@ class FormatVisitor : ASTVisitor
     {
         _result.load();
         _lineLength.load();
-        _emptyLinesIndex.load();
+        _tokenInfo.load();
     }
 
     private size_t indentLength()
@@ -1823,17 +1851,6 @@ class FormatVisitor : ASTVisitor
     {
         return _lineLength + length <= (indentLength * 4 > _config.softMaxLineLength
                 ? _config.maxLineLength : _config.softMaxLineLength);
-    }
-
-    private bool shouldWriteEmptyLine()
-    {
-        return _emptyLines[_emptyLinesIndex];
-    }
-
-    private void nextEmptyLineHint()
-    {
-        if (_emptyLinesIndex + 1 < _emptyLines.length)
-            ++_emptyLinesIndex;
     }
 
     private void write(const char character)
@@ -1909,10 +1926,10 @@ class FormatVisitor : ASTVisitor
 
         if (kind != BraceKind.start)
         {
-            if (_inlineDepth == 0 && shouldWriteEmptyLine())
+            if (_inlineDepth == 0 && _tokenInfo.emptyLines.current)
                 writeNewLine();
 
-            nextEmptyLineHint();
+            ++_tokenInfo.emptyLines.index;
         }
     }
 
@@ -1922,10 +1939,10 @@ class FormatVisitor : ASTVisitor
         writeNewLine();
         _tempIndentLevel = 0;
 
-        if (allowEmptyLine && _inlineDepth == 0 && shouldWriteEmptyLine())
+        if (allowEmptyLine && _inlineDepth == 0 && _tokenInfo.emptyLines.current)
             writeNewLine();
 
-        nextEmptyLineHint();
+        ++_tokenInfo.emptyLines.index;
     }
 
     private void writeNewLine()

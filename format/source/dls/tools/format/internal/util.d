@@ -22,6 +22,21 @@ module dls.tools.format.internal.util;
 
 import dparse.lexer : Token;
 
+struct RollbackRange(T)
+{
+    T[] data;
+    Memento!size_t index;
+
+    @property T current()
+    {
+        assert(index >= 0);
+        assert(index < data.length);
+        return data[index];
+    }
+
+    alias data this;
+}
+
 struct Memento(T)
 {
     T data;
