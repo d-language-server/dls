@@ -529,26 +529,9 @@ package(dls.tools.format) class FormatVisitor : ASTVisitor
     // TODO
     override void visit(const ClassDeclaration classDeclaration)
     {
-        write("class ");
-        visit(classDeclaration.name);
-        tryVisit(classDeclaration.templateParameters);
-        tryVisit(classDeclaration.baseClassList);
-
-        if (classDeclaration.constraint !is null)
-        {
-            ++_indentLevel;
-            writeNewLine();
-            writeIndents();
-            write("if (");
-            visit(classDeclaration.constraint);
-            write(')');
-            --_indentLevel;
-        }
-
-        if (classDeclaration.structBody is null)
-            writeSemicolon();
-        else
-            visit(classDeclaration.structBody);
+        writeDataStructure("class", classDeclaration.name, classDeclaration.templateParameters,
+                classDeclaration.baseClassList, classDeclaration.constraint,
+                classDeclaration.structBody);
     }
 
     // DONE
@@ -1118,10 +1101,12 @@ package(dls.tools.format) class FormatVisitor : ASTVisitor
             visit(initializer.nonVoidInitializer);
     }
 
-    // TODO
+    // DONE
     override void visit(const InterfaceDeclaration interfaceDeclaration)
     {
-        super.visit(interfaceDeclaration);
+        writeDataStructure("interface", interfaceDeclaration.name, interfaceDeclaration.templateParameters,
+                interfaceDeclaration.baseClassList,
+                interfaceDeclaration.constraint, interfaceDeclaration.structBody);
     }
 
     // TODO
@@ -1546,10 +1531,11 @@ package(dls.tools.format) class FormatVisitor : ASTVisitor
             writeBraces(BraceKind.empty);
     }
 
-    // TODO
+    // DONE
     override void visit(const StructDeclaration structDeclaration)
     {
-        super.visit(structDeclaration);
+        writeDataStructure("struct", structDeclaration.name, structDeclaration.templateParameters,
+                null, structDeclaration.constraint, structDeclaration.structBody);
     }
 
     // TODO
@@ -2187,6 +2173,33 @@ package(dls.tools.format) class FormatVisitor : ASTVisitor
             write(" = ");
             visit(enumMember.assignExpression);
         }
+    }
+
+    private void writeDataStructure(const string type, const Token name, const TemplateParameters templateParameters,
+            const BaseClassList baseClassList, const Constraint constraint,
+            const StructBody structBody)
+    {
+        write(type);
+        write(' ');
+        visit(name);
+        tryVisit(templateParameters);
+        tryVisit(baseClassList);
+
+        if (constraint !is null)
+        {
+            ++_indentLevel;
+            writeNewLine();
+            writeIndents();
+            write("if (");
+            visit(constraint);
+            write(')');
+            --_indentLevel;
+        }
+
+        if (structBody is null)
+            writeSemicolon();
+        else
+            visit(structBody);
     }
 
     alias visit = ASTVisitor.visit;
