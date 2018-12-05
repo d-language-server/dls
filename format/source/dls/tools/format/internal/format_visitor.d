@@ -441,7 +441,7 @@ package(dls.tools.format) class FormatVisitor : ASTVisitor
         super.visit(breakStatement);
     }
 
-    // TODO
+    // DONE
     override void visit(const BaseClass baseClass)
     {
         super.visit(baseClass);
@@ -450,7 +450,34 @@ package(dls.tools.format) class FormatVisitor : ASTVisitor
     // TODO
     override void visit(const BaseClassList baseClassList)
     {
-        super.visit(baseClassList);
+        if (baseClassList.items.length == 0)
+            return;
+
+        write(" :");
+        beginTransaction();
+        write(' ');
+        visit(baseClassList.items[0]);
+
+        if (baseClassList.items.length == 1)
+        {
+            commitTransaction();
+            return;
+        }
+
+        const inlineFirstClass = canAddToCurrentLine(1);
+        cancelTransaction();
+
+        if (inlineFirstClass)
+            write(' ');
+        else
+        {
+            ++_tempIndentLevel;
+            writeNewLine();
+            writeIndents();
+            --_tempIndentLevel;
+        }
+
+        writeList(baseClassList.items);
     }
 
     // TODO
@@ -498,9 +525,24 @@ package(dls.tools.format) class FormatVisitor : ASTVisitor
     {
         write("class ");
         visit(classDeclaration.name);
-        // base classes
-        // constraints
-        tryVisit(classDeclaration.structBody);
+        tryVisit(classDeclaration.templateParameters);
+        tryVisit(classDeclaration.baseClassList);
+
+        if (classDeclaration.constraint !is null)
+        {
+            ++_indentLevel;
+            writeNewLine();
+            writeIndents();
+            write("if (");
+            visit(classDeclaration.constraint);
+            write(')');
+            --_indentLevel;
+        }
+
+        if (classDeclaration.structBody is null)
+            writeSemicolon();
+        else
+            visit(classDeclaration.structBody);
     }
 
     // DONE
@@ -527,7 +569,7 @@ package(dls.tools.format) class FormatVisitor : ASTVisitor
         super.visit(conditionalStatement);
     }
 
-    // TODO
+    // DONE
     override void visit(const Constraint constraint)
     {
         super.visit(constraint);
