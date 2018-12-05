@@ -158,7 +158,7 @@ package(dls.tools.format) class FormatVisitor : ASTVisitor
     override void visit(const AliasThisDeclaration aliasThisDeclaration)
     {
         write("alias ");
-        super.visit(aliasThisDeclaration);
+        visit(aliasThisDeclaration.identifier);
         write(" this");
         writeSemicolon();
     }
@@ -428,7 +428,7 @@ package(dls.tools.format) class FormatVisitor : ASTVisitor
                 && blockStatement.declarationsAndStatements.declarationsAndStatements.length > 0)
         {
             writeBraces(BraceKind.start);
-            super.visit(blockStatement);
+            visit(blockStatement.declarationsAndStatements);
             writeBraces(BraceKind.end);
         }
         else
@@ -629,13 +629,13 @@ package(dls.tools.format) class FormatVisitor : ASTVisitor
     override void visit(const DeleteExpression deleteExpression)
     {
         write("delete ");
-        super.visit(deleteExpression);
+        visit(deleteExpression.unaryExpression);
     }
 
     // DONE
     override void visit(const DeleteStatement deleteStatement)
     {
-        super.visit(deleteStatement);
+        visit(deleteStatement.deleteExpression);
         writeSemicolon();
     }
 
@@ -647,7 +647,7 @@ package(dls.tools.format) class FormatVisitor : ASTVisitor
         if (deprecated_.assignExpression !is null)
         {
             write('(');
-            super.visit(deprecated_);
+            visit(deprecated_.assignExpression);
             write(')');
         }
     }
@@ -781,8 +781,7 @@ package(dls.tools.format) class FormatVisitor : ASTVisitor
     // DONE
     override void visit(const FunctionBody functionBody)
     {
-        tryVisit(functionBody.missingFunctionBody);
-        tryVisit(functionBody.specifiedFunctionBody);
+        super.visit(functionBody);
     }
 
     // TODO
@@ -1008,7 +1007,7 @@ package(dls.tools.format) class FormatVisitor : ASTVisitor
     override void visit(const ImportExpression importExpression)
     {
         write("import(");
-        super.visit(importExpression);
+        visit(importExpression.assignExpression);
         write(")");
     }
 
@@ -1138,7 +1137,7 @@ package(dls.tools.format) class FormatVisitor : ASTVisitor
     // DONE
     override void visit(const MissingFunctionBody missingFunctionBody)
     {
-        super.visit(missingFunctionBody);
+        tryVisit(missingFunctionBody.functionContracts);
         writeSemicolon();
     }
 
@@ -1306,7 +1305,7 @@ package(dls.tools.format) class FormatVisitor : ASTVisitor
     // DONE
     override void visit(const PragmaDeclaration pragmaDeclaration)
     {
-        super.visit(pragmaDeclaration);
+        visit(pragmaDeclaration.pragmaExpression);
         writeSemicolon();
     }
 
@@ -1423,7 +1422,8 @@ package(dls.tools.format) class FormatVisitor : ASTVisitor
     // DONE
     override void visit(const SpecifiedFunctionBody specifiedFunctionBody)
     {
-        super.visit(specifiedFunctionBody);
+        tryVisit(specifiedFunctionBody.functionContracts);
+        tryVisit(specifiedFunctionBody.blockStatement);
     }
 
     // TODO
@@ -1590,7 +1590,7 @@ package(dls.tools.format) class FormatVisitor : ASTVisitor
     override void visit(const TemplateParameters templateParameters)
     {
         write('(');
-        super.visit(templateParameters);
+        visit(templateParameters.templateParameterList);
         write(')');
     }
 
