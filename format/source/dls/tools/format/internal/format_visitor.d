@@ -59,31 +59,37 @@ private enum BraceKind
 class FormatVisitor : ASTVisitor
 {
     import dls.tools.format.internal.config : FormatConfig, IndentStyle;
+    import dls.tools.format.internal.util : Memento;
     import std.container : SList;
     import std.outbuffer : OutBuffer;
 
-    OutBuffer result;
-    private OutBuffer _savedResult;
+    private Memento!OutBuffer _result;
     private const(Token)[] _inputTokens;
     private FormatConfig _config;
     private size_t _indentLevel;
     private size_t _tempIndentLevel;
-    private size_t _lineLength;
-    private size_t _tempLineLength;
+    private Memento!size_t _lineLength;
     private SList!Style _styles;
     private size_t _inlineDepth;
-    private size_t[] _doubleNewLines;
+    private bool[] _emptyLines;
+    private Memento!size_t _emptyLinesIndex;
 
-    this(const Token[] inputTokens, const FormatConfig config)
+    @property OutBuffer result()
+    {
+        return _result.data;
+    }
+
+    this(const Token[] inputTokens, const FormatConfig config, bool[] emptyLines)
     {
         import dls.tools.format.internal.config : EndOfLine;
         import std.algorithm : filter;
         import std.array : array;
 
-        result = new OutBuffer();
+        _result.data = new OutBuffer();
         _inputTokens = inputTokens.filter!(t => t.type == tok!"comment").array;
         _config = config;
         _styles.insertFront(Style.none);
+        _emptyLines = emptyLines;
 
         if (_config.endOfLine == EndOfLine.osDefault)
         {
@@ -928,20 +934,22 @@ class FormatVisitor : ASTVisitor
 
         foreach (i, importBind; importBindings.importBinds)
         {
-            const importBindText = getString(importBind);
-
             if (i > 0)
                 write(',');
 
-            if (canAddToCurrentLine(importBindText.length + 2))
-                write(' ');
+            beginTransaction();
+            write(' ');
+            visit(importBind);
+
+            if (canAddToCurrentLine(1))
+                commitTransaction();
             else
             {
+                cancelTransaction();
                 writeNewLine();
                 writeIndents();
+                visit(importBind);
             }
-
-            write(importBindText);
         }
     }
 
@@ -1781,20 +1789,26 @@ class FormatVisitor : ASTVisitor
         }
     }
 
-    private void useTempBuffer(bool temp)
+    private void beginTransaction()
     {
-        if (temp)
-        {
-            _savedResult = result;
-            _tempLineLength = _lineLength;
-            result = new OutBuffer();
-            _lineLength = 0;
-        }
-        else
-        {
-            result = _savedResult;
-            _lineLength = _tempLineLength;
-        }
+        _result.save();
+        _lineLength.save();
+        _emptyLinesIndex.save();
+        _result = new OutBuffer();
+    }
+
+    private void commitTransaction()
+    {
+        auto data = _result.data;
+        _result.load();
+        _result.write(data);
+    }
+
+    private void cancelTransaction()
+    {
+        _result.load();
+        _lineLength.load();
+        _emptyLinesIndex.load();
     }
 
     private size_t indentLength()
@@ -1805,29 +1819,26 @@ class FormatVisitor : ASTVisitor
                 ? _config.indentSize : _config.tabWidth);
     }
 
-    private string getString(void delegate() dg)
-    {
-        useTempBuffer(true);
-        dg();
-        const nodeString = result.toString();
-        useTempBuffer(false);
-        return nodeString;
-    }
-
-    private string getString(T)(const T node)
-    {
-        return getString({ tryVisit(node); });
-    }
-
     private bool canAddToCurrentLine(size_t length)
     {
         return _lineLength + length <= (indentLength * 4 > _config.softMaxLineLength
                 ? _config.maxLineLength : _config.softMaxLineLength);
     }
 
+    private bool shouldWriteEmptyLine()
+    {
+        return _emptyLines[_emptyLinesIndex];
+    }
+
+    private void nextEmptyLineHint()
+    {
+        if (_emptyLinesIndex + 1 < _emptyLines.length)
+            ++_emptyLinesIndex;
+    }
+
     private void write(const char character)
     {
-        result.write(character);
+        _result.write(character);
         _lineLength += character == '\t' ? _config.tabWidth : 1;
     }
 
@@ -1836,7 +1847,7 @@ class FormatVisitor : ASTVisitor
         import std.algorithm : count;
 
         const numTabs = count(text, '\t');
-        result.write(text);
+        _result.write(text);
         _lineLength += text.length - numTabs + (numTabs * _config.tabWidth);
     }
 
@@ -1895,13 +1906,26 @@ class FormatVisitor : ASTVisitor
         }
 
         writeNewLine();
+
+        if (kind != BraceKind.start)
+        {
+            if (_inlineDepth == 0 && shouldWriteEmptyLine())
+                writeNewLine();
+
+            nextEmptyLineHint();
+        }
     }
 
-    private void writeSemicolon()
+    private void writeSemicolon(bool allowEmptyLine = true)
     {
         write(';');
         writeNewLine();
         _tempIndentLevel = 0;
+
+        if (allowEmptyLine && _inlineDepth == 0 && shouldWriteEmptyLine())
+            writeNewLine();
+
+        nextEmptyLineHint();
     }
 
     private void writeNewLine()
@@ -2007,17 +2031,21 @@ class FormatVisitor : ASTVisitor
     {
         if (enumMembers.length > 0)
         {
+            beginTransaction();
             ++_inlineDepth;
-            const enumBodyText = getString({ writeEnumMembers(enumMembers); });
+            writeEnumMembers(enumMembers);
             --_inlineDepth;
 
-            if (canAddToCurrentLine(enumBodyText.length))
+            if (canAddToCurrentLine(0))
             {
-                write(enumBodyText);
+                commitTransaction();
                 writeNewLine();
             }
             else
+            {
+                cancelTransaction();
                 writeEnumMembers(enumMembers);
+            }
         }
         else
         {

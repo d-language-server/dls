@@ -22,6 +22,24 @@ module dls.tools.format.internal.util;
 
 import dparse.lexer : Token;
 
+struct Memento(T)
+{
+    T data;
+    private T saved;
+
+    void save()
+    {
+        saved = data;
+    }
+
+    void load()
+    {
+        data = saved;
+    }
+
+    alias data this;
+}
+
 string tokenString(const Token token)
 {
     import dparse.lexer : str;
