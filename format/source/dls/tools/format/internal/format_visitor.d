@@ -1027,21 +1027,25 @@ package(dls.tools.format) class FormatVisitor : ASTVisitor
     {
         write("import ");
 
-        foreach (i, singleImport; importDeclaration.singleImports)
+        if (importDeclaration.singleImports.length > 0)
+            ++_tempIndentLevel;
+
+        foreach (singleImport; importDeclaration.singleImports)
         {
             visit(singleImport);
 
-            if (i + 1 < importDeclaration.singleImports.length
-                    || importDeclaration.importBindings !is null)
-            {
-                ++_tempIndentLevel;
-                write(',');
-                writeNewLine();
-                writeIndents();
-            }
+            if (singleImport == importDeclaration.singleImports[$ - 1]
+                    && importDeclaration.importBindings is null)
+                break;
+
+            write(',');
+            writeNewLine();
+            writeIndents();
         }
 
-        tryVisit(importDeclaration.importBindings);
+        if (importDeclaration.importBindings !is null)
+            visit(importDeclaration.importBindings);
+
         writeSemicolon();
     }
 
