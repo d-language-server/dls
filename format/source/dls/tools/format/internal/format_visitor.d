@@ -1233,9 +1233,13 @@ package(dls.tools.format) class FormatVisitor : ASTVisitor
     // DONE
     override void visit(const ModuleDeclaration moduleDeclaration)
     {
-        writeIndents();
-        tryVisit(moduleDeclaration.deprecated_);
-        writeNewLine();
+        if (moduleDeclaration.deprecated_ !is null)
+        {
+            writeIndents();
+            visit(moduleDeclaration.deprecated_);
+            writeNewLine();
+        }
+
         writeIndents();
         write("module ");
         visit(moduleDeclaration.moduleName);
