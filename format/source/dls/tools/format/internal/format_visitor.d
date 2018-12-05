@@ -1956,17 +1956,36 @@ package(dls.tools.format) class FormatVisitor : ASTVisitor
 
     private void writeList(T)(T[] list, bool startWithComma = false)
     {
-        bool putComma = startWithComma;
+        auto putComma = startWithComma;
+        ++_tempIndentLevel;
 
         foreach (arg; list)
         {
             if (putComma)
-                write(", ");
-            else
-                putComma = true;
+            {
+                write(',');
+                beginTransaction();
+                write(' ');
+                visit(arg);
 
-            visit(arg);
+                if (canAddToCurrentLine(arg == list[$ - 1] ? 0 : 1))
+                    commitTransaction();
+                else
+                {
+                    cancelTransaction();
+                    writeNewLine();
+                    writeIndents();
+                    visit(arg);
+                }
+            }
+            else
+            {
+                putComma = true;
+                visit(arg);
+            }
         }
+
+        --_tempIndentLevel;
     }
 
     private void writeCurrentStyle(bool start)
