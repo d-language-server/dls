@@ -64,23 +64,28 @@ package(dls.tools.format) struct TokenInfo
 
     void save()
     {
-        import std.traits : isSomeFunction;
+        foreachMember!"save";
+    }
 
-        foreach (member; __traits(allMembers, typeof(this)))
-        {
-            static if (!isSomeFunction!(__traits(getMember, typeof(this), member)))
-                mixin(member ~ ".index.save();");
-        }
+    void clear()
+    {
+        foreachMember!"clear";
     }
 
     void load()
+    {
+        foreachMember!"load";
+    }
+
+    private void foreachMember(string which)()
     {
         import std.traits : isSomeFunction;
 
         foreach (member; __traits(allMembers, typeof(this)))
         {
-            static if (!isSomeFunction!(__traits(getMember, typeof(this), member)))
-                mixin(member ~ ".index.load();");
+            static if (!isSomeFunction!(__traits(getMember, typeof(this),
+                    member)) && !__traits(isTemplate, __traits(getMember, typeof(this), member)))
+                mixin(member ~ ".index." ~ which ~ "();");
         }
     }
 }
@@ -100,6 +105,7 @@ package(dls.tools.format) class FormatVisitor : ASTVisitor
     private Memento!size_t _lineLength;
     private SList!Style _styles;
     private size_t _inlineDepth;
+    private size_t _transactionDepth;
     private TokenInfo _tokenInfo;
 
     @property OutBuffer result()
@@ -1869,6 +1875,7 @@ package(dls.tools.format) class FormatVisitor : ASTVisitor
         _lineLength.save();
         _tokenInfo.save();
         _result = new OutBuffer();
+        ++_transactionDepth;
     }
 
     private void commitTransaction()
@@ -1876,6 +1883,9 @@ package(dls.tools.format) class FormatVisitor : ASTVisitor
         auto data = _result.data;
         _result.load();
         _result.write(data);
+        _lineLength.clear();
+        _tokenInfo.clear();
+        --_transactionDepth;
     }
 
     private void cancelTransaction()
@@ -1883,6 +1893,7 @@ package(dls.tools.format) class FormatVisitor : ASTVisitor
         _result.load();
         _lineLength.load();
         _tokenInfo.load();
+        --_transactionDepth;
     }
 
     private size_t indentLength()
@@ -1895,7 +1906,7 @@ package(dls.tools.format) class FormatVisitor : ASTVisitor
 
     private bool canAddToCurrentLine(size_t length)
     {
-        return _lineLength + length <= (indentLength * 4 > _config.softMaxLineLength
+        return _transactionDepth > 1 || _lineLength + length <= (indentLength * 4 > _config.softMaxLineLength
                 ? _config.maxLineLength : _config.softMaxLineLength);
     }
 

@@ -39,17 +39,25 @@ struct RollbackRange(T)
 
 struct Memento(T)
 {
+    import std.container : SList;
+
     T data;
-    private T saved;
+    private SList!T saved;
 
     void save()
     {
-        saved = data;
+        saved.insertFront(data);
+    }
+
+    void clear()
+    {
+        saved.removeFront();
     }
 
     void load()
     {
-        data = saved;
+        data = saved.front;
+        clear();
     }
 
     alias data this;
