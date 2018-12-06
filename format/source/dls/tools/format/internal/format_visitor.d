@@ -104,6 +104,7 @@ package(dls.tools.format) class FormatVisitor : ASTVisitor
     private size_t _tempIndentLevel;
     private Memento!size_t _lineLength;
     private SList!Style _styles;
+    private SList!bool _declarationBraces;
     private size_t _inlineDepth;
     private size_t _transactionDepth;
     private TokenInfo _tokenInfo;
@@ -123,6 +124,7 @@ package(dls.tools.format) class FormatVisitor : ASTVisitor
         _inputTokens = inputTokens.filter!(t => t.type == tok!"comment").array;
         _config = config;
         _styles.insertFront(Style.none);
+        _declarationBraces.insertFront(true);
         _tokenInfo = tokenInfo;
 
         if (_config.endOfLine == EndOfLine.osDefault)
@@ -1950,7 +1952,8 @@ package(dls.tools.format) class FormatVisitor : ASTVisitor
             break;
 
         case BraceKind.start:
-            if (_config.braceStyle == BraceStyle.otbs)
+            if (!_declarationBraces.front
+                    || _config.braceStyle == BraceStyle.otbs)
                 write(' ');
             else
             {
@@ -1969,11 +1972,12 @@ package(dls.tools.format) class FormatVisitor : ASTVisitor
             break;
         }
 
-        writeNewLine();
+        if (_declarationBraces.front || kind == BraceKind.start)
+            writeNewLine();
 
         if (kind != BraceKind.start)
         {
-            if (_inlineDepth == 0 && _tokenInfo.emptyLines.current)
+            if (_declarationBraces.front && _inlineDepth == 0 && _tokenInfo.emptyLines.current)
                 writeNewLine();
 
             ++_tokenInfo.emptyLines.index;
