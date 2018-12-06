@@ -150,16 +150,37 @@ package(dls.tools.format) class FormatVisitor : ASTVisitor
         tryVisit(addExpression.right);
     }
 
-    // TODO
+    // DONE
     override void visit(const AliasDeclaration aliasDeclaration)
     {
+        write("alias ");
         tryVisit(aliasDeclaration.storageClasses);
+        tryVisit(aliasDeclaration.type);
+
+        if (aliasDeclaration.declaratorIdentifierList !is null)
+        {
+            write(' ');
+            visit(aliasDeclaration.declaratorIdentifierList);
+        }
+
+        tryVisit(aliasDeclaration.parameters);
+        tryVisit(aliasDeclaration.memberFunctionAttributes);
+
+        if (aliasDeclaration.initializers.length > 0)
+            writeList(aliasDeclaration.initializers);
+
+        writeSemicolon();
     }
 
-    // TODO
+    // DONE
     override void visit(const AliasInitializer aliasInitializer)
     {
-        super.visit(aliasInitializer);
+        visit(aliasInitializer.name);
+        tryVisit(aliasInitializer.templateParameters);
+        write(" = ");
+        tryVisit(aliasInitializer.storageClasses);
+        tryVisit(aliasInitializer.type);
+        tryVisit(aliasInitializer.functionLiteralExpression);
     }
 
     // DONE
@@ -886,10 +907,10 @@ package(dls.tools.format) class FormatVisitor : ASTVisitor
         }
     }
 
-    // TODO
+    // DONE
     override void visit(const DeclaratorIdentifierList identifierList)
     {
-        super.visit(identifierList);
+        writeList(identifierList.identifiers);
     }
 
     // TODO
