@@ -584,7 +584,10 @@ package(dls.tools.format) class FormatVisitor : ASTVisitor
     // DONE
     override void visit(const Constraint constraint)
     {
-        super.visit(constraint);
+        writeIndents();
+        write("if (");
+        visit(constraint.expression);
+        write(')');
     }
 
     // TODO
@@ -933,7 +936,7 @@ package(dls.tools.format) class FormatVisitor : ASTVisitor
         visit(identityExpression.right);
     }
 
-    // TODO
+    // DONE
     override void visit(const IfStatement ifStatement)
     {
         static bool isBlockOrIf(const DeclarationOrStatement dos)
@@ -1385,7 +1388,7 @@ package(dls.tools.format) class FormatVisitor : ASTVisitor
         write(")");
     }
 
-    // TODO
+    // DONE
     override void visit(const PragmaStatement pragmaStatement)
     {
         visit(pragmaStatement.pragmaExpression);
@@ -1502,17 +1505,17 @@ package(dls.tools.format) class FormatVisitor : ASTVisitor
         super.visit(statementNoCaseNoDefault);
     }
 
-    // TODO
+    // DONE
     override void visit(const StaticAssertDeclaration staticAssertDeclaration)
     {
-        super.visit(staticAssertDeclaration);
+        visit(staticAssertDeclaration.staticAssertStatement);
     }
 
-    // TODO
+    // DONE
     override void visit(const StaticAssertStatement staticAssertStatement)
     {
         write("static ");
-        super.visit(staticAssertStatement);
+        visit(staticAssertStatement.assertExpression);
         writeSemicolon();
     }
 
@@ -1541,13 +1544,13 @@ package(dls.tools.format) class FormatVisitor : ASTVisitor
         write(' ');
     }
 
-    // TODO
+    // DONE
     override void visit(const StructBody structBody)
     {
         if (structBody.declarations.length > 0)
         {
             writeBraces(BraceKind.start);
-            super.visit(structBody);
+            tryVisit(structBody.declarations);
             writeBraces(BraceKind.end);
         }
         else
@@ -2156,9 +2159,7 @@ package(dls.tools.format) class FormatVisitor : ASTVisitor
             }
         }
         else
-        {
             writeBraces(BraceKind.empty);
-        }
     }
 
     private void writeEnumMembers(T)(const T[] enumMembers)
@@ -2215,9 +2216,7 @@ package(dls.tools.format) class FormatVisitor : ASTVisitor
             ++_indentLevel;
             writeNewLine();
             writeIndents();
-            write("if (");
             visit(constraint);
-            write(')');
             --_indentLevel;
         }
 
