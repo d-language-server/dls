@@ -1656,22 +1656,29 @@ package(dls.tools.format) class FormatVisitor : ASTVisitor
         super.visit(templateAliasParameter);
     }
 
-    // TODO
+    // DONE
     override void visit(const TemplateArgument templateArgument)
     {
         super.visit(templateArgument);
     }
 
-    // TODO
+    // DONE
     override void visit(const TemplateArgumentList templateArgumentList)
     {
-        super.visit(templateArgumentList);
+        writeList(templateArgumentList.items);
     }
 
-    // TODO
+    // DONE
     override void visit(const TemplateArguments templateArguments)
     {
-        super.visit(templateArguments);
+        if (templateArguments.templateSingleArgument is null)
+        {
+            write('(');
+            visit(templateArguments.templateArgumentList);
+            write(')');
+        }
+        else
+            visit(templateArguments.templateSingleArgument);
     }
 
     // TODO
@@ -1680,10 +1687,12 @@ package(dls.tools.format) class FormatVisitor : ASTVisitor
         super.visit(templateDeclaration);
     }
 
-    // TODO
+    // DONE
     override void visit(const TemplateInstance templateInstance)
     {
-        super.visit(templateInstance);
+        visit(templateInstance.identifier);
+        write('!');
+        visit(templateInstance.templateArguments);
     }
 
     // TODO
@@ -1712,10 +1721,10 @@ package(dls.tools.format) class FormatVisitor : ASTVisitor
         write(')');
     }
 
-    // TODO
+    // DONE
     override void visit(const TemplateSingleArgument templateSingleArgument)
     {
-        super.visit(templateSingleArgument);
+        visit(templateSingleArgument.token);
     }
 
     // TODO
