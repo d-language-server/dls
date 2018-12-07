@@ -507,10 +507,10 @@ package(dls.tools.format) class FormatVisitor : ASTVisitor
             write(' ');
         else
         {
-            ++_tempIndentLevel;
+            ++_indentLevel;
             writeNewLine();
             writeIndents();
-            --_tempIndentLevel;
+            --_indentLevel;
         }
 
         writeList(baseClassList.items);
@@ -1445,9 +1445,10 @@ package(dls.tools.format) class FormatVisitor : ASTVisitor
 
         if (pragmaStatement.statement !is null)
         {
-            ++_tempIndentLevel;
+            ++_indentLevel;
             visit(pragmaStatement.statement);
             writeSemicolon();
+            --_indentLevel;
         }
         else
             visit(pragmaStatement.blockStatement);
@@ -2105,12 +2106,12 @@ package(dls.tools.format) class FormatVisitor : ASTVisitor
                     commitTransaction();
                 else
                 {
-                    ++_tempIndentLevel;
+                    ++_indentLevel;
                     cancelTransaction();
                     writeNewLine();
                     writeIndents();
                     visit(arg);
-                    --_tempIndentLevel;
+                    --_indentLevel;
                 }
             }
             else
