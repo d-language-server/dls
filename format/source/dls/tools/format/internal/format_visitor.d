@@ -248,22 +248,48 @@ package(dls.tools.format) class FormatVisitor : ASTVisitor
         write(')');
     }
 
-    // TODO
+    // DONE
     override void visit(const ArrayInitializer arrayInitializer)
     {
-        super.visit(arrayInitializer);
+        write('[');
+        ++_inlineDepth;
+        beginTransaction();
+        writePrettyList(arrayInitializer.arrayMemberInitializations);
+        --_inlineDepth;
+
+        if (canAddToCurrentLine(2))
+            commitTransaction();
+        else
+        {
+            ++_indentLevel;
+            cancelTransaction();
+            writeNewLine();
+            writeIndents();
+            writePrettyList(arrayInitializer.arrayMemberInitializations);
+            --_indentLevel;
+        }
+
+        write(']');
     }
 
-    // TODO
+    // DONE
     override void visit(const ArrayLiteral arrayLiteral)
     {
-        super.visit(arrayLiteral);
+        write('[');
+        visit(arrayLiteral.argumentList);
+        write(']');
     }
 
-    // TODO
+    // DONE
     override void visit(const ArrayMemberInitialization arrayMemberInitialization)
     {
-        super.visit(arrayMemberInitialization);
+        if (arrayMemberInitialization.assignExpression !is null)
+        {
+            visit(arrayMemberInitialization.assignExpression);
+            write(": ");
+        }
+
+        visit(arrayMemberInitialization.nonVoidInitializer);
     }
 
     // TODO
@@ -396,10 +422,12 @@ package(dls.tools.format) class FormatVisitor : ASTVisitor
         tryVisit(assignExpression.expression);
     }
 
-    // TODO
+    // DONE
     override void visit(const AssocArrayLiteral assocArrayLiteral)
     {
-        super.visit(assocArrayLiteral);
+        write('[');
+        visit(assocArrayLiteral.keyValuePairs);
+        write(']');
     }
 
     // DONE
@@ -1206,16 +1234,18 @@ package(dls.tools.format) class FormatVisitor : ASTVisitor
         super.visit(isExpression);
     }
 
-    // TODO
+    // DONE
     override void visit(const KeyValuePair keyValuePair)
     {
-        super.visit(keyValuePair);
+        visit(keyValuePair.key);
+        write(": ");
+        visit(keyValuePair.value);
     }
 
-    // TODO
+    // DONE
     override void visit(const KeyValuePairs keyValuePairs)
     {
-        super.visit(keyValuePairs);
+        writeList(keyValuePairs.keyValuePairs);
     }
 
     // TODO
@@ -2115,7 +2145,7 @@ package(dls.tools.format) class FormatVisitor : ASTVisitor
                 write(' ');
                 visit(arg);
 
-                if (canAddToCurrentLine(arg == list[$ - 1] ? 0 : 1))
+                if (canAddToCurrentLine(1))
                     commitTransaction();
                 else
                 {
@@ -2132,6 +2162,23 @@ package(dls.tools.format) class FormatVisitor : ASTVisitor
                 putComma = true;
                 visit(arg);
             }
+        }
+    }
+
+    private void writePrettyList(T)(T[] list)
+    {
+        foreach (i, arg; list)
+        {
+            visit(arg);
+
+            if (i + 1 < list.length)
+            {
+                write(',');
+                writeNewLine();
+                writeIndents();
+            }
+            else
+                writeNewLine();
         }
     }
 
@@ -2238,21 +2285,7 @@ package(dls.tools.format) class FormatVisitor : ASTVisitor
     {
         writeBraces(BraceKind.start);
         writeIndents();
-
-        foreach (i, member; enumMembers)
-        {
-            visit(member);
-
-            if (i + 1 < enumMembers.length)
-            {
-                write(',');
-                writeNewLine();
-                writeIndents();
-            }
-            else
-                writeNewLine();
-        }
-
+        writePrettyList(enumMembers);
         writeBraces(BraceKind.end);
     }
 
