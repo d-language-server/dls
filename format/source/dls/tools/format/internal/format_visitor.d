@@ -192,10 +192,17 @@ package(dls.tools.format) class FormatVisitor : ASTVisitor
         writeSemicolon();
     }
 
-    // TODO
+    // DONE
     override void visit(const AlignAttribute alignAttribute)
     {
-        super.visit(alignAttribute);
+        write("align");
+
+        if (alignAttribute.assignExpression !is null)
+        {
+            write('(');
+            visit(alignAttribute.assignExpression);
+            write(')');
+        }
     }
 
     // DONE
