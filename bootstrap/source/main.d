@@ -117,5 +117,14 @@ int main(string[] args)
 
     stdout.rawWrite(output);
 
+    version (Windows)
+    {
+        stdout.rawWrite("\r\n");
+    }
+    else
+    {
+        stdout.rawWrite("\n");
+    }
+
     return status;
 }

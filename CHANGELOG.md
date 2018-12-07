@@ -4,6 +4,9 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.19.2
+- Fixed `dls:bootstrap` not printing a newline after dls' path ([#18](https://github.com/d-language-server/dls/issues/18))
+
 #### 0.19.1
 - Fixed data possibly being sent in socket multiple times
 - Fixed symbol list being empty when encountering an anonymous symbol
