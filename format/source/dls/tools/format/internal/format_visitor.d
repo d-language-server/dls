@@ -266,6 +266,7 @@ package(dls.tools.format) class FormatVisitor : ASTVisitor
             writeNewLine();
             writeIndents();
             writePrettyList(arrayInitializer.arrayMemberInitializations);
+            writeNewLine();
             --_indentLevel;
         }
 
@@ -1100,28 +1101,8 @@ package(dls.tools.format) class FormatVisitor : ASTVisitor
     override void visit(const ImportBindings importBindings)
     {
         visit(importBindings.singleImport);
-        write(" :");
-        ++_tempIndentLevel;
-
-        foreach (i, importBind; importBindings.importBinds)
-        {
-            if (i > 0)
-                write(',');
-
-            beginTransaction();
-            write(' ');
-            visit(importBind);
-
-            if (canAddToCurrentLine(1))
-                commitTransaction();
-            else
-            {
-                cancelTransaction();
-                writeNewLine();
-                writeIndents();
-                visit(importBind);
-            }
-        }
+        write(" : ");
+        writeList(importBindings.importBinds);
     }
 
     // DONE
@@ -1132,21 +1113,19 @@ package(dls.tools.format) class FormatVisitor : ASTVisitor
         if (importDeclaration.singleImports.length > 0)
             ++_tempIndentLevel;
 
-        foreach (singleImport; importDeclaration.singleImports)
-        {
-            visit(singleImport);
-
-            if (singleImport == importDeclaration.singleImports[$ - 1]
-                    && importDeclaration.importBindings is null)
-                break;
-
-            write(',');
-            writeNewLine();
-            writeIndents();
-        }
+        writePrettyList(importDeclaration.singleImports);
 
         if (importDeclaration.importBindings !is null)
+        {
+            if (importDeclaration.singleImports.length > 0)
+            {
+                write(',');
+                writeNewLine();
+                writeIndents();
+            }
+
             visit(importDeclaration.importBindings);
+        }
 
         writeSemicolon();
     }
@@ -2171,14 +2150,12 @@ package(dls.tools.format) class FormatVisitor : ASTVisitor
         {
             visit(arg);
 
-            if (i + 1 < list.length)
-            {
-                write(',');
-                writeNewLine();
-                writeIndents();
-            }
-            else
-                writeNewLine();
+            if (i + 1 == list.length)
+                break;
+
+            write(',');
+            writeNewLine();
+            writeIndents();
         }
     }
 
@@ -2286,6 +2263,7 @@ package(dls.tools.format) class FormatVisitor : ASTVisitor
         writeBraces(BraceKind.start);
         writeIndents();
         writePrettyList(enumMembers);
+        writeNewLine();
         writeBraces(BraceKind.end);
     }
 
