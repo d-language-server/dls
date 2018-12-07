@@ -886,10 +886,53 @@ package(dls.tools.format) class FormatVisitor : ASTVisitor
             visit(functionDeclaration.functionBody);
     }
 
-    // TODO
+    // DONE
     override void visit(const FunctionLiteralExpression functionLiteralExpression)
     {
-        super.visit(functionLiteralExpression);
+        _declarationBraces.insertFront(false);
+
+        if (functionLiteralExpression.functionOrDelegate != tok!"")
+            writef("%s ", str(functionLiteralExpression.functionOrDelegate));
+
+        if (functionLiteralExpression.returnType !is null)
+        {
+            visit(functionLiteralExpression.returnType);
+
+            if (functionLiteralExpression.parameters !is null)
+                write(' ');
+        }
+
+        if (functionLiteralExpression.identifier.type != tok!"")
+            visit(functionLiteralExpression.identifier);
+        else
+        {
+            tryVisit(functionLiteralExpression.parameters);
+            tryVisit(functionLiteralExpression.functionAttributes);
+            tryVisit(functionLiteralExpression.memberFunctionAttributes);
+        }
+
+        if (functionLiteralExpression.specifiedFunctionBody is null)
+        {
+            write(" => ");
+            visit(functionLiteralExpression.assignExpression);
+        }
+        else
+        {
+            ++_inlineDepth;
+            beginTransaction();
+            visit(functionLiteralExpression.specifiedFunctionBody);
+            --_inlineDepth;
+
+            if (canAddToCurrentLine(2))
+                commitTransaction();
+            else
+            {
+                cancelTransaction();
+                visit(functionLiteralExpression.specifiedFunctionBody);
+            }
+        }
+
+        _declarationBraces.removeFront();
     }
 
     // TODO
@@ -2032,7 +2075,6 @@ package(dls.tools.format) class FormatVisitor : ASTVisitor
     private void writeList(T)(T[] list, bool startWithComma = false)
     {
         auto putComma = startWithComma;
-        ++_tempIndentLevel;
 
         foreach (arg; list)
         {
@@ -2047,10 +2089,12 @@ package(dls.tools.format) class FormatVisitor : ASTVisitor
                     commitTransaction();
                 else
                 {
+                    ++_tempIndentLevel;
                     cancelTransaction();
                     writeNewLine();
                     writeIndents();
                     visit(arg);
+                    --_tempIndentLevel;
                 }
             }
             else
@@ -2059,8 +2103,6 @@ package(dls.tools.format) class FormatVisitor : ASTVisitor
                 visit(arg);
             }
         }
-
-        --_tempIndentLevel;
     }
 
     private void writeCurrentStyle(bool start)
