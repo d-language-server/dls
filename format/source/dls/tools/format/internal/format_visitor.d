@@ -237,15 +237,15 @@ package(dls.tools.format) class FormatVisitor : ASTVisitor
     // DONE
     override void visit(const ArgumentList argumentList)
     {
-        write('(');
         writeList(argumentList.items);
-        write(')');
     }
 
-    // TODO
+    // DONE
     override void visit(const Arguments arguments)
     {
-        super.visit(arguments);
+        write('(');
+        visit(arguments.argumentList);
+        write(')');
     }
 
     // TODO
@@ -402,15 +402,24 @@ package(dls.tools.format) class FormatVisitor : ASTVisitor
         super.visit(assocArrayLiteral);
     }
 
-    // TODO
+    // DONE
     override void visit(const AtAttribute atAttribute)
     {
         write('@');
 
         if (atAttribute.argumentList is null && atAttribute.templateInstance is null)
             visit(atAttribute.identifier);
-
-        super.visit(atAttribute);
+        else
+        {
+            if (atAttribute.argumentList is null)
+                visit(atAttribute.templateInstance);
+            else
+            {
+                write('(');
+                visit(atAttribute.argumentList);
+                write(')');
+            }
+        }
     }
 
     // TODO
@@ -1433,7 +1442,11 @@ package(dls.tools.format) class FormatVisitor : ASTVisitor
         visit(pragmaExpression.identifier);
 
         if (pragmaExpression.argumentList !is null)
+        {
+            write('(');
             writeList(pragmaExpression.argumentList.items, true);
+            write(')');
+        }
 
         write(")");
     }
