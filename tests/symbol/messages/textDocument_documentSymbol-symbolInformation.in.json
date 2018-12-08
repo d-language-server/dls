@@ -1,0 +1,10 @@
+{
+    "jsonrpc": "2.0",
+    "id": "textDocument/documentSymbol",
+    "method": "textDocument/documentSymbol",
+    "params": {
+        "textDocument": {
+            "uri": "testFile:///source/app.d"
+        }
+    }
+}

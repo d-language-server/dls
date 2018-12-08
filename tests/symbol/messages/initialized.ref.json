@@ -1,0 +1,18 @@
+[
+    {
+        "jsonrpc": "2.0",
+        "method": "textDocument/publishDiagnostics",
+        "params": {
+            "diagnostics": [],
+            "uri": "testFile:///source/lib.d"
+        }
+    },
+    {
+        "jsonrpc": "2.0",
+        "method": "textDocument/publishDiagnostics",
+        "params": {
+            "diagnostics": [],
+            "uri": "testFile:///source/app.d"
+        }
+    }
+]

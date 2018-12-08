@@ -1,0 +1,9 @@
+initialize-symbolInformation
+initialized
+textDocument_documentSymbol-symbolInformation
+workspace_symbol
+shutdown
+initialize-documentSymbol
+initialized
+textDocument_documentSymbol-documentSymbol
+shutdown

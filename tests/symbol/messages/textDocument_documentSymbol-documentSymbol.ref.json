@@ -1,0 +1,312 @@
+[
+    {
+        "id": "textDocument/documentSymbol",
+        "jsonrpc": "2.0",
+        "result": [
+            {
+                "children": [],
+                "kind": 12,
+                "name": "main",
+                "range": {
+                    "end": {
+                        "character": 0,
+                        "line": 6
+                    },
+                    "start": {
+                        "character": 5,
+                        "line": 2
+                    }
+                },
+                "selectionRange": {
+                    "end": {
+                        "character": 9,
+                        "line": 2
+                    },
+                    "start": {
+                        "character": 5,
+                        "line": 2
+                    }
+                }
+            },
+            {
+                "children": [
+                    {
+                        "children": [],
+                        "kind": 13,
+                        "name": "number",
+                        "range": {
+                            "end": {
+                                "character": 11,
+                                "line": 10
+                            },
+                            "start": {
+                                "character": 5,
+                                "line": 10
+                            }
+                        },
+                        "selectionRange": {
+                            "end": {
+                                "character": 11,
+                                "line": 10
+                            },
+                            "start": {
+                                "character": 5,
+                                "line": 10
+                            }
+                        }
+                    },
+                    {
+                        "children": [
+                            {
+                                "children": [],
+                                "kind": 13,
+                                "name": "anonymous",
+                                "range": {
+                                    "end": {
+                                        "character": 15,
+                                        "line": 14
+                                    },
+                                    "start": {
+                                        "character": 6,
+                                        "line": 14
+                                    }
+                                },
+                                "selectionRange": {
+                                    "end": {
+                                        "character": 15,
+                                        "line": 14
+                                    },
+                                    "start": {
+                                        "character": 6,
+                                        "line": 14
+                                    }
+                                }
+                            },
+                            {
+                                "children": [],
+                                "kind": 13,
+                                "name": "symbol",
+                                "range": {
+                                    "end": {
+                                        "character": 15,
+                                        "line": 15
+                                    },
+                                    "start": {
+                                        "character": 9,
+                                        "line": 15
+                                    }
+                                },
+                                "selectionRange": {
+                                    "end": {
+                                        "character": 15,
+                                        "line": 15
+                                    },
+                                    "start": {
+                                        "character": 9,
+                                        "line": 15
+                                    }
+                                }
+                            }
+                        ],
+                        "kind": 11,
+                        "name": "<anonymous UnionDeclaration>",
+                        "range": {
+                            "end": {
+                                "character": 1,
+                                "line": 16
+                            },
+                            "start": {
+                                "character": 1,
+                                "line": 12
+                            }
+                        },
+                        "selectionRange": {
+                            "end": {
+                                "character": 6,
+                                "line": 12
+                            },
+                            "start": {
+                                "character": 1,
+                                "line": 12
+                            }
+                        }
+                    }
+                ],
+                "kind": 5,
+                "name": "Class",
+                "range": {
+                    "end": {
+                        "character": 0,
+                        "line": 17
+                    },
+                    "start": {
+                        "character": 6,
+                        "line": 8
+                    }
+                },
+                "selectionRange": {
+                    "end": {
+                        "character": 11,
+                        "line": 8
+                    },
+                    "start": {
+                        "character": 6,
+                        "line": 8
+                    }
+                }
+            },
+            {
+                "children": [
+                    {
+                        "children": [],
+                        "kind": 13,
+                        "name": "name",
+                        "range": {
+                            "end": {
+                                "character": 12,
+                                "line": 21
+                            },
+                            "start": {
+                                "character": 8,
+                                "line": 21
+                            }
+                        },
+                        "selectionRange": {
+                            "end": {
+                                "character": 12,
+                                "line": 21
+                            },
+                            "start": {
+                                "character": 8,
+                                "line": 21
+                            }
+                        }
+                    }
+                ],
+                "kind": 23,
+                "name": "Struct",
+                "range": {
+                    "end": {
+                        "character": 0,
+                        "line": 22
+                    },
+                    "start": {
+                        "character": 7,
+                        "line": 19
+                    }
+                },
+                "selectionRange": {
+                    "end": {
+                        "character": 13,
+                        "line": 19
+                    },
+                    "start": {
+                        "character": 7,
+                        "line": 19
+                    }
+                }
+            },
+            {
+                "children": [
+                    {
+                        "children": [],
+                        "kind": 22,
+                        "name": "foo",
+                        "range": {
+                            "end": {
+                                "character": 4,
+                                "line": 26
+                            },
+                            "start": {
+                                "character": 1,
+                                "line": 26
+                            }
+                        },
+                        "selectionRange": {
+                            "end": {
+                                "character": 4,
+                                "line": 26
+                            },
+                            "start": {
+                                "character": 1,
+                                "line": 26
+                            }
+                        }
+                    },
+                    {
+                        "children": [],
+                        "kind": 22,
+                        "name": "bar",
+                        "range": {
+                            "end": {
+                                "character": 4,
+                                "line": 27
+                            },
+                            "start": {
+                                "character": 1,
+                                "line": 27
+                            }
+                        },
+                        "selectionRange": {
+                            "end": {
+                                "character": 4,
+                                "line": 27
+                            },
+                            "start": {
+                                "character": 1,
+                                "line": 27
+                            }
+                        }
+                    },
+                    {
+                        "children": [],
+                        "kind": 22,
+                        "name": "baz",
+                        "range": {
+                            "end": {
+                                "character": 4,
+                                "line": 28
+                            },
+                            "start": {
+                                "character": 1,
+                                "line": 28
+                            }
+                        },
+                        "selectionRange": {
+                            "end": {
+                                "character": 4,
+                                "line": 28
+                            },
+                            "start": {
+                                "character": 1,
+                                "line": 28
+                            }
+                        }
+                    }
+                ],
+                "kind": 10,
+                "name": "Enum",
+                "range": {
+                    "end": {
+                        "character": 0,
+                        "line": 29
+                    },
+                    "start": {
+                        "character": 5,
+                        "line": 24
+                    }
+                },
+                "selectionRange": {
+                    "end": {
+                        "character": 9,
+                        "line": 24
+                    },
+                    "start": {
+                        "character": 5,
+                        "line": 24
+                    }
+                }
+            }
+        ]
+    }
+]

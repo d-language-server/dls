@@ -1,0 +1,224 @@
+[
+    {
+        "id": "textDocument/documentSymbol",
+        "jsonrpc": "2.0",
+        "result": [
+            {
+                "containerName": "",
+                "kind": 12,
+                "location": {
+                    "range": {
+                        "end": {
+                            "character": 9,
+                            "line": 2
+                        },
+                        "start": {
+                            "character": 5,
+                            "line": 2
+                        }
+                    },
+                    "uri": "testFile:///source/app.d"
+                },
+                "name": "main"
+            },
+            {
+                "containerName": "",
+                "kind": 5,
+                "location": {
+                    "range": {
+                        "end": {
+                            "character": 11,
+                            "line": 8
+                        },
+                        "start": {
+                            "character": 6,
+                            "line": 8
+                        }
+                    },
+                    "uri": "testFile:///source/app.d"
+                },
+                "name": "Class"
+            },
+            {
+                "containerName": "Class",
+                "kind": 13,
+                "location": {
+                    "range": {
+                        "end": {
+                            "character": 11,
+                            "line": 10
+                        },
+                        "start": {
+                            "character": 5,
+                            "line": 10
+                        }
+                    },
+                    "uri": "testFile:///source/app.d"
+                },
+                "name": "number"
+            },
+            {
+                "containerName": "Class",
+                "kind": 11,
+                "location": {
+                    "range": {
+                        "end": {
+                            "character": 6,
+                            "line": 12
+                        },
+                        "start": {
+                            "character": 1,
+                            "line": 12
+                        }
+                    },
+                    "uri": "testFile:///source/app.d"
+                },
+                "name": "<anonymous UnionDeclaration>"
+            },
+            {
+                "containerName": "",
+                "kind": 13,
+                "location": {
+                    "range": {
+                        "end": {
+                            "character": 15,
+                            "line": 14
+                        },
+                        "start": {
+                            "character": 6,
+                            "line": 14
+                        }
+                    },
+                    "uri": "testFile:///source/app.d"
+                },
+                "name": "anonymous"
+            },
+            {
+                "containerName": "",
+                "kind": 13,
+                "location": {
+                    "range": {
+                        "end": {
+                            "character": 15,
+                            "line": 15
+                        },
+                        "start": {
+                            "character": 9,
+                            "line": 15
+                        }
+                    },
+                    "uri": "testFile:///source/app.d"
+                },
+                "name": "symbol"
+            },
+            {
+                "containerName": "",
+                "kind": 23,
+                "location": {
+                    "range": {
+                        "end": {
+                            "character": 13,
+                            "line": 19
+                        },
+                        "start": {
+                            "character": 7,
+                            "line": 19
+                        }
+                    },
+                    "uri": "testFile:///source/app.d"
+                },
+                "name": "Struct"
+            },
+            {
+                "containerName": "Struct",
+                "kind": 13,
+                "location": {
+                    "range": {
+                        "end": {
+                            "character": 12,
+                            "line": 21
+                        },
+                        "start": {
+                            "character": 8,
+                            "line": 21
+                        }
+                    },
+                    "uri": "testFile:///source/app.d"
+                },
+                "name": "name"
+            },
+            {
+                "containerName": "",
+                "kind": 10,
+                "location": {
+                    "range": {
+                        "end": {
+                            "character": 9,
+                            "line": 24
+                        },
+                        "start": {
+                            "character": 5,
+                            "line": 24
+                        }
+                    },
+                    "uri": "testFile:///source/app.d"
+                },
+                "name": "Enum"
+            },
+            {
+                "containerName": "Enum",
+                "kind": 22,
+                "location": {
+                    "range": {
+                        "end": {
+                            "character": 4,
+                            "line": 26
+                        },
+                        "start": {
+                            "character": 1,
+                            "line": 26
+                        }
+                    },
+                    "uri": "testFile:///source/app.d"
+                },
+                "name": "foo"
+            },
+            {
+                "containerName": "Enum",
+                "kind": 22,
+                "location": {
+                    "range": {
+                        "end": {
+                            "character": 4,
+                            "line": 27
+                        },
+                        "start": {
+                            "character": 1,
+                            "line": 27
+                        }
+                    },
+                    "uri": "testFile:///source/app.d"
+                },
+                "name": "bar"
+            },
+            {
+                "containerName": "Enum",
+                "kind": 22,
+                "location": {
+                    "range": {
+                        "end": {
+                            "character": 4,
+                            "line": 28
+                        },
+                        "start": {
+                            "character": 1,
+                            "line": 28
+                        }
+                    },
+                    "uri": "testFile:///source/app.d"
+                },
+                "name": "baz"
+            }
+        ]
+    }
+]

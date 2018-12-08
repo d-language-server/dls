@@ -1,0 +1,22 @@
+{
+    "jsonrpc": "2.0",
+    "id": "initialize",
+    "method": "initialize",
+    "params": {
+        "processId": null,
+        "rootUri": "testFile:///",
+        "capabilities": {
+            "workspace": {
+                "symbol": {
+                    "dynamicRegistration": false
+                }
+            },
+            "textDocument": {
+                "documentSymbol": {
+                    "dynamicRegistration": false,
+                    "hierarchicalDocumentSymbolSupport": true
+                }
+            }
+        }
+    }
+}

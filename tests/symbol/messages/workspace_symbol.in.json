@@ -1,0 +1,8 @@
+{
+    "jsonrpc": "2.0",
+    "id": "workspace/symbol",
+    "method": "workspace/symbol",
+    "params": {
+        "query": ""
+    }
+}
