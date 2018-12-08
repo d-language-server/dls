@@ -26,16 +26,14 @@ import dls.util.uri : Uri;
 import dsymbol.symbol : CompletionKind;
 import std.container : RedBlackTree;
 
-int compareLocations(inout(SymbolInformation) s1, inout(SymbolInformation) s2)
+bool compareLocations(inout(SymbolInformation) s1, inout(SymbolInformation) s2)
 {
     //dfmt off
-    return s1.location.uri < s2.location.uri ? -1
-        : s1.location.uri > s2.location.uri ? 1
-        : s1.location.range.start.line < s2.location.range.start.line ? -1
-        : s1.location.range.start.line > s2.location.range.start.line ? 1
-        : s1.location.range.start.character < s2.location.range.start.character ? -1
-        : s1.location.range.start.character > s2.location.range.start.character ? 1
-        : 0;
+    return s1.location.uri < s2.location.uri ? true
+        : s1.location.uri > s2.location.uri ? false
+        : s1.location.range.start.line < s2.location.range.start.line ? true
+        : s1.location.range.start.line > s2.location.range.start.line ? false
+        : s1.location.range.start.character < s2.location.range.start.character;
     //dfmt on
 }
 
