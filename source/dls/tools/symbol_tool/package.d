@@ -151,7 +151,7 @@ class SymbolTool : Tool
     import dcd.common.messages : AutocompleteRequest, RequestKind;
     import dls.protocol.definitions : Location, MarkupContent, Position, Range, WorkspaceEdit;
     import dls.protocol.interfaces : CompletionItem, DocumentHighlight, DocumentSymbol, Hover;
-    import dsymbol.modulecache : ASTAllocator, ModuleCache;
+    import dsymbol.modulecache : ModuleCache;
     import dub.dub : Dub;
 
     private static SymbolTool _instance;
@@ -222,7 +222,6 @@ class SymbolTool : Tool
     private ProjectType[string] _workspaceProjectTypes;
     private string[string][string] _workspaceDependencies;
     private string[][string] _workspaceDependenciesPaths;
-    private ASTAllocator _allocator;
     private ModuleCache _cache;
 
     @property Uri[] workspacesFilesUris()
@@ -414,8 +413,9 @@ class SymbolTool : Tool
 
     this()
     {
-        _allocator = new ASTAllocator();
-        _cache = ModuleCache(_allocator);
+        import dsymbol.modulecache : ASTAllocator;
+
+        _cache = ModuleCache(new ASTAllocator());
     }
 
     Uri getWorkspace(const Uri uri)
@@ -887,6 +887,7 @@ class SymbolTool : Tool
         import dls.util.logger : logger;
         import dparse.lexer : StringCache;
         import dparse.rollback_allocator : RollbackAllocator;
+        import dsymbol.modulecache : ASTAllocator;
         import std.algorithm : filter;
         import std.array : appender;
 
@@ -895,26 +896,29 @@ class SymbolTool : Tool
 
         auto request = getPreparedRequest(uri, position, RequestKind.symbolLocation);
         auto stringCache = StringCache(StringCache.defaultBucketCount);
-        RollbackAllocator ra;
+        auto allocator = new ASTAllocator();
+        RollbackAllocator rollbackAllocator;
         auto currentFileStuff = getSymbolsForCompletion(request,
-                CompletionType.location, _allocator, &ra, stringCache, _cache);
+                CompletionType.location, allocator, &rollbackAllocator, stringCache, _cache);
 
         scope (exit)
         {
             currentFileStuff.destroy();
+            allocator.deallocateAll();
         }
 
         auto result = appender!(Location[]);
 
         foreach (symbol; currentFileStuff.symbols.filter!q{a.location > 0})
         {
+            RollbackAllocator ra;
             auto symbolUri = symbol.symbolFile == "stdin" ? uri : Uri.fromPath(symbol.symbolFile);
             auto document = Document.get(symbolUri);
             request.fileName = symbolUri.path;
             request.sourceCode = cast(ubyte[]) document.toString();
             request.cursorPosition = symbol.location + 1;
             auto stuff = getSymbolsForCompletion(request,
-                    CompletionType.location, _allocator, &ra, stringCache, _cache);
+                    CompletionType.location, allocator, &ra, stringCache, _cache);
 
             scope (exit)
             {
@@ -938,6 +942,7 @@ class SymbolTool : Tool
         import dls.util.logger : logger;
         import dparse.lexer : StringCache;
         import dparse.rollback_allocator : RollbackAllocator;
+        import dsymbol.modulecache : ASTAllocator;
         import std.algorithm : filter, map, uniq;
         import std.array : appender;
 
@@ -946,13 +951,15 @@ class SymbolTool : Tool
 
         auto request = getPreparedRequest(uri, position, RequestKind.symbolLocation);
         auto stringCache = StringCache(StringCache.defaultBucketCount);
-        RollbackAllocator ra;
+        auto allocator = new ASTAllocator();
+        RollbackAllocator rollbackAllocator;
         auto stuff = getSymbolsForCompletion(request, CompletionType.location,
-                _allocator, &ra, stringCache, _cache);
+                allocator, &rollbackAllocator, stringCache, _cache);
 
         scope (exit)
         {
             stuff.destroy();
+            allocator.deallocateAll();
         }
 
         auto result = appender!(Location[]);
@@ -1149,6 +1156,7 @@ class SymbolTool : Tool
         import dparse.lexer : LexerConfig, StringBehavior, StringCache, Token,
             WhitespaceBehavior, getTokensForParser, tok;
         import dparse.rollback_allocator : RollbackAllocator;
+        import dsymbol.modulecache : ASTAllocator;
         import dsymbol.string_interning : internString;
         import std.algorithm : filter;
         import std.array : appender;
@@ -1159,13 +1167,15 @@ class SymbolTool : Tool
         auto sourceTokens = getTokensForParser(Document.get(uri).toString(),
                 LexerConfig(uri.path, StringBehavior.compiler, WhitespaceBehavior.skip),
                 &stringCache);
-        RollbackAllocator ra;
+        auto allocator = new ASTAllocator();
+        RollbackAllocator rollbackAllocator;
         auto stuff = getSymbolsForCompletion(request, CompletionType.location,
-                _allocator, &ra, stringCache, _cache);
+                allocator, &rollbackAllocator, stringCache, _cache);
 
         scope (exit)
         {
             stuff.destroy();
+            allocator.deallocateAll();
         }
 
         const(Token)* sourceToken;
@@ -1236,9 +1246,10 @@ class SymbolTool : Tool
             {
                 if (token.type == tok!"identifier" && token.text == sourceToken.text)
                 {
+                    RollbackAllocator ra;
                     request.cursorPosition = token.index + 1;
                     auto candidateStuff = getSymbolsForCompletion(request,
-                            CompletionType.location, _allocator, &ra, stringCache, _cache);
+                            CompletionType.location, allocator, &ra, stringCache, _cache);
 
                     scope (exit)
                     {
