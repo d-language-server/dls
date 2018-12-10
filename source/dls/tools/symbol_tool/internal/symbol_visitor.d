@@ -22,7 +22,7 @@ module dls.tools.symbol_tool.internal.symbol_visitor;
 
 import dparse.ast;
 
-package(dls.tools.symbol_tool) class SymbolVisitor(SymbolType) : ASTVisitor
+package class SymbolVisitor(SymbolType) : ASTVisitor
 {
     import dls.protocol.definitions : Range;
     import dls.protocol.interfaces : DocumentSymbol, SymbolKind, SymbolInformation;
