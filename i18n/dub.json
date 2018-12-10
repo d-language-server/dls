@@ -13,6 +13,6 @@
 		"dls:protocol": "*"
 	},
 	"preGenerateCommands": [
-		"dub run --quiet dls:gen"
+		"rdmd $PACKAGE_DIR/scripts/gen.d"
 	]
 }

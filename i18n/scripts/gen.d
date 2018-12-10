@@ -21,15 +21,17 @@
 void main()
 {
     import std.algorithm : sort;
-    import std.file : readText, thisExePath, write;
+    import std.file : readText, write;
     import std.format : format;
     import std.json : parseJSON;
     import std.path : buildNormalizedPath;
+    import std.process : environment;
     import std.range : replace;
 
-    immutable i18nDir = buildNormalizedPath(thisExePath, "..", "..", "i18n");
-    immutable translationsPath = buildNormalizedPath(i18nDir, "data", "translations.json");
-    immutable trModulePath = buildNormalizedPath(i18nDir, "source", "dls", "util", "constants.d");
+    immutable translationsPath = buildNormalizedPath(environment["DUB_PACKAGE_DIR"],
+            "data", "translations.json");
+    immutable trModulePath = buildNormalizedPath(environment["DUB_PACKAGE_DIR"],
+            "source", "dls", "util", "constants.d");
     immutable trModuleContent = readText(trModulePath);
     auto translations = parseJSON(readText(translationsPath));
     string content;
