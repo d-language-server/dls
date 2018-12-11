@@ -18,6 +18,8 @@
  *
  */
 
+private immutable dubPackageDir = "DUB_PACKAGE_DIR";
+
 void main()
 {
     import std.algorithm : sort;
@@ -28,9 +30,9 @@ void main()
     import std.process : environment;
     import std.range : replace;
 
-    immutable translationsPath = buildNormalizedPath(environment["DUB_PACKAGE_DIR"],
+    immutable translationsPath = buildNormalizedPath(environment[dubPackageDir],
             "data", "translations.json");
-    immutable trModulePath = buildNormalizedPath(environment["DUB_PACKAGE_DIR"],
+    immutable trModulePath = buildNormalizedPath(environment[dubPackageDir],
             "source", "dls", "util", "constants.d");
     immutable trModuleContent = readText(trModulePath);
     auto translations = parseJSON(readText(translationsPath));

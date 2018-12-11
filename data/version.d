@@ -18,7 +18,8 @@
  *
  */
 
-immutable dubPackageVersion = "DUB_PACKAGE_VERSION";
+private immutable dubPackageDir = "DUB_PACKAGE_DIR";
+private immutable dubPackageVersion = "DUB_PACKAGE_VERSION";
 
 void main()
 {
@@ -26,7 +27,7 @@ void main()
     import std.path : buildNormalizedPath;
     import std.process : environment;
 
-    const versionDataFile = buildNormalizedPath("data", "version.txt");
+    const versionDataFile = buildNormalizedPath(environment[dubPackageDir], "data", "version.txt");
     const fileVersion = exists(versionDataFile) ? readText(versionDataFile) : "";
     const currentVersion = dubPackageVersion in environment ? environment[dubPackageVersion]
         : getVersionFromDescription();

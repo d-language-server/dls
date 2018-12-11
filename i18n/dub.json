@@ -13,6 +13,6 @@
 		"dls:protocol": "*"
 	},
 	"preGenerateCommands": [
-		"rdmd $PACKAGE_DIR/scripts/gen.d"
+		"rdmd $PACKAGE_DIR/data/translations.d"
 	]
 }
