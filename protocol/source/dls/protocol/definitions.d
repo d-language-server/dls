@@ -58,6 +58,26 @@ class Location
     }
 }
 
+class LocationLink
+{
+    import std.typecons : Nullable;
+
+    Nullable!Range originSelectionRange;
+    string targetUri;
+    Range targetRange;
+    Nullable!Range targetSelectionRange;
+
+    this(Nullable!Range originSelectionRange = Nullable!Range.init, string targetUri = string.init,
+            Range targetRange = new Range(),
+            Nullable!Range targetSelectionRange = Nullable!Range.init)
+    {
+        this.originSelectionRange = originSelectionRange;
+        this.targetUri = targetUri;
+        this.targetRange = targetRange;
+        this.targetSelectionRange = targetSelectionRange;
+    }
+}
+
 class Diagnostic
 {
     import std.json : JSONValue;

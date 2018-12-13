@@ -137,6 +137,11 @@ SignatureHelp signatureHelp(TextDocumentPositionParams params)
     return null;
 }
 
+Location[] declaration(TextDocumentPositionParams params)
+{
+    return [];
+}
+
 Location[] definition(TextDocumentPositionParams params)
 {
     import dls.tools.symbol_tool : SymbolTool;

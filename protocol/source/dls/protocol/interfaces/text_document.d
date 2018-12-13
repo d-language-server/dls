@@ -306,7 +306,10 @@ final class SignatureInformation : InformationBase
     }
 }
 
-alias ParameterInformation = InformationBase;
+final class ParameterInformation : InformationBase
+{
+    JSONValue label;
+}
 
 final class SignatureHelpRegistrationOptions : TextDocumentRegistrationOptions
 {

@@ -72,6 +72,7 @@ enum TextDocument : string
     completionResolve     = "completionItem/resolve",
     hover                 = "textDocument/hover",
     signatureHelp         = "textDocument/signatureHelp",
+    declaration           = "textDocument/declaration",
     definition            = "textDocument/definition",
     typeDefinition        = "textDocument/typeDefinition",
     implementation        = "textDocument/implementation",

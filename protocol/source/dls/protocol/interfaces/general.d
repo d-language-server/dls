@@ -27,6 +27,13 @@ private class WithDynamicRegistration
     Nullable!bool dynamicRegistration;
 }
 
+private final class WithLinkSupport : WithDynamicRegistration
+{
+    import std.typecons : Nullable;
+
+    Nullable!bool linkSupport;
+}
+
 final class InitializeParams
 {
     import dls.protocol.definitions : DocumentUri;
@@ -183,10 +190,16 @@ final class TextDocumentClientCapabilities
         {
             import dls.protocol.definitions : MarkupKind;
 
+            static final class ParameterInformation
+            {
+                Nullable!bool labelOffsetSupport;
+            }
+
             Nullable!(MarkupKind[]) documentationFormat;
+            Nullable!ParameterInformation parameterInformation;
         }
 
-        Nullable!SignatureInformation signatureHelp;
+        Nullable!SignatureInformation signatureInformation;
     }
 
     static final class DocumentSymbol : WithDynamicRegistration
@@ -250,9 +263,10 @@ final class TextDocumentClientCapabilities
     Nullable!WithDynamicRegistration formatting;
     Nullable!WithDynamicRegistration rangeFormatting;
     Nullable!WithDynamicRegistration onTypeFormatting;
-    Nullable!WithDynamicRegistration definition;
-    Nullable!WithDynamicRegistration typeDefinition;
-    Nullable!WithDynamicRegistration implementation;
+    Nullable!WithLinkSupport declaration;
+    Nullable!WithLinkSupport definition;
+    Nullable!WithLinkSupport typeDefinition;
+    Nullable!WithLinkSupport implementation;
     Nullable!CodeAction codeAction;
     Nullable!WithDynamicRegistration codeLens;
     Nullable!WithDynamicRegistration documentLink;
