@@ -202,6 +202,13 @@ void exit(JSONValue nothing)
     import dls.server : Server;
     import dls.util.logger : logger;
 
+    if (Server.initialized)
+    {
+        logger.warning("Shutdown not requested prior to exit");
+        shutdown(JSONValue());
+        Server.initialized = true;
+    }
+
     logger.info("Exiting server");
     Server.exit = true;
 }
