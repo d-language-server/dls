@@ -38,11 +38,11 @@ package class SymbolVisitor(SymbolType) : ASTVisitor
 
     static if (is(SymbolType == SymbolInformation))
     {
-        private string container;
+        private string _container;
     }
     else
     {
-        private DocumentSymbol container;
+        private DocumentSymbol _container;
     }
 
     this(Uri uri, const string query, bool listLocalSymbols)
@@ -243,19 +243,19 @@ package class SymbolVisitor(SymbolType) : ASTVisitor
 
     private void acceptSymbol(A : ASTNode)(const A dec, string name)
     {
-        auto oldContainer = container;
+        auto oldContainer = _container;
 
         static if (is(SymbolType == SymbolInformation))
         {
-            container = name;
+            _container = name;
         }
         else
         {
-            container = (container is null ? result.data : container.children)[$ - 1];
+            _container = (_container is null ? result.data : _container.children)[$ - 1];
         }
 
         dec.accept(this);
-        container = oldContainer;
+        _container = oldContainer;
     }
 
     private void tryInsert(const string name, SymbolKind kind, Range range, size_t endLocation = 0)
@@ -271,7 +271,7 @@ package class SymbolVisitor(SymbolType) : ASTVisitor
             static if (is(SymbolType == SymbolInformation))
             {
                 result ~= new SymbolInformation(name, kind, new Location(_uri,
-                        range), container.nullable);
+                        range), _container.nullable);
             }
             else
             {
@@ -280,13 +280,13 @@ package class SymbolVisitor(SymbolType) : ASTVisitor
                 DocumentSymbol[] children;
                 DocumentSymbol documentSymbol = new DocumentSymbol(name, Nullable!string(),
                         kind, Nullable!bool(), fullRange, range, children.nullable);
-                if (container is null)
+                if (_container is null)
                 {
                     result ~= documentSymbol;
                 }
                 else
                 {
-                    container.children ~= documentSymbol;
+                    _container.children ~= documentSymbol;
                 }
             }
         }
