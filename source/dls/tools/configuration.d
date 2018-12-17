@@ -25,6 +25,7 @@ class Configuration
     static class SymbolConfiguration
     {
         string[] importPaths;
+        bool listLocalSymbols;
     }
 
     static class AnalysisConfiguration

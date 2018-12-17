@@ -764,7 +764,8 @@ class SymbolTool : Tool
                 LexerConfig(uri.path, StringBehavior.compiler), &stringCache);
         RollbackAllocator ra;
         const mod = parseModule(tokens, uri.path, &ra, toDelegate(&doNothing));
-        auto visitor = new SymbolVisitor!SymbolType(uri, query);
+        auto visitor = new SymbolVisitor!SymbolType(uri, query, query is null
+                ? _configuration.symbol.listLocalSymbols : false);
         visitor.visit(mod);
         return visitor.result.data;
     }

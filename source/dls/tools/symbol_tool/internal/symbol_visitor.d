@@ -27,12 +27,14 @@ package class SymbolVisitor(SymbolType) : ASTVisitor
     import dls.protocol.definitions : Range;
     import dls.protocol.interfaces : DocumentSymbol, SymbolKind, SymbolInformation;
     import dls.util.uri : Uri;
+    import dparse.lexer : Token;
     import std.array : Appender;
     import std.typecons : nullable;
 
     Appender!(SymbolType[]) result;
     private Uri _uri;
     private const string _upperQuery;
+    private const bool _listLocalSymbols;
 
     static if (is(SymbolType == SymbolInformation))
     {
@@ -43,12 +45,13 @@ package class SymbolVisitor(SymbolType) : ASTVisitor
         private DocumentSymbol container;
     }
 
-    this(Uri uri, const string query)
+    this(Uri uri, const string query, bool listLocalSymbols)
     {
         import std.uni : toUpper;
 
         _uri = uri;
         _upperQuery = toUpper(query);
+        _listLocalSymbols = listLocalSymbols;
     }
 
     override void visit(const ModuleDeclaration dec)
@@ -86,14 +89,14 @@ package class SymbolVisitor(SymbolType) : ASTVisitor
                 .enumBody.endLocation);
     }
 
-    override void visit(const EnumMember mem)
+    override void visit(const EnumMember member)
     {
-        visitSymbol(mem, SymbolKind.enumMember, false);
+        visitSymbol(member, SymbolKind.enumMember, false);
     }
 
-    override void visit(const AnonymousEnumMember mem)
+    override void visit(const AnonymousEnumMember member)
     {
-        visitSymbol(mem, SymbolKind.enumMember, false);
+        visitSymbol(member, SymbolKind.enumMember, false);
     }
 
     override void visit(const TemplateDeclaration dec)
@@ -103,43 +106,51 @@ package class SymbolVisitor(SymbolType) : ASTVisitor
 
     override void visit(const FunctionDeclaration dec)
     {
-        visitSymbol(dec, SymbolKind.function_, false, getFunctionEndLocation(dec));
+        visitSymbol(dec, SymbolKind.function_, _listLocalSymbols, getFunctionEndLocation(dec));
     }
 
     override void visit(const Constructor dec)
     {
-        tryInsertFunction(dec, "this");
+        visitFunction(dec, "this");
     }
 
     override void visit(const Destructor dec)
     {
-        tryInsertFunction(dec, "~this");
+        visitFunction(dec, "~this");
     }
 
     override void visit(const StaticConstructor dec)
     {
-        tryInsertFunction(dec, "static this");
+        visitFunction(dec, "static this");
     }
 
     override void visit(const StaticDestructor dec)
     {
-        tryInsertFunction(dec, "static ~this");
+        visitFunction(dec, "static ~this");
     }
 
     override void visit(const SharedStaticConstructor dec)
     {
-        tryInsertFunction(dec, "shared static this");
+        visitFunction(dec, "shared static this");
     }
 
     override void visit(const SharedStaticDestructor dec)
     {
-        tryInsertFunction(dec, "shared static ~this");
+        visitFunction(dec, "shared static ~this");
     }
 
-    override void visit(const Invariant dec)
+    override void visit(const Parameter param)
     {
-        tryInsert("invariant", SymbolKind.function_, getRange(dec),
-                dec.blockStatement is null ? 0 : dec.blockStatement.endLocation);
+        if (_listLocalSymbols && param.name.text.length > 0)
+        {
+            visitSymbol(param, SymbolKind.variable, false);
+        }
+    }
+
+    override void visit(const Invariant inv)
+    {
+        tryInsert("invariant", SymbolKind.function_, getRange(inv),
+                inv.blockStatement is null ? 0 : inv.blockStatement.endLocation);
     }
 
     override void visit(const VariableDeclaration dec)
@@ -216,36 +227,35 @@ package class SymbolVisitor(SymbolType) : ASTVisitor
 
         if (accept)
         {
-            auto oldContainer = container;
-
-            static if (is(SymbolType == SymbolInformation))
-            {
-                container = dec.name.text.dup;
-            }
-            else
-            {
-                container = (container is null ? result.data : container.children)[$ - 1];
-            }
-
-            dec.accept(this);
-            container = oldContainer;
+            acceptSymbol(dec, dec.name.text.dup);
         }
     }
 
-    private Range getRange(T)(const T t)
+    private void visitFunction(A : ASTNode)(const A dec, const string name)
     {
-        import dls.util.document : Document;
+        tryInsert(name, SymbolKind.function_, getRange(dec), getFunctionEndLocation(dec));
 
-        const document = Document.get(_uri);
-
-        static if (__traits(hasMember, T, "line") && __traits(hasMember, T, "column"))
+        if (_listLocalSymbols)
         {
-            return document.wordRangeAtLineAndByte(t.line - 1, t.column - 1);
+            acceptSymbol(dec, name);
+        }
+    }
+
+    private void acceptSymbol(A : ASTNode)(const A dec, string name)
+    {
+        auto oldContainer = container;
+
+        static if (is(SymbolType == SymbolInformation))
+        {
+            container = name;
         }
         else
         {
-            return document.wordRangeAtByte(t.index);
+            container = (container is null ? result.data : container.children)[$ - 1];
         }
+
+        dec.accept(this);
+        container = oldContainer;
     }
 
     private void tryInsert(const string name, SymbolKind kind, Range range, size_t endLocation = 0)
@@ -282,9 +292,27 @@ package class SymbolVisitor(SymbolType) : ASTVisitor
         }
     }
 
-    private void tryInsertFunction(A : ASTNode)(const A dec, const string name)
+    private Range getRange(const Token t)
     {
-        tryInsert(name, SymbolKind.function_, getRange(dec), getFunctionEndLocation(dec));
+        import dls.util.document : Document;
+
+        return Document.get(_uri).wordRangeAtLineAndByte(t.line - 1, t.column - 1);
+    }
+
+    private Range getRange(T)(const T t)
+    {
+        import dls.util.document : Document;
+
+        const document = Document.get(_uri);
+
+        static if (__traits(hasMember, T, "index"))
+        {
+            return document.wordRangeAtByte(t.index);
+        }
+        else
+        {
+            return document.wordRangeAtByte(t.location);
+        }
     }
 
     alias visit = ASTVisitor.visit;
