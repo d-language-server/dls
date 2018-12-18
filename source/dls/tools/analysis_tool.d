@@ -93,9 +93,9 @@ class AnalysisTool : Tool
 
     private static AnalysisTool _instance;
 
-    static void initialize()
+    static void initialize(AnalysisTool tool)
     {
-        _instance = new AnalysisTool();
+        _instance = tool;
         _instance.addConfigHook("filePatterns", (const Uri uri) {
             const newPatterns = getConfig(uri).analysis.filePatterns;
 

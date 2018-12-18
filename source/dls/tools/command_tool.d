@@ -34,9 +34,9 @@ class CommandTool : Tool
 
     private static CommandTool _instance;
 
-    static void initialize()
+    static void initialize(CommandTool tool)
     {
-        _instance = new CommandTool();
+        _instance = tool;
     }
 
     static void shutdown()

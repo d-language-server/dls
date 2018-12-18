@@ -38,6 +38,12 @@ class Configuration
 
     static class FormatConfiguration
     {
+        static enum Engine : string
+        {
+            dfmt = "dfmt",
+            indent = "indent"
+        }
+
         static enum BraceStyle : string
         {
             allman = "allman",
@@ -60,6 +66,7 @@ class Configuration
             alwaysNewlineIndent = "alwaysNewlineIndent"
         }
 
+        Engine engine = Engine.dfmt;
         EndOfLine endOfLine = EndOfLine.lf;
         int maxLineLength = 120;
         bool dfmtAlignSwitchStatements = true;

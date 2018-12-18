@@ -42,9 +42,9 @@ class Tool
         return _workspacesConfigs.keys.sort().map!(u => Uri.fromPath(u)).array;
     }
 
-    static void initialize()
+    static void initialize(Tool tool)
     {
-        _instance = new Tool();
+        _instance = tool;
         _globalConfig = new Configuration();
     }
 
@@ -73,10 +73,6 @@ class Tool
     @property static Tool instance()
     {
         return _instance;
-    }
-
-    protected this()
-    {
     }
 
     void updateConfig(const Uri uri, JSONValue json)
@@ -111,8 +107,16 @@ class Tool
         _configHooks[this.toString() ~ '/' ~ name] = hook;
     }
 
-    protected void removeConfigHook(string name)
+    protected void removeConfigHooks()
     {
-        _configHooks.remove(this.toString() ~ '/' ~ name);
+        import std.algorithm : startsWith;
+
+        foreach (key; _configHooks.byKey)
+        {
+            if (key.startsWith(this.toString() ~ '/'))
+            {
+                _configHooks.remove(key);
+            }
+        }
     }
 }

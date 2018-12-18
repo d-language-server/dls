@@ -145,13 +145,13 @@ class SymbolTool : Tool
 
     private static SymbolTool _instance;
 
-    static void initialize()
+    static void initialize(SymbolTool tool)
     {
         import std.algorithm : filter;
         import std.array : array;
         import std.file : exists;
 
-        _instance = new SymbolTool();
+        _instance = tool;
         _instance.importDirectories(defaultImportPaths.filter!exists.array);
         _instance.addConfigHook("importPaths", (const Uri uri) {
             import std.path : buildNormalizedPath, isAbsolute;
@@ -172,7 +172,7 @@ class SymbolTool : Tool
 
     static void shutdown()
     {
-        _instance.removeConfigHook("importPaths");
+        _instance.removeConfigHooks();
         destroy(_instance);
     }
 

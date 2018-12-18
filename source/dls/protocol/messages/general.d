@@ -32,7 +32,7 @@ InitializeResult initialize(InitializeParams params)
     import dls.server : Server;
     import dls.tools.analysis_tool : AnalysisTool;
     import dls.tools.command_tool : CommandTool;
-    import dls.tools.format_tool : FormatTool;
+    import dls.tools.format_tool : DfmtFormatTool, FormatTool;
     import dls.tools.symbol_tool : SymbolTool;
     import dls.tools.tool : Tool;
     import dls.util.json : convertToJSON;
@@ -43,11 +43,11 @@ InitializeResult initialize(InitializeParams params)
 
     initState = params;
     logger.info("Initializing server");
-    Tool.initialize();
-    AnalysisTool.initialize();
-    CommandTool.initialize();
-    FormatTool.initialize();
-    SymbolTool.initialize();
+    Tool.initialize(new Tool());
+    AnalysisTool.initialize(new AnalysisTool());
+    CommandTool.initialize(new CommandTool());
+    FormatTool.initialize(new DfmtFormatTool());
+    SymbolTool.initialize(new SymbolTool());
 
     debug
     {

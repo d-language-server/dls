@@ -54,22 +54,35 @@ shared static this()
     //dfmt on
 }
 
-class FormatTool : Tool
+abstract class FormatTool : Tool
 {
-    import dfmt.config : Config;
     import dls.protocol.definitions : Position, Range, TextEdit;
     import dls.protocol.interfaces : FormattingOptions;
     import dls.util.uri : Uri;
 
     private static FormatTool _instance;
 
-    static void initialize()
+    static void initialize(FormatTool tool)
     {
-        _instance = new FormatTool();
+        _instance = tool;
+        _instance.addConfigHook("engine", (const Uri uri) {
+            auto config = getConfig(null);
+
+            if (config.format.engine == Configuration.FormatConfiguration.Engine.dfmt
+                && typeid(_instance) == typeid(DfmtFormatTool))
+            {
+                return;
+            }
+
+            FormatTool.shutdown();
+            FormatTool.initialize(config.format.engine == Configuration.FormatConfiguration.Engine.dfmt
+                ? new DfmtFormatTool() : new IndentFormatTool());
+        });
     }
 
     static void shutdown()
     {
+        _instance.removeConfigHooks();
         destroy(_instance);
     }
 
@@ -78,7 +91,20 @@ class FormatTool : Tool
         return _instance;
     }
 
-    TextEdit[] formatting(const Uri uri, const FormattingOptions options)
+    TextEdit[] formatting(const Uri uri, const FormattingOptions options);
+    TextEdit[] rangeFormatting(const Uri uri, const Range range, const FormattingOptions options);
+    TextEdit[] onTypeFormatting(const Uri uri, const Position position,
+            const FormattingOptions options);
+}
+
+class DfmtFormatTool : FormatTool
+{
+    import dfmt.config : Config;
+    import dls.protocol.definitions : Position, Range, TextEdit;
+    import dls.protocol.interfaces : FormattingOptions;
+    import dls.util.uri : Uri;
+
+    override TextEdit[] formatting(const Uri uri, const FormattingOptions options)
     {
         import dfmt.formatter : format;
         import dls.protocol.logger : logger;
@@ -95,7 +121,8 @@ class FormatTool : Tool
         return diff(uri, buffer.toString());
     }
 
-    TextEdit[] rangeFormatting(const Uri uri, const Range range, const FormattingOptions options)
+    override TextEdit[] rangeFormatting(const Uri uri, const Range range,
+            const FormattingOptions options)
     {
         import dls.util.document : Document;
         import std.algorithm : filter;
@@ -111,7 +138,7 @@ class FormatTool : Tool
         }).array;
     }
 
-    TextEdit[] onTypeFormatting(const Uri uri, const Position position,
+    override TextEdit[] onTypeFormatting(const Uri uri, const Position position,
             const FormattingOptions options)
     {
         import dls.util.document : Document;
@@ -258,5 +285,29 @@ class FormatTool : Tool
 
         pushTextEdit();
         return result;
+    }
+}
+
+class IndentFormatTool : FormatTool
+{
+    import dls.protocol.definitions : Position, Range, TextEdit;
+    import dls.protocol.interfaces : FormattingOptions;
+    import dls.util.uri : Uri;
+
+    override TextEdit[] formatting(const Uri uri, const FormattingOptions options)
+    {
+        return [];
+    }
+
+    override TextEdit[] rangeFormatting(const Uri uri, const Range range,
+            const FormattingOptions options)
+    {
+        return [];
+    }
+
+    override TextEdit[] onTypeFormatting(const Uri uri, const Position position,
+            const FormattingOptions options)
+    {
+        return [];
     }
 }
