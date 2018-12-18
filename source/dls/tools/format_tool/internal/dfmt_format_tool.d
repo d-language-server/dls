@@ -18,12 +18,12 @@
  *
  */
 
-module dls.tools.format_tool;
+module dls.tools.format_tool.internal.dfmt_format_tool;
 
 import dfmt.config : BraceStyle, TemplateConstraintStyle;
 import dfmt.editorconfig : EOL;
 import dls.tools.configuration : Configuration;
-import dls.tools.tool : Tool;
+import dls.tools.format_tool.internal.format_tool : FormatTool;
 
 private immutable EOL[Configuration.FormatConfiguration.EndOfLine] eolMap;
 private immutable BraceStyle[Configuration.FormatConfiguration.BraceStyle] braceStyleMap;
@@ -52,49 +52,6 @@ shared static this()
         Configuration.FormatConfiguration.TemplateConstraintStyle.alwaysNewlineIndent      : TemplateConstraintStyle.always_newline_indent
     ];
     //dfmt on
-}
-
-abstract class FormatTool : Tool
-{
-    import dls.protocol.definitions : Position, Range, TextEdit;
-    import dls.protocol.interfaces : FormattingOptions;
-    import dls.util.uri : Uri;
-
-    private static FormatTool _instance;
-
-    static void initialize(FormatTool tool)
-    {
-        _instance = tool;
-        _instance.addConfigHook("engine", (const Uri uri) {
-            auto config = getConfig(null);
-
-            if (config.format.engine == Configuration.FormatConfiguration.Engine.dfmt
-                && typeid(_instance) == typeid(DfmtFormatTool))
-            {
-                return;
-            }
-
-            FormatTool.shutdown();
-            FormatTool.initialize(config.format.engine == Configuration.FormatConfiguration.Engine.dfmt
-                ? new DfmtFormatTool() : new IndentFormatTool());
-        });
-    }
-
-    static void shutdown()
-    {
-        _instance.removeConfigHooks();
-        destroy(_instance);
-    }
-
-    @property static FormatTool instance()
-    {
-        return _instance;
-    }
-
-    TextEdit[] formatting(const Uri uri, const FormattingOptions options);
-    TextEdit[] rangeFormatting(const Uri uri, const Range range, const FormattingOptions options);
-    TextEdit[] onTypeFormatting(const Uri uri, const Position position,
-            const FormattingOptions options);
 }
 
 class DfmtFormatTool : FormatTool
@@ -285,29 +242,5 @@ class DfmtFormatTool : FormatTool
 
         pushTextEdit();
         return result;
-    }
-}
-
-class IndentFormatTool : FormatTool
-{
-    import dls.protocol.definitions : Position, Range, TextEdit;
-    import dls.protocol.interfaces : FormattingOptions;
-    import dls.util.uri : Uri;
-
-    override TextEdit[] formatting(const Uri uri, const FormattingOptions options)
-    {
-        return [];
-    }
-
-    override TextEdit[] rangeFormatting(const Uri uri, const Range range,
-            const FormattingOptions options)
-    {
-        return [];
-    }
-
-    override TextEdit[] onTypeFormatting(const Uri uri, const Position position,
-            const FormattingOptions options)
-    {
-        return [];
     }
 }
