@@ -24,36 +24,54 @@ import dls.protocol.interfaces : CompletionItemKind, SymbolKind, SymbolInformati
 import dls.tools.tool : Tool;
 import dls.util.uri : Uri;
 import dsymbol.symbol : CompletionKind;
-import std.container : RedBlackTree;
-
-bool compareLocations(inout(SymbolInformation) s1, inout(SymbolInformation) s2)
-{
-    //dfmt off
-    return s1.location.uri < s2.location.uri ? true
-        : s1.location.uri > s2.location.uri ? false
-        : s1.location.range.start.line < s2.location.range.start.line ? true
-        : s1.location.range.start.line > s2.location.range.start.line ? false
-        : s1.location.range.start.character < s2.location.range.start.character;
-    //dfmt on
-}
-
-alias SymbolInformationTree = RedBlackTree!(SymbolInformation, compareLocations, true);
 
 private string[string] macros;
 private immutable CompletionItemKind[CompletionKind] completionKinds;
 private immutable SymbolKind[CompletionKind] symbolKinds;
-
-private enum ProjectType : int
-{
-    dub,
-    custom
-}
 
 shared static this()
 {
     import dub.internal.vibecompat.core.log : LogLevel, setLogLevel;
 
     setLogLevel(LogLevel.none);
+
+    //dfmt off
+    completionKinds = [
+        CompletionKind.className            : CompletionItemKind.class_,
+        CompletionKind.interfaceName        : CompletionItemKind.interface_,
+        CompletionKind.structName           : CompletionItemKind.struct_,
+        CompletionKind.unionName            : CompletionItemKind.interface_,
+        CompletionKind.variableName         : CompletionItemKind.variable,
+        CompletionKind.memberVariableName   : CompletionItemKind.field,
+        CompletionKind.keyword              : CompletionItemKind.keyword,
+        CompletionKind.functionName         : CompletionItemKind.function_,
+        CompletionKind.enumName             : CompletionItemKind.enum_,
+        CompletionKind.enumMember           : CompletionItemKind.enumMember,
+        CompletionKind.packageName          : CompletionItemKind.folder,
+        CompletionKind.moduleName           : CompletionItemKind.module_,
+        CompletionKind.aliasName            : CompletionItemKind.variable,
+        CompletionKind.templateName         : CompletionItemKind.function_,
+        CompletionKind.mixinTemplateName    : CompletionItemKind.function_
+    ];
+
+    symbolKinds = [
+        CompletionKind.className            : SymbolKind.class_,
+        CompletionKind.interfaceName        : SymbolKind.interface_,
+        CompletionKind.structName           : SymbolKind.struct_,
+        CompletionKind.unionName            : SymbolKind.interface_,
+        CompletionKind.variableName         : SymbolKind.variable,
+        CompletionKind.memberVariableName   : SymbolKind.field,
+        CompletionKind.keyword              : SymbolKind.constant,
+        CompletionKind.functionName         : SymbolKind.function_,
+        CompletionKind.enumName             : SymbolKind.enum_,
+        CompletionKind.enumMember           : SymbolKind.enumMember,
+        CompletionKind.packageName          : SymbolKind.package_,
+        CompletionKind.moduleName           : SymbolKind.module_,
+        CompletionKind.aliasName            : SymbolKind.variable,
+        CompletionKind.templateName         : SymbolKind.function_,
+        CompletionKind.mixinTemplateName    : SymbolKind.function_
+    ];
+    //dfmt on
 }
 
 static this()
@@ -107,43 +125,13 @@ static this()
         "MREF"          : "$0",
         "MREF1"         : "$0"
     ];
-
-    completionKinds = [
-        CompletionKind.className            : CompletionItemKind.class_,
-        CompletionKind.interfaceName        : CompletionItemKind.interface_,
-        CompletionKind.structName           : CompletionItemKind.struct_,
-        CompletionKind.unionName            : CompletionItemKind.interface_,
-        CompletionKind.variableName         : CompletionItemKind.variable,
-        CompletionKind.memberVariableName   : CompletionItemKind.field,
-        CompletionKind.keyword              : CompletionItemKind.keyword,
-        CompletionKind.functionName         : CompletionItemKind.function_,
-        CompletionKind.enumName             : CompletionItemKind.enum_,
-        CompletionKind.enumMember           : CompletionItemKind.enumMember,
-        CompletionKind.packageName          : CompletionItemKind.folder,
-        CompletionKind.moduleName           : CompletionItemKind.module_,
-        CompletionKind.aliasName            : CompletionItemKind.variable,
-        CompletionKind.templateName         : CompletionItemKind.function_,
-        CompletionKind.mixinTemplateName    : CompletionItemKind.function_
-    ];
-
-    symbolKinds = [
-        CompletionKind.className            : SymbolKind.class_,
-        CompletionKind.interfaceName        : SymbolKind.interface_,
-        CompletionKind.structName           : SymbolKind.struct_,
-        CompletionKind.unionName            : SymbolKind.interface_,
-        CompletionKind.variableName         : SymbolKind.variable,
-        CompletionKind.memberVariableName   : SymbolKind.field,
-        CompletionKind.keyword              : SymbolKind.constant,
-        CompletionKind.functionName         : SymbolKind.function_,
-        CompletionKind.enumName             : SymbolKind.enum_,
-        CompletionKind.enumMember           : SymbolKind.enumMember,
-        CompletionKind.packageName          : SymbolKind.package_,
-        CompletionKind.moduleName           : SymbolKind.module_,
-        CompletionKind.aliasName            : SymbolKind.variable,
-        CompletionKind.templateName         : SymbolKind.function_,
-        CompletionKind.mixinTemplateName    : SymbolKind.function_
-    ];
     //dfmt on
+}
+
+private enum ProjectType : int
+{
+    dub,
+    custom
 }
 
 class SymbolTool : Tool
@@ -683,12 +671,13 @@ class SymbolTool : Tool
         import dsymbol.symbol : DSymbol;
         import std.algorithm : any, canFind, map, startsWith;
         import std.array : appender, array;
+        import std.container : RedBlackTree;
         import std.file : SpanMode, dirEntries;
         import std.uni : toUpper;
 
         logger.infof(`Fetching symbols from workspace with query "%s"`, query);
 
-        auto result = new SymbolInformationTree();
+        auto result = new RedBlackTree!(SymbolInformation, compareLocations, true)();
         const upperQuery = toUpper(query);
 
         void collectSymbolInformations(Uri symbolUri, const(DSymbol)* symbol,
@@ -753,10 +742,6 @@ class SymbolTool : Tool
         if (query is null)
         {
             logger.infof("Fetching symbols from %s", uri.path);
-        }
-
-        static void doNothing(string, size_t, size_t, string, bool)
-        {
         }
 
         auto stringCache = StringCache(StringCache.defaultBucketCount);
@@ -1361,4 +1346,19 @@ class SymbolTool : Tool
         d.loadPackage();
         return d;
     }
+}
+
+bool compareLocations(inout(SymbolInformation) s1, inout(SymbolInformation) s2)
+{
+    //dfmt off
+    return s1.location.uri < s2.location.uri ? true
+        : s1.location.uri > s2.location.uri ? false
+        : s1.location.range.start.line < s2.location.range.start.line ? true
+        : s1.location.range.start.line > s2.location.range.start.line ? false
+        : s1.location.range.start.character < s2.location.range.start.character;
+    //dfmt on
+}
+
+void doNothing(string, size_t, size_t, string, bool)
+{
 }

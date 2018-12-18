@@ -54,11 +54,6 @@ package class SymbolVisitor(SymbolType) : ASTVisitor
         _listLocalSymbols = listLocalSymbols;
     }
 
-    override void visit(const ModuleDeclaration dec)
-    {
-        dec.accept(this);
-    }
-
     override void visit(const ClassDeclaration dec)
     {
         visitSymbol(dec, SymbolKind.class_, true, dec.structBody is null ? 0

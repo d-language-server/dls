@@ -160,11 +160,6 @@ class Document
         return new Position(lineNumber, columnNumber);
     }
 
-    Range wordRangeAtByte(size_t bytePosition) const
-    {
-        return wordRangeAtPosition(positionAtByte(bytePosition));
-    }
-
     Range wordRangeAtPosition(const Position position) const
     {
         import std.algorithm : min;
@@ -201,6 +196,11 @@ class Document
 
         return wordRangeAtPosition(new Position(lineNumber,
                 toUCSindex(_lines[lineNumber], bytePosition)));
+    }
+
+    Range wordRangeAtByte(size_t bytePosition) const
+    {
+        return wordRangeAtPosition(positionAtByte(bytePosition));
     }
 
     private void change(const TextDocumentContentChangeEvent[] events)
