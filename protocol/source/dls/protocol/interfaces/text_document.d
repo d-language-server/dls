@@ -28,7 +28,7 @@ final class DidOpenTextDocumentParams
 {
     TextDocumentItem textDocument;
 
-    this()
+    @safe this() pure nothrow
     {
         this.textDocument = new TextDocumentItem();
     }
@@ -39,7 +39,7 @@ final class DidChangeTextDocumentParams
     VersionedTextDocumentIdentifier textDocument;
     TextDocumentContentChangeEvent[] contentChanges;
 
-    this()
+    @safe this() pure nothrow
     {
         this.textDocument = new VersionedTextDocumentIdentifier();
     }
@@ -52,6 +52,10 @@ final class TextDocumentContentChangeEvent
     Nullable!Range range;
     Nullable!size_t rangeLength;
     string text;
+
+    @safe this() pure nothrow
+    {
+    }
 }
 
 final class TextDocumentChangeRegistrationOptions : TextDocumentRegistrationOptions
@@ -60,7 +64,7 @@ final class TextDocumentChangeRegistrationOptions : TextDocumentRegistrationOpti
 
     TextDocumentSyncKind syncKind;
 
-    this(TextDocumentSyncKind syncKind = TextDocumentSyncKind.init)
+    @safe this(TextDocumentSyncKind syncKind = TextDocumentSyncKind.init) pure nothrow
     {
         this.syncKind = syncKind;
     }
@@ -70,7 +74,7 @@ private class ParamsBase
 {
     TextDocumentIdentifier textDocument;
 
-    this()
+    @safe this() pure nothrow
     {
         this.textDocument = new TextDocumentIdentifier();
     }
@@ -79,6 +83,10 @@ private class ParamsBase
 final class WillSaveTextDocumentParams : ParamsBase
 {
     TextDocumentSaveReason reason;
+
+    @safe this() pure nothrow
+    {
+    }
 }
 
 enum TextDocumentSaveReason : ubyte
@@ -93,6 +101,10 @@ final class DidSaveTextDocumentParams : ParamsBase
     import std.typecons : Nullable;
 
     Nullable!string text;
+
+    @safe this() pure nothrow
+    {
+    }
 }
 
 final class TextDocumentSaveRegistrationOptions : TextDocumentRegistrationOptions
@@ -101,7 +113,7 @@ final class TextDocumentSaveRegistrationOptions : TextDocumentRegistrationOption
 
     Nullable!bool includeText;
 
-    this(Nullable!bool includeText = Nullable!bool.init)
+    @safe this(Nullable!bool includeText = Nullable!bool.init) pure nothrow
     {
         this.includeText = includeText;
     }
@@ -114,7 +126,7 @@ final class PublishDiagnosticsParams
     DocumentUri uri;
     Diagnostic[] diagnostics;
 
-    this(DocumentUri uri = DocumentUri.init, Diagnostic[] diagnostics = Diagnostic[].init)
+    @safe this(DocumentUri uri = DocumentUri.init, Diagnostic[] diagnostics = Diagnostic[].init) pure nothrow
     {
         this.uri = uri;
         this.diagnostics = diagnostics;
@@ -126,6 +138,10 @@ final class CompletionParams : TextDocumentPositionParams
     import std.typecons : Nullable;
 
     Nullable!CompletionContext context;
+
+    @safe this() pure nothrow
+    {
+    }
 }
 
 final class CompletionContext
@@ -134,6 +150,10 @@ final class CompletionContext
 
     CompletionTriggerKind triggerKind;
     Nullable!string triggerCharacter;
+
+    @safe this() pure nothrow
+    {
+    }
 }
 
 enum CompletionTriggerKind : ubyte
@@ -148,7 +168,7 @@ final class CompletionList
     bool isIncomplete;
     CompletionItem[] items;
 
-    this(bool isIncomplete = bool.init, CompletionItem[] items = CompletionItem[].init)
+    @safe this(bool isIncomplete = bool.init, CompletionItem[] items = CompletionItem[].init) pure nothrow
     {
         this.isIncomplete = isIncomplete;
         this.items = items;
@@ -181,7 +201,7 @@ final class CompletionItem
     Nullable!Command command;
     Nullable!JSONValue data;
 
-    this(string label = string.init, Nullable!CompletionItemKind kind = Nullable!CompletionItemKind.init,
+    @safe this(string label = string.init, Nullable!CompletionItemKind kind = Nullable!CompletionItemKind.init,
             Nullable!string detail = Nullable!string.init,
             Nullable!MarkupContent documentation = Nullable!MarkupContent.init,
             Nullable!bool deprecated_ = Nullable!bool.init, Nullable!string sortText = Nullable!string.init,
@@ -191,7 +211,7 @@ final class CompletionItem
             Nullable!(TextEdit[]) additionalTextEdits = Nullable!(TextEdit[])
             .init, Nullable!(string[]) commitCharacters = Nullable!(string[])
             .init, Nullable!Command command = Nullable!Command.init,
-            Nullable!JSONValue data = Nullable!JSONValue.init)
+            Nullable!JSONValue data = Nullable!JSONValue.init) pure nothrow
     {
         this.label = label;
         this.kind = kind;
@@ -246,8 +266,8 @@ final class CompletionRegistrationOptions : TextDocumentRegistrationOptions
     Nullable!(string[]) triggerCharacters;
     Nullable!bool resolveProvider;
 
-    this(Nullable!(string[]) triggerCharacters = Nullable!(string[]).init,
-            Nullable!bool resolveProvider = Nullable!bool.init)
+    @safe this(Nullable!(string[]) triggerCharacters = Nullable!(string[])
+            .init, Nullable!bool resolveProvider = Nullable!bool.init) pure nothrow
     {
         this.triggerCharacters = triggerCharacters;
         this.resolveProvider = resolveProvider;
@@ -261,7 +281,8 @@ final class Hover
     MarkupContent contents;
     Nullable!Range range;
 
-    this(MarkupContent contents = MarkupContent.init, Nullable!Range range = Nullable!Range.init)
+    @safe this(MarkupContent contents = MarkupContent.init,
+            Nullable!Range range = Nullable!Range.init) pure nothrow
     {
         this.contents = contents;
         this.range = range;
@@ -276,9 +297,9 @@ final class SignatureHelp
     Nullable!double activeSignature;
     Nullable!double activeParameter;
 
-    this(SignatureInformation[] signatures = SignatureInformation[].init,
+    @safe this(SignatureInformation[] signatures = SignatureInformation[].init,
             Nullable!double activeSignature = Nullable!double.init,
-            Nullable!double activeParameter = Nullable!double.init)
+            Nullable!double activeParameter = Nullable!double.init) pure nothrow
     {
         this.signatures = signatures;
         this.activeSignature = activeSignature;
@@ -292,6 +313,10 @@ private class InformationBase
 
     string label;
     Nullable!string documentation;
+
+    @safe this() pure nothrow
+    {
+    }
 }
 
 final class SignatureInformation : InformationBase
@@ -300,7 +325,8 @@ final class SignatureInformation : InformationBase
 
     Nullable!(ParameterInformation[]) parameters;
 
-    this(Nullable!(ParameterInformation[]) parameters = Nullable!(ParameterInformation[]).init)
+    @safe this(Nullable!(ParameterInformation[]) parameters = Nullable!(
+            ParameterInformation[]).init) pure nothrow
     {
         this.parameters = parameters;
     }
@@ -309,6 +335,10 @@ final class SignatureInformation : InformationBase
 final class ParameterInformation : InformationBase
 {
     JSONValue label;
+
+    @safe this() pure nothrow
+    {
+    }
 }
 
 final class SignatureHelpRegistrationOptions : TextDocumentRegistrationOptions
@@ -317,7 +347,7 @@ final class SignatureHelpRegistrationOptions : TextDocumentRegistrationOptions
 
     Nullable!(string[]) triggerCharacters;
 
-    this(Nullable!(string[]) triggerCharacters = Nullable!(string[]).init)
+    @safe this(Nullable!(string[]) triggerCharacters = Nullable!(string[]).init) pure nothrow
     {
         this.triggerCharacters = triggerCharacters;
     }
@@ -327,7 +357,7 @@ final class ReferenceParams : TextDocumentPositionParams
 {
     ReferenceContext context;
 
-    this()
+    @safe this() pure nothrow
     {
         this.context = new ReferenceContext();
     }
@@ -336,6 +366,10 @@ final class ReferenceParams : TextDocumentPositionParams
 final class ReferenceContext
 {
     bool includeDeclaration;
+
+    @safe this() pure nothrow
+    {
+    }
 }
 
 final class DocumentHighlight
@@ -345,8 +379,8 @@ final class DocumentHighlight
     Range range;
     Nullable!DocumentHighlightKind kind;
 
-    this(Range range = new Range(),
-            Nullable!DocumentHighlightKind kind = Nullable!DocumentHighlightKind.init)
+    @safe this(Range range = new Range(),
+            Nullable!DocumentHighlightKind kind = Nullable!DocumentHighlightKind.init) pure nothrow
     {
         this.range = range;
         this.kind = kind;
@@ -374,10 +408,10 @@ final class DocumentSymbol
     Range selectionRange;
     Nullable!(DocumentSymbol[]) children;
 
-    this(string name = string.init, Nullable!string detail = Nullable!string.init,
+    @safe this(string name = string.init, Nullable!string detail = Nullable!string.init,
             SymbolKind kind = SymbolKind.init, Nullable!bool deprecated_ = Nullable!bool.init,
             Range range = new Range(), Range selectionRange = new Range(),
-            Nullable!(DocumentSymbol[]) children = Nullable!(DocumentSymbol[]).init)
+            Nullable!(DocumentSymbol[]) children = Nullable!(DocumentSymbol[]).init) pure nothrow
     {
         this.name = name;
         this.detail = detail;
@@ -398,9 +432,9 @@ final class SymbolInformation
     Location location;
     Nullable!string containerName;
 
-    this(string name = string.init, SymbolKind kind = SymbolKind.init,
+    @safe this(string name = string.init, SymbolKind kind = SymbolKind.init,
             Location location = new Location(),
-            Nullable!string containerName = Nullable!string.init)
+            Nullable!string containerName = Nullable!string.init) pure nothrow
     {
         this.name = name;
         this.kind = kind;
@@ -444,7 +478,7 @@ final class CodeActionParams : ParamsBase
     Range range;
     CodeActionContext context;
 
-    this()
+    @safe this() pure nothrow
     {
         this.range = new Range();
         this.context = new CodeActionContext();
@@ -467,6 +501,10 @@ final class CodeActionContext
 
     Diagnostic[] diagnostics;
     Nullable!(CodeActionKind[]) only;
+
+    @safe this() pure nothrow
+    {
+    }
 }
 
 final class CodeAction
@@ -479,10 +517,10 @@ final class CodeAction
     Nullable!WorkspaceEdit edit;
     Nullable!Command command;
 
-    this(string title = string.init, Nullable!CodeActionKind kind = Nullable!CodeActionKind.init,
+    @safe this(string title = string.init, Nullable!CodeActionKind kind = Nullable!CodeActionKind.init,
             Nullable!(Diagnostic[]) diagnostics = Nullable!(Diagnostic[]).init,
             Nullable!WorkspaceEdit edit = Nullable!WorkspaceEdit.init,
-            Nullable!Command command = Nullable!Command.init)
+            Nullable!Command command = Nullable!Command.init) pure nothrow
     {
         this.title = title;
         this.kind = kind;
@@ -504,8 +542,8 @@ final class CodeLens
     Nullable!Command command;
     Nullable!JSONValue data;
 
-    this(Range range = new Range(), Nullable!Command command = Nullable!Command.init,
-            Nullable!JSONValue data = Nullable!JSONValue.init)
+    @safe this(Range range = new Range(), Nullable!Command command = Nullable!Command.init,
+            Nullable!JSONValue data = Nullable!JSONValue.init) pure nothrow
     {
         this.range = range;
         this.command = command;
@@ -519,7 +557,7 @@ final class CodeLensRegistrationOptions : TextDocumentRegistrationOptions
 
     Nullable!bool resolveProvider;
 
-    this(Nullable!bool resolveProvider = Nullable!bool.init)
+    @safe this(Nullable!bool resolveProvider = Nullable!bool.init) pure nothrow
     {
         this.resolveProvider = resolveProvider;
     }
@@ -534,7 +572,7 @@ final class DocumentLink
     Range range;
     Nullable!DocumentUri target;
 
-    this(Range range = new Range(), Nullable!DocumentUri target = Nullable!DocumentUri.init)
+    @safe this(Range range = new Range(), Nullable!DocumentUri target = Nullable!DocumentUri.init) pure nothrow
     {
         this.range = range;
         this.target = target;
@@ -547,7 +585,7 @@ final class DocumentLinkRegistrationOptions : TextDocumentRegistrationOptions
 
     Nullable!bool resolveProvider;
 
-    this(Nullable!bool resolveProvider = Nullable!bool.init)
+    @safe this(Nullable!bool resolveProvider = Nullable!bool.init) pure nothrow
     {
         this.resolveProvider = resolveProvider;
     }
@@ -560,7 +598,7 @@ final class ColorInformation
     Range range;
     Color color;
 
-    this(Range range = new Range(), Color color = new Color())
+    @safe this(Range range = new Range(), Color color = new Color()) pure nothrow
     {
         this.range = range;
         this.color = color;
@@ -574,7 +612,7 @@ final class Color
     float blue;
     float alpha;
 
-    this(float red = 0, float green = 0, float blue = 0, float alpha = 0)
+    @safe this(float red = 0, float green = 0, float blue = 0, float alpha = 0) pure nothrow
     {
         this.red = red;
         this.green = green;
@@ -588,9 +626,8 @@ final class ColorPresentationParams : ParamsBase
     Color color;
     Range range;
 
-    this()
+    @safe this() pure nothrow
     {
-        super();
         this.color = new Color();
         this.range = new Range();
     }
@@ -604,8 +641,8 @@ final class ColorPresentation
     Nullable!TextEdit textEdit;
     Nullable!(TextEdit[]) additionalTextEdits;
 
-    this(string label = string.init, Nullable!TextEdit textEdit = Nullable!TextEdit.init,
-            Nullable!(TextEdit[]) additionalTextEdits = Nullable!(TextEdit[]).init)
+    @safe this(string label = string.init, Nullable!TextEdit textEdit = Nullable!TextEdit.init,
+            Nullable!(TextEdit[]) additionalTextEdits = Nullable!(TextEdit[]).init) pure nothrow
     {
         this.label = label;
         this.textEdit = textEdit;
@@ -617,7 +654,7 @@ class DocumentFormattingParams : ParamsBase
 {
     FormattingOptions options;
 
-    this()
+    @safe this() pure nothrow
     {
         this.options = new FormattingOptions();
     }
@@ -627,13 +664,17 @@ final class FormattingOptions
 {
     size_t tabSize;
     bool insertSpaces;
+
+    @safe this() pure nothrow
+    {
+    }
 }
 
 final class DocumentRangeFormattingParams : DocumentFormattingParams
 {
     Range range;
 
-    this()
+    @safe this() pure nothrow
     {
         this.range = new Range();
     }
@@ -644,7 +685,7 @@ final class DocumentOnTypeFormattingParams : DocumentFormattingParams
     Position position;
     string ch;
 
-    this()
+    @safe this() pure nothrow
     {
         this.position = new Position();
     }
@@ -657,8 +698,8 @@ final class DocumentOnTypeFormattingRegistrationOptions : TextDocumentRegistrati
     string firstTriggerCharacter;
     Nullable!(string[]) moreTriggerCharacter;
 
-    this(string firstTriggerCharacter = string.init,
-            Nullable!(string[]) moreTriggerCharacter = Nullable!(string[]).init)
+    @safe this(string firstTriggerCharacter = string.init,
+            Nullable!(string[]) moreTriggerCharacter = Nullable!(string[]).init) pure nothrow
     {
         this.firstTriggerCharacter = firstTriggerCharacter;
         this.moreTriggerCharacter = moreTriggerCharacter;
@@ -670,7 +711,7 @@ final class RenameParams : ParamsBase
     Position position;
     string newName;
 
-    this()
+    @safe this() pure nothrow
     {
         this.position = new Position();
     }
@@ -681,6 +722,10 @@ final class RenameRegistrationOptions : TextDocumentRegistrationOptions
     import std.typecons : Nullable;
 
     Nullable!bool prepareProvider;
+
+    @safe this() pure nothrow
+    {
+    }
 }
 
 alias FoldingRangeParams = ParamsBase;
@@ -701,4 +746,8 @@ final class FoldingRange
     size_t endLine;
     Nullable!size_t endCharacter;
     Nullable!FoldingRangeKind kind;
+
+    @safe this() pure nothrow
+    {
+    }
 }

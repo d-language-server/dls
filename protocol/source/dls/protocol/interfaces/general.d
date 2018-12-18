@@ -25,6 +25,10 @@ private class WithDynamicRegistration
     import std.typecons : Nullable;
 
     Nullable!bool dynamicRegistration;
+
+    @safe this() pure nothrow
+    {
+    }
 }
 
 private final class WithLinkSupport : WithDynamicRegistration
@@ -32,6 +36,10 @@ private final class WithLinkSupport : WithDynamicRegistration
     import std.typecons : Nullable;
 
     Nullable!bool linkSupport;
+
+    @safe this() pure nothrow
+    {
+    }
 }
 
 final class InitializeParams
@@ -65,6 +73,10 @@ final class InitializeParams
             bool documentRangeFormatting = true;
             bool documentOnTypeFormatting = true;
             bool rename = true;
+
+            @safe this() pure nothrow
+            {
+            }
         }
 
         bool autoUpdate = true;
@@ -73,7 +85,7 @@ final class InitializeParams
         string logFile = "";
         Capabilities capabilities;
 
-        this()
+        @safe this() pure nothrow
         {
             this.capabilities = new Capabilities();
         }
@@ -87,7 +99,7 @@ final class InitializeParams
     Nullable!Trace trace;
     Nullable!(WorkspaceFolder[]) workspaceFolders;
 
-    this()
+    @safe this() pure nothrow
     {
         this.capabilities = new ClientCapabilities();
     }
@@ -117,6 +129,10 @@ final class WorkspaceClientCapabilities
         Nullable!bool documentChanges;
         Nullable!(ResourceOperationKind[]) resourceOperations;
         Nullable!FailureHandlingKind failureHandling;
+
+        @safe this() pure nothrow
+        {
+        }
     }
 
     static final class Symbol : WithDynamicRegistration
@@ -126,9 +142,17 @@ final class WorkspaceClientCapabilities
             import dls.protocol.interfaces.text_document : SymbolKind;
 
             Nullable!(SymbolKind[]) valueSet;
+
+            @safe this() pure nothrow
+            {
+            }
         }
 
         Nullable!SymbolKind symbolKind;
+
+        @safe this() pure nothrow
+        {
+        }
     }
 
     Nullable!bool applyEdit;
@@ -139,6 +163,10 @@ final class WorkspaceClientCapabilities
     Nullable!WithDynamicRegistration executeCommand;
     Nullable!bool workspaceFolders;
     Nullable!bool configuration;
+
+    @safe this() pure nothrow
+    {
+    }
 }
 
 final class TextDocumentClientCapabilities
@@ -150,6 +178,10 @@ final class TextDocumentClientCapabilities
         Nullable!bool willSave;
         Nullable!bool willSaveWaitUntil;
         Nullable!bool didSave;
+
+        @safe this() pure nothrow
+        {
+        }
     }
 
     static final class Completion : WithDynamicRegistration
@@ -163,6 +195,10 @@ final class TextDocumentClientCapabilities
             Nullable!(MarkupKind[]) documentationFormat;
             Nullable!bool deprecatedSupport;
             Nullable!bool preselectSupport;
+
+            @safe this() pure nothrow
+            {
+            }
         }
 
         static final class CompletionItemKind
@@ -170,11 +206,19 @@ final class TextDocumentClientCapabilities
             import dls.protocol.interfaces.text_document : CompletionItemKind;
 
             Nullable!(CompletionItemKind[]) valueSet;
+
+            @safe this() pure nothrow
+            {
+            }
         }
 
         Nullable!CompletionItem completionItem;
         Nullable!CompletionItemKind completionItemKind;
         Nullable!bool contextSupport;
+
+        @safe this() pure nothrow
+        {
+        }
     }
 
     static final class Hover : WithDynamicRegistration
@@ -182,6 +226,10 @@ final class TextDocumentClientCapabilities
         import dls.protocol.definitions : MarkupKind;
 
         Nullable!(MarkupKind[]) contentFormat;
+
+        @safe this() pure nothrow
+        {
+        }
     }
 
     static final class SignatureHelp : WithDynamicRegistration
@@ -193,13 +241,25 @@ final class TextDocumentClientCapabilities
             static final class ParameterInformation
             {
                 Nullable!bool labelOffsetSupport;
+
+                @safe this() pure nothrow
+                {
+                }
             }
 
             Nullable!(MarkupKind[]) documentationFormat;
             Nullable!ParameterInformation parameterInformation;
+
+            @safe this() pure nothrow
+            {
+            }
         }
 
         Nullable!SignatureInformation signatureInformation;
+
+        @safe this() pure nothrow
+        {
+        }
     }
 
     static final class DocumentSymbol : WithDynamicRegistration
@@ -209,10 +269,18 @@ final class TextDocumentClientCapabilities
             import dls.protocol.interfaces.text_document : SymbolKind;
 
             Nullable!(SymbolKind[]) valueSet;
+
+            @safe this() pure nothrow
+            {
+            }
         }
 
         Nullable!SymbolKind symbolKind;
         Nullable!bool hierarchicalDocumentSymbolSupport;
+
+        @safe this() pure nothrow
+        {
+        }
     }
 
     static final class CodeAction : WithDynamicRegistration
@@ -224,33 +292,53 @@ final class TextDocumentClientCapabilities
                 import dls.protocol.interfaces.text_document : CodeActionKind;
 
                 CodeActionKind[] valueSet;
+
+                @safe this() pure nothrow
+                {
+                }
             }
 
             CodeActionKind codeActionKind;
 
-            this()
+            @safe this() pure nothrow
             {
                 this.codeActionKind = new CodeActionKind();
             }
         }
 
         Nullable!CodeActionLiteralSupport codeActionLiteralSupport;
+
+        @safe this() pure nothrow
+        {
+        }
     }
 
     static final class Rename : WithDynamicRegistration
     {
         Nullable!bool prepareSupport;
+
+        @safe this() pure nothrow
+        {
+        }
     }
 
     static final class PublishDiagnostics
     {
         Nullable!bool relatedInformation;
+
+        @safe this() pure nothrow
+        {
+        }
     }
 
     static final class FoldingRange : WithDynamicRegistration
     {
         Nullable!size_t rangeLimit;
         Nullable!bool lineFoldingOnly;
+
+        @safe this() pure nothrow
+        {
+        }
     }
 
     Nullable!Synchronisation synchronisation;
@@ -274,6 +362,10 @@ final class TextDocumentClientCapabilities
     Nullable!Rename rename;
     Nullable!PublishDiagnostics publishDiagnostics;
     Nullable!FoldingRange foldingRange;
+
+    @safe this() pure nothrow
+    {
+    }
 }
 
 final class ClientCapabilities
@@ -284,13 +376,17 @@ final class ClientCapabilities
     Nullable!WorkspaceClientCapabilities workspace;
     Nullable!TextDocumentClientCapabilities textDocument;
     Nullable!JSONValue experimental;
+
+    @safe this() pure nothrow
+    {
+    }
 }
 
 final class InitializeResult
 {
     ServerCapabilities capabilities;
 
-    this(ServerCapabilities capabilities = new ServerCapabilities())
+    @safe this(ServerCapabilities capabilities = new ServerCapabilities()) pure nothrow
     {
         this.capabilities = capabilities;
     }
@@ -299,6 +395,10 @@ final class InitializeResult
 final class InitializeErrorData
 {
     bool retry;
+
+    @safe this() pure nothrow
+    {
+    }
 }
 
 enum TextDocumentSyncKind : ubyte
@@ -314,7 +414,7 @@ private class OptionsBase
 
     Nullable!bool resolveProvider;
 
-    this(Nullable!bool resolveProvider = Nullable!bool.init)
+    @safe this(Nullable!bool resolveProvider = Nullable!bool.init) pure nothrow
     {
         this.resolveProvider = resolveProvider;
     }
@@ -326,8 +426,8 @@ final class CompletionOptions : OptionsBase
 
     Nullable!(string[]) triggerCharacters;
 
-    this(Nullable!bool resolveProvider = Nullable!bool.init,
-            Nullable!(string[]) triggerCharacters = Nullable!(string[]).init)
+    @safe this(Nullable!bool resolveProvider = Nullable!bool.init,
+            Nullable!(string[]) triggerCharacters = Nullable!(string[]).init) pure nothrow
     {
         super(resolveProvider);
         this.triggerCharacters = triggerCharacters;
@@ -340,7 +440,7 @@ final class SignatureHelpOptions
 
     Nullable!(string[]) triggerCharacters;
 
-    this(Nullable!(string[]) triggerCharacters = Nullable!(string[]).init)
+    @safe this(Nullable!(string[]) triggerCharacters = Nullable!(string[]).init) pure nothrow
     {
         this.triggerCharacters = triggerCharacters;
     }
@@ -353,7 +453,7 @@ final class CodeActionOptions
 
     Nullable!(CodeActionKind[]) codeActionKinds;
 
-    this(Nullable!(CodeActionKind[]) codeActionKinds = Nullable!(CodeActionKind[]).init)
+    @safe this(Nullable!(CodeActionKind[]) codeActionKinds = Nullable!(CodeActionKind[]).init) pure nothrow
     {
         this.codeActionKinds = codeActionKinds;
     }
@@ -368,8 +468,8 @@ final class DocumentOnTypeFormattingOptions
     string firstTriggerCharacter;
     Nullable!(string[]) moreTriggerCharacter;
 
-    this(string firstTriggerCharacter = string.init,
-            Nullable!(string[]) moreTriggerCharacter = Nullable!(string[]).init)
+    @safe this(string firstTriggerCharacter = string.init,
+            Nullable!(string[]) moreTriggerCharacter = Nullable!(string[]).init) pure nothrow
     {
         this.firstTriggerCharacter = firstTriggerCharacter;
         this.moreTriggerCharacter = moreTriggerCharacter;
@@ -382,7 +482,7 @@ final class RenameOptions
 
     Nullable!bool prepareProvider;
 
-    this(Nullable!bool prepareProvider = Nullable!bool.init)
+    @safe this(Nullable!bool prepareProvider = Nullable!bool.init) pure nothrow
     {
         this.prepareProvider = prepareProvider;
     }
@@ -394,7 +494,7 @@ final class ExecuteCommandOptions
 {
     string[] commands;
 
-    this(string[] commands = string[].init)
+    @safe this(string[] commands = string[].init) pure nothrow
     {
         this.commands = commands;
     }
@@ -406,7 +506,7 @@ final class SaveOptions
 
     Nullable!bool includeText;
 
-    this(Nullable!bool includeText = Nullable!bool.init)
+    @safe this(Nullable!bool includeText = Nullable!bool.init) pure nothrow
     {
         this.includeText = includeText;
     }
@@ -414,10 +514,16 @@ final class SaveOptions
 
 final class ColorProviderOptions
 {
+    @safe this() pure nothrow
+    {
+    }
 }
 
 final class FoldingRangeProviderOptions
 {
+    @safe this() pure nothrow
+    {
+    }
 }
 
 final class TextDocumentSyncOptions
@@ -430,10 +536,10 @@ final class TextDocumentSyncOptions
     Nullable!bool willSaveWaitUntil;
     Nullable!SaveOptions save;
 
-    this(Nullable!bool openClose = Nullable!bool.init,
+    @safe this(Nullable!bool openClose = Nullable!bool.init,
             Nullable!TextDocumentSyncKind change = Nullable!TextDocumentSyncKind.init,
             Nullable!bool willSave = Nullable!bool.init, Nullable!bool willSaveWaitUntil = Nullable!bool.init,
-            Nullable!SaveOptions save = Nullable!SaveOptions.init)
+            Nullable!SaveOptions save = Nullable!SaveOptions.init) pure nothrow
     {
         this.openClose = openClose;
         this.change = change;
@@ -449,7 +555,7 @@ final class StaticRegistrationOptions
 
     Nullable!string id;
 
-    this(Nullable!string id = Nullable!string.init)
+    @safe this(Nullable!string id = Nullable!string.init) pure nothrow
     {
         this.id = id;
     }
@@ -467,8 +573,8 @@ final class ServerCapabilities
             Nullable!bool supported;
             Nullable!JSONValue changeNotifications;
 
-            this(Nullable!bool supported = Nullable!bool.init,
-                    Nullable!JSONValue changeNotifications = Nullable!JSONValue.init)
+            @safe this(Nullable!bool supported = Nullable!bool.init,
+                    Nullable!JSONValue changeNotifications = Nullable!JSONValue.init) pure nothrow
             {
                 this.supported = supported;
                 this.changeNotifications = changeNotifications;
@@ -477,7 +583,7 @@ final class ServerCapabilities
 
         Nullable!WorkspaceFolders workspaceFolders;
 
-        this(Nullable!WorkspaceFolders workspaceFolders = Nullable!WorkspaceFolders.init)
+        @safe this(Nullable!WorkspaceFolders workspaceFolders = Nullable!WorkspaceFolders.init) pure nothrow
         {
             this.workspaceFolders = workspaceFolders;
         }
@@ -506,6 +612,10 @@ final class ServerCapabilities
     Nullable!ExecuteCommandOptions executeCommandProvider;
     Nullable!Workspace workspace;
     Nullable!JSONValue experimental;
+
+    @safe this() pure nothrow
+    {
+    }
 }
 
 final class CancelParams
@@ -513,4 +623,8 @@ final class CancelParams
     import std.json : JSONValue;
 
     JSONValue id;
+
+    @safe this() pure nothrow
+    {
+    }
 }

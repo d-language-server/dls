@@ -25,7 +25,7 @@ private abstract class RegistrationBase
     string id;
     string method;
 
-    private this(string id, string method)
+    @safe this(string id, string method) pure nothrow
     {
         this.id = id;
         this.method = method;
@@ -42,8 +42,8 @@ final class Registration(R : RegistrationOptionsBase) : RegistrationBase
 
     Nullable!R registerOptions;
 
-    this(string id = string.init, string method = string.init,
-            Nullable!R registerOptions = Nullable!R.init)
+    @safe this(string id = string.init, string method = string.init,
+            Nullable!R registerOptions = Nullable!R.init) pure nothrow
     {
         super(id, method);
         this.registerOptions = registerOptions;
@@ -57,7 +57,7 @@ class TextDocumentRegistrationOptions : RegistrationOptionsBase
 
     Nullable!DocumentSelector documentSelector;
 
-    this(Nullable!DocumentSelector documentSelector = Nullable!DocumentSelector.init)
+    @safe this(Nullable!DocumentSelector documentSelector = Nullable!DocumentSelector.init) pure nothrow
     {
         this.documentSelector = documentSelector;
     }
@@ -67,7 +67,7 @@ final class RegistrationParams(R)
 {
     Registration!R[] registrations;
 
-    this(Registration!R[] registrations = Registration!R[].init)
+    @safe this(Registration!R[] registrations = Registration!R[].init) pure nothrow
     {
         this.registrations = registrations;
     }
@@ -75,7 +75,7 @@ final class RegistrationParams(R)
 
 final class Unregistration : RegistrationBase
 {
-    this(string id = string.init, string method = string.init)
+    @safe this(string id = string.init, string method = string.init) pure nothrow
     {
         super(id, method);
     }
@@ -85,7 +85,7 @@ final class UnregistrationParams
 {
     Unregistration[] unregistrations;
 
-    this(Unregistration[] unregistrations = Unregistration[].init)
+    @safe this(Unregistration[] unregistrations = Unregistration[].init) pure nothrow
     {
         this.unregistrations = unregistrations;
     }

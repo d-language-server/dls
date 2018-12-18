@@ -27,7 +27,7 @@ class Position
     size_t line;
     size_t character;
 
-    this(size_t line = size_t.init, size_t character = size_t.init)
+    @safe this(size_t line = size_t.init, size_t character = size_t.init) pure nothrow
     {
         this.line = line;
         this.character = character;
@@ -39,7 +39,7 @@ class Range
     Position start;
     Position end;
 
-    this(Position start = new Position(), Position end = new Position())
+    @safe this(Position start = new Position(), Position end = new Position()) pure nothrow
     {
         this.start = start;
         this.end = end;
@@ -51,7 +51,7 @@ class Location
     DocumentUri uri;
     Range range;
 
-    this(DocumentUri uri = DocumentUri.init, Range range = new Range())
+    @safe this(DocumentUri uri = DocumentUri.init, Range range = new Range()) pure nothrow
     {
         this.uri = uri;
         this.range = range;
@@ -67,9 +67,9 @@ class LocationLink
     Range targetRange;
     Nullable!Range targetSelectionRange;
 
-    this(Nullable!Range originSelectionRange = Nullable!Range.init, string targetUri = string.init,
+    @safe this(Nullable!Range originSelectionRange = Nullable!Range.init, string targetUri = string.init,
             Range targetRange = new Range(),
-            Nullable!Range targetSelectionRange = Nullable!Range.init)
+            Nullable!Range targetSelectionRange = Nullable!Range.init) pure nothrow
     {
         this.originSelectionRange = originSelectionRange;
         this.targetUri = targetUri;
@@ -90,12 +90,12 @@ class Diagnostic
     Nullable!string source;
     Nullable!(DiagnosticRelatedInformation[]) relatedInformation;
 
-    this(Range range = new Range(), string message = string.init,
+    @safe this(Range range = new Range(), string message = string.init,
             Nullable!DiagnosticSeverity severity = Nullable!DiagnosticSeverity.init,
             Nullable!JSONValue code = Nullable!JSONValue.init,
             Nullable!string source = Nullable!string.init,
             Nullable!(DiagnosticRelatedInformation[]) relatedInformation = Nullable!(
-                DiagnosticRelatedInformation[]).init)
+                DiagnosticRelatedInformation[]).init) pure nothrow
     {
         this.range = range;
         this.message = message;
@@ -119,7 +119,7 @@ class DiagnosticRelatedInformation
     Location location;
     string message;
 
-    this(Location location = new Location(), string message = string.init)
+    @safe this(Location location = new Location(), string message = string.init) pure nothrow
     {
         this.location = location;
         this.message = message;
@@ -135,8 +135,8 @@ class Command
     string command;
     Nullable!(JSONValue[]) arguments;
 
-    this(string title = string.init, string command = string.init,
-            Nullable!(JSONValue[]) arguments = Nullable!(JSONValue[]).init)
+    @safe this(string title = string.init, string command = string.init,
+            Nullable!(JSONValue[]) arguments = Nullable!(JSONValue[]).init) pure nothrow
     {
         this.title = title;
         this.command = command;
@@ -149,7 +149,7 @@ class TextEdit
     Range range;
     string newText;
 
-    this(Range range = new Range(), string newText = string.init)
+    @safe this(Range range = new Range(), string newText = string.init) pure nothrow
     {
         this.range = range;
         this.newText = newText;
@@ -161,8 +161,8 @@ class TextDocumentEdit
     VersionedTextDocumentIdentifier textDocument;
     TextEdit[] edits;
 
-    this(VersionedTextDocumentIdentifier textDocument = new VersionedTextDocumentIdentifier(),
-            TextEdit[] edits = TextEdit[].init)
+    @safe this(VersionedTextDocumentIdentifier textDocument = new VersionedTextDocumentIdentifier(),
+            TextEdit[] edits = TextEdit[].init) pure nothrow
     {
         this.textDocument = textDocument;
         this.edits = edits;
@@ -176,8 +176,8 @@ class CreateFileOptions
     Nullable!bool overwrite;
     Nullable!bool ignoreIfExists;
 
-    this(Nullable!bool overwrite = Nullable!bool.init,
-            Nullable!bool ignoreIfExists = Nullable!bool.init)
+    @safe this(Nullable!bool overwrite = Nullable!bool.init,
+            Nullable!bool ignoreIfExists = Nullable!bool.init) pure nothrow
     {
         this.overwrite = overwrite;
         this.ignoreIfExists = ignoreIfExists;
@@ -192,8 +192,8 @@ class CreateFile
     string uri;
     Nullable!CreateFileOptions options;
 
-    this(string uri = string.init,
-            Nullable!CreateFileOptions options = Nullable!CreateFileOptions.init)
+    @safe this(string uri = string.init,
+            Nullable!CreateFileOptions options = Nullable!CreateFileOptions.init) pure nothrow
     {
         this.uri = uri;
         this.options = options;
@@ -207,8 +207,8 @@ class RenameFileOptions
     Nullable!bool overwrite;
     Nullable!bool ignoreIfExists;
 
-    this(Nullable!bool overwrite = Nullable!bool.init,
-            Nullable!bool ignoreIfExists = Nullable!bool.init)
+    @safe this(Nullable!bool overwrite = Nullable!bool.init,
+            Nullable!bool ignoreIfExists = Nullable!bool.init) pure nothrow
     {
         this.overwrite = overwrite;
         this.ignoreIfExists = ignoreIfExists;
@@ -224,8 +224,8 @@ class RenameFile
     string newUri;
     Nullable!RenameFileOptions options;
 
-    this(string oldUri = string.init, string newUri = string.init,
-            Nullable!RenameFileOptions options = Nullable!RenameFileOptions.init)
+    @safe this(string oldUri = string.init, string newUri = string.init,
+            Nullable!RenameFileOptions options = Nullable!RenameFileOptions.init) pure nothrow
     {
         this.oldUri = oldUri;
         this.newUri = newUri;
@@ -240,8 +240,8 @@ class DeleteFileOptions
     Nullable!bool recursive;
     Nullable!bool ignoreIfExists;
 
-    this(Nullable!bool recursive = Nullable!bool.init,
-            Nullable!bool ignoreIfExists = Nullable!bool.init)
+    @safe this(Nullable!bool recursive = Nullable!bool.init,
+            Nullable!bool ignoreIfExists = Nullable!bool.init) pure nothrow
     {
         this.recursive = recursive;
         this.ignoreIfExists = ignoreIfExists;
@@ -256,8 +256,8 @@ class DeleteFile
     string uri;
     Nullable!DeleteFileOptions options;
 
-    this(string uri = string.init,
-            Nullable!DeleteFileOptions options = Nullable!DeleteFileOptions.init)
+    @safe this(string uri = string.init,
+            Nullable!DeleteFileOptions options = Nullable!DeleteFileOptions.init) pure nothrow
     {
         this.uri = uri;
         this.options = options;
@@ -271,9 +271,9 @@ class WorkspaceEdit
     Nullable!(TextEdit[][string]) changes;
     Nullable!(TextDocumentEdit[]) documentChanges; // (TextDocumentEdit | CreateFile | RenameFile | DeleteFile)[]
 
-    this(Nullable!(TextEdit[][string]) changes = Nullable!(TextEdit[][string])
+    @safe this(Nullable!(TextEdit[][string]) changes = Nullable!(TextEdit[][string])
             .init, Nullable!(TextDocumentEdit[]) documentChanges = Nullable!(
-                TextDocumentEdit[]).init)
+                TextDocumentEdit[]).init) pure nothrow
     {
         this.changes = changes;
         this.documentChanges = documentChanges;
@@ -284,7 +284,7 @@ class TextDocumentIdentifier
 {
     DocumentUri uri;
 
-    this(DocumentUri uri = DocumentUri.init)
+    @safe this(DocumentUri uri = DocumentUri.init) pure nothrow
     {
         this.uri = uri;
     }
@@ -296,8 +296,8 @@ class TextDocumentItem : TextDocumentIdentifier
     long version_;
     string text;
 
-    this(DocumentUri uri = DocumentUri.init, string languageId = string.init,
-            long version_ = long.init, string text = string.init)
+    @safe this(DocumentUri uri = DocumentUri.init, string languageId = string.init,
+            long version_ = long.init, string text = string.init) pure nothrow
     {
         super(uri);
         this.languageId = languageId;
@@ -312,7 +312,7 @@ class VersionedTextDocumentIdentifier : TextDocumentIdentifier
 
     JSONValue version_;
 
-    this(DocumentUri uri = DocumentUri.init, JSONValue version_ = JSONValue.init)
+    @safe this(DocumentUri uri = DocumentUri.init, JSONValue version_ = JSONValue.init) pure nothrow
     {
         super(uri);
         this.version_ = version_;
@@ -324,8 +324,8 @@ class TextDocumentPositionParams
     TextDocumentIdentifier textDocument;
     Position position;
 
-    this(TextDocumentIdentifier textDocument = new TextDocumentIdentifier(),
-            Position position = new Position())
+    @safe this(TextDocumentIdentifier textDocument = new TextDocumentIdentifier(),
+            Position position = new Position()) pure nothrow
     {
         this.textDocument = textDocument;
         this.position = position;
@@ -340,9 +340,9 @@ class DocumentFilter
     Nullable!string scheme;
     Nullable!string pattern;
 
-    this(Nullable!string languageId = Nullable!string.init,
+    @safe this(Nullable!string languageId = Nullable!string.init,
             Nullable!string scheme = Nullable!string.init,
-            Nullable!string pattern = Nullable!string.init)
+            Nullable!string pattern = Nullable!string.init) pure nothrow
     {
         this.languageId = languageId;
         this.scheme = scheme;
@@ -363,7 +363,7 @@ class MarkupContent
     MarkupKind kind;
     string value;
 
-    this(MarkupKind kind = MarkupKind.init, string value = string.init)
+    @safe this(MarkupKind kind = MarkupKind.init, string value = string.init) pure nothrow
     {
         this.kind = kind;
         this.value = value;

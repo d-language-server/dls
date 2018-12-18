@@ -26,17 +26,29 @@ final class WorkspaceFolder
 {
     string uri;
     string name;
+
+    @safe this() pure nothrow
+    {
+    }
 }
 
 final class DidChangeWorkspaceFoldersParams
 {
     WorkspaceFoldersChangeEvent event;
+
+    @safe this() pure nothrow
+    {
+    }
 }
 
 final class WorkspaceFoldersChangeEvent
 {
     WorkspaceFolder[] added;
     WorkspaceFolder[] removed;
+
+    @safe this() pure nothrow
+    {
+    }
 }
 
 final class DidChangeConfigurationParams
@@ -44,13 +56,17 @@ final class DidChangeConfigurationParams
     import std.json : JSONValue;
 
     JSONValue settings;
+
+    @safe this() pure nothrow
+    {
+    }
 }
 
 final class ConfigurationParams
 {
     ConfigurationItem[] items;
 
-    this(ConfigurationItem[] items = ConfigurationItem[].init)
+    @safe this(ConfigurationItem[] items = ConfigurationItem[].init) pure nothrow
     {
         this.items = items;
     }
@@ -63,8 +79,8 @@ final class ConfigurationItem
     Nullable!string scopeUri;
     Nullable!string section;
 
-    this(Nullable!string scopeUri = Nullable!string.init,
-            Nullable!string section = Nullable!string.init)
+    @safe this(Nullable!string scopeUri = Nullable!string.init,
+            Nullable!string section = Nullable!string.init) pure nothrow
     {
         this.scopeUri = scopeUri;
         this.section = section;
@@ -74,6 +90,10 @@ final class ConfigurationItem
 final class DidChangeWatchedFilesParams
 {
     FileEvent[] changes;
+
+    @safe this() pure nothrow
+    {
+    }
 }
 
 final class FileEvent
@@ -82,6 +102,10 @@ final class FileEvent
 
     DocumentUri uri;
     FileChangeType type;
+
+    @safe this() pure nothrow
+    {
+    }
 }
 
 enum FileChangeType : ubyte
@@ -95,7 +119,7 @@ final class DidChangeWatchedFilesRegistrationOptions : RegistrationOptionsBase
 {
     FileSystemWatcher[] watchers;
 
-    this(FileSystemWatcher[] watchers = FileSystemWatcher[].init)
+    @safe this(FileSystemWatcher[] watchers = FileSystemWatcher[].init) pure nothrow
     {
         this.watchers = watchers;
     }
@@ -108,7 +132,7 @@ final class FileSystemWatcher
     string globPattern;
     Nullable!ubyte kind;
 
-    this(string globPattern = string.init, Nullable!ubyte kind = Nullable!ubyte.init)
+    @safe this(string globPattern = string.init, Nullable!ubyte kind = Nullable!ubyte.init) pure nothrow
     {
         this.globPattern = globPattern;
         this.kind = kind;
@@ -125,6 +149,10 @@ enum WatchKind : ubyte
 final class WorkspaceSymbolParams
 {
     string query;
+
+    @safe this() pure nothrow
+    {
+    }
 }
 
 final class ExecuteCommandParams
@@ -134,13 +162,17 @@ final class ExecuteCommandParams
 
     string command;
     Nullable!(JSONValue[]) arguments;
+
+    @safe this() pure nothrow
+    {
+    }
 }
 
 final class ExecuteCommandRegistrationOptions : RegistrationOptionsBase
 {
     string[] commands;
 
-    this(string[] commands = string[].init)
+    @safe this(string[] commands = string[].init) pure nothrow
     {
         this.commands = commands;
     }
@@ -152,7 +184,7 @@ final class ApplyWorkspaceEditParams
 
     WorkspaceEdit edit;
 
-    this(WorkspaceEdit edit = WorkspaceEdit.init)
+    @safe this(WorkspaceEdit edit = WorkspaceEdit.init) pure nothrow
     {
         this.edit = edit;
     }
@@ -161,4 +193,8 @@ final class ApplyWorkspaceEditParams
 final class ApplyWorkspaceEditResponse
 {
     bool applied;
+
+    @safe this() pure nothrow
+    {
+    }
 }

@@ -25,7 +25,7 @@ class ShowMessageParams
     MessageType type;
     string message;
 
-    this(MessageType type = MessageType.init, string message = string.init)
+    @safe this(MessageType type = MessageType.init, string message = string.init) pure nothrow
     {
         this.type = type;
         this.message = message;
@@ -46,8 +46,8 @@ final class ShowMessageRequestParams : ShowMessageParams
 
     Nullable!(MessageActionItem[]) actions;
 
-    this(MessageType type = MessageType.init, string message = string.init,
-            Nullable!(MessageActionItem[]) actions = Nullable!(MessageActionItem[]).init)
+    @safe this(MessageType type = MessageType.init, string message = string.init,
+            Nullable!(MessageActionItem[]) actions = Nullable!(MessageActionItem[]).init) pure nothrow
     {
         super(type, message);
         this.actions = actions;
@@ -58,7 +58,7 @@ final class MessageActionItem
 {
     string title;
 
-    this(string title = string.init)
+    @safe this(string title = string.init) pure nothrow
     {
         this.title = title;
     }
