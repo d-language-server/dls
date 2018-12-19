@@ -22,6 +22,8 @@ module dls.tools.configuration;
 
 class Configuration
 {
+    import std.json : JSONValue;
+
     static class SymbolConfiguration
     {
         string[] importPaths;
@@ -83,5 +85,40 @@ class Configuration
         symbol = new SymbolConfiguration();
         analysis = new AnalysisConfiguration();
         format = new FormatConfiguration();
+    }
+
+    void merge(JSONValue json)
+    {
+        merge(this, json);
+    }
+
+    private void merge(T)(const T config, JSONValue json)
+    {
+        import dls.util.json : convertFromJSON;
+        import std.json : JSONType;
+        import std.meta : Alias;
+        import std.traits : isSomeFunction, isType;
+
+        if (json.type != JSONType.object)
+        {
+            return;
+        }
+
+        foreach (member; __traits(allMembers, T))
+        {
+            alias m = Alias!(__traits(getMember, T, member));
+
+            static if (!isType!(m) && !isSomeFunction!(m))
+            {
+                static if (is(m == class))
+                {
+                    merge(m, json[member]);
+                }
+                else
+                {
+                    m = convertFromJSON!(typeof(m))(json[member]);
+                }
+            }
+        }
     }
 }

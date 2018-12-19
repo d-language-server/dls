@@ -75,7 +75,7 @@ void didChangeConfiguration(DidChangeConfigurationParams params)
     if ("d" in params.settings && "dls" in params.settings["d"])
     {
         logger.info("Applying new configuration");
-        Tool.configuration = convertFromJSON!Configuration(params.settings["d"]["dls"]);
+        Tool.mergeConfig(params.settings["d"]["dls"]);
     }
 }
 

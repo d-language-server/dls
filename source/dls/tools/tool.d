@@ -25,23 +25,24 @@ private alias Hook = void delegate();
 abstract class Tool
 {
     import dls.tools.configuration : Configuration;
+    import std.json : JSONValue;
 
     protected static Configuration _configuration;
     private static Hook[string] _configHooks;
 
-    @property static void configuration(Configuration config)
+    static this()
     {
-        _configuration = config;
+        _configuration = new Configuration();
+    }
+
+    static void mergeConfig(JSONValue json)
+    {
+        _configuration.merge(json);
 
         foreach (hook; _configHooks)
         {
             hook();
         }
-    }
-
-    static this()
-    {
-        configuration = new Configuration();
     }
 
     protected static void addConfigHook(string name, Hook hook)
