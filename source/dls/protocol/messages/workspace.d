@@ -27,17 +27,33 @@ import std.typecons : Nullable;
 
 void workspaceFolders(string id, Nullable!(WorkspaceFolder[]) folders)
 {
+    import dls.protocol.jsonrpc : send;
+    import dls.protocol.messages.methods : Workspace;
+    import dls.protocol.state : initState;
     import dls.tools.analysis_tool : AnalysisTool;
     import dls.tools.symbol_tool : SymbolTool;
     import dls.util.uri : Uri;
+    import std.typecons : nullable;
 
     if (!folders.isNull)
     {
+        ConfigurationItem[] items;
+
         foreach (workspaceFolder; folders)
         {
             auto uri = new Uri(workspaceFolder.uri);
+            items ~= new ConfigurationItem(uri.toString().nullable);
             SymbolTool.instance.importPath(uri);
             AnalysisTool.instance.addAnalysisConfig(uri);
+        }
+
+        const conf = !initState.capabilities.workspace.isNull
+            && !initState.capabilities.workspace.configuration.isNull
+            && initState.capabilities.workspace.configuration;
+
+        if (conf)
+        {
+            send(Workspace.configuration, new ConfigurationParams(items));
         }
     }
 }
@@ -46,6 +62,7 @@ void didChangeWorkspaceFolders(DidChangeWorkspaceFoldersParams params)
 {
     import dls.tools.analysis_tool : AnalysisTool;
     import dls.tools.symbol_tool : SymbolTool;
+    import dls.tools.tool : Tool;
     import dls.util.uri : Uri;
     import std.typecons : nullable;
 
@@ -56,26 +73,62 @@ void didChangeWorkspaceFolders(DidChangeWorkspaceFoldersParams params)
         auto uri = new Uri(folder.uri);
         SymbolTool.instance.clearPath(uri);
         AnalysisTool.instance.removeAnalysisConfig(uri);
+        Tool.removeConfig(uri);
     }
 }
 
-void configuration(string id, JSONValue[] config)
+void configuration(string id, JSONValue[] configs)
 {
+    import dls.tools.tool : Tool;
+    import dls.util.logger : logger;
+
+    auto uris = null ~ Tool.workspacesUris;
+
+    logger.info("Updating workspace configurations");
+
+    for (size_t i; i < configs.length && i < uris.length; ++i)
+    {
+        auto config = configs[i];
+
+        if ("d" in config && "dls" in config["d"])
+        {
+            Tool.updateConfig(uris[i], config["d"]["dls"]);
+        }
+    }
 }
 
 void didChangeConfiguration(DidChangeConfigurationParams params)
 {
+    import dls.protocol.jsonrpc : send;
+    import dls.protocol.messages.methods : Workspace;
+    import dls.protocol.state : initState;
     import dls.tools.configuration : Configuration;
     import dls.tools.tool : Tool;
     import dls.util.json : convertFromJSON;
     import dls.util.logger : logger;
+    import std.typecons : Nullable, nullable;
 
     logger.info("Configuration changed");
 
-    if ("d" in params.settings && "dls" in params.settings["d"])
+    const conf = !initState.capabilities.workspace.isNull
+        && !initState.capabilities.workspace.configuration.isNull
+        && initState.capabilities.workspace.configuration;
+
+    if (conf)
     {
-        logger.info("Applying new configuration");
-        Tool.mergeConfig(params.settings["d"]["dls"]);
+        auto items = [new ConfigurationItem(Nullable!string(null))];
+
+        foreach (uri; Tool.workspacesUris)
+        {
+            items ~= new ConfigurationItem(uri.toString().nullable);
+        }
+
+        send(Workspace.configuration, new ConfigurationParams(items));
+    }
+    else if ("d" in params.settings && "dls" in params.settings["d"])
+    {
+        logger.info("Updating configuration");
+        Tool.updateConfig(null, params.settings["d"]["dls"]);
     }
 }
 

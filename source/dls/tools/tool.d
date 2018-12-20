@@ -20,39 +20,80 @@
 
 module dls.tools.tool;
 
-private alias Hook = void delegate();
+import dls.util.uri : Uri;
+
+alias Hook = void delegate(const Uri uri);
 
 abstract class Tool
 {
     import dls.tools.configuration : Configuration;
     import std.json : JSONValue;
 
-    protected static Configuration _configuration;
+    private static Configuration _globalConfig;
+    private static JSONValue[string] _workspacesConfigs;
     private static Hook[string] _configHooks;
+
+    @property static Uri[] workspacesUris()
+    {
+        import std.algorithm : map, sort;
+        import std.array : array;
+
+        return _workspacesConfigs.keys.sort().map!(u => Uri.fromPath(u)).array;
+    }
 
     static this()
     {
-        _configuration = new Configuration();
+        _globalConfig = new Configuration();
     }
 
-    static void mergeConfig(JSONValue json)
+    static void updateConfig(const Uri uri, JSONValue json)
     {
-        _configuration.merge(json);
+        if (uri is null || uri.path.length == 0)
+        {
+            _globalConfig.merge(json);
+        }
+        else
+        {
+            _workspacesConfigs[uri.path] = json;
+        }
 
         foreach (hook; _configHooks)
         {
-            hook();
+            hook(uri);
         }
     }
 
-    protected static void addConfigHook(string name, Hook hook)
+    static void removeConfig(const Uri uri)
     {
-        _configHooks[name] = hook;
+        if (uri in _workspacesConfigs)
+        {
+            _workspacesConfigs.remove(uri.path);
+        }
     }
 
-    protected static void removeConfigHook(string name)
+    protected static Configuration getConfig(const Uri uri)
     {
-        _configHooks.remove(name);
+        import dls.util.json : convertToJSON;
+
+        if (uri is null || uri.path !in _workspacesConfigs)
+        {
+            return _globalConfig;
+        }
+
+        auto config = new Configuration();
+        config.merge(convertToJSON(_globalConfig));
+        config.merge(_workspacesConfigs[uri.path]);
+        return config;
+    }
+
+    protected void addConfigHook(string name, Hook hook)
+    {
+        _configHooks[this.toString() ~ '/' ~ name] = hook;
+    }
+
+    protected void removeConfigHook(string name)
+    {
+        _configHooks.remove(this.toString() ~ '/' ~ name);
     }
 
     static void initialize();

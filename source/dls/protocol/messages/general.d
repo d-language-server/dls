@@ -33,6 +33,7 @@ InitializeResult initialize(InitializeParams params)
     import dls.tools.command_tool : CommandTool;
     import dls.tools.format_tool : FormatTool;
     import dls.tools.symbol_tool : SymbolTool;
+    import dls.tools.tool : Tool;
     import dls.util.logger : logger;
     import dls.util.uri : Uri;
     import std.algorithm : map, sort, uniq;
@@ -76,6 +77,7 @@ InitializeResult initialize(InitializeParams params)
     foreach (uri; uris.sort!q{a.path < b.path}
             .uniq!q{a.path == b.path})
     {
+        Tool.updateConfig(uri, JSONValue());
         SymbolTool.instance.importPath(uri);
         AnalysisTool.instance.addAnalysisConfig(uri);
     }
@@ -120,15 +122,17 @@ InitializeResult initialize(InitializeParams params)
 @("")
 void initialized(JSONValue nothing)
 {
-    import dls.protocol.interfaces : DidChangeWatchedFilesRegistrationOptions,
-        FileSystemWatcher, Registration, RegistrationParams, WatchKind;
+    import dls.protocol.interfaces : ConfigurationItem, ConfigurationParams,
+        DidChangeWatchedFilesRegistrationOptions, FileSystemWatcher,
+        Registration, RegistrationParams, WatchKind;
     import dls.protocol.jsonrpc : send;
-    import dls.protocol.messages.methods : Client;
+    import dls.protocol.messages.methods : Client, Workspace;
     import dls.protocol.state : initOptions, initState;
     import dls.server : Server;
     import dls.tools.analysis_tool : AnalysisTool;
+    import dls.tools.tool : Tool;
     import dls.util.logger : logger;
-    import std.typecons : nullable;
+    import std.typecons : Nullable, nullable;
 
     debug
     {
@@ -141,29 +145,45 @@ void initialized(JSONValue nothing)
         spawn(&update, initOptions.autoUpdate);
     }
 
-    const didChangeWatchedFiles = !initState.capabilities.workspace.isNull
-        && !initState.capabilities.workspace.didChangeWatchedFiles.isNull
-        && initState.capabilities.workspace.didChangeWatchedFiles.dynamicRegistration;
-    ubyte watchAllEvents = WatchKind.create + WatchKind.change + WatchKind.delete_;
-
-    if (didChangeWatchedFiles)
+    if (!initState.capabilities.workspace.isNull)
     {
-        logger.info("Registering watchers");
-        //dfmt off
-        auto watchers = [
-            new FileSystemWatcher("**/dub.{json,sdl}", watchAllEvents.nullable),
-            new FileSystemWatcher("**/dub.selections.json", watchAllEvents.nullable),
-            new FileSystemWatcher("**/.gitmodules", watchAllEvents.nullable),
-            new FileSystemWatcher("**/*.ini", watchAllEvents.nullable),
-            new FileSystemWatcher("**/*.{d,di}", watchAllEvents.nullable)
-        ];
-        //dfmt on
-        auto registrationOptions = new DidChangeWatchedFilesRegistrationOptions(watchers);
-        auto registration = new Registration!DidChangeWatchedFilesRegistrationOptions(
-                "dls-registration-watch-dub-files",
-                "workspace/didChangeWatchedFiles", registrationOptions.nullable);
-        send(Client.registerCapability,
-                new RegistrationParams!DidChangeWatchedFilesRegistrationOptions([registration]));
+        const didChangeWatchedFiles = !initState.capabilities.workspace.didChangeWatchedFiles.isNull
+            && initState.capabilities.workspace.didChangeWatchedFiles.dynamicRegistration;
+        ubyte watchAllEvents = WatchKind.create + WatchKind.change + WatchKind.delete_;
+
+        if (didChangeWatchedFiles)
+        {
+            logger.info("Registering file watchers");
+            //dfmt off
+            auto watchers = [
+                new FileSystemWatcher("**/dub.{json,sdl}", watchAllEvents.nullable),
+                new FileSystemWatcher("**/dub.selections.json", watchAllEvents.nullable),
+                new FileSystemWatcher("**/.gitmodules", watchAllEvents.nullable),
+                new FileSystemWatcher("**/*.ini", watchAllEvents.nullable),
+                new FileSystemWatcher("**/*.{d,di}", watchAllEvents.nullable)
+            ];
+            //dfmt on
+            auto registrationOptions = new DidChangeWatchedFilesRegistrationOptions(watchers);
+            auto registration = new Registration!DidChangeWatchedFilesRegistrationOptions("dls-file-watchers",
+                    "workspace/didChangeWatchedFiles", registrationOptions.nullable);
+            send(Client.registerCapability,
+                    new RegistrationParams!DidChangeWatchedFilesRegistrationOptions([registration]));
+        }
+
+        const configuration = !initState.capabilities.workspace.configuration.isNull
+            && initState.capabilities.workspace.configuration;
+
+        if (configuration)
+        {
+            auto items = [new ConfigurationItem(Nullable!string(null))];
+
+            foreach (uri; Tool.workspacesUris)
+            {
+                items ~= new ConfigurationItem(uri.toString().nullable);
+            }
+
+            send(Workspace.configuration, new ConfigurationParams(items));
+        }
     }
 
     AnalysisTool.instance.scanAllWorkspaces();

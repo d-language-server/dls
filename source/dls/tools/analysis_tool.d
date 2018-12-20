@@ -149,7 +149,7 @@ class AnalysisTool : Tool
         import std.file : exists;
         import std.path : buildNormalizedPath;
 
-        auto configPath = getConfigUri(workspaceUri).path;
+        auto configPath = getAnalysisConfigUri(workspaceUri).path;
         auto conf = defaultStaticAnalysisConfig();
 
         if (exists(configPath))
@@ -204,7 +204,7 @@ class AnalysisTool : Tool
         };
 
         const mod = parseModule(tokens, uri.path, &ra, syntaxProblemhandler);
-        const analysisResults = analyze(uri.path, mod, getConfig(uri),
+        const analysisResults = analyze(uri.path, mod, getAnalysisConfig(uri),
                 SymbolTool.instance.cache, tokens, true);
 
         foreach (result; analysisResults)
@@ -329,25 +329,26 @@ class AnalysisTool : Tool
         import inifiled : INI, writeINIFile;
         import std.path : buildNormalizedPath;
 
-        auto config = getConfig(uri);
+        auto config = getAnalysisConfig(uri);
         *getDiagnosticParameter(config, code) = Check.disabled;
-        writeINIFile(config, getConfigUri(SymbolTool.instance.getWorkspace(uri)).path);
+        writeINIFile(config, getAnalysisConfigUri(SymbolTool.instance.getWorkspace(uri)).path);
     }
 
-    private Uri getConfigUri(const Uri workspaceUri)
+    private Uri getAnalysisConfigUri(const Uri workspaceUri)
     {
         import std.algorithm : filter, map;
         import std.array : array;
         import std.file : exists;
         import std.path : buildNormalizedPath;
 
-        auto possibleFiles = [_configuration.analysis.configFile, "dscanner.ini", ".dscanner.ini"].map!(
+        auto possibleFiles = [getConfig(workspaceUri).analysis.configFile,
+            "dscanner.ini", ".dscanner.ini"].map!(
                 file => buildNormalizedPath(workspaceUri.path, file));
         return Uri.fromPath((possibleFiles.filter!exists.array ~ buildNormalizedPath(workspaceUri.path,
                 "dscanner.ini"))[0]);
     }
 
-    private StaticAnalysisConfig getConfig(const Uri uri)
+    private StaticAnalysisConfig getAnalysisConfig(const Uri uri)
     {
         import dls.tools.symbol_tool : SymbolTool;
         import dscanner.analysis.config : defaultStaticAnalysisConfig;

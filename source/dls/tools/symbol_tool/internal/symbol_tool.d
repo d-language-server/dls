@@ -152,14 +152,14 @@ class SymbolTool : Tool
 
         _instance = new SymbolTool();
         _instance.importDirectories(defaultImportPaths.filter!exists.array);
-        addConfigHook(_instance.toString(), {
-            _instance.importDirectories(_configuration.symbol.importPaths);
+        _instance.addConfigHook("importPaths", (const Uri uri) {
+            _instance.importDirectories(getConfig(uri).symbol.importPaths);
         });
     }
 
     static void shutdown()
     {
-        removeConfigHook(_instance.toString());
+        _instance.removeConfigHook("importPaths");
         destroy(_instance);
     }
 
@@ -750,7 +750,7 @@ class SymbolTool : Tool
         RollbackAllocator ra;
         const mod = parseModule(tokens, uri.path, &ra, toDelegate(&doNothing));
         auto visitor = new SymbolVisitor!SymbolType(uri, query, query is null
-                ? _configuration.symbol.listLocalSymbols : false);
+                ? getConfig(uri).symbol.listLocalSymbols : false);
         visitor.visit(mod);
         return visitor.result.data;
     }
