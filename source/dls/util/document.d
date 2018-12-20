@@ -37,24 +37,24 @@ class Document
     {
         import std.algorithm : map;
 
-        return _documents.byKey.map!(uri => new Uri(uri));
+        return _documents.byValue.map!(doc => new Uri(doc._uri));
     }
 
     static Document get(const Uri uri)
     {
         import std.file : readText;
 
-        return uri in _documents ? _documents[uri] : new Document(uri, readText(uri.path));
+        return uri.path in _documents ? _documents[uri.path] : new Document(uri, readText(uri.path));
     }
 
     static void open(const TextDocumentItem textDocument)
     {
         auto uri = new Uri(textDocument.uri);
 
-        if (uri !in _documents)
+        if (uri.path !in _documents)
         {
-            _documents[uri] = new Document(uri, textDocument.text);
-            _documents[uri]._version = textDocument.version_;
+            _documents[uri.path] = new Document(uri, textDocument.text);
+            _documents[uri.path]._version = textDocument.version_;
         }
     }
 
@@ -62,9 +62,9 @@ class Document
     {
         auto uri = new Uri(textDocument.uri);
 
-        if (uri in _documents)
+        if (uri.path in _documents)
         {
-            _documents.remove(uri);
+            _documents.remove(uri.path);
         }
     }
 
@@ -73,10 +73,10 @@ class Document
     {
         auto uri = new Uri(textDocument.uri);
 
-        if (uri in _documents)
+        if (uri.path in _documents)
         {
-            _documents[uri].change(events);
-            _documents[uri]._version = textDocument.version_;
+            _documents[uri.path].change(events);
+            _documents[uri.path]._version = textDocument.version_;
         }
     }
 
