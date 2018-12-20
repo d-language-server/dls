@@ -33,15 +33,6 @@ private shared NotificationHandler[string] notificationHandlers;
 private shared ResponseHandler[string] responseHandlers;
 private shared ResponseHandler[string] runtimeResponseHandlers;
 
-/++
-Checks if a function is correct handler function. These will only be registered
-at startup time and will never be unregistered.
-+/
-template isHandler(func...)
-{
-    enum isHandler = isSomeFunction!func;
-}
-
 class HandlerNotFoundException : Exception
 {
     this(const string method)

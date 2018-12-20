@@ -22,12 +22,12 @@ module dls.server;
 
 shared static this()
 {
-    import dls.protocol.handlers : isHandler, pushHandler;
+    import dls.protocol.handlers : pushHandler;
     import dls.util.setup : initialSetup;
     import std.algorithm : map;
     import std.array : join, split;
-    import std.meta : AliasSeq;
-    import std.traits : hasUDA, select;
+    import std.meta : Alias, AliasSeq;
+    import std.traits : hasUDA, isSomeFunction, select;
     import std.typecons : tuple;
     import std.string : capitalize;
 
@@ -35,14 +35,14 @@ shared static this()
 
     foreach (modName; AliasSeq!("general", "client", "text_document", "window", "workspace"))
     {
-        mixin("import dls.protocol.messages" ~ (modName.length ? "." ~ modName : "") ~ ";");
-        mixin("alias mod = dls.protocol.messages" ~ (modName.length ? "." ~ modName : "") ~ ";");
+        mixin("import dls.protocol.messages." ~ modName ~ ";");
+        mixin("alias mod = dls.protocol.messages." ~ modName ~ ";");
 
         foreach (thing; __traits(allMembers, mod))
         {
-            mixin("alias t = " ~ thing ~ ";");
+            alias t = Alias!(__traits(getMember, mod, thing));
 
-            static if (isHandler!t)
+            static if (__traits(getProtection, t) == "public" && isSomeFunction!t)
             {
                 enum attrs = tuple(__traits(getAttributes, t));
                 enum attrsWithDefaults = tuple(modName[0] ~ modName.split('_')

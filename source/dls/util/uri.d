@@ -44,12 +44,11 @@ class Uri
         import std.conv : to;
         import std.regex : matchAll;
         import std.uri : decodeComponent;
-        import std.utf : toUTF32;
 
-        auto matches = matchAll(decodeComponent(uri.toUTF32()), _reg);
+        _uri = decodeComponent(uri);
+        auto matches = matchAll(_uri, _reg);
 
         //dfmt off
-        _uri        = uri;
         _scheme     = matches.front[1];
         _authority  = matches.front[2];
         _path       = matches.front[3].to!string.normalized;

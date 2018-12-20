@@ -30,6 +30,7 @@ Converts a `JSONValue` to an object of type `T` by filling its fields with the J
 T convertFromJSON(T)(JSONValue json) if (is(T == class) || is(T == struct))
 {
     import std.json : JSONException, JSONType;
+    import std.meta : Alias;
     import std.traits : isSomeFunction, isType;
 
     static if (is(T == class))
@@ -48,9 +49,9 @@ T convertFromJSON(T)(JSONValue json) if (is(T == class) || is(T == struct))
 
     foreach (member; __traits(allMembers, T))
     {
-        static if (__traits(getProtection, __traits(getMember, T,
-                member)) == "public" && !isType!(__traits(getMember, T,
-                member)) && !isSomeFunction!(__traits(getMember, T, member)))
+        alias m = Alias!(__traits(getMember, T, member));
+
+        static if (__traits(getProtection, m) == "public" && !isType!(m) && !isSomeFunction!(m))
         {
             try
             {
@@ -403,6 +404,7 @@ unittest
 Nullable!JSONValue convertToJSON(T)(T value)
         if ((is(T == class) || is(T == struct)) && !is(T == JSONValue))
 {
+    import std.meta : Alias;
     import std.traits : isSomeFunction, isType;
     import std.typecons : nullable;
 
@@ -418,9 +420,9 @@ Nullable!JSONValue convertToJSON(T)(T value)
 
     foreach (member; __traits(allMembers, T))
     {
-        static if (__traits(getProtection, __traits(getMember, T,
-                member)) == "public" && !isType!(__traits(getMember, T,
-                member)) && !isSomeFunction!(__traits(getMember, T, member)))
+        alias m = Alias!(__traits(getMember, T, member));
+
+        static if (__traits(getProtection, m) == "public" && !isType!(m) && !isSomeFunction!(m))
         {
             auto json = convertToJSON!(typeof(__traits(getMember, value, member)))(
                     __traits(getMember, value, member));
