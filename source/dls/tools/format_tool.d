@@ -141,8 +141,7 @@ class FormatTool : Tool
             return b ? OptionalBoolean.t : OptionalBoolean.f;
         }
 
-        auto workspaceUri = SymbolTool.instance.getWorkspace(uri);
-        auto conf = getConfig(workspaceUri);
+        auto conf = getConfig(SymbolTool.instance.getWorkspace(uri));
         Config config;
         config.initializeWithDefaults();
         config.pattern = configPattern;
@@ -168,7 +167,7 @@ class FormatTool : Tool
         config.dfmt_single_template_constraint_indent = toOptBool(
                 conf.format.dfmtSingleTemplateConstraintIndent);
 
-        auto fileConfig = getConfigFor!Config(workspaceUri.path);
+        auto fileConfig = getConfigFor!Config(uri.path);
         fileConfig.pattern = configPattern;
         config.merge(fileConfig, configPattern);
         return config;
