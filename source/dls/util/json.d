@@ -67,6 +67,11 @@ T convertFromJSON(T)(JSONValue json) if (is(T == class) || is(T == struct))
     return result;
 }
 
+T convertFromJSON(T)(JSONValue json) if (is(T == interface))
+{
+    static assert(false, "Cannot instantiate an interface");
+}
+
 version (unittest)
 {
     struct TestStruct
@@ -402,7 +407,7 @@ unittest
 }
 
 Nullable!JSONValue convertToJSON(T)(T value)
-        if ((is(T == class) || is(T == struct)) && !is(T == JSONValue))
+        if ((is(T == class) || is(T == struct) || is(T == interface)) && !is(T == JSONValue))
 {
     import std.meta : Alias;
     import std.traits : isSomeFunction, isType;
@@ -492,7 +497,7 @@ unittest
 }
 
 Nullable!JSONValue convertToJSON(T)(T value)
-        if ((!is(T == class) && !is(T == struct)) || is(T == JSONValue))
+        if ((!is(T == class) && !is(T == struct) && !is(T == interface)) || is(T == JSONValue))
 {
     import std.typecons : nullable;
 

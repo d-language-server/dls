@@ -20,7 +20,7 @@
 
 module dls.protocol.interfaces.workspace;
 
-import dls.protocol.interfaces.client : RegistrationOptionsBase;
+import dls.protocol.interfaces.client : RegistrationOptions;
 
 final class WorkspaceFolder
 {
@@ -115,7 +115,7 @@ enum FileChangeType : ubyte
     deleted = 3
 }
 
-final class DidChangeWatchedFilesRegistrationOptions : RegistrationOptionsBase
+final class DidChangeWatchedFilesRegistrationOptions : RegistrationOptions
 {
     FileSystemWatcher[] watchers;
 
@@ -168,7 +168,7 @@ final class ExecuteCommandParams
     }
 }
 
-final class ExecuteCommandRegistrationOptions : RegistrationOptionsBase
+final class ExecuteCommandRegistrationOptions : RegistrationOptions
 {
     string[] commands;
 

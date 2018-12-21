@@ -32,11 +32,11 @@ private abstract class RegistrationBase
     }
 }
 
-package interface RegistrationOptionsBase
+package interface RegistrationOptions
 {
 }
 
-final class Registration(R : RegistrationOptionsBase) : RegistrationBase
+final class Registration(R : RegistrationOptions) : RegistrationBase
 {
     import std.typecons : Nullable;
 
@@ -50,7 +50,7 @@ final class Registration(R : RegistrationOptionsBase) : RegistrationBase
     }
 }
 
-class TextDocumentRegistrationOptions : RegistrationOptionsBase
+class TextDocumentRegistrationOptions : RegistrationOptions
 {
     import dls.protocol.definitions : DocumentSelector;
     import std.typecons : Nullable;
@@ -63,7 +63,7 @@ class TextDocumentRegistrationOptions : RegistrationOptionsBase
     }
 }
 
-final class RegistrationParams(R)
+final class RegistrationParams(R : RegistrationOptions)
 {
     Registration!R[] registrations;
 
