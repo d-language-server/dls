@@ -95,11 +95,11 @@ class Configuration
     private void merge(T)(const T config, JSONValue json)
     {
         import dls.util.json : convertFromJSON;
-        import std.json : JSONType;
+        import std.json : JSON_TYPE;
         import std.meta : Alias;
         import std.traits : isSomeFunction, isType;
 
-        if (json.type != JSONType.object)
+        if (json.type != JSON_TYPE.OBJECT)
         {
             return;
         }

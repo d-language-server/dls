@@ -112,7 +112,7 @@ shared static this()
     import std.algorithm : min;
     import std.datetime : Clock, SysTime;
     import std.format : format;
-    import std.json : JSONType;
+    import std.json : JSON_TYPE;
 
     try
     {
@@ -121,7 +121,7 @@ shared static this()
             const releaseDate = SysTime.fromISOExtString(release["published_at"].str);
 
             if (Clock.currTime.toUTC() - releaseDate > 1.hours
-                    && release["prerelease"].type == JSONType.false_)
+                    && release["prerelease"].type == JSON_TYPE.FALSE)
             {
                 foreach (asset; release["assets"].array)
                 {

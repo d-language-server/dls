@@ -121,10 +121,10 @@ void update(bool autoUpdate)
     import std.conv : to;
     import std.datetime : Clock, SysTime;
     import std.format : format;
-    import std.json : JSONType;
+    import std.json : JSON_TYPE;
     import std.path : asNormalizedPath;
 
-    auto validReleases = allReleases.filter!(r => r["prerelease"].type == JSONType.false_
+    auto validReleases = allReleases.filter!(r => r["prerelease"].type == JSON_TYPE.FALSE
             || initOptions.preReleaseBuilds);
 
     if (validReleases.empty)
@@ -191,7 +191,7 @@ void update(bool autoUpdate)
         }
         catch (Exception e)
         {
-            logger.errorf("Could not download DLS: %s", e.message);
+            logger.errorf("Could not download DLS: %s", e.msg);
         }
     }
 
