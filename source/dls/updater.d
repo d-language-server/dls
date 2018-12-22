@@ -91,7 +91,7 @@ void cleanup()
                 }
                 else
                 {
-                    static assert(false, "Platform not suported");
+                    static assert(false, "Platform not supported");
                 }
             }
             catch (Exception e)

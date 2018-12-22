@@ -306,7 +306,7 @@ string linkDls()
     }
     else
     {
-        static assert(false, "Platform not suported");
+        static assert(false, "Platform not supported");
     }
 
     return buildNormalizedPath(dubDirPath, dubDirName, "packages", ".bin");
@@ -357,7 +357,7 @@ private void makeLink(const string target, const string link, bool directory)
     }
     else
     {
-        static assert(false, "Platform not suported");
+        static assert(false, "Platform not supported");
     }
 }
 

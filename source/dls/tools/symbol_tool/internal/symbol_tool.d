@@ -385,7 +385,7 @@ class SymbolTool : Tool
         }
         else
         {
-            static assert(false, "Platform not suported");
+            static assert(false, "Platform not supported");
         }
 
         foreach (path; splitter(environment["PATH"], pathSep))

@@ -79,7 +79,7 @@ shared static this()
     }
     else
     {
-        static assert(false, "Platform not suported");
+        static assert(false, "Platform not supported");
     }
 }
 
