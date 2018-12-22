@@ -256,10 +256,13 @@ package class SymbolVisitor(SymbolType) : ASTVisitor
     private void tryInsert(const string name, SymbolKind kind, Range range, size_t endLocation = 0)
     {
         import dls.protocol.definitions : Location, Position;
+        import dls.util.disposable_fiber : DisposableFiber;
         import dls.util.document : Document;
         import std.algorithm : canFind;
         import std.typecons : Nullable, nullable;
         import std.uni : toUpper;
+
+        DisposableFiber.yield();
 
         if (_upperQuery is null || toUpper(name).canFind(_upperQuery))
         {

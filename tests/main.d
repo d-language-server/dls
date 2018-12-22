@@ -72,6 +72,11 @@ private class TestCommunicator : Communicator
         return _directoriesMessages.keys.length > 0;
     }
 
+    bool hasPendingData()
+    {
+        return false;
+    }
+
     char[] read(size_t size)
     {
         auto currentMessage = _directoriesMessages[_directory][0];

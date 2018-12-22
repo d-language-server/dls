@@ -665,6 +665,7 @@ class SymbolTool : Tool
 
     SymbolInformation[] symbol(const string query)
     {
+        import dls.util.disposable_fiber : DisposableFiber;
         import dls.util.document : Document;
         import dls.util.logger : logger;
         import dsymbol.string_interning : internString;
@@ -702,6 +703,7 @@ class SymbolTool : Tool
 
             foreach (s; symbol.getPartsByName(internString(null)))
             {
+                DisposableFiber.yield();
                 collectSymbolInformations(symbolUri, s, name);
             }
         }
@@ -720,6 +722,7 @@ class SymbolTool : Tool
             {
                 foreach (symbol; moduleSymbol.getPartsByName(internString(null)))
                 {
+                    DisposableFiber.yield();
                     collectSymbolInformations(moduleUri, symbol);
                 }
             }
@@ -869,6 +872,7 @@ class SymbolTool : Tool
     {
         import dcd.common.messages : CompletionType;
         import dcd.server.autocomplete.util : getSymbolsForCompletion;
+        import dls.util.disposable_fiber : DisposableFiber;
         import dls.util.document : Document;
         import dls.util.logger : logger;
         import dparse.lexer : StringCache;
@@ -897,6 +901,7 @@ class SymbolTool : Tool
 
         foreach (symbol; currentFileStuff.symbols.filter!q{a.location > 0})
         {
+            DisposableFiber.yield();
             RollbackAllocator ra;
             auto symbolUri = symbol.symbolFile == "stdin" ? uri : Uri.fromPath(symbol.symbolFile);
             auto document = Document.get(symbolUri);
@@ -1138,6 +1143,7 @@ class SymbolTool : Tool
     {
         import dcd.common.messages : CompletionType;
         import dcd.server.autocomplete.util : getSymbolsForCompletion;
+        import dls.util.disposable_fiber : DisposableFiber;
         import dls.util.document : Document;
         import dparse.lexer : LexerConfig, StringBehavior, StringCache, Token,
             WhitespaceBehavior, getTokensForParser, tok;
@@ -1232,6 +1238,7 @@ class SymbolTool : Tool
             {
                 if (token.type == tok!"identifier" && token.text == sourceToken.text)
                 {
+                    DisposableFiber.yield();
                     RollbackAllocator ra;
                     request.cursorPosition = token.index + 1;
                     auto candidateStuff = getSymbolsForCompletion(request,

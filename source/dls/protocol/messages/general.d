@@ -234,6 +234,9 @@ void exit(JSONValue nothing)
 }
 
 @("$")
-void cancelRequest(JSONValue id)
+void cancelRequest(CancelParams params)
 {
+    import dls.server : Server;
+
+    Server.cancel(params.id);
 }

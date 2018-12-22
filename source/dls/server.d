@@ -60,9 +60,27 @@ shared static this()
 final abstract class Server
 {
     import dls.protocol.interfaces : InitializeParams;
+    import dls.util.disposable_fiber : DisposableFiber;
+    import std.container : DList;
+    import std.json : JSONValue;
 
     static bool initialized;
     static bool exit;
+    private static DisposableFiber[string] _requestsFibers;
+    private static DList!DisposableFiber _fibers;
+
+    static void cancel(JSONValue id)
+    {
+        import dls.util.logger : logger;
+
+        const idString = id.toString();
+
+        if (idString in _requestsFibers)
+        {
+            logger.infof("Cancelling request %s", idString);
+            _requestsFibers[idString].dispose();
+        }
+    }
 
     static void loop()
     {
@@ -129,7 +147,38 @@ final abstract class Server
                 continue;
             }
 
-            handleJSON(communicator.read(headers["Content-Length"].strip().to!size_t));
+            auto fiber = new DisposableFiber(() {
+                handleJSON(communicator.read(headers["Content-Length"].strip().to!size_t));
+            });
+
+            fiber.call();
+            _fibers.insertBack(fiber);
+
+            while (!communicator.hasPendingData())
+            {
+                while (!_fibers.empty && _fibers.front.state == DisposableFiber.State.TERM)
+                {
+                    foreach (id, f; _requestsFibers)
+                    {
+                        if (f == _fibers.front)
+                        {
+                            _requestsFibers.remove(id);
+                            break;
+                        }
+                    }
+
+                    _fibers.removeFront();
+                }
+
+                if (_fibers.empty)
+                {
+                    break;
+                }
+                else
+                {
+                    _fibers.front.call();
+                }
+            }
         }
     }
 
@@ -140,10 +189,11 @@ final abstract class Server
         import dls.protocol.jsonrpc : ErrorCodes, InvalidParamsException,
             NotificationMessage, RequestMessage, ResponseMessage, send, sendError;
         import dls.protocol.state : initOptions;
+        import dls.util.disposable_fiber : FiberDisposedException;
         import dls.util.json : convertFromJSON;
         import dls.util.logger : logger;
         import std.algorithm : startsWith;
-        import std.json : JSONException, JSONValue, parseJSON;
+        import std.json : JSONException, parseJSON;
 
         RequestMessage request;
         NotificationMessage notification;
@@ -159,6 +209,7 @@ final abstract class Server
                     if ("id" in json)
                     {
                         request = convertFromJSON!RequestMessage(json);
+                        _requestsFibers[request.id.toString()] = DisposableFiber.getThis();
 
                         if (initialized || request.method == "initialize")
                         {
@@ -193,6 +244,9 @@ final abstract class Server
                         logger.error(response.error.message);
                     }
                 }
+            }
+            catch (FiberDisposedException)
+            {
             }
             catch (JSONException e)
             {

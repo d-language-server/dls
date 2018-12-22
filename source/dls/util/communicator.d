@@ -39,6 +39,7 @@ private __gshared Communicator _communicator;
 interface Communicator
 {
     bool hasData();
+    bool hasPendingData();
     char[] read(size_t size);
     void write(const char[] data);
     void flush();
@@ -51,6 +52,11 @@ class StdioCommunicator : Communicator
     bool hasData()
     {
         return !stdin.eof;
+    }
+
+    bool hasPendingData()
+    {
+        return false;
     }
 
     char[] read(size_t size)
@@ -90,6 +96,23 @@ class SocketCommunicator : Communicator
         {
             return _socket.isAlive;
         }
+    }
+
+    bool hasPendingData()
+    {
+        import std.socket : SocketFlags;
+
+        static char[1] buffer;
+        ptrdiff_t result;
+
+        synchronized (_socket)
+        {
+            _socket.blocking = false;
+            result = _socket.receive(buffer, SocketFlags.PEEK);
+            _socket.blocking = true;
+        }
+
+        return result > 0 && result != Socket.ERROR;
     }
 
     char[] read(size_t size)
