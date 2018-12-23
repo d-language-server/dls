@@ -74,7 +74,7 @@ class CommandTool : Tool
         import std.json : JSONException;
         import std.format : format;
 
-        logger.infof("Executing command %s with arguments %s", commandName, arguments);
+        logger.info("Executing command %s with arguments %s", commandName, arguments);
 
         try
         {

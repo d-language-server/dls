@@ -77,7 +77,7 @@ final abstract class Server
 
         if (idString in _requestsFibers)
         {
-            logger.infof("Cancelling request %s", idString);
+            logger.info("Cancelling request %s", idString);
             _requestsFibers[idString].dispose();
         }
     }
@@ -250,25 +250,25 @@ final abstract class Server
             }
             catch (JSONException e)
             {
-                logger.errorf("%s: %s", ErrorCodes.parseError[0], e.toString());
+                logger.error("%s: %s", ErrorCodes.parseError[0], e.toString());
                 sendError(ErrorCodes.parseError, request, JSONValue(e.toString()));
             }
             catch (HandlerNotFoundException e)
             {
                 if (notification is null || !notification.method.startsWith("$/"))
                 {
-                    logger.errorf("%s: %s", ErrorCodes.methodNotFound[0], e.toString());
+                    logger.error("%s: %s", ErrorCodes.methodNotFound[0], e.toString());
                     sendError(ErrorCodes.methodNotFound, request, JSONValue(e.toString()));
                 }
             }
             catch (InvalidParamsException e)
             {
-                logger.errorf("%s: %s", ErrorCodes.invalidParams[0], e.toString());
+                logger.error("%s: %s", ErrorCodes.invalidParams[0], e.toString());
                 sendError(ErrorCodes.invalidParams, request, JSONValue(e.toString()));
             }
             catch (Exception e)
             {
-                logger.errorf("%s: %s", ErrorCodes.internalError[0], e.toString());
+                logger.error("%s: %s", ErrorCodes.internalError[0], e.toString());
                 sendError(ErrorCodes.internalError, request, JSONValue(e.toString()));
             }
         }
@@ -281,7 +281,7 @@ final abstract class Server
             }
             catch (Error e)
             {
-                logger.errorf("%s: %s", ErrorCodes.internalError[0], e.toString());
+                logger.error("%s: %s", ErrorCodes.internalError[0], e.toString());
                 sendError(ErrorCodes.internalError, request, JSONValue(e.toString()));
             }
         }

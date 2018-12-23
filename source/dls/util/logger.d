@@ -59,40 +59,25 @@ private shared class LspLogger
         _messageType = traceToType[t];
     }
 
-    void info(const string message) const
-    {
-        sendMessage(message, MessageType.info);
-    }
-
-    void infof(Args...)(const string message, const Args args) const
+    void info(Args...)(const string message, const Args args) const
     {
         import std.format : format;
 
-        info(format(message, args));
+        sendMessage(format(message, args), MessageType.info);
     }
 
-    void warning(const string message) const
-    {
-        sendMessage(message, MessageType.warning);
-    }
-
-    void warningf(Args...)(const string message, const Args args) const
+    void warning(Args...)(const string message, const Args args) const
     {
         import std.format : format;
 
-        warning(format(message, args));
+        sendMessage(format(message, args), MessageType.warning);
     }
 
-    void error(const string message) const
-    {
-        sendMessage(message, MessageType.error);
-    }
-
-    void errorf(Args...)(const string message, const Args args) const
+    void error(Args...)(const string message, const Args args) const
     {
         import std.format : format;
 
-        error(format(message, args));
+        sendMessage(format(message, args), MessageType.error);
     }
 
     private void sendMessage(const string message, const MessageType type) const

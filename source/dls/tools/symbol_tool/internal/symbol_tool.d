@@ -464,7 +464,7 @@ class SymbolTool : Tool
             return;
         }
 
-        logger.infof("Importing dub project: %s", uri.path);
+        logger.info("Importing dub project: %s", uri.path);
 
         auto d = getDub(uri);
         string[string] workspaceDeps;
@@ -524,7 +524,7 @@ class SymbolTool : Tool
             return;
         }
 
-        logger.infof("Importing custom project: %s", uri.path);
+        logger.info("Importing custom project: %s", uri.path);
 
         auto possibleSourceDirs = ["source", "src", ""].map!(d => buildNormalizedPath(uri.path, d))
             .find!exists;
@@ -553,7 +553,7 @@ class SymbolTool : Tool
             return;
         }
 
-        logger.infof("Importing dub selections for project: %s", uri.path);
+        logger.info("Importing dub selections for project: %s", uri.path);
 
         const d = getDub(uri);
         string[] newDependenciesPaths;
@@ -592,7 +592,7 @@ class SymbolTool : Tool
             return;
         }
 
-        logger.infof("Importing git submodules for project: %s", uri.path);
+        logger.info("Importing git submodules for project: %s", uri.path);
 
         string[string] newWorkspaceDeps;
         string[] newDependenciesPaths;
@@ -635,7 +635,7 @@ class SymbolTool : Tool
         import std.concurrency : spawn;
         import std.path : dirName;
 
-        logger.infof("Upgrading dependencies from %s", dirName(uri.path));
+        logger.info("Upgrading dependencies from %s", dirName(uri.path));
 
         spawn((string uriString) {
             import dls.protocol.interfaces.dls : TranslationParams;
@@ -676,7 +676,7 @@ class SymbolTool : Tool
         import std.file : SpanMode, dirEntries;
         import std.uni : toUpper;
 
-        logger.infof(`Fetching symbols from workspace with query "%s"`, query);
+        logger.info(`Fetching symbols from workspace with query "%s"`, query);
 
         auto result = new RedBlackTree!(SymbolInformation, compareLocations, true)();
         const upperQuery = toUpper(query);
@@ -744,7 +744,7 @@ class SymbolTool : Tool
 
         if (query is null)
         {
-            logger.infof("Fetching symbols from %s", uri.path);
+            logger.info("Fetching symbols from %s", uri.path);
         }
 
         auto stringCache = StringCache(StringCache.defaultBucketCount);
@@ -768,7 +768,7 @@ class SymbolTool : Tool
         import std.conv : to;
         import std.json : JSONValue;
 
-        logger.infof("Fetching completions for %s at position %s,%s", uri.path,
+        logger.info("Fetching completions for %s at position %s,%s", uri.path,
                 position.line, position.character);
 
         auto request = getPreparedRequest(uri, position, RequestKind.autocomplete);
@@ -853,7 +853,7 @@ class SymbolTool : Tool
         import std.algorithm : filter, map, sort, uniq;
         import std.array : array;
 
-        logger.infof("Fetching documentation for %s at position %s,%s",
+        logger.info("Fetching documentation for %s at position %s,%s",
                 uri.path, position.line, position.character);
 
         auto request = getPreparedRequest(uri, position, RequestKind.doc);
@@ -881,7 +881,7 @@ class SymbolTool : Tool
         import std.algorithm : filter;
         import std.array : appender;
 
-        logger.infof("Finding declarations for %s at position %s,%s", uri.path,
+        logger.info("Finding declarations for %s at position %s,%s", uri.path,
                 position.line, position.character);
 
         auto request = getPreparedRequest(uri, position, RequestKind.symbolLocation);
@@ -937,7 +937,7 @@ class SymbolTool : Tool
         import std.algorithm : filter, map, uniq;
         import std.array : appender;
 
-        logger.infof("Finding type declaration for %s at position %s,%s",
+        logger.info("Finding type declaration for %s at position %s,%s",
                 uri.path, position.line, position.character);
 
         auto request = getPreparedRequest(uri, position, RequestKind.symbolLocation);
@@ -972,7 +972,7 @@ class SymbolTool : Tool
     {
         import dls.util.logger : logger;
 
-        logger.infof("Finding references for %s at position %s,%s", uri.path,
+        logger.info("Finding references for %s at position %s,%s", uri.path,
                 position.line, position.character);
         return referencesForFiles(uri, position, workspacesFilesUris, includeDeclaration);
     }
@@ -986,7 +986,7 @@ class SymbolTool : Tool
         import std.path : filenameCmp;
         import std.typecons : nullable;
 
-        logger.infof("Highlighting usages for %s at position %s,%s", uri.path,
+        logger.info("Highlighting usages for %s at position %s,%s", uri.path,
                 position.line, position.character);
 
         auto sources = referencesForFiles(uri, position, null, true);
@@ -1023,7 +1023,7 @@ class SymbolTool : Tool
             return null;
         }
 
-        logger.infof("Renaming symbol for %s at position %s,%s", uri.path,
+        logger.info("Renaming symbol for %s at position %s,%s", uri.path,
                 position.line, position.character);
 
         auto refs = references(uri, position, true);
@@ -1057,7 +1057,7 @@ class SymbolTool : Tool
         import dls.util.logger : logger;
         import std.algorithm : any;
 
-        logger.infof("Preparing symbol rename for %s at position %s,%s",
+        logger.info("Preparing symbol rename for %s at position %s,%s",
                 uri.path, position.line, position.character);
 
         auto defs = definition(uri, position);
@@ -1087,7 +1087,7 @@ class SymbolTool : Tool
         import std.algorithm : map;
         import std.array : array;
 
-        logger.infof("Importing directories: %s", paths);
+        logger.info("Importing directories: %s", paths);
         _cache.addImportPaths(paths.map!normalized.array);
     }
 
@@ -1097,7 +1097,7 @@ class SymbolTool : Tool
         import dls.util.uri : normalized;
         import std.algorithm : map, startsWith;
 
-        logger.infof("Clearing import directories: %s", paths);
+        logger.info("Clearing import directories: %s", paths);
 
         string[] pathsToRemove;
 

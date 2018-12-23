@@ -85,7 +85,7 @@ class FormatTool : Tool
         import dls.util.logger : logger;
         import std.outbuffer : OutBuffer;
 
-        logger.infof("Formatting %s", uri.path);
+        logger.info("Formatting %s", uri.path);
 
         const document = Document.get(uri);
         auto contents = cast(ubyte[]) document.toString();

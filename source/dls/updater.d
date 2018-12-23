@@ -191,7 +191,7 @@ void update(bool autoUpdate)
         }
         catch (Exception e)
         {
-            logger.errorf("Could not download DLS: %s", e.msg);
+            logger.error("Could not download DLS: %s", e.msg);
         }
     }
 

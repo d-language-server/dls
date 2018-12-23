@@ -161,7 +161,7 @@ void didChangeWatchedFiles(DidChangeWatchedFilesParams params)
         auto uri = new Uri(event.uri);
         auto dirUri = Uri.fromPath(dirName(uri.path));
 
-        logger.infof("Resource %s: %s", event.type, uri.path);
+        logger.info("Resource %s: %s", event.type, uri.path);
 
         if (exists(uri.path) && !isFile(uri.path))
         {

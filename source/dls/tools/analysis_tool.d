@@ -159,7 +159,7 @@ class AnalysisTool : Tool
                 conf = _analysisConfigs[workspaceUri.path];
             }
 
-            logger.infof("Updating config from file %s", configPath);
+            logger.info("Updating config from file %s", configPath);
             readINIFile(conf, configPath);
         }
 
@@ -187,7 +187,7 @@ class AnalysisTool : Tool
         import std.typecons : Nullable, nullable;
         import std.utf : toUTF16;
 
-        logger.infof("Fetching diagnostics for %s", uri.path);
+        logger.info("Fetching diagnostics for %s", uri.path);
 
         auto stringCache = StringCache(StringCache.defaultBucketCount);
         auto tokens = getTokensForParser(Document.get(uri).toString(),
@@ -239,7 +239,7 @@ class AnalysisTool : Tool
 
         if (commandCompat)
         {
-            logger.infof("Fetching commands for %s at range %s,%s to %s,%s", uri.path,
+            logger.info("Fetching commands for %s at range %s,%s to %s,%s", uri.path,
                     range.start.line, range.start.character, range.end.line, range.end.character);
         }
 
@@ -289,7 +289,7 @@ class AnalysisTool : Tool
         import std.array : appender;
         import std.typecons : Nullable, nullable;
 
-        logger.infof("Fetching code actions for %s at range %s,%s to %s,%s", uri.path,
+        logger.info("Fetching code actions for %s at range %s,%s to %s,%s", uri.path,
                 range.start.line, range.start.character, range.end.line, range.end.character);
 
         if (kinds.length > 0 && !kinds.canFind(CodeActionKind.quickfix))

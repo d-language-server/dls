@@ -41,7 +41,7 @@ void didOpen(DidOpenTextDocumentParams params)
     if (params.textDocument.languageId.toLower() == "d")
     {
         auto uri = new Uri(params.textDocument.uri);
-        logger.infof("Document opened: %s", uri.path);
+        logger.info("Document opened: %s", uri.path);
 
         if (!SymbolTool.instance.workspacesFilesUris.canFind!q{a.path == b.path}(uri))
         {
@@ -59,7 +59,7 @@ void didChange(DidChangeTextDocumentParams params)
     import dls.util.logger : logger;
     import dls.util.uri : Uri;
 
-    logger.infof("Document changed: %s", new Uri(params.textDocument.uri).path);
+    logger.info("Document changed: %s", new Uri(params.textDocument.uri).path);
     Document.change(params.textDocument, params.contentChanges);
 }
 
@@ -82,7 +82,7 @@ void didSave(DidSaveTextDocumentParams params)
     import dls.util.uri : Uri;
 
     auto uri = new Uri(params.textDocument.uri);
-    logger.infof("Document saved: %s", uri.path);
+    logger.info("Document saved: %s", uri.path);
     send(TextDocument.publishDiagnostics, new PublishDiagnosticsParams(uri,
             AnalysisTool.instance.diagnostics(uri)));
 }
@@ -99,7 +99,7 @@ void didClose(DidCloseTextDocumentParams params)
     import std.algorithm : canFind;
 
     auto uri = new Uri(params.textDocument.uri);
-    logger.infof("Document closed: %s", uri.path);
+    logger.info("Document closed: %s", uri.path);
     Document.close(params.textDocument);
 
     if (!SymbolTool.instance.workspacesFilesUris.canFind!q{a.path == b.path}(uri))
