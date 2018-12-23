@@ -213,6 +213,7 @@ final abstract class Server
                     {
                         request = convertFromJSON!RequestMessage(json);
                         _requestsFibers[request.id.toString()] = DisposableFiber.getThis();
+                        logger.info("Received request %s: %s", request.id, request.method);
 
                         if (initialized || request.method == "initialize")
                         {
@@ -227,6 +228,7 @@ final abstract class Server
                     else
                     {
                         notification = convertFromJSON!NotificationMessage(json);
+                        logger.info("Received notification: %s", notification.method);
 
                         if (initialized || notification.method == "exit")
                         {
@@ -237,6 +239,7 @@ final abstract class Server
                 else
                 {
                     auto response = convertFromJSON!ResponseMessage(json);
+                    logger.info("Received response for request %s", response.id);
 
                     if (response.error.isNull)
                     {

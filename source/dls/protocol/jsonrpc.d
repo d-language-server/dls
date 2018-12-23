@@ -102,24 +102,28 @@ void sendError(ErrorCodes error, RequestMessage request, JSONValue data)
     }
 }
 
-/++ Sends a request or a notification message. +/
+/// Sends a request or a notification message.
 string send(string method, Nullable!JSONValue params = Nullable!JSONValue())
 {
     import dls.protocol.handlers : hasResponseHandler, pushHandler;
+    import dls.protocol.logger : logger;
     import std.uuid : randomUUID;
 
     if (hasResponseHandler(method))
     {
-        auto id = randomUUID().toString();
+        const id = randomUUID().toString();
         pushHandler(id, method);
+        logger.info(`Sending request "%s": %s`, id, method);
         send!RequestMessage(JSONValue(id), method, params, Nullable!ResponseError());
         return id;
     }
 
+    logger.info("Sending notification: %s", method);
     send!NotificationMessage(JSONValue(), method, params, Nullable!ResponseError());
     return null;
 }
 
+/// Sends a request or a notification message.
 string send(T)(string method, T params) if (!is(T : Nullable!JSONValue))
 {
     import dls.util.json : convertToJSON;
@@ -128,13 +132,17 @@ string send(T)(string method, T params) if (!is(T : Nullable!JSONValue))
     return send(method, convertToJSON(params).nullable);
 }
 
-/++ Sends a response message. +/
+/// Sends a response message.
 void send(JSONValue id, Nullable!JSONValue result,
         Nullable!ResponseError error = Nullable!ResponseError())
 {
+    import dls.protocol.logger : logger;
+
+    logger.info("Sending response with %s for request %s", error.isNull ? "result" : "error", id);
     send!ResponseMessage(id, null, result, error);
 }
 
+/// Sends a response message.
 private void send(T : Message)(JSONValue id, string method,
         Nullable!JSONValue payload, Nullable!ResponseError error)
 {
