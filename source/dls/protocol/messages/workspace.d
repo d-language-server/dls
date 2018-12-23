@@ -79,8 +79,8 @@ void didChangeWorkspaceFolders(DidChangeWorkspaceFoldersParams params)
 
 void configuration(string id, JSONValue[] configs)
 {
+    import dls.protocol.logger : logger;
     import dls.tools.tool : Tool;
-    import dls.util.logger : logger;
 
     auto uris = null ~ Tool.workspacesUris;
 
@@ -100,12 +100,12 @@ void configuration(string id, JSONValue[] configs)
 void didChangeConfiguration(DidChangeConfigurationParams params)
 {
     import dls.protocol.jsonrpc : send;
+    import dls.protocol.logger : logger;
     import dls.protocol.messages.methods : Workspace;
     import dls.protocol.state : initState;
     import dls.tools.configuration : Configuration;
     import dls.tools.tool : Tool;
     import dls.util.json : convertFromJSON;
-    import dls.util.logger : logger;
     import std.typecons : Nullable, nullable;
 
     logger.info("Configuration changed");
@@ -136,11 +136,11 @@ void didChangeWatchedFiles(DidChangeWatchedFilesParams params)
 {
     import dls.protocol.interfaces : FileChangeType, PublishDiagnosticsParams;
     import dls.protocol.jsonrpc : send;
+    import dls.protocol.logger : logger;
     import dls.protocol.messages.methods : TextDocument;
     import dls.tools.analysis_tool : AnalysisTool;
     import dls.tools.symbol_tool : SymbolTool;
     import dls.util.document : Document;
-    import dls.util.logger : logger;
     import dls.util.uri : Uri;
     import std.algorithm : canFind, filter;
     import std.file : exists, isFile;

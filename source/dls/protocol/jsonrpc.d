@@ -92,14 +92,6 @@ class CancelParams
     JSONValue id;
 }
 
-class InvalidParamsException : Exception
-{
-    this(string msg)
-    {
-        super("Invalid parameters: " ~ msg);
-    }
-}
-
 void sendError(ErrorCodes error, RequestMessage request, JSONValue data)
 {
     import std.typecons : nullable;

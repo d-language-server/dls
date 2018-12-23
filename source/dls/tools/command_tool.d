@@ -64,12 +64,13 @@ class CommandTool : Tool
     JSONValue executeCommand(const string commandName, const JSONValue[] arguments)
     {
         import dls.protocol.definitions : WorkspaceEdit;
+        import dls.protocol.errors : InvalidParamsException;
         import dls.protocol.interfaces : ApplyWorkspaceEditParams;
-        import dls.protocol.jsonrpc : InvalidParamsException, send;
+        import dls.protocol.jsonrpc : send;
+        import dls.protocol.logger : logger;
         import dls.protocol.messages.methods : Workspace;
         import dls.tools.analysis_tool : AnalysisTool;
         import dls.util.json : convertFromJSON;
-        import dls.util.logger : logger;
         import dls.util.uri : Uri;
         import std.json : JSONException;
         import std.format : format;

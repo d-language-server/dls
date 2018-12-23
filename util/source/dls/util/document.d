@@ -106,7 +106,7 @@ class Document
 
     void validatePosition(const Position position) const
     {
-        import dls.protocol.jsonrpc : InvalidParamsException;
+        import dls.protocol.errors : InvalidParamsException;
         import std.format : format;
 
         if (position.line >= _lines.length || position.character > _lines[position.line].length)

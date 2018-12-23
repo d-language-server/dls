@@ -451,9 +451,9 @@ class SymbolTool : Tool
 
     void importDubProject(const Uri uri)
     {
+        import dls.protocol.logger : logger;
         import dls.protocol.messages.window : Util;
         import dls.util.constants : Tr;
-        import dls.util.logger : logger;
         import dub.platform : BuildPlatform;
         import std.algorithm : map;
         import std.array : appender, array;
@@ -512,8 +512,8 @@ class SymbolTool : Tool
 
     void importCustomProject(const Uri uri)
     {
-        import dls.protocol.jsonrpc : InvalidParamsException;
-        import dls.util.logger : logger;
+        import dls.protocol.errors : InvalidParamsException;
+        import dls.protocol.logger : logger;
         import std.algorithm : find, map;
         import std.array : array;
         import std.file : exists;
@@ -542,7 +542,7 @@ class SymbolTool : Tool
 
     void importDubSelections(const Uri uri)
     {
-        import dls.util.logger : logger;
+        import dls.protocol.logger : logger;
         import dls.util.uri : normalized;
         import std.algorithm : map, reduce;
         import std.array : array;
@@ -573,7 +573,7 @@ class SymbolTool : Tool
 
     void importGitSubmodules(const Uri uri)
     {
-        import dls.util.logger : logger;
+        import dls.protocol.logger : logger;
         import std.algorithm : findSplit;
         import std.file : exists;
         import std.path : buildPath;
@@ -631,7 +631,7 @@ class SymbolTool : Tool
 
     void upgradeSelections(const Uri uri)
     {
-        import dls.util.logger : logger;
+        import dls.protocol.logger : logger;
         import std.concurrency : spawn;
         import std.path : dirName;
 
@@ -665,9 +665,9 @@ class SymbolTool : Tool
 
     SymbolInformation[] symbol(const string query)
     {
+        import dls.protocol.logger : logger;
         import dls.util.disposable_fiber : DisposableFiber;
         import dls.util.document : Document;
-        import dls.util.logger : logger;
         import dsymbol.string_interning : internString;
         import dsymbol.symbol : DSymbol;
         import std.algorithm : any, canFind, map, startsWith;
@@ -734,9 +734,9 @@ class SymbolTool : Tool
     SymbolType[] symbol(SymbolType)(Uri uri, const string query) // TODO: make uri const
     if (is(SymbolType == SymbolInformation) || is(SymbolType == DocumentSymbol))
     {
+        import dls.protocol.logger : logger;
         import dls.tools.symbol_tool.internal.symbol_visitor : SymbolVisitor;
         import dls.util.document : Document;
-        import dls.util.logger : logger;
         import dparse.lexer : LexerConfig, StringBehavior, StringCache, getTokensForParser;
         import dparse.parser : parseModule;
         import dparse.rollback_allocator : RollbackAllocator;
@@ -761,8 +761,8 @@ class SymbolTool : Tool
     CompletionItem[] completion(const Uri uri, const Position position)
     {
         import dcd.common.messages : AutocompleteResponse, CompletionType;
+        import dls.protocol.logger : logger;
         import dcd.server.autocomplete : complete;
-        import dls.util.logger : logger;
         import std.algorithm : chunkBy, map, sort, uniq;
         import std.array : array;
         import std.conv : to;
@@ -849,7 +849,7 @@ class SymbolTool : Tool
     Hover hover(const Uri uri, const Position position)
     {
         import dcd.server.autocomplete : getDoc;
-        import dls.util.logger : logger;
+        import dls.protocol.logger : logger;
         import std.algorithm : filter, map, sort, uniq;
         import std.array : array;
 
@@ -872,9 +872,9 @@ class SymbolTool : Tool
     {
         import dcd.common.messages : CompletionType;
         import dcd.server.autocomplete.util : getSymbolsForCompletion;
+        import dls.protocol.logger : logger;
         import dls.util.disposable_fiber : DisposableFiber;
         import dls.util.document : Document;
-        import dls.util.logger : logger;
         import dparse.lexer : StringCache;
         import dparse.rollback_allocator : RollbackAllocator;
         import dsymbol.modulecache : ASTAllocator;
@@ -929,8 +929,8 @@ class SymbolTool : Tool
     {
         import dcd.common.messages : CompletionType;
         import dcd.server.autocomplete.util : getSymbolsForCompletion;
+        import dls.protocol.logger : logger;
         import dls.util.document : Document;
-        import dls.util.logger : logger;
         import dparse.lexer : StringCache;
         import dparse.rollback_allocator : RollbackAllocator;
         import dsymbol.modulecache : ASTAllocator;
@@ -970,7 +970,7 @@ class SymbolTool : Tool
 
     Location[] references(const Uri uri, const Position position, bool includeDeclaration)
     {
-        import dls.util.logger : logger;
+        import dls.protocol.logger : logger;
 
         logger.info("Finding references for %s at position %s,%s", uri.path,
                 position.line, position.character);
@@ -980,7 +980,7 @@ class SymbolTool : Tool
     DocumentHighlight[] highlight(const Uri uri, const Position position)
     {
         import dls.protocol.interfaces : DocumentHighlightKind;
-        import dls.util.logger : logger;
+        import dls.protocol.logger : logger;
         import std.algorithm : any;
         import std.array : appender;
         import std.path : filenameCmp;
@@ -1009,9 +1009,9 @@ class SymbolTool : Tool
     {
         import dls.protocol.definitions : TextDocumentEdit, TextEdit,
             VersionedTextDocumentIdentifier;
+        import dls.protocol.logger : logger;
         import dls.protocol.state : initState;
         import dls.util.document : Document;
-        import dls.util.logger : logger;
         import std.array : appender;
         import std.typecons : nullable;
 
@@ -1053,8 +1053,8 @@ class SymbolTool : Tool
 
     Range prepareRename(const Uri uri, const Position position)
     {
+        import dls.protocol.logger : logger;
         import dls.util.document : Document;
-        import dls.util.logger : logger;
         import std.algorithm : any;
 
         logger.info("Preparing symbol rename for %s at position %s,%s",
@@ -1082,7 +1082,7 @@ class SymbolTool : Tool
 
     private void importDirectories(const string[] paths)
     {
-        import dls.util.logger : logger;
+        import dls.protocol.logger : logger;
         import dls.util.uri : normalized;
         import std.algorithm : map;
         import std.array : array;
@@ -1093,7 +1093,7 @@ class SymbolTool : Tool
 
     private void clearDirectories(const string[] paths)
     {
-        import dls.util.logger : logger;
+        import dls.protocol.logger : logger;
         import dls.util.uri : normalized;
         import std.algorithm : map, startsWith;
 

@@ -108,11 +108,11 @@ void update(bool autoUpdate)
         downloadDls, allReleases, linkDls;
     static import dls.protocol.jsonrpc;
     import dls.protocol.interfaces.dls : DlsUpgradeSizeParams, TranslationParams;
+    import dls.protocol.logger : logger;
     import dls.protocol.messages.methods : Dls;
     import dls.protocol.messages.window : Util;
     import dls.protocol.state : initOptions;
     import dls.util.constants : Tr;
-    import dls.util.logger : logger;
     import dub.dependency : Dependency;
     import dub.dub : Dub, FetchOptions;
     import dub.semver : compareVersions;

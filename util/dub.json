@@ -1,0 +1,12 @@
+{
+	"name": "util",
+	"authors": [
+		"Laurent Tréguier"
+	],
+	"description": "DLS utilities",
+	"copyright": "Copyright © 2018, Laurent Tréguier",
+	"license": "GPL-3.0 or later",
+	"dependencies": {
+		"dls:protocol": "*"
+	}
+}

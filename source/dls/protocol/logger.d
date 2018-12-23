@@ -18,7 +18,7 @@
  *
  */
 
-module dls.util.logger;
+module dls.protocol.logger;
 
 import dls.protocol.interfaces : InitializeParams;
 

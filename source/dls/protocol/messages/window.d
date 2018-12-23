@@ -25,10 +25,10 @@ import std.typecons : Nullable;
 
 void showMessageRequest(string id, Nullable!MessageActionItem item)
 {
+    import dls.protocol.logger : logger;
     import dls.tools.symbol_tool : SymbolTool;
     import dls.util.constants : Tr;
     import dls.util.i18n : tr;
-    import dls.util.logger : logger;
     import dls.util.uri : Uri;
     import std.concurrency : locate, receiveOnly, send;
     import std.path : dirName;

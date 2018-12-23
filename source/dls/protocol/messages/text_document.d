@@ -29,11 +29,11 @@ void didOpen(DidOpenTextDocumentParams params)
 {
     import dls.protocol.interfaces : PublishDiagnosticsParams;
     import dls.protocol.jsonrpc : send;
+    import dls.protocol.logger : logger;
     import dls.protocol.messages.methods : TextDocument;
     import dls.tools.analysis_tool : AnalysisTool;
     import dls.tools.symbol_tool : SymbolTool;
     import dls.util.document : Document;
-    import dls.util.logger : logger;
     import dls.util.uri : Uri;
     import std.algorithm : canFind;
     import std.uni : toLower;
@@ -55,8 +55,8 @@ void didOpen(DidOpenTextDocumentParams params)
 
 void didChange(DidChangeTextDocumentParams params)
 {
+    import dls.protocol.logger : logger;
     import dls.util.document : Document;
-    import dls.util.logger : logger;
     import dls.util.uri : Uri;
 
     logger.info("Document changed: %s", new Uri(params.textDocument.uri).path);
@@ -76,9 +76,9 @@ void didSave(DidSaveTextDocumentParams params)
 {
     import dls.protocol.interfaces : PublishDiagnosticsParams;
     import dls.protocol.jsonrpc : send;
+    import dls.protocol.logger : logger;
     import dls.protocol.messages.methods : TextDocument;
     import dls.tools.analysis_tool : AnalysisTool;
-    import dls.util.logger : logger;
     import dls.util.uri : Uri;
 
     auto uri = new Uri(params.textDocument.uri);
@@ -91,10 +91,10 @@ void didClose(DidCloseTextDocumentParams params)
 {
     import dls.protocol.interfaces : PublishDiagnosticsParams;
     import dls.protocol.jsonrpc : send;
+    import dls.protocol.logger : logger;
     import dls.protocol.messages.methods : TextDocument;
     import dls.tools.symbol_tool : SymbolTool;
     import dls.util.document : Document;
-    import dls.util.logger : logger;
     import dls.util.uri : Uri;
     import std.algorithm : canFind;
 

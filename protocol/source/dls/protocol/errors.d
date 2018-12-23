@@ -18,31 +18,12 @@
  *
  */
 
-module dls.protocol.state;
+module dls.protocol.errors;
 
-import dls.protocol.interfaces : InitializeParams;
-
-private InitializeParams _initState;
-
-@property InitializeParams initState()
+class InvalidParamsException : Exception
 {
-    return _initState is null ? new InitializeParams() : _initState;
-}
-
-@property void initState(InitializeParams params)
-{
-    import dls.protocol.logger : logger;
-
-    _initState = params;
-
-    if (!params.trace.isNull)
+    this(string msg)
     {
-        logger.trace = params.trace;
+        super("Invalid parameters: " ~ msg);
     }
-}
-
-@property InitializeParams.InitializationOptions initOptions()
-{
-    return initState.initializationOptions.isNull
-        ? new InitializeParams.InitializationOptions() : _initState.initializationOptions;
 }

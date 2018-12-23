@@ -81,8 +81,8 @@ class FormatTool : Tool
     TextEdit[] formatting(const Uri uri, const FormattingOptions options)
     {
         import dfmt.formatter : format;
+        import dls.protocol.logger : logger;
         import dls.util.document : Document;
-        import dls.util.logger : logger;
         import std.outbuffer : OutBuffer;
 
         logger.info("Formatting %s", uri.path);

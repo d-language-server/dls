@@ -142,8 +142,8 @@ class AnalysisTool : Tool
 
     void updateAnalysisConfig(const Uri workspaceUri)
     {
+        import dls.protocol.logger : logger;
         import dls.server : Server;
-        import dls.util.logger : logger;
         import dscanner.analysis.config : defaultStaticAnalysisConfig;
         import inifiled : readINIFile;
         import std.file : exists;
@@ -174,9 +174,9 @@ class AnalysisTool : Tool
     Diagnostic[] diagnostics(const Uri uri)
     {
         import dls.protocol.definitions : DiagnosticSeverity;
+        import dls.protocol.logger : logger;
         import dls.tools.symbol_tool : SymbolTool;
         import dls.util.document : Document;
-        import dls.util.logger : logger;
         import dparse.lexer : LexerConfig, StringBehavior, StringCache, getTokensForParser;
         import dparse.parser : parseModule;
         import dparse.rollback_allocator : RollbackAllocator;
@@ -225,12 +225,12 @@ class AnalysisTool : Tool
             Diagnostic[] diagnostics, bool commandCompat)
     {
         import dls.protocol.definitions : Position;
+        import dls.protocol.logger : logger;
         import dls.tools.command_tool : Commands;
         import dls.util.constants : Tr;
         import dls.util.document : Document;
         import dls.util.i18n : tr;
         import dls.util.json : convertToJSON;
-        import dls.util.logger : logger;
         import std.algorithm : filter;
         import std.array : appender;
         import std.json : JSONValue;
@@ -279,12 +279,12 @@ class AnalysisTool : Tool
             Diagnostic[] diagnostics, const CodeActionKind[] kinds)
     {
         import dls.protocol.definitions : Command, Position;
+        import dls.protocol.logger : logger;
         import dls.tools.command_tool : Commands;
         import dls.util.constants : Tr;
         import dls.util.document : Document;
         import dls.util.i18n : tr;
         import dls.util.json : convertFromJSON;
-        import dls.util.logger : logger;
         import std.algorithm : canFind, filter;
         import std.array : appender;
         import std.typecons : Nullable, nullable;

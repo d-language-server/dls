@@ -71,7 +71,7 @@ final abstract class Server
 
     static void cancel(JSONValue id)
     {
-        import dls.util.logger : logger;
+        import dls.protocol.logger : logger;
 
         const idString = id.toString();
 
@@ -84,8 +84,8 @@ final abstract class Server
 
     static void loop()
     {
+        import dls.protocol.logger : logger;
         import dls.util.communicator : communicator;
-        import dls.util.logger : logger;
         import std.algorithm : findSplit;
         import std.array : appender;
         import std.conv : to;
@@ -184,14 +184,15 @@ final abstract class Server
 
     private static void handleJSON(const char[] content)
     {
+        import dls.protocol.errors : InvalidParamsException;
         import dls.protocol.handlers : HandlerNotFoundException,
             NotificationHandler, RequestHandler, ResponseHandler, handler;
-        import dls.protocol.jsonrpc : ErrorCodes, InvalidParamsException,
-            NotificationMessage, RequestMessage, ResponseMessage, send, sendError;
+        import dls.protocol.jsonrpc : ErrorCodes, NotificationMessage,
+            RequestMessage, ResponseMessage, send, sendError;
+        import dls.protocol.logger : logger;
         import dls.protocol.state : initOptions;
         import dls.util.disposable_fiber : FiberDisposedException;
         import dls.util.json : convertFromJSON;
-        import dls.util.logger : logger;
         import std.algorithm : startsWith;
         import std.json : JSONException, parseJSON;
 

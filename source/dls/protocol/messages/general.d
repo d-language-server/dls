@@ -27,6 +27,7 @@ import std.json : JSONValue;
 InitializeResult initialize(InitializeParams params)
 {
     import dls.protocol.interfaces : CodeActionKind;
+    import dls.protocol.logger : logger;
     import dls.protocol.state : initOptions, initState;
     import dls.server : Server;
     import dls.tools.analysis_tool : AnalysisTool;
@@ -34,7 +35,6 @@ InitializeResult initialize(InitializeParams params)
     import dls.tools.format_tool : FormatTool;
     import dls.tools.symbol_tool : SymbolTool;
     import dls.tools.tool : Tool;
-    import dls.util.logger : logger;
     import dls.util.uri : Uri;
     import std.algorithm : map, sort, uniq;
     import std.array : array;
@@ -126,12 +126,12 @@ void initialized(JSONValue nothing)
         DidChangeWatchedFilesRegistrationOptions, FileSystemWatcher,
         Registration, RegistrationParams, WatchKind;
     import dls.protocol.jsonrpc : send;
+    import dls.protocol.logger : logger;
     import dls.protocol.messages.methods : Client, Workspace;
     import dls.protocol.state : initOptions, initState;
     import dls.server : Server;
     import dls.tools.analysis_tool : AnalysisTool;
     import dls.tools.tool : Tool;
-    import dls.util.logger : logger;
     import std.typecons : Nullable, nullable;
 
     debug
@@ -193,13 +193,13 @@ void initialized(JSONValue nothing)
 JSONValue shutdown(JSONValue nothing)
 {
     import dls.protocol.definitions : TextDocumentIdentifier;
+    import dls.protocol.logger : logger;
     import dls.server : Server;
     import dls.tools.analysis_tool : AnalysisTool;
     import dls.tools.command_tool : CommandTool;
     import dls.tools.format_tool : FormatTool;
     import dls.tools.symbol_tool : SymbolTool;
     import dls.util.document : Document;
-    import dls.util.logger : logger;
 
     logger.info("Shutting down server");
     Server.initialized = false;
@@ -219,8 +219,8 @@ JSONValue shutdown(JSONValue nothing)
 @("")
 void exit(JSONValue nothing)
 {
+    import dls.protocol.logger : logger;
     import dls.server : Server;
-    import dls.util.logger : logger;
 
     if (Server.initialized)
     {
