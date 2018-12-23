@@ -56,7 +56,31 @@ class StdioCommunicator : Communicator
 
     bool hasPendingData()
     {
-        return false;
+        version (Windows)
+        {
+            return false;
+        }
+        else version (Posix)
+        {
+            import core.stdc.stdio : EOF, getc, ungetc;
+            import core.sys.posix.fcntl : F_GETFL, F_SETFL, O_NONBLOCK, fcntl;
+
+            const flags = fcntl(stdin.fileno, F_GETFL);
+
+            if (fcntl(stdin.fileno, F_SETFL, flags | O_NONBLOCK) == -1)
+            {
+                return false;
+            }
+
+            const c = getc(stdin.getFP());
+            ungetc(c, stdin.getFP());
+            fcntl(stdin.fileno, F_SETFL, flags);
+            return c != EOF;
+        }
+        else
+        {
+            return false;
+        }
     }
 
     char[] read(size_t size)
