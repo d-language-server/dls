@@ -454,6 +454,7 @@ class SymbolTool : Tool
         import dls.protocol.logger : logger;
         import dls.protocol.messages.window : Util;
         import dls.util.constants : Tr;
+        import dls.util.disposable_fiber : DisposableFiber;
         import dub.platform : BuildPlatform;
         import std.algorithm : map;
         import std.array : appender, array;
@@ -491,6 +492,7 @@ class SymbolTool : Tool
 
         foreach (sub; d.project.rootPackage.subPackages)
         {
+            DisposableFiber.yield();
             auto p = d.project.packageManager.getSubPackage(d.project.rootPackage,
                     baseName(sub.path), true);
 
@@ -574,6 +576,7 @@ class SymbolTool : Tool
     void importGitSubmodules(const Uri uri)
     {
         import dls.protocol.logger : logger;
+        import dls.util.disposable_fiber : DisposableFiber;
         import std.algorithm : findSplit;
         import std.file : exists;
         import std.path : buildPath;
@@ -599,6 +602,7 @@ class SymbolTool : Tool
 
         foreach (line; File(gitModulesPath, "r").byLineCopy)
         {
+            DisposableFiber.yield();
             auto parts = findSplit(line, "=");
 
             switch (strip(parts[0]))
@@ -691,6 +695,7 @@ class SymbolTool : Tool
                 return;
             }
 
+            DisposableFiber.yield();
             auto name = symbol.name == "*constructor*" ? "this" : symbol.name;
 
             if (toUpper(name).canFind(upperQuery))
@@ -703,7 +708,6 @@ class SymbolTool : Tool
 
             foreach (s; symbol.getPartsByName(internString(null)))
             {
-                DisposableFiber.yield();
                 collectSymbolInformations(symbolUri, s, name);
             }
         }
@@ -712,6 +716,7 @@ class SymbolTool : Tool
         {
             if (Document.uris.map!q{a.path}.canFind(moduleUri.path))
             {
+                DisposableFiber.yield();
                 result.insert(symbol!SymbolInformation(moduleUri, query));
                 continue;
             }
@@ -722,7 +727,6 @@ class SymbolTool : Tool
             {
                 foreach (symbol; moduleSymbol.getPartsByName(internString(null)))
                 {
-                    DisposableFiber.yield();
                     collectSymbolInformations(moduleUri, symbol);
                 }
             }

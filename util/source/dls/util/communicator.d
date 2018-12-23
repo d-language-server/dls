@@ -136,7 +136,7 @@ class SocketCommunicator : Communicator
             _socket.blocking = true;
         }
 
-        return result > 0 && result != Socket.ERROR;
+        return result != Socket.ERROR && result > 0;
     }
 
     char[] read(size_t size)

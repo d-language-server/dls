@@ -262,7 +262,10 @@ package class SymbolVisitor(SymbolType) : ASTVisitor
         import std.typecons : Nullable, nullable;
         import std.uni : toUpper;
 
-        DisposableFiber.yield();
+        if (_upperQuery is null)
+        {
+            DisposableFiber.yield();
+        }
 
         if (_upperQuery is null || toUpper(name).canFind(_upperQuery))
         {
