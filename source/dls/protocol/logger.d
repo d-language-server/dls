@@ -20,15 +20,15 @@
 
 module dls.protocol.logger;
 
-import dls.protocol.interfaces : InitializeParams;
+import dls.protocol.interfaces : InitializeParams, MessageType;
 
 private shared _logger = new shared LspLogger();
 private immutable int[InitializeParams.Trace] traceToType;
-private immutable logMessageFormat = "[%.24s] %s";
+private immutable string[MessageType] messageSeverity;
+private immutable logMessageFormat = "[%.24s] [%s] %s";
 
 shared static this()
 {
-    import dls.protocol.interfaces : MessageType;
     import std.conv : to;
     import std.experimental.logger : LogLevel, globalLogLevel;
 
@@ -39,6 +39,13 @@ shared static this()
         InitializeParams.Trace.off      : 0,
         InitializeParams.Trace.messages : MessageType.warning.to!int,
         InitializeParams.Trace.verbose  : MessageType.log.to!int
+    ];
+
+    messageSeverity = [
+        MessageType.log     : "L",
+        MessageType.info    : "I",
+        MessageType.warning : "W",
+        MessageType.error   : "E"
     ];
     //dfmt on
 }
@@ -104,7 +111,8 @@ private shared class LspLogger
             synchronized
             {
                 auto log = File(initOptions.logFile, firstLog ? "w" : "a");
-                log.writefln(logMessageFormat, Clock.currTime.toString(), message);
+                log.writefln(logMessageFormat, Clock.currTime.toString(),
+                        messageSeverity[type], message);
                 log.flush();
             }
 
@@ -116,8 +124,8 @@ private shared class LspLogger
 
         if (type <= _messageType)
         {
-            send(Window.logMessage, new LogMessageParams(type,
-                    format(logMessageFormat, Clock.currTime.toString(), message)));
+            send(Window.logMessage, new LogMessageParams(type, format(logMessageFormat,
+                    Clock.currTime.toString(), messageSeverity[type], message)));
         }
     }
 }
