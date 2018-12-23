@@ -66,10 +66,32 @@ final abstract class Server
     import std.container : DList;
     import std.json : JSONValue;
 
-    static bool initialized;
+    static bool _initialized;
     static bool exit;
     private static DisposableFiber[string] _requestsFibers;
     private static DList!DisposableFiber _fibers;
+
+    @property static bool initialized()
+    {
+        return _initialized;
+    }
+
+    @property static void initialized(bool i)
+    {
+        import dls.protocol.logger : logger;
+
+        _initialized = i;
+
+        if (!_initialized)
+        {
+            logger.info("Cancelling pending requests");
+
+            foreach (fiber; _requestsFibers.byValue)
+            {
+                fiber.dispose();
+            }
+        }
+    }
 
     static void cancel(JSONValue id)
     {
@@ -215,7 +237,7 @@ final abstract class Server
                         _requestsFibers[request.id.toString()] = DisposableFiber.getThis();
                         logger.info("Received request %s: %s", request.id, request.method);
 
-                        if (initialized || request.method == "initialize")
+                        if (_initialized || request.method == "initialize")
                         {
                             send(request.id,
                                     handler!RequestHandler(request.method)(request.params));
@@ -230,7 +252,7 @@ final abstract class Server
                         notification = convertFromJSON!NotificationMessage(json);
                         logger.info("Received notification: %s", notification.method);
 
-                        if (initialized || notification.method == "exit")
+                        if (_initialized || notification.method == "exit")
                         {
                             handler!NotificationHandler(notification.method)(notification.params);
                         }
