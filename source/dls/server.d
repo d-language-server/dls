@@ -147,9 +147,8 @@ final abstract class Server
                 continue;
             }
 
-            auto fiber = new DisposableFiber(() {
-                handleJSON(communicator.read(headers["Content-Length"].strip().to!size_t));
-            });
+            const content = communicator.read(headers["Content-Length"].strip().to!size_t);
+            auto fiber = new DisposableFiber(() { handleJSON(content); });
 
             fiber.call();
             _fibers.insertBack(fiber);
