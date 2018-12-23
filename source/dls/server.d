@@ -77,7 +77,8 @@ final abstract class Server
 
         const idString = id.toString();
 
-        if (idString in _requestsFibers)
+        if (idString in _requestsFibers
+                && _requestsFibers[idString].state != DisposableFiber.State.TERM)
         {
             logger.info("Cancelling request %s", idString);
             _requestsFibers[idString].dispose();
