@@ -247,6 +247,7 @@ final abstract class Server
             }
             catch (FiberDisposedException)
             {
+                sendError(ErrorCodes.requestCancelled, request, JSONValue());
             }
             catch (JSONException e)
             {
