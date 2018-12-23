@@ -20,6 +20,8 @@
 
 module dls.server;
 
+private immutable contentLengthHeaderName = "Content-Length";
+
 shared static this()
 {
     import dls.protocol.handlers : pushHandler;
@@ -141,13 +143,13 @@ final abstract class Server
                 continue;
             }
 
-            if ("Content-Length" !in headers)
+            if (contentLengthHeaderName !in headers)
             {
-                logger.error("No valid Content-Length section in header");
+                logger.error("No valid %s section in header", contentLengthHeaderName);
                 continue;
             }
 
-            const content = communicator.read(headers["Content-Length"].strip().to!size_t);
+            const content = communicator.read(headers[contentLengthHeaderName].strip().to!size_t);
             auto fiber = new DisposableFiber(() { handleJSON(content); });
 
             fiber.call();
