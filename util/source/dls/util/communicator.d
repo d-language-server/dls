@@ -47,20 +47,18 @@ interface Communicator
 
 class StdioCommunicator : Communicator
 {
-    import std.stdio : stdin, stdout;
-
     bool hasData()
     {
+        import std.stdio : stdin;
+
         return !stdin.eof;
     }
 
     bool hasPendingData()
     {
-        version (Windows)
-        {
-            return false;
-        }
-        else version (Posix)
+        import std.stdio : stdin;
+
+        version (Posix)
         {
             import core.stdc.stdio : EOF, getc, ungetc;
             import core.sys.posix.fcntl : F_GETFL, F_SETFL, O_NONBLOCK, fcntl;
@@ -85,6 +83,8 @@ class StdioCommunicator : Communicator
 
     char[] read(size_t size)
     {
+        import std.stdio : stdin;
+
         static char[] buffer;
         buffer.length = size;
         return stdin.rawRead(buffer);
@@ -92,11 +92,15 @@ class StdioCommunicator : Communicator
 
     void write(const char[] data)
     {
+        import std.stdio : stdout;
+
         stdout.rawWrite(data);
     }
 
     void flush()
     {
+        import std.stdio : stdout;
+
         stdout.flush();
     }
 }

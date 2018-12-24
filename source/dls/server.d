@@ -173,7 +173,7 @@ final abstract class Server
             }
 
             const content = communicator.read(headers[contentLengthHeaderName].strip().to!size_t);
-            auto fiber = new DisposableFiber(() { handleJSON(content); });
+            auto fiber = new DisposableFiber({ handleJSON(content); });
 
             fiber.call();
             _fibers.insertBack(fiber);
