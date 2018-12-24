@@ -119,6 +119,9 @@ class AnalysisTool : Tool
         import std.algorithm : each;
 
         SymbolTool.instance.workspacesFilesUris.each!((uri) {
+            import dls.util.disposable_fiber : DisposableFiber;
+
+            DisposableFiber.yield();
             send(TextDocument.publishDiagnostics, new PublishDiagnosticsParams(uri,
                 AnalysisTool.instance.diagnostics(uri)));
         });

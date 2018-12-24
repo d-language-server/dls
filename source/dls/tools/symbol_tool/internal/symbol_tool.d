@@ -1281,6 +1281,7 @@ class SymbolTool : Tool
     {
         import ddoc : Lexer, expand;
         import dls.protocol.definitions : MarkupKind;
+        import dls.util.disposable_fiber : DisposableFiber;
         import std.array : appender, replace;
         import std.regex : regex, split;
 
@@ -1289,6 +1290,8 @@ class SymbolTool : Tool
 
         foreach (dad; detailsAndDocumentations)
         {
+            DisposableFiber.yield();
+
             if (putSeparator)
             {
                 result ~= "\n\n---\n\n";
