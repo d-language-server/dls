@@ -47,6 +47,8 @@ before_deploy:
   - zip -0 dls-${TRAVIS_TAG:-untagged}.$TRAVIS_OS_NAME.$ARCH.zip dls LICENSE.txt
 deploy:
   provider: releases
+  edge:
+    branch: v1.10.5
   api_key: $GITHUB_API_KEY
   file_glob: true
   file: dls-*.zip

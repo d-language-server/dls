@@ -4,6 +4,13 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+### 0.20.0
+- Added support for druntime + phobos installations in ~/dlang on Posix systems
+- Added limited support for FreeBSD using binary releases using the Linux compatibility module
+- Added option to list all symbols from a document, including local variables and parameters
+- Added support for cancelling long running operations
+- Fixed formatting only using `.editorconfig` files present at a project root
+
 #### 0.19.2
 - Fixed `dls:bootstrap` not printing a newline after dls' path ([#18](https://github.com/d-language-server/dls/issues/18))
 
