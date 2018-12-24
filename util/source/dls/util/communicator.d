@@ -113,9 +113,11 @@ class SocketCommunicator : Communicator
 
     this(ushort port)
     {
-        import std.socket : AddressInfo, InternetAddress, TcpSocket;
+        import std.socket : AddressInfo, InternetAddress, SocketOption,
+            SocketOptionLevel, TcpSocket;
 
         _socket = new TcpSocket(new InternetAddress("localhost", port));
+        _socket.setOption(SocketOptionLevel.TCP, SocketOption.TCP_NODELAY, 1);
     }
 
     bool hasData()
