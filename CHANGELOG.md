@@ -4,6 +4,9 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.20.1
+- Enhanced socket communication by setting the `TCP_NODELAY` flag
+
 ### 0.20.0
 - Added support for druntime + phobos installations in ~/dlang on Posix systems
 - Added limited support for FreeBSD using binary releases using the Linux compatibility module

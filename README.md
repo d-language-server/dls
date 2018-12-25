@@ -80,6 +80,8 @@ Some command line options exist to control the behavior of DLS:
 - `--stdio`: use standard input and output streams for communication
 - `--socket=PORT` or `--tcp=PORT`: use a socket connecting on the specified port for communication
 
+On Windows, using Sockets is recommended for DLS to be able to cancel requests when asked to.
+
 ## Installing
 
 You can run `dub fetch dls` and then `dub run dls:bootstrap` to install dls.
