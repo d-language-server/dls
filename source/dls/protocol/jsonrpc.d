@@ -113,12 +113,12 @@ string send(string method, Nullable!JSONValue params = Nullable!JSONValue())
     {
         const id = randomUUID().toString();
         pushHandler(id, method);
-        logger.info(`Sending request "%s": %s`, id, method);
+        logger.log(`Sending request "%s": %s`, id, method);
         send!RequestMessage(JSONValue(id), method, params, Nullable!ResponseError());
         return id;
     }
 
-    logger.info("Sending notification: %s", method);
+    logger.log("Sending notification: %s", method);
     send!NotificationMessage(JSONValue(), method, params, Nullable!ResponseError());
     return null;
 }
@@ -138,7 +138,7 @@ void send(JSONValue id, Nullable!JSONValue result,
 {
     import dls.protocol.logger : logger;
 
-    logger.info("Sending response with %s for request %s", error.isNull ? "result" : "error", id);
+    logger.log("Sending response with %s for request %s", error.isNull ? "result" : "error", id);
     send!ResponseMessage(id, null, result, error);
 }
 

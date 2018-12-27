@@ -35,7 +35,8 @@ shared static this()
 
     initialSetup();
 
-    foreach (modName; AliasSeq!("general", "client", "text_document", "window", "workspace"))
+    foreach (modName; AliasSeq!("general", "client", "text_document", "window",
+            "workspace", "other"))
     {
         mixin("import dls.protocol.messages." ~ modName ~ ";");
         mixin("alias mod = dls.protocol.messages." ~ modName ~ ";");
@@ -235,7 +236,7 @@ final abstract class Server
                     {
                         request = convertFromJSON!RequestMessage(json);
                         _requestsFibers[request.id.toString()] = DisposableFiber.getThis();
-                        logger.info("Received request %s: %s", request.id, request.method);
+                        logger.log("Received request %s: %s", request.id, request.method);
 
                         if (_initialized || request.method == "initialize")
                         {
@@ -250,7 +251,7 @@ final abstract class Server
                     else
                     {
                         notification = convertFromJSON!NotificationMessage(json);
-                        logger.info("Received notification: %s", notification.method);
+                        logger.log("Received notification: %s", notification.method);
 
                         if (_initialized || notification.method == "exit")
                         {
@@ -261,7 +262,7 @@ final abstract class Server
                 else
                 {
                     auto response = convertFromJSON!ResponseMessage(json);
-                    logger.info("Received response for request %s", response.id);
+                    logger.log("Received response for request %s", response.id);
 
                     if (response.error.isNull)
                     {

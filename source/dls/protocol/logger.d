@@ -38,11 +38,11 @@ shared static this()
     traceToType = [
         InitializeParams.Trace.off      : 0,
         InitializeParams.Trace.messages : MessageType.warning.to!int,
-        InitializeParams.Trace.verbose  : MessageType.log.to!int
+        InitializeParams.Trace.verbose  : MessageType.info.to!int
     ];
 
     messageSeverity = [
-        MessageType.log     : "L",
+        MessageType.log     : "D",
         MessageType.info    : "I",
         MessageType.warning : "W",
         MessageType.error   : "E"
@@ -58,6 +58,7 @@ shared static this()
 private shared class LspLogger
 {
     import dls.protocol.interfaces : MessageType;
+    import std.format : format;
 
     private int _messageType;
 
@@ -66,24 +67,23 @@ private shared class LspLogger
         _messageType = traceToType[t];
     }
 
+    void log(Args...)(const string message, const Args args) const
+    {
+        sendMessage(format(message, args), MessageType.log);
+    }
+
     void info(Args...)(const string message, const Args args) const
     {
-        import std.format : format;
-
         sendMessage(format(message, args), MessageType.info);
     }
 
     void warning(Args...)(const string message, const Args args) const
     {
-        import std.format : format;
-
         sendMessage(format(message, args), MessageType.warning);
     }
 
     void error(Args...)(const string message, const Args args) const
     {
-        import std.format : format;
-
         sendMessage(format(message, args), MessageType.error);
     }
 
