@@ -90,14 +90,26 @@ DLS will automatically update itself whenever a new version is out.
 
 ### Notes about FreeBSD
 
-DLS should be usable using FreeBSD's Linux binary compatibility system.
+DLS is usable using FreeBSD's Linux binary compatibility system.
 The main steps to enable Linux binary compatibility are:
 - Adding `enable_linux="YES"` to `/etc/rc.conf`
-- `kldload linux` (even on x86_64 systems; the 64bit Linux binaries segfault on FreeBSD)
-- `pkg install emulators/linux_base-c7`
-- `pkg install ftp/linux-c7-curl`
+- `kldload linux` (only the 32bit binaries will be used; the 64bit Linux binaries segfault on FreeBSD)
+- `pkg install emulators/linux_base-c7` (or `emulators/linux_base-c6`)
+- `pkg install ftp/linux-c7-curl` (or `ftp/linux-c6-curl`)
+- Adding the following lines to `/etc/fstab`:
+    ```
+    linprocfs	/compat/linux/proc		linprocfs	rw				0	0
+    linsysfs	/compat/linux/sys		linsysfs	rw				0	0
+    tmpfs		/compat/linux/dev/shm	tmpfs		rw,mode=1777	0	0
+    ```
+- Running:
+    ```shell
+    mount /compat/linux/proc
+    mount /compat/linux/sys
+    mount /compat/linux/dev/shm
+    ```
 
-More detailed information can be found in the [FreeBSD documentation](https://www.freebsd.org/doc/en_US.ISO8859-1/books/handbook/linuxemu-lbc-install.html).
+More detailed information can be found in the [FreeBSD documentation](https://www.freebsd.org/doc/handbook/linuxemu-lbc-install.html).
 
 ## Client side configuration
 
