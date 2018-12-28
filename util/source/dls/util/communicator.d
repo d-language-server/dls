@@ -47,6 +47,24 @@ interface Communicator
 
 class StdioCommunicator : Communicator
 {
+    import std.parallelism : Task;
+
+    private Task!(readChar)* _background;
+
+    static int readChar()
+    {
+        import std.stdio : EOF, stdin;
+
+        static char[1] buffer;
+        auto result = stdin.rawRead(buffer);
+        return result.length > 0 ? result[0] : EOF;
+    }
+
+    this()
+    {
+        startBackground();
+    }
+
     bool hasData()
     {
         import std.stdio : stdin;
@@ -56,38 +74,29 @@ class StdioCommunicator : Communicator
 
     bool hasPendingData()
     {
-        import std.stdio : stdin;
-
-        version (Posix)
-        {
-            import core.stdc.stdio : EOF, getc, ungetc;
-            import core.sys.posix.fcntl : F_GETFL, F_SETFL, O_NONBLOCK, fcntl;
-
-            const flags = fcntl(stdin.fileno, F_GETFL);
-
-            if (fcntl(stdin.fileno, F_SETFL, flags | O_NONBLOCK) == -1)
-            {
-                return false;
-            }
-
-            const c = getc(stdin.getFP());
-            ungetc(c, stdin.getFP());
-            fcntl(stdin.fileno, F_SETFL, flags);
-            return c != EOF;
-        }
-        else
-        {
-            return false;
-        }
+        return _background.done && hasData();
     }
 
     char[] read(size_t size)
     {
         import std.stdio : stdin;
 
+        if (size == 0)
+        {
+            return [];
+        }
+
         static char[] buffer;
         buffer.length = size;
-        return stdin.rawRead(buffer);
+        buffer[0] = cast(char) _background.yieldForce();
+
+        if (size > 1)
+        {
+            stdin.rawRead(buffer[1 .. $]);
+        }
+
+        startBackground();
+        return buffer;
     }
 
     void write(const char[] data)
@@ -102,6 +111,14 @@ class StdioCommunicator : Communicator
         import std.stdio : stdout;
 
         stdout.flush();
+    }
+
+    private void startBackground()
+    {
+        import std.parallelism : task;
+
+        _background = task!readChar;
+        _background.executeInNewThread();
     }
 }
 
