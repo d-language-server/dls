@@ -103,3 +103,15 @@ string normalized(const string path)
 
     return res.asNormalizedPath.to!string;
 }
+
+int filenameCmp(const Uri a, const Uri b)
+{
+    import std.path : filenameCmp;
+
+    return filenameCmp(a.path, b.path);
+}
+
+bool sameFile(const Uri a, const Uri b)
+{
+    return filenameCmp(a, b) == 0;
+}

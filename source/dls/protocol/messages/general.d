@@ -35,7 +35,7 @@ InitializeResult initialize(InitializeParams params)
     import dls.tools.format_tool : FormatTool;
     import dls.tools.symbol_tool : SymbolTool;
     import dls.tools.tool : Tool;
-    import dls.util.uri : Uri;
+    import dls.util.uri : Uri, filenameCmp, sameFile;
     import std.algorithm : map, sort, uniq;
     import std.array : array;
     import std.typecons : Nullable, nullable;
@@ -74,8 +74,8 @@ InitializeResult initialize(InitializeParams params)
         uris ~= params.workspaceFolders.map!(wf => new Uri(wf.uri)).array;
     }
 
-    foreach (uri; uris.sort!q{a.path < b.path}
-            .uniq!q{a.path == b.path})
+    foreach (uri; uris.sort!((a, b) => filenameCmp(a, b) < 0)
+            .uniq!sameFile)
     {
         Tool.updateConfig(uri, JSONValue());
         SymbolTool.instance.importPath(uri);

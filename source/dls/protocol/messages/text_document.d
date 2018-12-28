@@ -34,7 +34,7 @@ void didOpen(DidOpenTextDocumentParams params)
     import dls.tools.analysis_tool : AnalysisTool;
     import dls.tools.symbol_tool : SymbolTool;
     import dls.util.document : Document;
-    import dls.util.uri : Uri;
+    import dls.util.uri : Uri, sameFile;
     import std.algorithm : canFind;
     import std.uni : toLower;
 
@@ -43,7 +43,7 @@ void didOpen(DidOpenTextDocumentParams params)
         auto uri = new Uri(params.textDocument.uri);
         logger.info("Document opened: %s", uri.path);
 
-        if (!SymbolTool.instance.workspacesFilesUris.canFind!q{a.path == b.path}(uri))
+        if (!SymbolTool.instance.workspacesFilesUris.canFind!sameFile(uri))
         {
             send(TextDocument.publishDiagnostics, new PublishDiagnosticsParams(uri,
                     AnalysisTool.instance.diagnostics(uri)));
@@ -95,14 +95,14 @@ void didClose(DidCloseTextDocumentParams params)
     import dls.protocol.messages.methods : TextDocument;
     import dls.tools.symbol_tool : SymbolTool;
     import dls.util.document : Document;
-    import dls.util.uri : Uri;
+    import dls.util.uri : Uri, sameFile;
     import std.algorithm : canFind;
 
     auto uri = new Uri(params.textDocument.uri);
     logger.info("Document closed: %s", uri.path);
     Document.close(params.textDocument);
 
-    if (!SymbolTool.instance.workspacesFilesUris.canFind!q{a.path == b.path}(uri))
+    if (!SymbolTool.instance.workspacesFilesUris.canFind!sameFile(uri))
     {
         send(TextDocument.publishDiagnostics, new PublishDiagnosticsParams(uri, []));
     }

@@ -141,7 +141,7 @@ void didChangeWatchedFiles(DidChangeWatchedFilesParams params)
     import dls.tools.analysis_tool : AnalysisTool;
     import dls.tools.symbol_tool : SymbolTool;
     import dls.util.document : Document;
-    import dls.util.uri : Uri;
+    import dls.util.uri : Uri, sameFile;
     import std.algorithm : canFind, filter;
     import std.file : exists, isFile;
     import std.path : baseName, dirName, extension;
@@ -199,14 +199,12 @@ void didChangeWatchedFiles(DidChangeWatchedFilesParams params)
             break;
         }
 
-        enum pathComp = q{a.path == b.path};
-
         switch (extension(uri.path))
         {
         case ".d", ".di":
             if (event.type != FileChangeType.deleted
-                    && !Document.uris.canFind!pathComp(uri)
-                    && SymbolTool.instance.workspacesFilesUris.canFind!pathComp(uri))
+                    && !Document.uris.canFind!sameFile(uri)
+                    && SymbolTool.instance.workspacesFilesUris.canFind!sameFile(uri))
             {
                 send(TextDocument.publishDiagnostics, new PublishDiagnosticsParams(uri,
                         AnalysisTool.instance.diagnostics(uri)));
