@@ -142,9 +142,9 @@ void didChangeWatchedFiles(DidChangeWatchedFilesParams params)
     import dls.tools.symbol_tool : SymbolTool;
     import dls.util.document : Document;
     import dls.util.uri : Uri, sameFile;
-    import std.algorithm : canFind, filter;
+    import std.algorithm : canFind, filter, startsWith;
     import std.file : exists, isFile;
-    import std.path : baseName, dirName, extension;
+    import std.path : baseName, dirName, extension, pathSplitter;
 
     foreach (event; params.changes.filter!(event => event.type == FileChangeType.deleted))
     {
@@ -156,10 +156,20 @@ void didChangeWatchedFiles(DidChangeWatchedFilesParams params)
         }
     }
 
-    foreach (event; params.changes)
+    outer: foreach (event; params.changes)
     {
         auto uri = new Uri(event.uri);
-        auto dirUri = Uri.fromPath(dirName(uri.path));
+        auto dirPath = dirName(uri.path);
+
+        foreach (part; pathSplitter(dirPath))
+        {
+            if (part.startsWith('.'))
+            {
+                continue outer;
+            }
+        }
+
+        auto dirUri = Uri.fromPath(dirPath);
 
         logger.info("Resource %s: %s", event.type, uri.path);
 
@@ -171,8 +181,7 @@ void didChangeWatchedFiles(DidChangeWatchedFilesParams params)
         switch (baseName(uri.path))
         {
         case "dub.json", "dub.sdl":
-            if (baseName(dirName(uri.path)) != ".dub"
-                    && event.type != FileChangeType.deleted)
+            if (event.type != FileChangeType.deleted)
             {
                 SymbolTool.instance.importDubProject(dirUri);
             }
