@@ -21,10 +21,8 @@
 int main(string[] args)
 {
     import dls.server : Server;
-    import dls.util.communicator : Communicator, SocketCommunicator,
-        StdioCommunicator, communicator;
+    import dls.util.communicator : SocketCommunicator, StdioCommunicator, communicator;
     import std.getopt : getopt;
-    import std.stdio : stdout;
 
     bool stdio = true;
     ushort port;
