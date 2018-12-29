@@ -41,7 +41,18 @@ Packages used (the stuff doing the actual hard work):
 
 ## Usage
 
-Some editors may need DLS to be [installed manually](#installing) (don't worry, it's easy).
+### Installation
+
+If you are using VSCode or Atom, you can [skip this step](#some-common-editors) and install the corresponding extension.
+
+Simply run:
+```shell
+dub fetch dls
+dub run dls:bootstrap
+```
+to install to download and install the latest binary release.
+The second command will output the executable's path.
+DLS will automatically update itself whenever a new version is out.
 
 ### Some common editors
 
@@ -49,51 +60,45 @@ Some editors may need DLS to be [installed manually](#installing) (don't worry, 
 - Atom: [install the package](https://atom.io/packages/ide-dlang)
 - Sublime Text (using [tomv654's LSP client](https://github.com/tomv564/LSP)):
     ```json
-    "clients":
     {
-        "dls":
-        {
-            "command":
-            [
-                "[path to dls executable]"
-            ],
-            "enabled": true,
-            "languageId": "d",
-            "scopes":
-            [
-                "source.d"
-            ],
-            "syntaxes":
-            [
-                "Packages/D/D.sublime-syntax"
-            ]
+        "clients": {
+            "dls": {
+                "command": ["<PATH TO DLS EXECUTABLE>"],
+                "enabled": true,
+                "languageId": "d",
+                "scopes": ["source.d"],
+                "syntaxes": ["Packages/D/D.sublime-syntax"]
+            }
         }
     }
     ```
+- Vim/Neovim (using [autozimu's LanguageClient-neovim](https://github.com/autozimu/LanguageClient-neovim)):
+    ```vim
+    let g:LanguageClient_serverCommands = {
+        \ 'd': ['<PATH TO DLS EXECUTABLE>']
+        \ }
+    ```
+- Emacs (using [d-mode](https://github.com/Emacs-D-Mode-Maintainers/Emacs-D-Mode) and [lsp-mode](https://github.com/emacs-lsp/lsp-mode)):
+    ```elisp
+    (require 'lsp)
+    (add-hook 'd-mode-hook #'lsp)
+    (lsp-register-client
+        (make-lsp-client
+            :new-connection (lsp-stdio-connection '("<PATH TO DLS EXECUTABLE>"))
+            :major-modes '(d-mode)
+            :server-id 'dls))
+    ```
 
-DLS should work with other editors, although your mileage may vary since it's moslty tested on the ones above.
 If it's not working with your editor of choice, [submit an issue](https://github.com/d-language-server/dls/issues/new)!
-
-### Command line options
-
-Some command line options exist to control the behavior of DLS:
-- `--stdio`: use standard input and output streams for communication
-- `--socket=PORT` or `--tcp=PORT`: use a socket connecting on the specified port for communication
-
-## Installing
-
-You can run `dub fetch dls` and then `dub run dls:bootstrap` to install dls.
-The second command will output a path that will point to the DLS executable.
-DLS will automatically update itself whenever a new version is out.
 
 ### Notes about FreeBSD
 
 DLS is usable using FreeBSD's Linux binary compatibility system.
 The main steps to enable Linux binary compatibility are:
 - Adding `enable_linux="YES"` to `/etc/rc.conf`
-- `kldload linux` (only the 32bit binaries will be used; the 64bit Linux binaries segfault on FreeBSD)
-- `pkg install emulators/linux_base-c7` (or `emulators/linux_base-c6`)
-- `pkg install ftp/linux-c7-curl` (or `ftp/linux-c6-curl`)
+- Running `kldload linux` (only the 32bit binaries will be used; the 64bit Linux binaries crash on FreeBSD)
+- Running `pkg install emulators/linux_base-c7` (or `emulators/linux_base-c6`)
+- Running `pkg install ftp/linux-c7-curl` (or `ftp/linux-c6-curl`)
 - Adding the following lines to `/etc/fstab`:
     ```
     linprocfs	/compat/linux/proc		linprocfs	rw				0	0
@@ -108,6 +113,12 @@ The main steps to enable Linux binary compatibility are:
     ```
 
 More detailed information can be found in the [FreeBSD documentation](https://www.freebsd.org/doc/handbook/linuxemu-lbc-install.html).
+
+### Command line options
+
+Some command line options exist to control the behavior of DLS:
+- `--stdio`: use standard input and output streams for communication (default behavior)
+- `--socket=<PORT>` or `--tcp=<PORT>`: use a socket to connect on the specified port for communication
 
 ## Client side configuration
 
@@ -175,6 +186,7 @@ The client should watch these files for the server to work properly:
 - `dub.selections.json`
 - `dub.json`
 - `dub.sdl`
+- `.gitmodules`
 - `*.ini`
 
 If the client supports dynamic registration of the `workspace/didChangeWatchedFiles` method, then the server will automatically register file watching.
@@ -216,5 +228,5 @@ Adding new strings is straightforward, simply add new entries in the `message` o
 
 ### Which branch should be targeted by pull requests ?
 
-Is it work on an upcoming new feature ? Then the `master` branch should be targeted.
-Is it a fix for a bug you've encountered ? Then the latest `release/v[MAJOR].[MINOR].x` branch should be targeted.
+Is it work on a new feature ? Then the `master` branch should be targeted.
+Is it a fix ? Then the latest `release/v<MAJOR>.<MINOR>.x` branch should be targeted.
