@@ -101,7 +101,8 @@ package class SymbolVisitor(SymbolType) : ASTVisitor
 
     override void visit(const FunctionDeclaration dec)
     {
-        visitSymbol(dec, SymbolKind.function_, _listLocalSymbols, getFunctionEndLocation(dec));
+        visitSymbol(dec, SymbolKind.function_, _listLocalSymbols,
+                getFunctionEndLocation(dec.functionBody));
     }
 
     override void visit(const Constructor dec)
@@ -196,21 +197,11 @@ package class SymbolVisitor(SymbolType) : ASTVisitor
         dec.accept(this);
     }
 
-    private size_t getFunctionEndLocation(A : ASTNode)(const A dec)
+    private size_t getFunctionEndLocation(const FunctionBody functionBody)
     {
-        if (dec.functionBody !is null)
-        {
-            if (dec.functionBody.bodyStatement !is null)
-            {
-                return dec.functionBody.bodyStatement.blockStatement is null ? 0
-                    : dec.functionBody.bodyStatement.blockStatement.endLocation;
-            }
-
-            return dec.functionBody.blockStatement is null ? 0
-                : dec.functionBody.blockStatement.endLocation;
-        }
-
-        return 0;
+        return functionBody is null || functionBody.specifiedFunctionBody is null
+            || functionBody.specifiedFunctionBody.blockStatement is null
+            ? 0 : functionBody.specifiedFunctionBody.blockStatement.endLocation;
     }
 
     private void visitSymbol(A : ASTNode)(const A dec, SymbolKind kind,
@@ -228,7 +219,8 @@ package class SymbolVisitor(SymbolType) : ASTVisitor
 
     private void visitFunction(A : ASTNode)(const A dec, const string name)
     {
-        tryInsert(name, SymbolKind.function_, getRange(dec), getFunctionEndLocation(dec));
+        tryInsert(name, SymbolKind.function_, getRange(dec),
+                getFunctionEndLocation(dec.functionBody));
 
         if (_listLocalSymbols)
         {
