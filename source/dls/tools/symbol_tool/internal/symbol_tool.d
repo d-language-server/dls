@@ -153,7 +153,19 @@ class SymbolTool : Tool
         _instance = new SymbolTool();
         _instance.importDirectories(defaultImportPaths.filter!exists.array);
         _instance.addConfigHook("importPaths", (const Uri uri) {
-            _instance.importDirectories(getConfig(uri).symbol.importPaths);
+            import std.path : buildPath, isAbsolute;
+
+            auto paths = getConfig(uri).symbol.importPaths;
+
+            foreach (ref path; paths)
+            {
+                if (!isAbsolute(path))
+                {
+                    path = buildPath(uri.path, path);
+                }
+            }
+
+            _instance.importDirectories(paths);
         });
     }
 

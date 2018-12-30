@@ -4,6 +4,9 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.20.2
+- Fixed relative import paths not being handled ([#19](https://github.com/d-language-server/dls/issues/19))
+
 #### 0.20.1
 - Enhanced socket communication by setting the `TCP_NODELAY` flag
 
