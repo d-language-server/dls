@@ -4,47 +4,18 @@
         "jsonrpc": "2.0",
         "result": {
             "capabilities": {
-                "codeActionProvider": true,
-                "completionProvider": {
-                    "resolveProvider": true,
-                    "triggerCharacters": [
-                        "."
-                    ]
-                },
-                "definitionProvider": true,
                 "documentFormattingProvider": true,
-                "documentHighlightProvider": true,
                 "documentOnTypeFormattingProvider": {
                     "firstTriggerCharacter": ";"
                 },
                 "documentRangeFormattingProvider": true,
-                "documentSymbolProvider": true,
-                "executeCommandProvider": {
-                    "commands": [
-                        "workspaceEdit",
-                        "codeAction.analysis.disableCheck"
-                    ]
-                },
-                "hoverProvider": true,
-                "referencesProvider": true,
-                "renameProvider": {
-                    "prepareProvider": true
-                },
                 "textDocumentSync": {
                     "change": 2,
                     "openClose": true,
                     "save": {
                         "includeText": false
                     }
-                },
-                "typeDefinitionProvider": true,
-                "workspace": {
-                    "workspaceFolders": {
-                        "changeNotifications": true,
-                        "supported": true
-                    }
-                },
-                "workspaceSymbolProvider": true
+                }
             }
         }
     }

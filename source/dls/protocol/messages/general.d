@@ -35,6 +35,7 @@ InitializeResult initialize(InitializeParams params)
     import dls.tools.format_tool : FormatTool;
     import dls.tools.symbol_tool : SymbolTool;
     import dls.tools.tool : Tool;
+    import dls.util.json : convertToJSON;
     import dls.util.uri : Uri, filenameCmp, sameFile;
     import std.algorithm : map, sort, uniq;
     import std.array : array;
@@ -92,27 +93,76 @@ InitializeResult initialize(InitializeParams params)
         textDocumentSync = new TextDocumentSyncOptions(true.nullable,
                 TextDocumentSyncKind.incremental.nullable);
         textDocumentSync.save = new SaveOptions(false.nullable);
-        hoverProvider = initOptions.capabilities.hover;
-        completionProvider = initOptions.capabilities.completion
-            ? new CompletionOptions(true.nullable, ["."].nullable) : Nullable!CompletionOptions();
-        definitionProvider = initOptions.capabilities.definition;
-        typeDefinitionProvider = initOptions.capabilities.definition;
-        referencesProvider = initOptions.capabilities.references;
-        documentHighlightProvider = initOptions.capabilities.documentHighlight;
-        documentSymbolProvider = initOptions.capabilities.documentSymbol;
-        workspaceSymbolProvider = initOptions.capabilities.workspaceSymbol;
-        codeActionProvider = initOptions.capabilities.codeAction;
-        documentFormattingProvider = initOptions.capabilities.documentFormatting;
-        documentRangeFormattingProvider = initOptions.capabilities.documentRangeFormatting;
-        documentOnTypeFormattingProvider = initOptions.capabilities.documentOnTypeFormatting
-            ? new DocumentOnTypeFormattingOptions(";") : Nullable!DocumentOnTypeFormattingOptions();
-        renameProvider = initOptions.capabilities.rename
-            ? new RenameOptions(true.nullable) : Nullable!RenameOptions();
-        executeCommandProvider = initOptions.capabilities.codeAction
-            ? new ExecuteCommandOptions(CommandTool.instance.commands)
-            : Nullable!ExecuteCommandOptions();
-        workspace = new ServerCapabilities.Workspace(new ServerCapabilities.Workspace.WorkspaceFolders(true.nullable,
-                JSONValue(true).nullable).nullable);
+
+        if (!params.capabilities.textDocument.isNull)
+        {
+            const textDocCaps = params.capabilities.textDocument.get();
+
+            if (!textDocCaps.hover.isNull)
+                hoverProvider = initOptions.capabilities.hover;
+
+            if (!textDocCaps.completion.isNull)
+                completionProvider = initOptions.capabilities.completion
+                    ? new CompletionOptions(true.nullable, ["."].nullable)
+                    : Nullable!CompletionOptions();
+
+            if (!textDocCaps.definition.isNull)
+                definitionProvider = initOptions.capabilities.definition;
+
+            if (!textDocCaps.typeDefinition.isNull)
+                typeDefinitionProvider = JSONValue(initOptions.capabilities.definition);
+
+            if (!textDocCaps.references.isNull)
+                referencesProvider = initOptions.capabilities.references;
+
+            if (!textDocCaps.documentHighlight.isNull)
+                documentHighlightProvider = initOptions.capabilities.documentHighlight;
+
+            if (!textDocCaps.documentSymbol.isNull)
+                documentSymbolProvider = initOptions.capabilities.documentSymbol;
+
+            if (!textDocCaps.codeAction.isNull)
+                codeActionProvider = JSONValue(initOptions.capabilities.codeAction);
+
+            if (!textDocCaps.formatting.isNull)
+                documentFormattingProvider = initOptions.capabilities.documentFormatting;
+
+            if (!textDocCaps.rangeFormatting.isNull)
+                documentRangeFormattingProvider = initOptions.capabilities.documentRangeFormatting;
+
+            if (!textDocCaps.onTypeFormatting.isNull)
+                documentOnTypeFormattingProvider = initOptions.capabilities.documentOnTypeFormatting
+                    ? new DocumentOnTypeFormattingOptions(";")
+                    : Nullable!DocumentOnTypeFormattingOptions();
+
+            if (!textDocCaps.rename.isNull)
+            {
+                const prepareSupport = !textDocCaps.rename.prepareSupport.isNull
+                    && textDocCaps.rename.prepareSupport.get();
+
+                renameProvider = initOptions.capabilities.rename ? prepareSupport
+                    ? convertToJSON(new RenameOptions(true.nullable))
+                    : JSONValue(true) : JSONValue(false);
+            }
+        }
+
+        if (!params.capabilities.workspace.isNull)
+        {
+            const workspaceCaps = params.capabilities.workspace.get();
+
+            if (!workspaceCaps.symbol.isNull)
+                workspaceSymbolProvider = initOptions.capabilities.workspaceSymbol;
+
+            if (!workspaceCaps.executeCommand.isNull)
+                executeCommandProvider = initOptions.capabilities.codeAction
+                    ? new ExecuteCommandOptions(CommandTool.instance.commands)
+                    : Nullable!ExecuteCommandOptions();
+
+            if (!workspaceCaps.workspaceFolders.isNull && workspaceCaps.workspaceFolders.get())
+                workspace = new ServerCapabilities.Workspace(
+                        new ServerCapabilities.Workspace.WorkspaceFolders(true.nullable,
+                        JSONValue(true).nullable).nullable);
+        }
     }
 
     Server.initialized = true;
