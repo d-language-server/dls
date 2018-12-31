@@ -81,6 +81,7 @@ final class InitializeParams
 
         bool autoUpdate = true;
         bool preReleaseBuilds = false;
+        bool safeMode = false;
         bool catchErrors = false;
         string logFile = "";
         Capabilities capabilities;

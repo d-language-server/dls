@@ -32,8 +32,10 @@ private InitializeParams _initState;
 @property void initState(InitializeParams params)
 {
     import dls.protocol.logger : logger;
+    import dls.util.disposable_fiber : DisposableFiber;
 
     _initState = params;
+    DisposableFiber.safeMode = initOptions.safeMode;
 
     if (!params.trace.isNull)
     {

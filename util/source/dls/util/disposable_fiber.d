@@ -32,6 +32,7 @@ class FiberDisposedException : Exception
 
 class DisposableFiber : Fiber
 {
+    static bool safeMode;
     private bool _disposed;
 
     static DisposableFiber getThis()
@@ -43,6 +44,11 @@ class DisposableFiber : Fiber
 
     static void yield()
     {
+        if (safeMode)
+        {
+            return;
+        }
+
         Fiber.yield();
 
         if (getThis()._disposed)
