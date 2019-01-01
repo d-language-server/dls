@@ -4,6 +4,18 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+### 0.21.0
+- Enhanced stdio communication to support cancelling long running operations on Windows
+- Enhanced file analysis to ignore folders whose name starts with a dot
+- Enhanced `dls:bootstrap` backwards compatibility back to DMD `2.067`
+- Updated libraries:
+    - `dcd`: `0.9.13` => `0.10.2`
+    - `dfmt`: `0.8.3` => `0.9.0`
+    - `dscanner`: `0.8.3` => `0.9.0`
+    - `dsymbol`: `0.4.8` => `0.5.7`
+    - `libddoc`: `0.4.0` => `0.5.1`
+    - `libdparse`: `0.9.10` => `0.10.12`
+
 #### 0.20.2
 - Fixed relative import paths not being handled ([#19](https://github.com/d-language-server/dls/issues/19))
 
