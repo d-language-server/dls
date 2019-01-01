@@ -174,14 +174,22 @@ void downloadDls(const void function(size_t size) totalSizeCallback = null,
 
         mkdirRecurse(dlsDir);
 
-        request.onReceive = (const ubyte[] data) {
+        request.onReceive = (ubyte[] data) {
             archiveData ~= data;
             return data.length;
         };
 
         request.onProgress = (size_t dlTotal, size_t dlNow, size_t ulTotal, size_t ulNow) {
-            import core.time : msecs;
-            import std.datetime.stopwatch : StopWatch;
+            import core.time : Duration, msecs;
+
+            static if (__VERSION__ >= 2075L)
+            {
+                import std.datetime.stopwatch : StopWatch;
+            }
+            else
+            {
+                import std.datetime : StopWatch;
+            }
 
             static bool started;
             static bool stopped;
@@ -199,7 +207,7 @@ void downloadDls(const void function(size_t size) totalSizeCallback = null,
             }
 
             if (started && !stopped && chunkSizeCallback !is null && dlNow > 0
-                    && (watch.peek() >= 500.msecs || dlNow == dlTotal))
+                    && (cast(Duration) watch.peek() >= 500.msecs || dlNow == dlTotal))
             {
                 watch.reset();
                 chunkSizeCallback(dlNow);

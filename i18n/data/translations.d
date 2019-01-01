@@ -47,7 +47,7 @@ void main()
 
     foreach (key; sort(translations.object.keys))
     {
-        content ~= format!"%s = \"%s\"%s\n"(key.replace(".", "_"), key, ",");
+        content ~= format("%s = \"%s\"%s\n", key.replace(".", "_"), key, ",");
     }
 
     content ~= "}\n";

@@ -78,7 +78,7 @@ int main(string[] args)
     }
     catch (Exception e)
     {
-        stderr.writeln(e.message);
+        stderr.writeln(e.msg);
         return 1;
     }
 
