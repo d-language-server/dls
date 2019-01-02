@@ -4,6 +4,9 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.21.1
+- Fixed stdio communication getting stuck in an infinite loop, preventing DLS from shutting down
+
 ### 0.21.0
 - Enhanced stdio communication to support cancelling long running operations on Windows
 - Enhanced file analysis to ignore folders whose name starts with a dot
@@ -30,7 +33,7 @@ Breaking changes will be in bold.
 - Fixed formatting only using `.editorconfig` files present at a project root
 
 #### 0.19.2
-- Fixed `dls:bootstrap` not printing a newline after dls' path ([#18](https://github.com/d-language-server/dls/issues/18))
+- Fixed `dls:bootstrap` not printing a newline after DLS' path ([#18](https://github.com/d-language-server/dls/issues/18))
 
 #### 0.19.1
 - Fixed data possibly being sent in socket multiple times
@@ -311,7 +314,7 @@ Breaking changes will be in bold.
 - Removed libcurl.dll from the Windows archive, DMD's libcurl.dll is now used
 
 #### 0.5.6
-- Fixed older dls binaries not being removed when upgrading
+- Fixed older DLS binaries not being removed when upgrading
 - Fixed `$/dls.upgradeDls.chunkSize` notifications being spammed
 - Fixed `dls:bootstrap` not necessarily using the correct libcurl.dll
 
@@ -360,7 +363,7 @@ Breaking changes will be in bold.
 - Added workspace and document symbols searching support
 - Added documentation on hover support
 - Added `dls:bootstrap` to supercede `dls:find`
-- Enhanced resilience on server exceptions (dls will only crash on errors and never on exceptions)
+- Enhanced resilience on server exceptions (DLS will only crash on errors and never on exceptions)
 - Fixed (really, for good this time) the updater by pining dependency versions
 - Updated libraries:
     - `arsd-official`: `none` => `2.0.0`
