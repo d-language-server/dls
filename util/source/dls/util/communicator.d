@@ -79,7 +79,7 @@ class StdioCommunicator : Communicator
 
     char[] read(size_t size)
     {
-        import std.stdio : stdin;
+        import std.stdio : EOF, stdin;
 
         if (size == 0)
         {
@@ -88,6 +88,13 @@ class StdioCommunicator : Communicator
 
         static char[] buffer;
         buffer.length = size;
+        const c = _background.yieldForce();
+
+        if (c == EOF)
+        {
+            return [];
+        }
+
         buffer[0] = cast(char) _background.yieldForce();
 
         if (size > 1)
