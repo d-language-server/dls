@@ -42,6 +42,7 @@ script:
   - export PATH="$HOME:$PATH"
   - dub ${OP:-test --main-file=tests/main.d} --arch=${ARCH:-x86_64} --compiler=$DC --build=${BUILD:-debug}
 before_deploy:
+  - if which strip; then strip dls; fi
   - upx --best --ultra-brute dls
   - zip -0 dls-${TRAVIS_TAG:-untagged}.$TRAVIS_OS_NAME.$ARCH.zip dls LICENSE.txt
 deploy:
