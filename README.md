@@ -156,24 +156,25 @@ DLS supports a few custom initialization options in the `InitializeParams.initia
 
 ```typescript
 interface InitializationOptions: {
-    autoUpdate?: boolean = true;
-    preReleaseBuilds?: boolean = false;
-    catchErrors?: boolean = false;
-    logFile?: string = "";
+    autoUpdate?: boolean = true;        // Enable auto-updating
+    preReleaseBuilds?: boolean = false; // Enable pre-release updates
+    safeMode?: boolean = false;         // Disable processing multiple requests in parallel
+    catchErrors?: boolean = false;      // Catch and ignore errors (WARNING: UNSAFE)
+    logFile?: string = "";              // Path to a file to log DLS operations
     capabilities?: {
-        hover?: boolean = true;
-        completion?: boolean = true;
-        definition?: boolean = true;
-        typeDefinition?: boolean = true;
-        references?: boolean = true;
-        documentHighlight?: boolean = true;
-        documentSymbol?: boolean = true;
-        workspaceSymbol?: boolean = true;
-        codeAction?: boolean = true;
-        documentFormatting?: boolean = true;
-        documentRangeFormatting?: boolean = true;
-        documentOnTypeFormatting?: boolean = true;
-        rename?: boolean = true;
+        hover?: boolean = true;                     // Enable hover
+        completion?: boolean = true;                // Enable completion
+        definition?: boolean = true;                // Enable go-to-definition
+        typeDefinition?: boolean = true;            // Enable go-to-type-definition
+        references?: boolean = true;                // Enable references search
+        documentHighlight?: boolean = true;         // Enable symbol highlighting
+        documentSymbol?: boolean = true;            // Enable document symbol search
+        workspaceSymbol?: boolean = true;           // Enable workspace symbol search
+        codeAction?: boolean = true;                // Enable code actions
+        documentFormatting?: boolean = true;        // Enable formatting
+        documentRangeFormatting?: boolean = true;   // Enable range formatting
+        documentOnTypeFormatting?: boolean = true;  // Enable on type formatting
+        rename?: boolean = true;                    // Enable renaming
     }
 }
 ```

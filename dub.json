@@ -25,6 +25,14 @@
 	"preGenerateCommands": [
 		"rdmd $PACKAGE_DIR/data/version.d"
 	],
+	"buildTypes": {
+		"release-simple": {
+			"buildOptions": [
+				"releaseMode",
+				"optimize"
+			]
+		}
+	},
 	"subPackages": [
 		"bootstrap",
 		"i18n",

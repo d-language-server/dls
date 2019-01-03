@@ -31,20 +31,16 @@ addons:
     update: true
     packages:
       - gcc-multilib
-      - upx-ucl
-before_install:
-  - if [[ $TRAVIS_OS_NAME = osx ]] && [[ ! -z $TRAVIS_TAG ]]; then brew update && brew install upx; fi
 before_script:
   - ln -s /usr/bin/ld.gold ~/ld
 script:
-  - if [[ ! -z $TRAVIS_TAG ]]; then export BUILD=release; fi
+  - if [[ ! -z $TRAVIS_TAG ]]; then export BUILD=release-simple; fi
   - if [[ ! -z $TRAVIS_TAG ]]; then export OP=build; fi
   - export PATH="$HOME:$PATH"
   - dub ${OP:-test --main-file=tests/main.d} --arch=${ARCH:-x86_64} --compiler=$DC --build=${BUILD:-debug}
 before_deploy:
   - if which strip; then strip dls; fi
-  - upx --best --ultra-brute dls
-  - zip -0 dls-${TRAVIS_TAG:-untagged}.$TRAVIS_OS_NAME.$ARCH.zip dls LICENSE.txt
+  - zip -9 dls-${TRAVIS_TAG:-untagged}.$TRAVIS_OS_NAME.$ARCH.zip dls LICENSE.txt
 deploy:
   provider: releases
   edge:
