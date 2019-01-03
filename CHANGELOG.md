@@ -4,6 +4,9 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.21.2
+- Removed inlining from releases
+
 #### 0.21.1
 - Fixed stdio communication getting stuck in an infinite loop, preventing DLS from shutting down
 
