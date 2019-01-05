@@ -3,17 +3,20 @@ image: Visual Studio 2017
 environment:
   matrix:
     - ARCH: x86_64
+      VC_ARCH: x64
     - ARCH: x86
+      VC_ARCH: x86
 cache:
   - '%LOCALAPPDATA%\dub -> dub.selections.json'
 install:
   - ps: $latest = (Invoke-WebRequest "https://ldc-developers.github.io/LATEST").toString().trim()
-  - ps: $url = "https://github.com/ldc-developers/ldc/releases/download/v$($latest)/ldc2-$($latest)-windows-multilib.7z";
+  - ps: $url = "https://github.com/ldc-developers/ldc/releases/download/v$($latest)/ldc2-$($latest)-windows-$($env:VC_ARCH).7z";
   - ps: Push-Location "$($env:TMP)"
   - ps: Invoke-WebRequest $url -OutFile ".\ldc.7z"
   - ps: 7z x ldc.7z > $null
   - ps: Pop-Location
-  - ps: $env:PATH += ";$($env:TMP)\ldc2-$($latest)-windows-multilib\bin"
+  - ps: $env:PATH += ";$($env:TMP)\ldc2-$($latest)-windows-$($env:VC_ARCH)\bin"
+  - call msvcEnv %VC_ARCH%
 build_script:
   - if defined APPVEYOR_REPO_TAG_NAME (set BUILD=release-simple) else (set BUILD=debug)
   - dub build --arch=%ARCH% --compiler=ldc2 --build=%BUILD%
