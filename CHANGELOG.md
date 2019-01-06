@@ -4,6 +4,9 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.21.4
+- Removed cross-platform cancellation support temporarily to fix a memory leak
+
 #### 0.21.3
 - Fixed error about missing `vcruntime140.dll` on some Windows systems by using Microsoft's linker for Windows releases
 
