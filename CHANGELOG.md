@@ -4,6 +4,9 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.21.5
+- Fixed memory leaked on cross-platform cancellation support with stdio communication
+
 #### 0.21.4
 - Removed cross-platform cancellation support temporarily to fix a memory leak
 
