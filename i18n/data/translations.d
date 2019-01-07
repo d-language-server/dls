@@ -26,28 +26,31 @@ void main()
     import std.file : readText, write;
     import std.format : format;
     import std.json : parseJSON;
-    import std.path : buildNormalizedPath;
+    import std.path : asRelativePath, buildNormalizedPath;
     import std.process : environment;
     import std.range : replace;
 
-    immutable translationsPath = buildNormalizedPath(environment[dubPackageDir],
-            "data", "translations.json");
-    immutable trModulePath = buildNormalizedPath(environment[dubPackageDir],
-            "source", "dls", "util", "constants.d");
+    immutable packageDir = environment[dubPackageDir];
+    immutable translationsPath = buildNormalizedPath(packageDir, "data", "translations.json");
+    immutable trModulePath = buildNormalizedPath(packageDir, "source", "dls",
+            "util", "constants.d");
     immutable trModuleContent = readText(trModulePath);
     auto translations = parseJSON(readText(translationsPath));
     string content;
 
+    content ~= format(q{/+ This file is generated automatically by %s +/},
+            __FILE_FULL_PATH__.asRelativePath(packageDir));
+    content ~= "\n\n";
     content ~= q{module dls.util.constants;};
     content ~= "\n\n";
     content ~= q{enum Tr : string};
     content ~= "\n{\n";
-    content ~= q{_ = "### BAD TRANSLATION KEY ###",};
+    content ~= q{    _ = "### BAD TRANSLATION KEY ###",};
     content ~= "\n";
 
     foreach (key; sort(translations.object.keys))
     {
-        content ~= format("%s = \"%s\"%s\n", key.replace(".", "_"), key, ",");
+        content ~= format("    %s = \"%s\"%s\n", key.replace(".", "_"), key, ",");
     }
 
     content ~= "}\n";
