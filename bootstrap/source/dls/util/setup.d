@@ -33,7 +33,7 @@ void initialSetup()
         {
             enum binDir = "bin64";
         }
-        else version (X86)
+        else
         {
             enum binDir = "bin";
         }
