@@ -31,7 +31,6 @@ void showMessageRequest(string id, Nullable!MessageActionItem item)
     import dls.util.i18n : tr;
     import dls.util.uri : Uri;
     import std.concurrency : locate, receiveOnly, send;
-    import std.path : dirName;
     import std.process : browse;
 
     while (id !in Util.messageRequestInfo)
@@ -77,15 +76,12 @@ void showMessageRequest(string id, Nullable!MessageActionItem item)
 
 final abstract class Util
 {
-    import dls.protocol.interfaces : MessageType;
     import dls.protocol.jsonrpc : send;
     import dls.protocol.messages.methods : Window;
     import dls.util.constants : Tr;
     import dls.util.i18n : tr, trType;
-    import std.array : array, replace;
+    import std.array : array;
     import std.algorithm : map;
-    import std.conv : to;
-    import std.json : JSONValue, parseJSON;
     import std.typecons : Tuple, tuple;
 
     shared alias ThreadMessageData = Tuple!(string, Tr, string);
