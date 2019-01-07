@@ -31,7 +31,6 @@ private immutable defaultLocale = "en";
 
 shared static this()
 {
-    import std.conv : to;
     import std.json : parseJSON;
 
     translations = parseJSON(translationsJson);
@@ -63,7 +62,7 @@ shared static this()
 
         if (size >= 2)
         {
-            locale = buffer[0 .. 2].to!string;
+            locale = buffer[0 .. 2].idup;
         }
     }
     else version (Posix)
@@ -85,7 +84,7 @@ shared static this()
 
 string tr(Tr identifier, string[] args = [])
 {
-    import std.conv : to;
+    import std.conv : text;
     import std.range : replace;
 
     auto message = translations[identifier];
@@ -93,7 +92,7 @@ string tr(Tr identifier, string[] args = [])
 
     foreach (i; 0 .. args.length)
     {
-        localizedMessage = localizedMessage.replace('$' ~ (i + 1).to!string, args[i]);
+        localizedMessage = localizedMessage.replace('$' ~ text(i + 1), args[i]);
     }
 
     return localizedMessage;
@@ -101,8 +100,6 @@ string tr(Tr identifier, string[] args = [])
 
 MessageType trType(Tr message)
 {
-    import std.conv : to;
-
     auto t = translations[message];
-    return "_type" in t ? t["_type"].integer.to!MessageType : MessageType.info;
+    return "_type" in t ? cast(MessageType) t["_type"].integer : MessageType.info;
 }

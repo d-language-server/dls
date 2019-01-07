@@ -152,7 +152,7 @@ final abstract class Server
                 }
                 while (!lf);
 
-                line = lineAppender.data.stripRight().to!string;
+                line = lineAppender.data.stripRight().idup;
                 auto parts = line.findSplit(":");
 
                 if (parts[1].length > 0)

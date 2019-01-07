@@ -41,7 +41,6 @@ class Uri
 
     this(DocumentUri uri)
     {
-        import std.conv : to;
         import std.regex : matchAll;
         import std.uri : decodeComponent;
 
@@ -51,7 +50,7 @@ class Uri
         //dfmt off
         _scheme     = matches.front[1];
         _authority  = matches.front[2];
-        _path       = matches.front[3].to!string.normalized;
+        _path       = matches.front[3].normalized;
         _query      = matches.front[4];
         _fragment   = matches.front[5];
         //dfmt on
@@ -78,7 +77,7 @@ class Uri
 
 string normalized(const string path)
 {
-    import std.conv : to;
+    import std.array : array;
     import std.path : asNormalizedPath;
 
     string res;
@@ -94,14 +93,14 @@ string normalized(const string path)
             return path[1 .. $].normalized;
         }
 
-        res = (driveName(path).asUpperCase.to!string ~ stripDrive(path));
+        res = (driveName(path).asUpperCase().array ~ stripDrive(path));
     }
     else
     {
         res = path;
     }
 
-    return res.asNormalizedPath.to!string;
+    return asNormalizedPath(res).array;
 }
 
 int filenameCmp(const Uri a, const Uri b)

@@ -264,9 +264,8 @@ class SymbolTool : Tool
 
     @property private static string[] defaultImportPaths()
     {
-        import std.algorithm : each, sort, uniq;
+        import std.algorithm : sort, uniq;
         import std.array : array, replace;
-        import std.conv : to;
         import std.file : FileException, exists, readText;
         import std.path : asNormalizedPath, dirName;
         import std.regex : matchAll;
@@ -282,9 +281,12 @@ class SymbolTool : Tool
 
             try
             {
-                readText(confPath).matchAll(`-I[^\s"]+`)
-                    .each!(m => paths ~= m.hit[2 .. $].replace("%@P%",
-                            dirName(confPath)).asNormalizedPath().to!string);
+                foreach (m; readText(confPath).matchAll(`-I[^\s"]+`))
+                {
+                    paths ~= m.hit[2 .. $].replace("%@P%", dirName(confPath))
+                        .asNormalizedPath().array;
+                }
+
                 break;
             }
             catch (FileException e)
@@ -781,7 +783,6 @@ class SymbolTool : Tool
         import dcd.server.autocomplete : complete;
         import std.algorithm : chunkBy, map, sort, uniq;
         import std.array : array;
-        import std.conv : to;
         import std.json : JSONValue;
 
         logger.info("Fetching completions for %s at position %s,%s", uri.path,
@@ -824,7 +825,7 @@ class SymbolTool : Tool
 
                 auto firstResult = resultGroup.front;
                 auto item = new CompletionItem(firstResult.identifier);
-                item.kind = completionKinds[firstResult.kind.to!CompletionKind];
+                item.kind = completionKinds[cast(CompletionKind) firstResult.kind];
                 item.detail = firstResult.definition;
 
                 auto data = appender!(string[][]);

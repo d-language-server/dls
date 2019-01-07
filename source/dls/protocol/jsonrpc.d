@@ -168,7 +168,7 @@ private void send(T : Message)(T m)
 {
     import dls.util.communicator : communicator;
     import dls.util.json : convertToJSON;
-    import std.conv : to;
+    import std.conv : text;
     import std.utf : toUTF8;
 
     auto message = convertToJSON(m);
@@ -176,8 +176,7 @@ private void send(T : Message)(T m)
 
     synchronized
     {
-        foreach (chunk; ["Content-Length: ", messageString.length.to!string,
-                eol, eol, messageString])
+        foreach (chunk; ["Content-Length: ", text(messageString.length), eol, eol, messageString])
         {
             communicator.write(chunk.toUTF8());
         }

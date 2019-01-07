@@ -316,7 +316,6 @@ T convertFromJSON(T : U[], U)(JSONValue json)
 {
     import std.algorithm : map;
     import std.array : array;
-    import std.conv : to;
     import std.json : JSONException, JSON_TYPE;
 
     switch (json.type)
@@ -331,10 +330,7 @@ T convertFromJSON(T : U[], U)(JSONValue json)
         return [convertFromJSON!U(JSONValue(true))];
 
     case JSON_TYPE.ARRAY:
-        return json.array
-            .map!(value => convertFromJSON!U(value))
-            .array
-            .to!T;
+        return json.array.map!(value => convertFromJSON!U(value)).array;
 
     case JSON_TYPE.OBJECT:
         throw new JSONException(json.toString() ~ " is not a string type");
@@ -359,12 +355,12 @@ unittest
     assert(convertFromJSON!(string[])(JSONValue("Hello")) == ["Hello"]);
 }
 
-T convertFromJSON(T : U[K], U, K)(JSONValue json) if (isAssociativeArray!T)
+T convertFromJSON(T : U[string], U)(JSONValue json) if (isAssociativeArray!T)
 {
-    import std.conv : to;
+    import std.conv : text;
     import std.json : JSONException, JSON_TYPE;
 
-    U[K] result;
+    U[string] result;
 
     switch (json.type)
     {
@@ -374,7 +370,7 @@ T convertFromJSON(T : U[K], U, K)(JSONValue json) if (isAssociativeArray!T)
     case JSON_TYPE.OBJECT:
         foreach (key, value; json.object)
         {
-            result[key.to!K] = convertFromJSON!U(value);
+            result[key] = convertFromJSON!U(value);
         }
 
         break;
@@ -382,7 +378,7 @@ T convertFromJSON(T : U[K], U, K)(JSONValue json) if (isAssociativeArray!T)
     case JSON_TYPE.ARRAY:
         foreach (key, value; json.array)
         {
-            result[key.to!K] = convertFromJSON!U(value);
+            result[text(key)] = convertFromJSON!U(value);
         }
 
         break;
@@ -535,7 +531,7 @@ unittest
 
 Nullable!JSONValue convertToJSON(T : U[K], U, K)(T value) if (isAssociativeArray!T)
 {
-    import std.conv : to;
+    import std.conv : text;
     import std.typecons : nullable;
 
     auto result = JSONValue();
@@ -543,7 +539,7 @@ Nullable!JSONValue convertToJSON(T : U[K], U, K)(T value) if (isAssociativeArray
     foreach (key; value.keys)
     {
         auto json = convertToJSON(value[key]);
-        result[key.to!string] = json.isNull ? JSONValue(null) : json;
+        result[text(key)] = json.isNull ? JSONValue(null) : json;
     }
 
     return result.nullable;

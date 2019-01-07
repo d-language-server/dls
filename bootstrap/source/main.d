@@ -37,7 +37,7 @@ int main(string[] args)
     import dls.bootstrap : canDownloadDls, buildDls, downloadDls, linkDls;
     import dls.util.constants : Tr;
     import dls.util.i18n : tr;
-    import std.conv : to;
+    import std.conv : text;
     import std.file : thisExePath;
     import std.format : format;
     import std.getopt : getopt, defaultGetoptPrinter;
@@ -88,7 +88,7 @@ int main(string[] args)
     if (check)
     {
         const ok = method != Method.download || canDownloadDls;
-        output = ok.to!string;
+        output = text(ok);
         status = ok ? 0 : 1;
     }
     else
@@ -102,7 +102,7 @@ int main(string[] args)
         }
 
         const printSize = progress ? (size_t size) {
-            stderr.rawWrite(size.to!string ~ '\n');
+            stderr.rawWrite(text(size) ~ '\n');
             stderr.flush();
         } : null;
         const printExtract = progress ? () {

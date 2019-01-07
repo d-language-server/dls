@@ -29,7 +29,6 @@ private immutable logMessageFormat = "[%.24s] [%s] %s";
 
 shared static this()
 {
-    import std.conv : to;
     import std.experimental.logger : LogLevel, globalLogLevel;
 
     globalLogLevel = LogLevel.off;
@@ -37,8 +36,8 @@ shared static this()
     //dfmt off
     traceToType = [
         InitializeParams.Trace.off      : 0,
-        InitializeParams.Trace.messages : MessageType.warning.to!int,
-        InitializeParams.Trace.verbose  : MessageType.info.to!int
+        InitializeParams.Trace.messages : MessageType.warning,
+        InitializeParams.Trace.verbose  : MessageType.info
     ];
 
     messageSeverity = [

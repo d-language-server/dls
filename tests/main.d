@@ -258,7 +258,7 @@ private inout(char[]) expandTestUris(inout(char[]) text, const string directory)
 
 private void writeDiff(const string reference, const string output)
 {
-    import std.conv : to;
+    import std.conv : text;
     import std.file : remove, tempDir, write;
     import std.path : buildPath;
     import std.process : Config, execute;
@@ -284,7 +284,8 @@ private void writeDiff(const string reference, const string output)
     }
     else version (Posix)
     {
-        const args = ["diff", "-U", size_t.max.to!string, refPath, outPath];
+        static immutable maxSize = text(size_t.max);
+        const args = ["diff", "-U", maxSize, refPath, outPath];
     }
     else
     {

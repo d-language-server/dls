@@ -117,8 +117,8 @@ void update(bool autoUpdate)
     import dub.dub : Dub, FetchOptions;
     import dub.semver : compareVersions;
     import std.algorithm : filter, stripLeft;
+    import std.array : array;
     import std.concurrency : ownerTid, receiveOnly, register, send, thisTid;
-    import std.conv : to;
     import std.datetime : Clock, SysTime;
     import std.format : format;
     import std.json : JSON_TYPE;
@@ -210,7 +210,7 @@ void update(bool autoUpdate)
         {
             try
             {
-                buildDls(pack.path.toString().asNormalizedPath.to!string, additionalArgs[i]);
+                buildDls(pack.path.toString().asNormalizedPath.array, additionalArgs[i]);
                 upgradeSuccessful = true;
             }
             catch (UpgradeFailedException e)
