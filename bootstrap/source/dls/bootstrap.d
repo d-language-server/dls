@@ -342,7 +342,7 @@ private void makeLink(const string target, const string link, bool directory)
         }
 
         immutable mklinkCommand = format!`mklink %s "%s" "%s"`(directory ? "/J" : "", link, target);
-        immutable powershellArgs = ["Start-Process", "-Wait", "-FilePath", "cmd.exe",
+        const powershellArgs = ["Start-Process", "-Wait", "-FilePath", "cmd.exe",
             "-ArgumentList", format!"'/c %s'"(mklinkCommand), "-WindowStyle", "Hidden"] ~ (directory
                 ? [] : ["-Verb", "runas"]);
         immutable result = execute(["powershell.exe", powershellArgs.join(' ')]);

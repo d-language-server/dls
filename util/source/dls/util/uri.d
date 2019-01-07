@@ -87,13 +87,14 @@ string normalized(const string path)
         import std.algorithm : startsWith;
         import std.path : driveName, stripDrive;
         import std.uni : asUpperCase;
+        import std.utf : toUTF8;
 
         if (path.startsWith('/') || path.startsWith('\\'))
         {
             return path[1 .. $].normalized;
         }
 
-        res = (driveName(path).asUpperCase().array ~ stripDrive(path));
+        res = (driveName(path).asUpperCase().toUTF8() ~ stripDrive(path));
     }
     else
     {
