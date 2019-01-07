@@ -137,7 +137,7 @@ InitializeResult initialize(InitializeParams params)
 
             if (!textDocCaps.rename.isNull)
             {
-                const prepareSupport = !textDocCaps.rename.prepareSupport.isNull
+                immutable prepareSupport = !textDocCaps.rename.prepareSupport.isNull
                     && textDocCaps.rename.prepareSupport.get();
 
                 renameProvider = initOptions.capabilities.rename ? prepareSupport
@@ -197,7 +197,7 @@ void initialized(JSONValue nothing)
 
     if (!initState.capabilities.workspace.isNull)
     {
-        const didChangeWatchedFiles = !initState.capabilities.workspace.didChangeWatchedFiles.isNull
+        immutable didChangeWatchedFiles = !initState.capabilities.workspace.didChangeWatchedFiles.isNull
             && initState.capabilities.workspace.didChangeWatchedFiles.dynamicRegistration;
         ubyte watchAllEvents = WatchKind.create + WatchKind.change + WatchKind.delete_;
 
@@ -220,7 +220,7 @@ void initialized(JSONValue nothing)
                     new RegistrationParams!DidChangeWatchedFilesRegistrationOptions([registration]));
         }
 
-        const configuration = !initState.capabilities.workspace.configuration.isNull
+        immutable configuration = !initState.capabilities.workspace.configuration.isNull
             && initState.capabilities.workspace.configuration;
 
         if (configuration)

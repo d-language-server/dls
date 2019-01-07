@@ -33,8 +33,8 @@ package class SymbolVisitor(SymbolType) : ASTVisitor
 
     Appender!(SymbolType[]) result;
     private Uri _uri;
-    private const string _upperQuery;
-    private const bool _listLocalSymbols;
+    private immutable string _upperQuery;
+    private immutable bool _listLocalSymbols;
 
     static if (is(SymbolType == SymbolInformation))
     {
@@ -207,7 +207,7 @@ package class SymbolVisitor(SymbolType) : ASTVisitor
     private void visitSymbol(A : ASTNode)(const A dec, SymbolKind kind,
             bool accept, size_t endLocation = 0)
     {
-        const name = dec.name.text.length > 0 ? dec.name.text.idup
+        immutable name = dec.name.text.length > 0 ? dec.name.text.idup
             : "<anonymous " ~ __traits(identifier, A) ~ ">";
         tryInsert(name, kind, getRange(dec.name), endLocation);
 

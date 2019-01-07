@@ -96,7 +96,7 @@ unittest
 {
     import std.json : parseJSON;
 
-    const jsonString = `{
+    immutable jsonString = `{
         "integer": 42,
         "floating": 3.0,
         "text": "Hello world",
@@ -114,12 +114,12 @@ unittest
         }
     }`;
 
-    const testClass = convertFromJSON!TestClass(parseJSON(jsonString));
+    immutable testClass = convertFromJSON!TestClass(parseJSON(jsonString));
     assert(testClass.integer == 42);
     assert(testClass.floating == 3.0);
     assert(testClass.text == "Hello world");
     assert(testClass.array == [0, 1, 2]);
-    const dictionary = ["key1" : "value1", "key2" : "value2", "key3" : "value3"];
+    immutable dictionary = ["key1" : "value1", "key2" : "value2", "key3" : "value3"];
     assert(testClass.dictionary == dictionary);
     assert(testClass.testStruct.uinteger == 16);
     assert(testClass.testStruct.json["key"].str == "value");

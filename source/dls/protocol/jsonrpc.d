@@ -111,7 +111,7 @@ string send(string method, Nullable!JSONValue params = Nullable!JSONValue())
 
     if (hasResponseHandler(method))
     {
-        const id = randomUUID().toString();
+        immutable id = randomUUID().toString();
         pushHandler(id, method);
         logger.log(`Sending request "%s": %s`, id, method);
         send!RequestMessage(JSONValue(id), method, params, Nullable!ResponseError());

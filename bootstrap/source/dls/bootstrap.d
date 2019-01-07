@@ -118,7 +118,7 @@ shared static this()
     {
         foreach (release; allReleases)
         {
-            const releaseDate = SysTime.fromISOExtString(release["published_at"].str);
+            immutable releaseDate = SysTime.fromISOExtString(release["published_at"].str);
 
             if (Clock.currTime.toUTC() - releaseDate > 1.hours
                     && release["prerelease"].type == JSON_TYPE.FALSE)
@@ -156,7 +156,7 @@ void downloadDls(const void function(size_t size) totalSizeCallback = null,
 
     if (downloadUrl.length > 0 || canDownloadDls)
     {
-        const dlsDir = buildNormalizedPath(dubBinDir, format(dlsDirName, downloadVersion));
+        immutable dlsDir = buildNormalizedPath(dubBinDir, format(dlsDirName, downloadVersion));
         auto request = HTTP(downloadUrl);
         auto archiveData = appender!(ubyte[]);
 
@@ -233,7 +233,7 @@ void downloadDls(const void function(size_t size) totalSizeCallback = null,
 
         foreach (name, member; archive.directory)
         {
-            const memberPath = buildNormalizedPath(dlsDir, name);
+            immutable memberPath = buildNormalizedPath(dlsDir, name);
             write(memberPath, archive.expand(member));
 
             version (Posix)
@@ -266,7 +266,7 @@ void buildDls(const string dlsDir, const string[] additionalArgs = [])
         cmdLine ~= ["--compiler=dmd", "--arch=" ~ (isX86_64 ? "x86_64" : "x86_mscoff")];
     }
 
-    const result = execute(cmdLine, null, Config.none, size_t.max, dlsDir);
+    immutable result = execute(cmdLine, null, Config.none, size_t.max, dlsDir);
 
     if (result.status != 0)
     {
@@ -283,9 +283,9 @@ string linkDls()
 
     mkdirRecurse(dubBinDir);
 
-    const dlsDir = buildNormalizedPath(dubBinDir, format(dlsDirName, downloadVersion));
-    const oldDlsLink = buildNormalizedPath(dubBinDir, dlsExecutable);
-    const dlsLatestDir = buildNormalizedPath(dubBinDir, dlsLatestDirName);
+    immutable dlsDir = buildNormalizedPath(dubBinDir, format(dlsDirName, downloadVersion));
+    immutable oldDlsLink = buildNormalizedPath(dubBinDir, dlsExecutable);
+    immutable dlsLatestDir = buildNormalizedPath(dubBinDir, dlsLatestDirName);
 
     if (exists(oldDlsLink) && !exists(dlsLatestDir))
     {
@@ -304,13 +304,13 @@ string linkDls()
 
     version (Windows)
     {
-        const dubDirPath = environment["LOCALAPPDATA"];
-        const dubDirName = "dub";
+        immutable dubDirPath = environment["LOCALAPPDATA"];
+        immutable dubDirName = "dub";
     }
     else version (Posix)
     {
-        const dubDirPath = environment["HOME"];
-        const dubDirName = ".dub";
+        immutable dubDirPath = environment["HOME"];
+        immutable dubDirName = ".dub";
     }
     else
     {
@@ -341,11 +341,11 @@ private void makeLink(const string target, const string link, bool directory)
             }
         }
 
-        const mklinkCommand = format!`mklink %s "%s" "%s"`(directory ? "/J" : "", link, target);
-        const powershellArgs = ["Start-Process", "-Wait", "-FilePath", "cmd.exe",
+        immutable mklinkCommand = format!`mklink %s "%s" "%s"`(directory ? "/J" : "", link, target);
+        immutable powershellArgs = ["Start-Process", "-Wait", "-FilePath", "cmd.exe",
             "-ArgumentList", format!"'/c %s'"(mklinkCommand), "-WindowStyle", "Hidden"] ~ (directory
                 ? [] : ["-Verb", "runas"]);
-        const result = execute(["powershell.exe", powershellArgs.join(' ')]);
+        immutable result = execute(["powershell.exe", powershellArgs.join(' ')]);
 
         if (result.status != 0)
         {

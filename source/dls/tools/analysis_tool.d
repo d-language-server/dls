@@ -199,7 +199,7 @@ class AnalysisTool : Tool
         auto document = Document.get(uri);
         auto diagnostics = appender!(Diagnostic[]);
 
-        const syntaxProblemhandler = (string path, size_t line, size_t column,
+        immutable syntaxProblemhandler = (string path, size_t line, size_t column,
                 string msg, bool isError) {
             diagnostics ~= new Diagnostic(document.wordRangeAtLineAndByte(line - 1, column - 1), msg, (isError
                     ? DiagnosticSeverity.error : DiagnosticSeverity.warning).nullable,
@@ -357,7 +357,7 @@ class AnalysisTool : Tool
         import dscanner.analysis.config : defaultStaticAnalysisConfig;
 
         const workspaceUri = SymbolTool.instance.getWorkspace(uri);
-        const workspacePath = workspaceUri is null ? "" : workspaceUri.path;
+        immutable workspacePath = workspaceUri is null ? "" : workspaceUri.path;
         return (workspacePath in _analysisConfigs) ? _analysisConfigs[workspacePath]
             : defaultStaticAnalysisConfig();
     }

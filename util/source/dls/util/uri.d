@@ -68,7 +68,7 @@ class Uri
         import std.string : tr;
         import std.uri : encode;
 
-        const uriPath = path.tr(`\`, `/`);
+        immutable uriPath = path.tr(`\`, `/`);
         return new Uri(encode(format!"file://%s%s"(uriPath.startsWith('/') ? "" : "/", uriPath)));
     }
 

@@ -307,8 +307,8 @@ class SymbolTool : Tool
 
             foreach (path; ["/snap", "/var/lib/snapd/snap"])
             {
-                const dmdSnapPath = buildPath(path, "dmd");
-                const ldcSnapIncludePath = buildPath(path, "ldc2", "current", "include", "d");
+                immutable dmdSnapPath = buildPath(path, "dmd");
+                immutable ldcSnapIncludePath = buildPath(path, "ldc2", "current", "include", "d");
 
                 if (exists(dmdSnapPath))
                 {
@@ -346,7 +346,7 @@ class SymbolTool : Tool
                         findSplit(baseName(b), "-")[2]) == 1;
             }
 
-            const dlangPath = buildPath(environment["HOME"], "dlang");
+            immutable dlangPath = buildPath(environment["HOME"], "dlang");
 
             if (!exists(dlangPath))
             {
@@ -389,13 +389,13 @@ class SymbolTool : Tool
 
         version (Windows)
         {
-            const pathSep = ';';
-            const ldc = "ldc2.exe";
+            immutable pathSep = ';';
+            immutable ldc = "ldc2.exe";
         }
         else version (Posix)
         {
-            const pathSep = ':';
-            const ldc = "ldc2";
+            immutable pathSep = ':';
+            immutable ldc = "ldc2";
         }
         else
         {
@@ -602,7 +602,7 @@ class SymbolTool : Tool
             return;
         }
 
-        const gitModulesPath = buildPath(uri.path, ".gitmodules");
+        immutable gitModulesPath = buildPath(uri.path, ".gitmodules");
 
         if (!exists(gitModulesPath))
         {
@@ -697,7 +697,7 @@ class SymbolTool : Tool
         logger.info(`Fetching symbols from workspace with query "%s"`, query);
 
         auto result = new RedBlackTree!(SymbolInformation, compareLocations, true)();
-        const upperQuery = toUpper(query);
+        immutable upperQuery = toUpper(query);
 
         void collectSymbolInformations(Uri symbolUri, const(DSymbol)* symbol,
                 string containerName = "")
@@ -1273,7 +1273,7 @@ class SymbolTool : Tool
                             continue;
                         }
 
-                        const candidateSymbolFile = candidateSymbol.symbolFile == "stdin"
+                        immutable candidateSymbolFile = candidateSymbol.symbolFile == "stdin"
                             ? fileUri.path : candidateSymbol.symbolFile;
 
                         if (checkFileAndLocation(candidateSymbolFile, candidateSymbol.location))

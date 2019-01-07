@@ -87,7 +87,7 @@ int main(string[] args)
 
     if (check)
     {
-        const ok = method != Method.download || canDownloadDls;
+        immutable ok = method != Method.download || canDownloadDls;
         output = text(ok);
         status = ok ? 0 : 1;
     }
@@ -101,11 +101,11 @@ int main(string[] args)
             stderr.flush();
         }
 
-        const printSize = progress ? (size_t size) {
+        immutable printSize = progress ? (size_t size) {
             stderr.rawWrite(text(size) ~ '\n');
             stderr.flush();
         } : null;
-        const printExtract = progress ? () {
+        immutable printExtract = progress ? () {
             stderr.rawWrite("extract\n");
             stderr.flush();
         } : null;

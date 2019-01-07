@@ -98,7 +98,7 @@ final abstract class Server
     {
         import dls.protocol.logger : logger;
 
-        const idString = id.toString();
+        immutable idString = id.toString();
 
         if (idString in _requestsFibers
                 && _requestsFibers[idString].state != DisposableFiber.State.TERM)
@@ -228,7 +228,7 @@ final abstract class Server
         {
             try
             {
-                const json = parseJSON(content);
+                immutable json = parseJSON(content);
 
                 if ("method" in json)
                 {

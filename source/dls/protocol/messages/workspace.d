@@ -47,7 +47,7 @@ void workspaceFolders(string id, Nullable!(WorkspaceFolder[]) folders)
             AnalysisTool.instance.addAnalysisConfig(uri);
         }
 
-        const conf = !initState.capabilities.workspace.isNull
+        immutable conf = !initState.capabilities.workspace.isNull
             && !initState.capabilities.workspace.configuration.isNull
             && initState.capabilities.workspace.configuration;
 
@@ -110,7 +110,7 @@ void didChangeConfiguration(DidChangeConfigurationParams params)
 
     logger.info("Configuration changed");
 
-    const conf = !initState.capabilities.workspace.isNull
+    immutable conf = !initState.capabilities.workspace.isNull
         && !initState.capabilities.workspace.configuration.isNull
         && initState.capabilities.workspace.configuration;
 

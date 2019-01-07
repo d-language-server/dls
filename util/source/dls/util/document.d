@@ -127,15 +127,15 @@ class Document
             return 0;
         }
 
-        const linesBytes = reduce!((s, i) => s + codeLength!char(_lines[i]))(cast(size_t) 0,
-                iota(position.line));
+        immutable linesBytes = reduce!((s, i) => s + codeLength!char(_lines[i]))(
+                cast(size_t) 0, iota(position.line));
 
         if (position.character > _lines[position.line].length)
         {
             return 0;
         }
 
-        const characterBytes = codeLength!char(_lines[position.line][0 .. position.character]);
+        immutable characterBytes = codeLength!char(_lines[position.line][0 .. position.character]);
         return linesBytes + characterBytes;
     }
 
@@ -153,10 +153,10 @@ class Document
             ++i;
         }
 
-        const lineNumber = i - 1;
-        const line = _lines[lineNumber];
+        immutable lineNumber = i - 1;
+        immutable line = _lines[lineNumber];
         bytes -= codeLength!char(line);
-        const columnNumber = toUCSindex(line, min(bytePosition - bytes, line.length));
+        immutable columnNumber = toUCSindex(line, min(bytePosition - bytes, line.length));
         return new Position(lineNumber, columnNumber);
     }
 
@@ -164,8 +164,8 @@ class Document
     {
         import std.algorithm : min;
 
-        const line = _lines[min(position.line, $ - 1)];
-        const middleIndex = min(position.character, line.length);
+        immutable line = _lines[min(position.line, $ - 1)];
+        immutable middleIndex = min(position.character, line.length);
         size_t startIndex = middleIndex;
         size_t endIndex = middleIndex;
 

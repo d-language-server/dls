@@ -91,7 +91,7 @@ class StdioCommunicator : Communicator
 
         static char[] buffer;
         buffer.length = size;
-        const c = _background.yieldForce();
+        immutable c = _background.yieldForce();
 
         if (c == EOF)
         {

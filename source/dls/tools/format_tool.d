@@ -180,7 +180,7 @@ class FormatTool : Tool
         import std.utf : decode;
 
         const document = Document.get(uri);
-        const before = document.toString();
+        immutable before = document.toString();
         size_t i;
         size_t j;
         TextEdit[] result;
@@ -237,7 +237,7 @@ class FormatTool : Tool
             }
 
             auto addition = !isWhite(beforeChar) && isWhite(afterChar);
-            const deletion = isWhite(beforeChar) && !isWhite(afterChar);
+            immutable deletion = isWhite(beforeChar) && !isWhite(afterChar);
 
             if (!addition && !deletion)
             {

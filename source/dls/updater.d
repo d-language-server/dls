@@ -133,9 +133,9 @@ void update(bool autoUpdate)
         return;
     }
 
-    const latestRelease = validReleases.front;
-    const latestVersion = latestRelease["tag_name"].str.stripLeft('v');
-    const releaseTime = SysTime.fromISOExtString(latestRelease["published_at"].str);
+    immutable latestRelease = validReleases.front;
+    immutable latestVersion = latestRelease["tag_name"].str.stripLeft('v');
+    immutable releaseTime = SysTime.fromISOExtString(latestRelease["published_at"].str);
 
     if (latestVersion.length == 0 || compareVersions(currentVersion,
             latestVersion) >= 0 || (Clock.currTime.toUTC() - releaseTime < 1.hours))
@@ -147,11 +147,11 @@ void update(bool autoUpdate)
     {
         auto id = Util.sendMessageRequest(Tr.app_upgradeDls,
                 [Tr.app_upgradeDls_upgrade], [latestVersion, currentVersion]);
-        const threadName = "updater";
+        immutable threadName = "updater";
         register(threadName, thisTid());
         send(ownerTid(), Util.ThreadMessageData(id, Tr.app_upgradeDls, threadName));
 
-        const shouldUpgrade = receiveOnly!bool();
+        immutable shouldUpgrade = receiveOnly!bool();
 
         if (!shouldUpgrade)
         {
@@ -204,7 +204,7 @@ void update(bool autoUpdate)
                 dub.defaultPlacementLocation, fetchOpts);
 
         int i;
-        const additionalArgs = [[], ["--force"]];
+        immutable additionalArgs = [[], ["--force"]];
 
         do
         {

@@ -27,9 +27,10 @@ void main()
     import std.path : buildNormalizedPath;
     import std.process : environment;
 
-    const versionDataFile = buildNormalizedPath(environment[dubPackageDir], "data", "version.txt");
-    const fileVersion = exists(versionDataFile) ? readText(versionDataFile) : "";
-    const currentVersion = dubPackageVersion in environment ? environment[dubPackageVersion]
+    immutable versionDataFile = buildNormalizedPath(environment[dubPackageDir],
+            "data", "version.txt");
+    immutable fileVersion = exists(versionDataFile) ? readText(versionDataFile) : "";
+    immutable currentVersion = dubPackageVersion in environment ? environment[dubPackageVersion]
         : getVersionFromDescription();
 
     if (currentVersion != fileVersion)
@@ -44,6 +45,6 @@ string getVersionFromDescription()
     import std.json : parseJSON;
     import std.process : execute;
 
-    const desc = parseJSON(execute(["dub", "describe"]).output);
+    immutable desc = parseJSON(execute(["dub", "describe"]).output);
     return desc["packages"].array.find!(p => p["name"] == desc["rootPackage"])[0]["version"].str;
 }
