@@ -1,4 +1,4 @@
-/+ This file is generated automatically by data/translations.d +/
+/+ This file is generated automatically by translations.d +/
 
 module dls.util.constants;
 

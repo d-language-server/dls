@@ -38,8 +38,7 @@ void main()
     auto translations = parseJSON(readText(translationsPath));
     string content;
 
-    content ~= format(q{/+ This file is generated automatically by %s +/},
-            __FILE_FULL_PATH__.asRelativePath(packageDir));
+    content ~= format(q{/+ This file is generated automatically by %s.d +/}, __MODULE__);
     content ~= "\n\n";
     content ~= q{module dls.util.constants;};
     content ~= "\n\n";
