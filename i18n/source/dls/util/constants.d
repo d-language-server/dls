@@ -34,6 +34,7 @@ enum Tr : string
     bootstrap_help_method = "bootstrap.help.method",
     bootstrap_help_method_auto = "bootstrap.help.method.auto",
     bootstrap_help_progress = "bootstrap.help.progress",
+    bootstrap_help_title = "bootstrap.help.title",
     bootstrap_installDls_downloading = "bootstrap.installDls.downloading",
     bootstrap_installDls_extracting = "bootstrap.installDls.extracting",
     bootstrap_installDls_installing = "bootstrap.installDls.installing",

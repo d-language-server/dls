@@ -90,9 +90,9 @@ string tr(Tr identifier, string[] args = [])
     auto message = translations[identifier];
     auto localizedMessage = message[locale in message ? locale : defaultLocale].str;
 
-    foreach (i; 0 .. args.length)
+    foreach (i, arg; args)
     {
-        localizedMessage = localizedMessage.replace('$' ~ text(i + 1), args[i]);
+        localizedMessage = localizedMessage.replace('$' ~ text(i + 1), arg);
     }
 
     return localizedMessage;

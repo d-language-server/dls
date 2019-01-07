@@ -49,8 +49,8 @@
         "fr": "Erreur de mise à jour des sélections:\n$1"
     },
     "app.upgradeDls": {
-        "en": "DLS version $1 is available (current: $2)",
-        "fr": "DLS version $1 est disponible (actuelle: $2)"
+        "en": "DLS version $1 is available (current version: $2)",
+        "fr": "DLS version $1 est disponible (version actuelle: $2)"
     },
     "app.upgradeDls.upgrade": {
         "en": "Upgrade",
@@ -75,8 +75,8 @@
     },
     "app.upgradeDls.linkError": {
         "_type": 1,
-        "en": "DLS could not be linked",
-        "fr": "DLS n'a pas pu être lié"
+        "en": "The symlink to DLS could not br created",
+        "fr": "Le lien symbolique vers DLS n'a pas pu être créé"
     },
     "app.showChangelog": {
         "en": "DLS upgraded to version $1",
@@ -94,6 +94,10 @@
         "en": "Disable $1 (project-wide)",
         "fr": "Désactiver $1 (tout le projet)"
     },
+    "bootstrap.help.title": {
+        "en": "DLS installer",
+        "fr": "Installateur de DLS"
+    },
     "bootstrap.help.default": {
         "en": "default",
         "fr": "défaut"
@@ -103,16 +107,16 @@
         "fr": "%s|%s|%s La méthode d'installation."
     },
     "bootstrap.help.method.auto": {
-        "en": "`%s` tries `%s` and falls back to `%s` if it's unavailable).",
-        "fr": "`%s` tente `%s` et retombe sur `%s` s'il n'est pas disponible)."
+        "en": "`%s` tries `%s`, and falls back to `%s` if unavailable).",
+        "fr": "`%s` tente `%s`, puis `%s` s'il n'est pas disponible)."
     },
     "bootstrap.help.check": {
         "en": "Checks if the selected method is available.",
         "fr": "Vérifie si la méthode sélectionnée est disponible."
     },
     "bootstrap.help.localization": {
-        "en": "Output localized strings.",
-        "fr": "Émettre des chaînes localisées."
+        "en": "Output localization strings.",
+        "fr": "Émettre des chaînes pour la localisation."
     },
     "bootstrap.help.progress": {
         "en": "Show progress (only for method `%s`).",

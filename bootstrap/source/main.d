@@ -72,7 +72,7 @@ int main(string[] args)
 
         if (info.helpWanted)
         {
-            defaultGetoptPrinter("DLS bootstrap utility", info.options);
+            defaultGetoptPrinter(tr(Tr.bootstrap_help_title), info.options);
             return 0;
         }
     }
