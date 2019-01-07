@@ -63,11 +63,11 @@ class LocationLink
     import std.typecons : Nullable;
 
     Nullable!Range originSelectionRange;
-    string targetUri;
+    DocumentUri targetUri;
     Range targetRange;
     Nullable!Range targetSelectionRange;
 
-    @safe this(Nullable!Range originSelectionRange = Nullable!Range.init, string targetUri = string.init,
+    @safe this(Nullable!Range originSelectionRange = Nullable!Range.init, DocumentUri targetUri = DocumentUri.init,
             Range targetRange = new Range(),
             Nullable!Range targetSelectionRange = Nullable!Range.init) pure nothrow
     {
@@ -186,13 +186,14 @@ class CreateFileOptions
 
 class CreateFile
 {
+    import dls.protocol.interfaces : ResourceOperationKind;
     import std.typecons : Nullable;
 
-    immutable string kind = "create";
-    string uri;
+    immutable ResourceOperationKind kind = ResourceOperationKind.create;
+    DocumentUri uri;
     Nullable!CreateFileOptions options;
 
-    @safe this(string uri = string.init,
+    @safe this(DocumentUri uri = DocumentUri.init,
             Nullable!CreateFileOptions options = Nullable!CreateFileOptions.init) pure nothrow
     {
         this.uri = uri;
@@ -217,14 +218,15 @@ class RenameFileOptions
 
 class RenameFile
 {
+    import dls.protocol.interfaces : ResourceOperationKind;
     import std.typecons : Nullable;
 
-    immutable string kind = "rename";
-    string oldUri;
-    string newUri;
+    immutable ResourceOperationKind kind = ResourceOperationKind.rename;
+    DocumentUri oldUri;
+    DocumentUri newUri;
     Nullable!RenameFileOptions options;
 
-    @safe this(string oldUri = string.init, string newUri = string.init,
+    @safe this(DocumentUri oldUri = DocumentUri.init, DocumentUri newUri = DocumentUri.init,
             Nullable!RenameFileOptions options = Nullable!RenameFileOptions.init) pure nothrow
     {
         this.oldUri = oldUri;
@@ -250,13 +252,14 @@ class DeleteFileOptions
 
 class DeleteFile
 {
+    import dls.protocol.interfaces : ResourceOperationKind;
     import std.typecons : Nullable;
 
-    immutable string kind = "delete";
-    string uri;
+    immutable ResourceOperationKind kind = ResourceOperationKind.delete_;
+    DocumentUri uri;
     Nullable!DeleteFileOptions options;
 
-    @safe this(string uri = string.init,
+    @safe this(DocumentUri uri = DocumentUri.init,
             Nullable!DeleteFileOptions options = Nullable!DeleteFileOptions.init) pure nothrow
     {
         this.uri = uri;

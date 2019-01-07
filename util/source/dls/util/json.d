@@ -27,7 +27,8 @@ import std.typecons : Nullable;
 /++
 Converts a `JSONValue` to an object of type `T` by filling its fields with the JSON's fields.
 +/
-T convertFromJSON(T)(JSONValue json) if (is(T == class) || is(T == struct))
+T convertFromJSON(T)(JSONValue json)
+        if ((is(T == class) || is(T == struct)) && !is(T == JSONValue))
 {
     import std.json : JSONException, JSON_TYPE;
     import std.meta : Alias;
@@ -286,9 +287,9 @@ unittest
     auto json = JSONValue("Hello");
     assert(convertFromJSON!string(json) == json.str);
     assert(convertFromJSON!(char[])(json) == json.str);
-    assert(convertFromJSON!(wstring)(json) == "Hello"w);
+    assert(convertFromJSON!wstring(json) == "Hello"w);
     assert(convertFromJSON!(wchar[])(json) == "Hello"w);
-    assert(convertFromJSON!(dstring)(json) == "Hello"d);
+    assert(convertFromJSON!dstring(json) == "Hello"d);
     assert(convertFromJSON!(dchar[])(json) == "Hello"d);
 
     // beware of the fact that JSONValue treats chars as integers; this returns "97" and not "a"

@@ -24,7 +24,9 @@ import dls.protocol.interfaces.client : RegistrationOptions;
 
 final class WorkspaceFolder
 {
-    string uri;
+    import dls.protocol.definitions : DocumentUri;
+
+    DocumentUri uri;
     string name;
 
     @safe this() pure nothrow
@@ -74,12 +76,13 @@ final class ConfigurationParams
 
 final class ConfigurationItem
 {
+    import dls.protocol.definitions : DocumentUri;
     import std.typecons : Nullable;
 
-    Nullable!string scopeUri;
+    Nullable!DocumentUri scopeUri;
     Nullable!string section;
 
-    @safe this(Nullable!string scopeUri = Nullable!string.init,
+    @safe this(Nullable!DocumentUri scopeUri = Nullable!DocumentUri.init,
             Nullable!string section = Nullable!string.init) pure nothrow
     {
         this.scopeUri = scopeUri;
