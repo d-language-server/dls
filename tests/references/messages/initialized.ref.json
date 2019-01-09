@@ -1,0 +1,43 @@
+[
+    {
+        "jsonrpc": "2.0",
+        "method": "textDocument/publishDiagnostics",
+        "params": {
+            "diagnostics": [
+                {
+                    "code": "dscanner.style.undocumented_declaration",
+                    "message": "Public declaration 'Foo' is undocumented.",
+                    "range": {
+                        "end": {
+                            "character": 9,
+                            "line": 2
+                        },
+                        "start": {
+                            "character": 6,
+                            "line": 2
+                        }
+                    },
+                    "severity": 2,
+                    "source": "D-Scanner"
+                },
+                {
+                    "code": "dscanner.style.undocumented_declaration",
+                    "message": "Public declaration 'member' is undocumented.",
+                    "range": {
+                        "end": {
+                            "character": 14,
+                            "line": 4
+                        },
+                        "start": {
+                            "character": 8,
+                            "line": 4
+                        }
+                    },
+                    "severity": 2,
+                    "source": "D-Scanner"
+                }
+            ],
+            "uri": "testFile:///source/app.d"
+        }
+    }
+]

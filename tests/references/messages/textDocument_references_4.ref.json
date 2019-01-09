@@ -1,0 +1,60 @@
+[
+    {
+        "id": "textDocument/references 4",
+        "jsonrpc": "2.0",
+        "result": [
+            {
+                "range": {
+                    "end": {
+                        "character": 14,
+                        "line": 4
+                    },
+                    "start": {
+                        "character": 8,
+                        "line": 4
+                    }
+                },
+                "uri": "testFile:///source/app.d"
+            },
+            {
+                "range": {
+                    "end": {
+                        "character": 22,
+                        "line": 10
+                    },
+                    "start": {
+                        "character": 16,
+                        "line": 10
+                    }
+                },
+                "uri": "testFile:///source/app.d"
+            },
+            {
+                "range": {
+                    "end": {
+                        "character": 14,
+                        "line": 11
+                    },
+                    "start": {
+                        "character": 8,
+                        "line": 11
+                    }
+                },
+                "uri": "testFile:///source/app.d"
+            },
+            {
+                "range": {
+                    "end": {
+                        "character": 22,
+                        "line": 12
+                    },
+                    "start": {
+                        "character": 16,
+                        "line": 12
+                    }
+                },
+                "uri": "testFile:///source/app.d"
+            }
+        ]
+    }
+]

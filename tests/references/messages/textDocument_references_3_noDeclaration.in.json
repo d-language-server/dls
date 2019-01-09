@@ -1,0 +1,17 @@
+{
+    "jsonrpc": "2.0",
+    "id": "textDocument/references 1 no declaration",
+    "method": "textDocument/references",
+    "params": {
+        "textDocument": {
+            "uri": "testFile:///source/app.d"
+        },
+        "position": {
+            "line": 10,
+            "character": 14
+        },
+        "context": {
+            "includeDeclaration": false
+        }
+    }
+}

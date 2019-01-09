@@ -1,0 +1,21 @@
+[
+    {
+        "id": "textDocument/references 2 no declaration",
+        "jsonrpc": "2.0",
+        "result": [
+            {
+                "range": {
+                    "end": {
+                        "character": 22,
+                        "line": 9
+                    },
+                    "start": {
+                        "character": 19,
+                        "line": 9
+                    }
+                },
+                "uri": "testFile:///source/app.d"
+            }
+        ]
+    }
+]

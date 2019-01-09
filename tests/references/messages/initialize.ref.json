@@ -1,0 +1,18 @@
+[
+    {
+        "id": "initialize",
+        "jsonrpc": "2.0",
+        "result": {
+            "capabilities": {
+                "referencesProvider": true,
+                "textDocumentSync": {
+                    "change": 2,
+                    "openClose": true,
+                    "save": {
+                        "includeText": false
+                    }
+                }
+            }
+        }
+    }
+]
