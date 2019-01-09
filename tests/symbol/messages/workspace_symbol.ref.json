@@ -45,11 +45,11 @@
                 "location": {
                     "range": {
                         "end": {
-                            "character": 11,
+                            "character": 14,
                             "line": 10
                         },
                         "start": {
-                            "character": 5,
+                            "character": 8,
                             "line": 10
                         }
                     },
@@ -63,11 +63,11 @@
                 "location": {
                     "range": {
                         "end": {
-                            "character": 15,
+                            "character": 21,
                             "line": 14
                         },
                         "start": {
-                            "character": 6,
+                            "character": 12,
                             "line": 14
                         }
                     },
@@ -81,11 +81,11 @@
                 "location": {
                     "range": {
                         "end": {
-                            "character": 15,
+                            "character": 21,
                             "line": 15
                         },
                         "start": {
-                            "character": 9,
+                            "character": 15,
                             "line": 15
                         }
                     },
@@ -135,11 +135,11 @@
                 "location": {
                     "range": {
                         "end": {
-                            "character": 12,
+                            "character": 15,
                             "line": 21
                         },
                         "start": {
-                            "character": 8,
+                            "character": 11,
                             "line": 21
                         }
                     },
@@ -171,11 +171,11 @@
                 "location": {
                     "range": {
                         "end": {
-                            "character": 4,
+                            "character": 7,
                             "line": 26
                         },
                         "start": {
-                            "character": 1,
+                            "character": 4,
                             "line": 26
                         }
                     },
@@ -189,11 +189,11 @@
                 "location": {
                     "range": {
                         "end": {
-                            "character": 4,
+                            "character": 7,
                             "line": 27
                         },
                         "start": {
-                            "character": 1,
+                            "character": 4,
                             "line": 27
                         }
                     },
@@ -207,11 +207,11 @@
                 "location": {
                     "range": {
                         "end": {
-                            "character": 4,
+                            "character": 7,
                             "line": 28
                         },
                         "start": {
-                            "character": 1,
+                            "character": 4,
                             "line": 28
                         }
                     },
