@@ -1,9 +1,3 @@
 {
-	"name": "formatting",
-	"authors": [
-		"Laurent Tréguier"
-	],
-	"description": "A minimal D application.",
-	"copyright": "Copyright © 2018, Laurent Tréguier",
-	"license": "MIT"
+	"name": "formatting"
 }
