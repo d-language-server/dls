@@ -4,6 +4,11 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.21.6
+- Fixed document contents not being saved internally ([#22](https://github.com/d-language-server/dls/issues/22))
+- Updated libraries:
+    - `dub`: `1.12.1` => `1.13.0`
+
 #### 0.21.5
 - Fixed memory leaked on cross-platform cancellation support with stdio communication
 

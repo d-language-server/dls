@@ -43,7 +43,7 @@ Packages used (the stuff doing the actual hard work):
 
 ### Installation
 
-If you are using VSCode or Atom, you can [skip this step](#some-common-editors) and install the corresponding extension.
+If you are using VSCode, Visual Studio or Atom, you can [skip this step](#some-common-editors) and install the corresponding extension.
 
 Simply run:
 ```shell
@@ -57,6 +57,7 @@ DLS will automatically update itself whenever a new version is out.
 ### Some common editors
 
 - Visual Studio Code: [install the extension](https://marketplace.visualstudio.com/items?itemName=LaurentTreguier.vscode-dls)
+- Visual Studio: [install the extension](https://marketplace.visualstudio.com/items?itemName=LaurentTreguier.visual-studio-dlang)
 - Atom: [install the package](https://atom.io/packages/ide-dlang)
 - Sublime Text (using [tomv654's LSP client](https://github.com/tomv564/LSP)):
     ```json
@@ -231,3 +232,9 @@ Adding new strings is straightforward, simply add new entries in the `message` o
 
 Is it work on a new feature ? Then the `master` branch should be targeted.
 Is it a fix ? Then the latest `release/v<MAJOR>.<MINOR>.x` branch should be targeted.
+
+## Other links
+
+- https://github.com/Pure-D/code-d: a D extension for VSCode
+- https://github.com/Pure-D/serve-d: a language server based on [workspace-d](https://github.com/Pure-D/serve-d)
+- https://github.com/dlang/visuald: an extension seamlessly integrating into Visual Studio

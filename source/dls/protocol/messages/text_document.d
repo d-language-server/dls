@@ -38,19 +38,16 @@ void didOpen(DidOpenTextDocumentParams params)
     import std.algorithm : canFind;
     import std.uni : toLower;
 
-    if (params.textDocument.languageId.toLower() == "d")
+    auto uri = new Uri(params.textDocument.uri);
+    logger.info("Document opened: %s", uri.path);
+
+    if (!SymbolTool.instance.workspacesFilesUris.canFind!sameFile(uri))
     {
-        auto uri = new Uri(params.textDocument.uri);
-        logger.info("Document opened: %s", uri.path);
-
-        if (!SymbolTool.instance.workspacesFilesUris.canFind!sameFile(uri))
-        {
-            send(TextDocument.publishDiagnostics, new PublishDiagnosticsParams(uri,
-                    AnalysisTool.instance.diagnostics(uri)));
-        }
-
-        Document.open(params.textDocument);
+        send(TextDocument.publishDiagnostics, new PublishDiagnosticsParams(uri,
+                AnalysisTool.instance.diagnostics(uri)));
     }
+
+    Document.open(params.textDocument);
 }
 
 void didChange(DidChangeTextDocumentParams params)
