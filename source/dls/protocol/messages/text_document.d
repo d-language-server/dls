@@ -47,7 +47,10 @@ void didOpen(DidOpenTextDocumentParams params)
                 AnalysisTool.instance.diagnostics(uri)));
     }
 
-    Document.open(params.textDocument);
+    if (!Document.open(params.textDocument))
+    {
+        logger.warning("Document %s is already open", uri.path);
+    }
 }
 
 void didChange(DidChangeTextDocumentParams params)
@@ -56,8 +59,13 @@ void didChange(DidChangeTextDocumentParams params)
     import dls.util.document : Document;
     import dls.util.uri : Uri;
 
-    logger.info("Document changed: %s", new Uri(params.textDocument.uri).path);
-    Document.change(params.textDocument, params.contentChanges);
+    auto uri = new Uri(params.textDocument.uri);
+    logger.info("Document changed: %s", uri.path);
+
+    if (Document.change(params.textDocument, params.contentChanges))
+    {
+        logger.warning("Document %s is not open", uri.path);
+    }
 }
 
 void willSave(WillSaveTextDocumentParams params)
@@ -97,7 +105,11 @@ void didClose(DidCloseTextDocumentParams params)
 
     auto uri = new Uri(params.textDocument.uri);
     logger.info("Document closed: %s", uri.path);
-    Document.close(params.textDocument);
+
+    if (Document.close(params.textDocument))
+    {
+        logger.warning("Document %s is not open", uri.path);
+    }
 
     if (!SymbolTool.instance.workspacesFilesUris.canFind!sameFile(uri))
     {

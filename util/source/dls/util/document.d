@@ -47,7 +47,7 @@ class Document
         return uri.path in _documents ? _documents[uri.path] : new Document(uri, readText(uri.path));
     }
 
-    static void open(const TextDocumentItem textDocument)
+    static bool open(const TextDocumentItem textDocument)
     {
         auto uri = new Uri(textDocument.uri);
 
@@ -55,20 +55,30 @@ class Document
         {
             _documents[uri.path] = new Document(uri, textDocument.text);
             _documents[uri.path]._version = textDocument.version_;
+            return true;
+        }
+        else
+        {
+            return false;
         }
     }
 
-    static void close(const TextDocumentIdentifier textDocument)
+    static bool close(const TextDocumentIdentifier textDocument)
     {
         auto uri = new Uri(textDocument.uri);
 
         if (uri.path in _documents)
         {
             _documents.remove(uri.path);
+            return true;
+        }
+        else
+        {
+            return false;
         }
     }
 
-    static void change(const VersionedTextDocumentIdentifier textDocument,
+    static bool change(const VersionedTextDocumentIdentifier textDocument,
             TextDocumentContentChangeEvent[] events)
     {
         auto uri = new Uri(textDocument.uri);
@@ -77,6 +87,11 @@ class Document
         {
             _documents[uri.path].change(events);
             _documents[uri.path]._version = textDocument.version_;
+            return true;
+        }
+        else
+        {
+            return false;
         }
     }
 
