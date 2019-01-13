@@ -52,13 +52,19 @@ class StdioCommunicator : Communicator
     private TaskPool _pool;
     private Task!(readChar)* _background;
 
-    static int readChar()
+    static char readChar()
     {
-        import std.stdio : EOF, stdin;
+        import std.stdio : stdin;
 
         static char[1] buffer;
         auto result = stdin.rawRead(buffer);
-        return result.length > 0 ? result[0] : EOF;
+
+        if (result.length > 0)
+        {
+            return result[0];
+        }
+
+        throw new Exception("No input data");
     }
 
     this()
@@ -77,12 +83,19 @@ class StdioCommunicator : Communicator
 
     bool hasPendingData()
     {
-        return _background.done && hasData();
+        try
+        {
+            return _background.done;
+        }
+        catch (Exception e)
+        {
+            return false;
+        }
     }
 
     char[] read(size_t size)
     {
-        import std.stdio : EOF, stdin;
+        import std.stdio : stdin;
 
         if (size == 0)
         {
@@ -91,21 +104,26 @@ class StdioCommunicator : Communicator
 
         static char[] buffer;
         buffer.length = size;
-        const c = _background.yieldForce();
 
-        if (c == EOF)
+        scope (exit)
         {
-            return [];
+            startBackground();
         }
 
-        buffer[0] = cast(char) c;
+        try
+        {
+            buffer[0] = _background.yieldForce();
+        }
+        catch (Exception e)
+        {
+            return stdin.rawRead(buffer);
+        }
 
         if (size > 1)
         {
             stdin.rawRead(buffer[1 .. $]);
         }
 
-        startBackground();
         return buffer;
     }
 
