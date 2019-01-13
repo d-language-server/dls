@@ -60,34 +60,21 @@ private immutable string dlsLatestDirName = "dls-latest";
 private string downloadUrl;
 private string downloadVersion;
 
+version (X86_64)
+    version = IntelArchitecture;
+else version (X86)
+    version = IntelArchitecture;
+
 shared static this()
 {
     import std.format : format;
 
-    version (FreeBSD)
-    {
-        immutable arch = "x86";
-    }
-    else version (X86_64)
-    {
-        immutable arch = "x86_64";
-    }
-    else version (X86)
+    version (IntelArchitecture)
     {
         import core.cpuid : isX86_64;
+        import std.system : OS, os;
 
-        version (Posix)
-        {
-            import std.process : execute;
-            import std.string : strip;
-
-            immutable arch = execute("uname").output.strip() != "FreeBSD"
-                && isX86_64 ? "x86_64" : "x86";
-        }
-        else
-        {
-            immutable arch = isX86_64 ? "x86_64" : "x86";
-        }
+        immutable arch = os != OS.freeBSD && isX86_64 ? "x86_64" : "x86";
     }
     else
     {
