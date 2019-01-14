@@ -48,16 +48,36 @@ interface Communicator
 class StdioCommunicator : Communicator
 {
     import std.parallelism : Task, TaskPool;
+    import std.stdio : File;
 
+    private static File _stdin;
+    private static File _stdout;
     private TaskPool _pool;
     private Task!(readChar)* _background;
 
+    static this()
+    {
+        import std.stdio : stderr, stdin, stdout;
+
+        _stdin = stdin;
+        _stdout = stdout;
+
+        version (Windows)
+        {
+            stdin = File("NUL", "r");
+        }
+        else version (Posix)
+        {
+            stdin = File("/dev/null", "r");
+        }
+
+        stdout = stderr;
+    }
+
     static char readChar()
     {
-        import std.stdio : stdin;
-
         static char[1] buffer;
-        auto result = stdin.rawRead(buffer);
+        auto result = _stdin.rawRead(buffer);
 
         if (result.length > 0)
         {
@@ -76,9 +96,7 @@ class StdioCommunicator : Communicator
 
     bool hasData()
     {
-        import std.stdio : stdin;
-
-        return !stdin.eof;
+        return !_stdin.eof;
     }
 
     bool hasPendingData()
@@ -95,8 +113,6 @@ class StdioCommunicator : Communicator
 
     char[] read(size_t size)
     {
-        import std.stdio : stdin;
-
         if (size == 0)
         {
             return [];
@@ -116,12 +132,12 @@ class StdioCommunicator : Communicator
         }
         catch (Exception e)
         {
-            return stdin.rawRead(buffer);
+            return _stdin.rawRead(buffer);
         }
 
         if (size > 1)
         {
-            stdin.rawRead(buffer[1 .. $]);
+            _stdin.rawRead(buffer[1 .. $]);
         }
 
         return buffer;
@@ -129,16 +145,12 @@ class StdioCommunicator : Communicator
 
     void write(const char[] data)
     {
-        import std.stdio : stdout;
-
-        stdout.rawWrite(data);
+        _stdout.rawWrite(data);
     }
 
     void flush()
     {
-        import std.stdio : stdout;
-
-        stdout.flush();
+        _stdout.flush();
     }
 
     private void startBackground()
