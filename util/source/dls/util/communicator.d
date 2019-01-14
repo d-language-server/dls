@@ -48,17 +48,43 @@ interface Communicator
 class StdioCommunicator : Communicator
 {
     import std.parallelism : Task, TaskPool;
+    import std.stdio : File;
 
+    private static File _stdin;
+    private static File _stdout;
     private TaskPool _pool;
     private Task!(readChar)* _background;
 
-    static int readChar()
+    static this()
     {
-        import std.stdio : EOF, stdin;
+        import std.stdio : stderr, stdin, stdout;
 
+        _stdin = stdin;
+        _stdout = stdout;
+
+        version (Windows)
+        {
+            stdin = File("NUL", "r");
+        }
+        else version (Posix)
+        {
+            stdin = File("/dev/null", "r");
+        }
+
+        stdout = stderr;
+    }
+
+    static char readChar()
+    {
         static char[1] buffer;
-        auto result = stdin.rawRead(buffer);
-        return result.length > 0 ? result[0] : EOF;
+        auto result = _stdin.rawRead(buffer);
+
+        if (result.length > 0)
+        {
+            return result[0];
+        }
+
+        throw new Exception("No input data");
     }
 
     this()
@@ -70,20 +96,23 @@ class StdioCommunicator : Communicator
 
     bool hasData()
     {
-        import std.stdio : stdin;
-
-        return !stdin.eof;
+        return !_stdin.eof;
     }
 
     bool hasPendingData()
     {
-        return _background.done && hasData();
+        try
+        {
+            return _background.done;
+        }
+        catch (Exception e)
+        {
+            return false;
+        }
     }
 
     char[] read(size_t size)
     {
-        import std.stdio : EOF, stdin;
-
         if (size == 0)
         {
             return [];
@@ -91,36 +120,37 @@ class StdioCommunicator : Communicator
 
         static char[] buffer;
         buffer.length = size;
-        immutable c = _background.yieldForce();
 
-        if (c == EOF)
+        scope (exit)
         {
-            return [];
+            startBackground();
         }
 
-        buffer[0] = cast(char) c;
+        try
+        {
+            buffer[0] = _background.yieldForce();
+        }
+        catch (Exception e)
+        {
+            return _stdin.rawRead(buffer);
+        }
 
         if (size > 1)
         {
-            stdin.rawRead(buffer[1 .. $]);
+            _stdin.rawRead(buffer[1 .. $]);
         }
 
-        startBackground();
         return buffer;
     }
 
     void write(const char[] data)
     {
-        import std.stdio : stdout;
-
-        stdout.rawWrite(data);
+        _stdout.rawWrite(data);
     }
 
     void flush()
     {
-        import std.stdio : stdout;
-
-        stdout.flush();
+        _stdout.flush();
     }
 
     private void startBackground()

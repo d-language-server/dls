@@ -4,6 +4,9 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.21.7
+- Fixed stdio communication on Windows hanging by applying a [fix from serve-d](https://github.com/Pure-D/serve-d/commit/eeb4c0875049be2bd7bd1f00019071413bee93ca)
+
 #### 0.21.6
 - Fixed document contents not being saved internally ([#22](https://github.com/d-language-server/dls/issues/22))
 - Updated libraries:
