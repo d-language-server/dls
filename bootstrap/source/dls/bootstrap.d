@@ -72,13 +72,20 @@ shared static this()
     version (IntelArchitecture)
     {
         import core.cpuid : isX86_64;
-        import std.system : OS, os;
 
-        immutable arch = os != OS.freeBSD && isX86_64 ? "x86_64" : "x86";
-    }
-    else
-    {
-        immutable arch = "none";
+        version (Posix)
+        {
+            import std.process : execute;
+            import std.string : strip;
+            import std.uni : toLower;
+
+            immutable arch = execute("uname").output.strip()
+                .toLower() != "freebsd" && isX86_64 ? "x86_64" : "x86";
+        }
+        else
+        {
+            immutable arch = isX86_64 ? "x86_64" : "x86";
+        }
     }
 
     dlsArchiveName = format("dls-%%s.%s.%s.zip", os, arch);
