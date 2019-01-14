@@ -20,10 +20,33 @@
 
 module dls.util.communicator;
 
+import std.stdio : File;
+
 // Socket can't be used with a shared aliasing.
 // However, the communicator's methods are all called either from the main
 // thread, or from inside a synchronized block, so __gshared is ok.
 private __gshared Communicator _communicator;
+private __gshared File _stdin;
+private __gshared File _stdout;
+
+shared static this()
+{
+    import std.stdio : stderr, stdin, stdout;
+
+    _stdin = stdin;
+    _stdout = stdout;
+
+    version (Windows)
+    {
+        stdin = File("NUL", "r");
+    }
+    else version (Posix)
+    {
+        stdin = File("/dev/null", "r");
+    }
+
+    stdout = stderr;
+}
 
 @property Communicator communicator()
 {
@@ -48,31 +71,9 @@ interface Communicator
 class StdioCommunicator : Communicator
 {
     import std.parallelism : Task, TaskPool;
-    import std.stdio : File;
 
-    private static File _stdin;
-    private static File _stdout;
     private TaskPool _pool;
     private Task!(readChar)* _background;
-
-    static this()
-    {
-        import std.stdio : stderr, stdin, stdout;
-
-        _stdin = stdin;
-        _stdout = stdout;
-
-        version (Windows)
-        {
-            stdin = File("NUL", "r");
-        }
-        else version (Posix)
-        {
-            stdin = File("/dev/null", "r");
-        }
-
-        stdout = stderr;
-    }
 
     static char readChar()
     {
