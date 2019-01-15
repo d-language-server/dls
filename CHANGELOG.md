@@ -4,6 +4,9 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.21.9
+- Fixed crash on `importPaths` configuration set to relative paths ([#23](https://github.com/d-language-server/dls/issues/23))
+
 #### 0.21.8
 - Fixed broken stdio communication
 
