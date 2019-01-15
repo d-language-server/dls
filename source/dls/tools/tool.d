@@ -48,6 +48,8 @@ abstract class Tool
 
     static void updateConfig(const Uri uri, JSONValue json)
     {
+        import dls.protocol.state : initState;
+
         if (uri is null || uri.path.length == 0)
         {
             _globalConfig.merge(json);
@@ -57,9 +59,9 @@ abstract class Tool
             _workspacesConfigs[uri.path] = json;
         }
 
-        foreach (hook; _configHooks)
+        foreach (hook; _configHooks.byValue)
         {
-            hook(uri);
+            hook(uri is null ? initState.rootUri.isNull ? null : new Uri(initState.rootUri) : uri);
         }
     }
 

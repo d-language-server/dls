@@ -159,7 +159,7 @@ class SymbolTool : Tool
 
             foreach (ref path; paths)
             {
-                if (!isAbsolute(path))
+                if (!(isAbsolute(path) || path is null))
                 {
                     path = buildPath(uri.path, path);
                 }
