@@ -33,14 +33,14 @@ void main()
     immutable packageDir = environment[dubPackageDir];
     immutable translationsPath = buildNormalizedPath(packageDir, "data", "translations.json");
     immutable trModulePath = buildNormalizedPath(packageDir, "source", "dls",
-            "util", "constants.d");
+            "util", "i18n", "constants.d");
     immutable trModuleContent = readText(trModulePath);
     auto translations = parseJSON(readText(translationsPath));
     string content;
 
     content ~= format(q{/+ This file is generated automatically by %s.d +/}, __MODULE__);
     content ~= "\n\n";
-    content ~= q{module dls.util.constants;};
+    content ~= q{module dls.util.i18n.constants;};
     content ~= "\n\n";
     content ~= q{enum Tr : string};
     content ~= "\n{\n";

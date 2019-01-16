@@ -22,7 +22,7 @@ module dls.protocol.interfaces.dls;
 
 class TranslationParams
 {
-    import dls.util.constants : Tr;
+    import dls.util.i18n : Tr;
 
     string tr;
 
@@ -36,7 +36,7 @@ class TranslationParams
 
 class DlsUpgradeSizeParams : TranslationParams
 {
-    import dls.util.constants : Tr;
+    import dls.util.i18n : Tr;
 
     size_t size;
 

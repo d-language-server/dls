@@ -35,8 +35,7 @@ shared static this()
 int main(string[] args)
 {
     import dls.bootstrap : canDownloadDls, buildDls, downloadDls, linkDls;
-    import dls.util.constants : Tr;
-    import dls.util.i18n : tr;
+    import dls.util.i18n : Tr, tr;
     import std.conv : text;
     import std.file : thisExePath;
     import std.format : format;

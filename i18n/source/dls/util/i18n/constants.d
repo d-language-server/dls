@@ -1,6 +1,6 @@
 /+ This file is generated automatically by translations.d +/
 
-module dls.util.constants;
+module dls.util.i18n.constants;
 
 enum Tr : string
 {

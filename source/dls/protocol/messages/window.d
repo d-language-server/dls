@@ -27,8 +27,7 @@ void showMessageRequest(string id, Nullable!MessageActionItem item)
 {
     import dls.protocol.logger : logger;
     import dls.tools.symbol_tool : SymbolTool;
-    import dls.util.constants : Tr;
-    import dls.util.i18n : tr;
+    import dls.util.i18n : Tr, tr;
     import dls.util.uri : Uri;
     import std.concurrency : locate, receiveOnly, send;
     import std.process : browse;
@@ -78,8 +77,7 @@ final abstract class Util
 {
     import dls.protocol.jsonrpc : send;
     import dls.protocol.messages.methods : Window;
-    import dls.util.constants : Tr;
-    import dls.util.i18n : tr, trType;
+    import dls.util.i18n : Tr, tr, trType;
     import std.array : array;
     import std.algorithm : map;
     import std.typecons : Tuple, tuple;

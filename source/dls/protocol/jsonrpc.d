@@ -20,7 +20,7 @@
 
 module dls.protocol.jsonrpc;
 
-import dls.util.constants : Tr;
+import dls.util.i18n : Tr;
 import std.json : JSONValue;
 import std.typecons : Nullable, Tuple, tuple;
 

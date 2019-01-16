@@ -23,8 +23,7 @@ int main(string[] args)
     import dls.info : currentVersion;
     import dls.server : Server;
     import dls.util.communicator : SocketCommunicator, StdioCommunicator, communicator;
-    import dls.util.constants : Tr;
-    import dls.util.i18n : tr;
+    import dls.util.i18n : Tr, tr;
     import std.getopt : defaultGetoptPrinter, getopt;
 
     bool stdio = true;

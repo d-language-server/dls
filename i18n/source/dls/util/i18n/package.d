@@ -20,7 +20,7 @@
 
 module dls.util.i18n;
 
-import dls.util.constants : Tr;
+public import dls.util.i18n.constants;
 import dls.protocol.interfaces : MessageType;
 import std.json : JSONValue;
 

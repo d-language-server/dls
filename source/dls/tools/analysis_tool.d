@@ -230,9 +230,8 @@ class AnalysisTool : Tool
         import dls.protocol.definitions : Position;
         import dls.protocol.logger : logger;
         import dls.tools.command_tool : Commands;
-        import dls.util.constants : Tr;
         import dls.util.document : Document;
-        import dls.util.i18n : tr;
+        import dls.util.i18n : Tr, tr;
         import dls.util.json : convertToJSON;
         import std.algorithm : filter;
         import std.array : appender;
@@ -284,9 +283,8 @@ class AnalysisTool : Tool
         import dls.protocol.definitions : Command, Position;
         import dls.protocol.logger : logger;
         import dls.tools.command_tool : Commands;
-        import dls.util.constants : Tr;
         import dls.util.document : Document;
-        import dls.util.i18n : tr;
+        import dls.util.i18n : Tr, tr;
         import dls.util.json : convertFromJSON;
         import std.algorithm : canFind, filter;
         import std.array : appender;

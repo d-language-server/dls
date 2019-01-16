@@ -467,8 +467,8 @@ class SymbolTool : Tool
     {
         import dls.protocol.logger : logger;
         import dls.protocol.messages.window : Util;
-        import dls.util.constants : Tr;
         import dls.util.disposable_fiber : DisposableFiber;
+        import dls.util.i18n : Tr;
         import dub.platform : BuildPlatform;
         import std.algorithm : map;
         import std.array : appender, array;
@@ -660,7 +660,7 @@ class SymbolTool : Tool
             import dls.protocol.jsonrpc : send;
             import dls.protocol.messages.methods : Dls;
             import dls.protocol.messages.window : Util;
-            import dls.util.constants : Tr;
+            import dls.util.i18n : Tr;
             import dub.dub : UpgradeOptions;
 
             send(Dls.UpgradeSelections.didStart,

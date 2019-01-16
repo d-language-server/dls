@@ -113,7 +113,7 @@ void update(bool autoUpdate)
     import dls.protocol.messages.methods : Dls;
     import dls.protocol.messages.window : Util;
     import dls.protocol.state : initOptions;
-    import dls.util.constants : Tr;
+    import dls.util.i18n : Tr;
     import dub.dependency : Dependency;
     import dub.dub : Dub, FetchOptions;
     import dub.semver : compareVersions;
