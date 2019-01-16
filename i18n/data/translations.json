@@ -1,4 +1,20 @@
 {
+    "app.help.title": {
+        "en": "D Language Server",
+        "fr": "Serveur de Language D"
+    },
+    "app.help.version": {
+        "en": "Display version",
+        "fr": "Afficher la version"
+    },
+    "app.help.stdio": {
+        "en": "Use standard input and output streams",
+        "fr": "Utiliser l'entrée et la sortie standards"
+    },
+    "app.help.socket": {
+        "en": "Connect to a socket on a specified port",
+        "fr": "Se connecter à une socket sur le port spécifié"
+    },
     "app.rpc.errorCodes.parseError": {
         "en": "Parse error",
         "fr": "Erreur d'analyse"

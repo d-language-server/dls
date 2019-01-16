@@ -20,12 +20,12 @@
 
 module dls.updater;
 
-private immutable currentVersion = import("version.txt");
 private immutable changelogUrl = "https://github.com/d-language-server/dls/blob/v%s/CHANGELOG.md";
 
 void cleanup()
 {
     import dls.bootstrap : dubBinDir;
+    import dls.info : currentVersion;
     import dub.semver : compareVersions;
     import std.file : FileException, SpanMode, dirEntries, isSymlink, remove, rmdirRecurse;
     import std.path : baseName;
@@ -106,6 +106,7 @@ void update(bool autoUpdate)
     import core.time : hours;
     import dls.bootstrap : UpgradeFailedException, buildDls, canDownloadDls,
         downloadDls, allReleases, linkDls;
+    import dls.info : currentVersion;
     static import dls.protocol.jsonrpc;
     import dls.protocol.interfaces.dls : DlsUpgradeSizeParams, TranslationParams;
     import dls.protocol.logger : logger;

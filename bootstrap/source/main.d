@@ -55,18 +55,18 @@ int main(string[] args)
         auto info = getopt(args,
                 "method|m",
                 format(tr(Tr.bootstrap_help_method), cast(string) Method.auto_, Method.download, Method.build)
+                ~ ' '
                 ~ format(tr(Tr.bootstrap_help_method_auto), cast(string) Method.auto_, Method.download, Method.build)
                 ~ format!" [%s = %s]"(tr(Tr.bootstrap_help_default), cast(string) method),
                 &method,
                 "check|c",
-                format!"%s [%s = %s]"(tr(Tr.bootstrap_help_check), tr(Tr.bootstrap_help_default), check),
+                tr(Tr.bootstrap_help_check),
                 &check,
                 "localization|l",
-                format!"%s [%s = %s]"(tr(Tr.bootstrap_help_localization), tr(Tr.bootstrap_help_default), localization),
+                tr(Tr.bootstrap_help_localization),
                 &localization,
                 "progress|p",
-                format(tr(Tr.bootstrap_help_progress), Method.download)
-                ~ format!" [%s = %s]"(tr(Tr.bootstrap_help_default), progress),
+                format(tr(Tr.bootstrap_help_progress), Method.download),
                 &progress);
         //dfmt on
 

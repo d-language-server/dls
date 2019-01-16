@@ -20,16 +20,43 @@
 
 int main(string[] args)
 {
+    import dls.info : currentVersion;
     import dls.server : Server;
     import dls.util.communicator : SocketCommunicator, StdioCommunicator, communicator;
-    import std.getopt : getopt;
+    import dls.util.constants : Tr;
+    import dls.util.i18n : tr;
+    import std.getopt : defaultGetoptPrinter, getopt;
 
     bool stdio = true;
     ushort port;
+    bool version_;
 
-    getopt(args, "stdio", &stdio, "socket|tcp", &port);
+    //dfmt off
+    auto result = getopt(args,
+        "stdio",
+        tr(Tr.app_help_stdio),
+        &stdio,
+        "socket|tcp",
+        tr(Tr.app_help_socket),
+        &port,
+        "version",
+        tr(Tr.app_help_version),
+        &version_);
+    //dfmt on
 
-    if (port > 0)
+    if (result.helpWanted)
+    {
+        defaultGetoptPrinter(tr(Tr.app_help_title), result.options);
+        return 0;
+    }
+    else if (version_)
+    {
+        communicator = new StdioCommunicator();
+        communicator.write(currentVersion ~ "\n");
+        communicator.flush();
+        return 0;
+    }
+    else if (port > 0)
     {
         communicator = new SocketCommunicator(port);
     }
