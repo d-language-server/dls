@@ -176,6 +176,9 @@ interface InitializationOptions: {
         documentRangeFormatting?: boolean = true;   // Enable range formatting
         documentOnTypeFormatting?: boolean = true;  // Enable on type formatting
         rename?: boolean = true;                    // Enable renaming
+    },
+    symbol?: {
+        autoImports?: boolean = true;   // Automatically import projects and their dependencies
     }
 }
 ```

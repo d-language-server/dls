@@ -79,16 +79,27 @@ final class InitializeParams
             }
         }
 
+        static final class Symbol
+        {
+            bool autoImports = true;
+
+            @safe this() pure nothrow
+            {
+            }
+        }
+
         bool autoUpdate = true;
         bool preReleaseBuilds = false;
         bool safeMode = false;
         bool catchErrors = false;
         string logFile = "";
         Capabilities capabilities;
+        Symbol symbol;
 
         @safe this() pure nothrow
         {
             this.capabilities = new Capabilities();
+            this.symbol = new Symbol();
         }
     }
 
