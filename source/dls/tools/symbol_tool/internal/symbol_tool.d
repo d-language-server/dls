@@ -153,7 +153,7 @@ class SymbolTool : Tool
         _instance = new SymbolTool();
         _instance.importDirectories(defaultImportPaths.filter!exists.array);
         _instance.addConfigHook("importPaths", (const Uri uri) {
-            import std.path : buildPath, isAbsolute;
+            import std.path : buildNormalizedPath, isAbsolute;
 
             auto paths = getConfig(uri).symbol.importPaths;
 
@@ -161,7 +161,7 @@ class SymbolTool : Tool
             {
                 if (!(isAbsolute(path) || path is null))
                 {
-                    path = buildPath(uri.path, path);
+                    path = buildNormalizedPath(uri.path, path);
                 }
             }
 
@@ -465,6 +465,7 @@ class SymbolTool : Tool
     {
         import dls.protocol.logger : logger;
         import dls.protocol.messages.window : Util;
+        import dls.protocol.state : initOptions;
         import dls.util.constants : Tr;
         import dls.util.disposable_fiber : DisposableFiber;
         import dub.platform : BuildPlatform;
@@ -472,7 +473,7 @@ class SymbolTool : Tool
         import std.array : appender, array;
         import std.path : baseName, buildNormalizedPath;
 
-        if (!validateProjectType(uri, ProjectType.dub))
+        if (!validateProjectType(uri, ProjectType.dub) || !initOptions.symbol.autoImports)
         {
             return;
         }
@@ -528,12 +529,13 @@ class SymbolTool : Tool
     {
         import dls.protocol.errors : InvalidParamsException;
         import dls.protocol.logger : logger;
+        import dls.protocol.state : initOptions;
         import std.algorithm : find, map;
         import std.array : array;
         import std.file : exists;
         import std.path : buildNormalizedPath;
 
-        if (!validateProjectType(uri, ProjectType.custom))
+        if (!validateProjectType(uri, ProjectType.custom) || !initOptions.symbol.autoImports)
         {
             return;
         }
@@ -557,12 +559,13 @@ class SymbolTool : Tool
     void importDubSelections(const Uri uri)
     {
         import dls.protocol.logger : logger;
+        import dls.protocol.state : initOptions;
         import dls.util.uri : normalized;
         import std.algorithm : map, reduce;
         import std.array : array;
         import std.path : buildNormalizedPath;
 
-        if (!validateProjectType(uri, ProjectType.dub))
+        if (!validateProjectType(uri, ProjectType.dub) || !initOptions.symbol.autoImports)
         {
             return;
         }
@@ -588,6 +591,7 @@ class SymbolTool : Tool
     void importGitSubmodules(const Uri uri)
     {
         import dls.protocol.logger : logger;
+        import dls.protocol.state : initOptions;
         import dls.util.disposable_fiber : DisposableFiber;
         import std.algorithm : findSplit;
         import std.file : exists;
@@ -595,7 +599,7 @@ class SymbolTool : Tool
         import std.stdio : File;
         import std.string : strip;
 
-        if (!validateProjectType(uri, ProjectType.custom))
+        if (!validateProjectType(uri, ProjectType.custom) || !initOptions.symbol.autoImports)
         {
             return;
         }
