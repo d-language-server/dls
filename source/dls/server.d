@@ -67,8 +67,8 @@ final abstract class Server
     import std.container : DList;
     import std.json : JSONValue;
 
-    static bool _initialized;
     static bool exit;
+    private static bool _initialized;
     private static DisposableFiber[string] _requestsFibers;
     private static DList!DisposableFiber _fibers;
 
@@ -111,6 +111,7 @@ final abstract class Server
     static void loop()
     {
         import dls.protocol.logger : logger;
+        import dls.protocol.messages.general : shutdown;
         import dls.util.communicator : communicator;
         import std.algorithm : findSplit;
         import std.array : appender;
@@ -204,6 +205,13 @@ final abstract class Server
                     _fibers.front.call();
                 }
             }
+        }
+
+        if (_initialized)
+        {
+            logger.warning("No shutdown request or exit notification received");
+            shutdown(JSONValue());
+            _initialized = true;
         }
     }
 
