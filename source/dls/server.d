@@ -180,7 +180,7 @@ final abstract class Server
             fiber.call();
             _fibers.insertBack(fiber);
 
-            while (!communicator.hasPendingData())
+            while (!_initialized || !communicator.hasPendingData())
             {
                 while (!_fibers.empty && _fibers.front.state == DisposableFiber.State.TERM)
                 {
