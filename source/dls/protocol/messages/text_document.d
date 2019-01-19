@@ -62,7 +62,7 @@ void didChange(DidChangeTextDocumentParams params)
     auto uri = new Uri(params.textDocument.uri);
     logger.info("Document changed: %s", uri.path);
 
-    if (Document.change(params.textDocument, params.contentChanges))
+    if (!Document.change(params.textDocument, params.contentChanges))
     {
         logger.warning("Document %s is not open", uri.path);
     }
@@ -106,7 +106,7 @@ void didClose(DidCloseTextDocumentParams params)
     auto uri = new Uri(params.textDocument.uri);
     logger.info("Document closed: %s", uri.path);
 
-    if (Document.close(params.textDocument))
+    if (!Document.close(params.textDocument))
     {
         logger.warning("Document %s is not open", uri.path);
     }
