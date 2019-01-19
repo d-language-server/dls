@@ -106,6 +106,11 @@ class Configuration
 
         foreach (member; __traits(allMembers, T))
         {
+            if (member !in json)
+            {
+                continue;
+            }
+
             alias m = Alias!(__traits(getMember, T, member));
 
             static if (!isType!(m) && !isSomeFunction!(m))
