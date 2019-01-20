@@ -105,7 +105,6 @@ void didChangeConfiguration(DidChangeConfigurationParams params)
     import dls.protocol.state : initState;
     import dls.tools.configuration : Configuration;
     import dls.tools.tool : Tool;
-    import dls.util.json : convertFromJSON;
     import std.typecons : Nullable, nullable;
 
     logger.info("Configuration changed");
