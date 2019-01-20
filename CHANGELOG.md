@@ -4,6 +4,9 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.21.11
+- Enhanced GNOME Builder compatibility
+
 #### 0.21.10
 - Added `autoImports` init option to disable automatically importing projects and their dependencies ([#24](https://github.com/d-language-server/dls/issues/24))
 
