@@ -230,7 +230,7 @@ class SymbolTool : Tool
         import std.algorithm : canFind, filter, map, reduce;
         import std.array : array;
         import std.file : SpanMode, dirEntries, isFile;
-        import std.path : globMatch;
+        import std.path : filenameCmp, globMatch;
 
         bool isImported(const Uri uri)
         {
@@ -250,7 +250,10 @@ class SymbolTool : Tool
         return reduce!q{a ~ b}(Document.uris.array,
                 _workspaceDependencies.byKey.map!(w => dirEntries(w, SpanMode.depth).map!q{a.name}
                     .filter!(file => globMatch(file, "*.{d,di}"))
-                    .filter!(file => !Document.uris.map!q{a.path}.canFind(file))
+                    .filter!(file => !Document.uris
+                    .map!q{a.path}
+                    .array
+                    .canFind!((a, b) => filenameCmp(a, b) == 0)(file))
                     .filter!isFile
                     .map!(Uri.fromPath)
                     .filter!isImported
