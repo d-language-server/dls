@@ -148,7 +148,7 @@ SignatureHelp signatureHelp(TextDocumentPositionParams params)
 
 Location[] declaration(TextDocumentPositionParams params)
 {
-    return [];
+    return definition(params);
 }
 
 Location[] definition(TextDocumentPositionParams params)
