@@ -1199,7 +1199,7 @@ class SymbolTool : Tool
         foreach (i, token; sourceTokens)
         {
             if (token.type == tok!"identifier" && request.cursorPosition >= token.index
-                    && request.cursorPosition < token.index + token.text.length)
+                    && request.cursorPosition <= token.index + token.text.length)
             {
                 sourceToken = &sourceTokens[i];
                 break;
