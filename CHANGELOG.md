@@ -4,6 +4,12 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.21.12
+- Fixed crash on diagnostics associated to no line/column pair ([#25](https://github.com/d-language-server/dls/issues/25))
+- Updated libraries:
+    - `libdparse`: `0.10.12` => `0.10.13`
+    - `msgpack-d`: `1.0.0-beta.7` => `1.0.0-beta.8`
+
 #### 0.21.11
 - Enhanced GNOME Builder compatibility
 

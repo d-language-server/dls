@@ -168,7 +168,7 @@ class Document
             ++i;
         }
 
-        immutable lineNumber = i - 1;
+        immutable lineNumber = minusOne(i);
         immutable line = _lines[lineNumber];
         bytes -= codeLength!char(line);
         immutable columnNumber = toUCSindex(line, min(bytePosition - bytes, line.length));
@@ -191,7 +191,7 @@ class Document
             return c == '_' || isAlphaNum(c);
         }
 
-        while (startIndex > 0 && isIdentifierChar(line[startIndex - 1]))
+        while (startIndex > 0 && isIdentifierChar(line[minusOne(startIndex)]))
         {
             --startIndex;
         }
@@ -273,4 +273,9 @@ class Document
 
         return lines;
     }
+}
+
+size_t minusOne(size_t i)
+{
+    return i > 0 ? i - 1 : 0;
 }
