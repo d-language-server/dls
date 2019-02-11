@@ -179,7 +179,7 @@ class AnalysisTool : Tool
         import dls.protocol.definitions : DiagnosticSeverity;
         import dls.protocol.logger : logger;
         import dls.tools.symbol_tool : SymbolTool;
-        import dls.util.document : Document;
+        import dls.util.document : Document, minusOne;
         import dparse.lexer : LexerConfig, StringBehavior, StringCache, getTokensForParser;
         import dparse.parser : parseModule;
         import dparse.rollback_allocator : RollbackAllocator;
@@ -201,9 +201,9 @@ class AnalysisTool : Tool
 
         const syntaxProblemhandler = (string path, size_t line, size_t column,
                 string msg, bool isError) {
-            diagnostics ~= new Diagnostic(document.wordRangeAtLineAndByte(line - 1, column - 1), msg, (isError
-                    ? DiagnosticSeverity.error : DiagnosticSeverity.warning).nullable,
-                    Nullable!JSONValue(), diagnosticSource.nullable);
+            auto severity = (isError ? DiagnosticSeverity.error : DiagnosticSeverity.warning);
+            diagnostics ~= new Diagnostic(document.wordRangeAtLineAndByte(minusOne(line), minusOne(column)), msg,
+                    severity.nullable, Nullable!JSONValue(), diagnosticSource.nullable);
         };
 
         const mod = parseModule(tokens, uri.path, &ra, syntaxProblemhandler);
@@ -212,10 +212,11 @@ class AnalysisTool : Tool
 
         foreach (result; analysisResults)
         {
-            if (!document.lines[result.line - 1].matchFirst(
+            if (!document.lines[minusOne(result.line)].matchFirst(
                     regex(`//.*@suppress\s*\(\s*`w ~ result.key.toUTF16() ~ `\s*\)`w)))
             {
-                diagnostics ~= new Diagnostic(document.wordRangeAtLineAndByte(result.line - 1, result.column - 1),
+                diagnostics ~= new Diagnostic(document.wordRangeAtLineAndByte(minusOne(result.line),
+                        minusOne(result.column)),
                         result.message, DiagnosticSeverity.warning.nullable,
                         JSONValue(result.key).nullable, diagnosticSource.nullable);
             }

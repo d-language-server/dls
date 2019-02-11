@@ -287,9 +287,9 @@ package class SymbolVisitor(SymbolType) : ASTVisitor
 
     private Range getRange(const Token t)
     {
-        import dls.util.document : Document;
+        import dls.util.document : Document, minusOne;
 
-        return Document.get(_uri).wordRangeAtLineAndByte(t.line - 1, t.column - 1);
+        return Document.get(_uri).wordRangeAtLineAndByte(minusOne(t.line), minusOne(t.column));
     }
 
     private Range getRange(T)(const T t)

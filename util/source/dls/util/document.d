@@ -153,7 +153,7 @@ class Document
             ++i;
         }
 
-        const lineNumber = i - 1;
+        const lineNumber = minusOne(i);
         const line = _lines[lineNumber];
         bytes -= codeLength!char(line);
         const columnNumber = toUCSindex(line, min(bytePosition - bytes, line.length));
@@ -176,7 +176,7 @@ class Document
             return c == '_' || isAlphaNum(c);
         }
 
-        while (startIndex > 0 && isIdentifierChar(line[startIndex - 1]))
+        while (startIndex > 0 && isIdentifierChar(line[minusOne(startIndex)]))
         {
             --startIndex;
         }
@@ -258,4 +258,9 @@ class Document
 
         return lines;
     }
+}
+
+size_t minusOne(size_t i)
+{
+    return i > 0 ? i - 1 : 0;
 }
