@@ -36,6 +36,7 @@ int main(string[] args)
 {
     import dls.bootstrap : canDownloadDls, buildDls, downloadDls, linkDls;
     import dls.util.i18n : Tr, tr;
+    import dls.util.getopt : printHelp;
     import std.conv : text;
     import std.file : thisExePath;
     import std.format : format;
@@ -71,7 +72,7 @@ int main(string[] args)
 
         if (info.helpWanted)
         {
-            defaultGetoptPrinter(tr(Tr.bootstrap_help_title), info.options);
+            printHelp(tr(Tr.bootstrap_help_title), info.options, data => stdout.rawWrite(data));
             return 0;
         }
     }

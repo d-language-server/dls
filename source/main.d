@@ -23,8 +23,9 @@ int main(string[] args)
     import dls.info : currentVersion;
     import dls.server : Server;
     import dls.util.communicator : SocketCommunicator, StdioCommunicator, communicator;
+    import dls.util.getopt : printHelp;
     import dls.util.i18n : Tr, tr;
-    import std.getopt : defaultGetoptPrinter, getopt;
+    import std.getopt : getopt;
 
     bool stdio = true;
     ushort port;
@@ -45,13 +46,16 @@ int main(string[] args)
 
     if (result.helpWanted)
     {
-        defaultGetoptPrinter(tr(Tr.app_help_title), result.options);
+        communicator = new StdioCommunicator();
+        printHelp(tr(Tr.app_help_title), result.options, data => communicator.write(data));
+        communicator.flush();
         return 0;
     }
     else if (version_)
     {
         communicator = new StdioCommunicator();
-        communicator.write(currentVersion ~ "\n");
+        communicator.write(currentVersion);
+        communicator.write("\n");
         communicator.flush();
         return 0;
     }
