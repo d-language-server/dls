@@ -94,7 +94,7 @@ string normalized(const string path)
             return path[1 .. $].normalized;
         }
 
-        res = (driveName(path).asUpperCase().toUTF8() ~ stripDrive(path));
+        res = driveName(path).asUpperCase().toUTF8() ~ stripDrive(path);
     }
     else
     {
