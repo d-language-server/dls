@@ -4,6 +4,12 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+### 0.22.0
+- Added help message for command line options
+- Added command line options for initialization options ([#28](https://github.com/d-language-server/dls/issues/28))
+- Added back inlining to releases
+- Fixed references not found for one-letter long symbols
+
 #### 0.21.12
 - Fixed crash on diagnostics associated to no line/column pair ([#25](https://github.com/d-language-server/dls/issues/25))
 - Updated libraries:
