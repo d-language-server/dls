@@ -87,6 +87,10 @@ shared static this()
             immutable arch = isX86_64 ? "x86_64" : "x86";
         }
     }
+    else
+    {
+        immutable arch = "none";
+    }
 
     dlsArchiveName = format("dls-%%s.%s.%s.zip", os, arch);
 }
