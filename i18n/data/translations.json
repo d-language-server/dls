@@ -4,16 +4,16 @@
         "fr": "Serveur de Language D"
     },
     "app.help.version": {
-        "en": "Display version",
-        "fr": "Afficher la version"
+        "en": "Display program version",
+        "fr": "Afficher la version du programme"
     },
     "app.help.stdio": {
         "en": "Use standard input and output streams",
         "fr": "Utiliser l'entrée et la sortie standards"
     },
     "app.help.socket": {
-        "en": "Connect to a socket on a specified port",
-        "fr": "Se connecter à une socket sur le port spécifié"
+        "en": "Value: <integer>  Connect to a socket on a specified port",
+        "fr": "Valeur: <entier>  Se connecter à une socket sur le port spécifié"
     },
     "app.rpc.errorCodes.parseError": {
         "en": "Parse error",
@@ -119,8 +119,8 @@
         "fr": "défaut"
     },
     "bootstrap.help.method": {
-        "en": "%s|%s|%s The installation method.",
-        "fr": "%s|%s|%s La méthode d'installation."
+        "en": "Value: %s|%s|%s  The installation method.",
+        "fr": "Valeur: %s|%s|%s  La méthode d'installation."
     },
     "bootstrap.help.method.auto": {
         "en": "`%s` tries `%s`, and falls back to `%s` if unavailable).",
