@@ -18,7 +18,7 @@ install:
   - ps: $env:PATH += ";$($env:TMP)\ldc2-$($latest)-windows-$($env:VC_ARCH)\bin"
   - call msvcEnv %VC_ARCH%
 build_script:
-  - if defined APPVEYOR_REPO_TAG_NAME (set BUILD=release-simple) else (set BUILD=debug)
+  - if defined APPVEYOR_REPO_TAG_NAME (set BUILD=release) else (set BUILD=debug)
   - dub build --arch=%ARCH% --compiler=ldc2 --build=%BUILD%
 after_build:
   - if defined APPVEYOR_REPO_TAG_NAME (set TAG_NAME=%APPVEYOR_REPO_TAG_NAME%) else (set TAG_NAME=untagged)
