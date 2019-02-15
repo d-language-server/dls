@@ -40,7 +40,7 @@ int main(string[] args)
     import std.conv : text;
     import std.file : thisExePath;
     import std.format : format;
-    import std.getopt : getopt, defaultGetoptPrinter;
+    import std.getopt : config, getopt;
     import std.path : dirName;
     import std.stdio : stderr, stdout;
 
@@ -52,7 +52,7 @@ int main(string[] args)
     try
     {
         //dfmt off
-        auto info = getopt(args,
+        auto info = getopt(args, config.passThrough,
                 "method|m",
                 format(tr(Tr.bootstrap_help_method), cast(string) Method.auto_, Method.download, Method.build)
                 ~ ' '

@@ -21,28 +21,47 @@
 int main(string[] args)
 {
     import dls.info : currentVersion;
+    import dls.protocol.interfaces : InitializeParams;
+    import dls.protocol.state : initOptions;
     import dls.server : Server;
     import dls.util.communicator : SocketCommunicator, StdioCommunicator, communicator;
     import dls.util.getopt : printHelp;
     import dls.util.i18n : Tr, tr;
-    import std.getopt : getopt;
+    import std.getopt : config, getopt;
 
     bool stdio = true;
     ushort port;
     bool version_;
+    auto init = new InitializeParams.InitializationOptions();
 
     //dfmt off
-    auto result = getopt(args,
-        "stdio",
-        tr(Tr.app_help_stdio),
-        &stdio,
-        "socket|tcp",
-        tr(Tr.app_help_socket),
-        &port,
-        "version",
-        tr(Tr.app_help_version),
-        &version_);
+    auto result = getopt(args, config.passThrough,
+        "stdio",        tr(Tr.app_help_stdio),      &stdio,
+        "socket",       tr(Tr.app_help_socket),     &port,
+        "tcp",          tr(Tr.app_help_socket),     &port,
+        "version",      tr(Tr.app_help_version),    &version_,
+        "init.autoUpdate",          &init.autoUpdate,
+        "init.preReleaseBuilds",    &init.preReleaseBuilds,
+        "init.safeMode",            &init.safeMode,
+        "init.catchErrors",         &init.catchErrors,
+        "init.logFile",             &init.logFile,
+        "init.capabilities.hover",                      &init.capabilities.hover,
+        "init.capabilities.completion",                 &init.capabilities.completion,
+        "init.capabilities.definition",                 &init.capabilities.definition,
+        "init.capabilities.typeDefinition",             &init.capabilities.typeDefinition,
+        "init.capabilities.references",                 &init.capabilities.references,
+        "init.capabilities.documentHighlight",          &init.capabilities.documentHighlight,
+        "init.capabilities.documentSymbol",             &init.capabilities.documentSymbol,
+        "init.capabilities.workspaceSymbol",            &init.capabilities.workspaceSymbol,
+        "init.capabilities.codeAction",                 &init.capabilities.codeAction,
+        "init.capabilities.documentFormatting",         &init.capabilities.documentFormatting,
+        "init.capabilities.documentRangeFormatting",    &init.capabilities.documentRangeFormatting,
+        "init.capabilities.documentOnTypeFormatting",   &init.capabilities.documentOnTypeFormatting,
+        "init.capabilities.rename",                     &init.capabilities.rename,
+        "init.symbol.autoImports",  &init.symbol.autoImports);
     //dfmt on
+
+    initOptions = init;
 
     if (result.helpWanted)
     {

@@ -23,10 +23,17 @@ module dls.protocol.state;
 import dls.protocol.interfaces : InitializeParams;
 
 private InitializeParams _initState;
+private InitializeParams.InitializationOptions _commandLineOptions;
+
+static this()
+{
+    _initState = new InitializeParams();
+    _commandLineOptions = new InitializeParams.InitializationOptions();
+}
 
 @property InitializeParams initState()
 {
-    return _initState is null ? new InitializeParams() : _initState;
+    return _initState;
 }
 
 @property void initState(InitializeParams params)
@@ -34,17 +41,73 @@ private InitializeParams _initState;
     import dls.protocol.logger : logger;
     import dls.util.disposable_fiber : DisposableFiber;
 
+    assert(params !is null);
     _initState = params;
-    DisposableFiber.safeMode = initOptions.safeMode;
 
     if (!params.trace.isNull)
     {
         logger.trace = params.trace;
     }
+
+    if (_initState.initializationOptions.isNull)
+    {
+        _initState.initializationOptions = _commandLineOptions;
+    }
+    else
+    {
+        merge(params.initializationOptions.get(), _commandLineOptions);
+    }
+
+    DisposableFiber.safeMode = initOptions.safeMode;
 }
 
 @property InitializeParams.InitializationOptions initOptions()
 {
-    return initState.initializationOptions.isNull
-        ? new InitializeParams.InitializationOptions() : _initState.initializationOptions;
+    return initState.initializationOptions.isNull ? _commandLineOptions
+        : _initState.initializationOptions;
+}
+
+@property void initOptions(InitializeParams.InitializationOptions options)
+{
+    assert(options !is null);
+    _commandLineOptions = options;
+}
+
+private void merge(T)(ref T options, const T addins)
+{
+    import std.meta : Alias;
+    import std.traits : isSomeFunction, isType;
+    import dls.protocol.logger : logger;
+
+    static if (is(T == class))
+    {
+        immutable reference = new T();
+    }
+    else
+    {
+        immutable reference = T.init;
+    }
+
+    foreach (member; __traits(allMembers, T))
+    {
+        alias m = Alias!(__traits(getMember, T, member));
+        alias optionsMember = Alias!(mixin("options." ~ member));
+        alias addinsMember = Alias!(mixin("addins." ~ member));
+
+        static if (__traits(getProtection, m) != "public" || isType!m || isSomeFunction!m)
+        {
+            continue;
+        }
+        else static if (is(typeof(m) == class))
+        {
+            merge(mixin("options." ~ member), mixin("addins." ~ member));
+        }
+        else
+        {
+            if (mixin("options." ~ member) == mixin("reference." ~ member))
+            {
+                mixin("options." ~ member) = mixin("addins." ~ member);
+            }
+        }
+    }
 }
