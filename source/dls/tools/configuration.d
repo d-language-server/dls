@@ -89,10 +89,10 @@ class Configuration
 
     void merge(JSONValue json)
     {
-        merge(this, json);
+        merge!(typeof(this))(json);
     }
 
-    private void merge(T)(const T config, JSONValue json)
+    private void merge(T)(JSONValue json)
     {
         import dls.util.json : convertFromJSON;
         import std.json : JSON_TYPE;
