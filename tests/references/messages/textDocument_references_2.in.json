@@ -1,6 +1,6 @@
 {
     "jsonrpc": "2.0",
-    "id": "textDocument/references 3",
+    "id": "textDocument/references 2",
     "method": "textDocument/references",
     "params": {
         "textDocument": {
