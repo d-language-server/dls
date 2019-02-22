@@ -4,6 +4,9 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.22.1
+- Removed a test temporarily (see https://github.com/dlang/dmd/pull/9380)
+
 ### 0.22.0
 - Added help message for command line options
 - Added command line options for initialization options ([#28](https://github.com/d-language-server/dls/issues/28))
