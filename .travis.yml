@@ -40,15 +40,15 @@ script:
 before_deploy:
   - if which strip; then strip dls; fi
   - zip -9 dls-${TRAVIS_TAG:-untagged}.$TRAVIS_OS_NAME.$ARCH.zip dls LICENSE.txt
+  - export TARGET_COMMITISH="$(echo -n release/$TRAVIS_TAG | sed 's/.[0-9]*$/.x/')"
 deploy:
   provider: releases
-  edge:
-    branch: v1.10.5
-  api_key: $GITHUB_API_KEY
+  api_key: "$GITHUB_API_KEY"
+  target_commitish: "$TARGET_COMMITISH"
   file_glob: true
   file: dls-*.zip
   skip_cleanup: true
   on:
-    condition: -n "$ARCH"
+    condition: "-n $ARCH"
     repo: d-language-server/dls
     tags: true
