@@ -202,17 +202,49 @@ class SymbolTool : Tool
     }
     else version (Posix)
     {
-        //dfmt off
-        private static immutable _compilerConfigPaths = [
-            "/Library/D/dmd/bin/dmd.conf",
-            "/etc/dmd.conf",
-            "/usr/local/etc/dmd.conf",
-            "/usr/local/bin/dmd.conf",
-            "/etc/ldc2.conf",
-            "/usr/local/etc/ldc2.conf",
-            "/home/linuxbrew/.linuxbrew/etc/dmd.conf"
-        ];
-        //dfmt on
+
+        @property private static string[] _compilerConfigPaths()
+        {
+            import std.algorithm : findSplitAfter, splitter, startsWith;
+            import std.file : exists;
+            import std.path : buildNormalizedPath;
+            import std.process : environment, execute;
+            import std.string : lineSplitter, strip, stripLeft;
+
+            //dfmt off
+            auto configPaths = [
+                "/Library/D/dmd/bin/dmd.conf",
+                "/etc/dmd.conf",
+                "/usr/local/etc/dmd.conf",
+                "/usr/local/bin/dmd.conf",
+                "/etc/ldc2.conf",
+                "/usr/local/etc/ldc2.conf",
+                "/home/linuxbrew/.linuxbrew/etc/dmd.conf"
+            ];
+            //dfmt on
+
+            foreach (path; splitter(environment["PATH"], ':'))
+            {
+                if (!exists(buildNormalizedPath(path, "dmd")))
+                {
+                    continue;
+                }
+
+                immutable output = execute(["dmd", "--help"], ["LANG" : "C"]).output;
+
+                foreach (line; lineSplitter(output))
+                {
+                    if (stripLeft(line).startsWith("Config file"))
+                    {
+                        configPaths = strip(findSplitAfter(line, ":")[1]) ~ configPaths;
+                    }
+                }
+
+                break;
+            }
+
+            return configPaths;
+        }
     }
     else
     {
