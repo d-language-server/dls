@@ -189,27 +189,29 @@ class SymbolTool : Tool
             import std.path : buildNormalizedPath;
             import std.process : environment;
 
+            auto configPaths = [`C:\D\dmd2\windows\bin\sc.ini`];
+
             foreach (path; splitter(environment["PATH"], ';'))
             {
                 if (exists(buildNormalizedPath(path, "dmd.exe")))
                 {
-                    return [buildNormalizedPath(path, "sc.ini")];
+                    configPaths = buildNormalizedPath(path, "sc.ini") ~ configPaths;
+                    _prependCompilerConfigPath(configPaths);
+                    break;
                 }
             }
 
-            return [];
+            return configPaths;
         }
     }
     else version (Posix)
     {
-
         @property private static string[] _compilerConfigPaths()
         {
-            import std.algorithm : findSplitAfter, splitter, startsWith;
+            import std.algorithm : splitter;
             import std.file : exists;
             import std.path : buildNormalizedPath;
-            import std.process : environment, execute;
-            import std.string : lineSplitter, strip, stripLeft;
+            import std.process : environment;
 
             //dfmt off
             auto configPaths = [
@@ -225,22 +227,11 @@ class SymbolTool : Tool
 
             foreach (path; splitter(environment["PATH"], ':'))
             {
-                if (!exists(buildNormalizedPath(path, "dmd")))
+                if (exists(buildNormalizedPath(path, "dmd")))
                 {
-                    continue;
+                    _prependCompilerConfigPath(configPaths);
+                    break;
                 }
-
-                immutable output = execute(["dmd", "--help"], ["LANG" : "C"]).output;
-
-                foreach (line; lineSplitter(output))
-                {
-                    if (stripLeft(line).startsWith("Config file"))
-                    {
-                        configPaths = strip(findSplitAfter(line, ":")[1]) ~ configPaths;
-                    }
-                }
-
-                break;
             }
 
             return configPaths;
@@ -249,6 +240,24 @@ class SymbolTool : Tool
     else
     {
         private static immutable string[] _compilerConfigPaths;
+    }
+
+    private static void _prependCompilerConfigPath(ref string[] configPaths)
+    {
+        import std.algorithm : startsWith;
+        import std.algorithm : findSplitAfter;
+        import std.process : execute;
+        import std.string : lineSplitter, strip, stripLeft;
+
+        immutable output = execute(["dmd", "--help"]).output;
+
+        foreach (line; lineSplitter(output))
+        {
+            if (stripLeft(line).startsWith("Config file"))
+            {
+                configPaths = strip(findSplitAfter(line, ":")[1]) ~ configPaths;
+            }
+        }
     }
 
     private ProjectType[string] _workspaceProjectTypes;
