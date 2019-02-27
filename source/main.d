@@ -65,14 +65,14 @@ int main(string[] args)
 
     if (result.helpWanted)
     {
-        communicator = new StdioCommunicator();
+        communicator = new StdioCommunicator(false);
         printHelp(tr(Tr.app_help_title), result.options, data => communicator.write(data));
         communicator.flush();
         return 0;
     }
     else if (version_)
     {
-        communicator = new StdioCommunicator();
+        communicator = new StdioCommunicator(false);
         communicator.write(currentVersion);
         communicator.write("\n");
         communicator.flush();
@@ -84,7 +84,7 @@ int main(string[] args)
     }
     else if (stdio)
     {
-        communicator = new StdioCommunicator();
+        communicator = new StdioCommunicator(true);
     }
     else
     {

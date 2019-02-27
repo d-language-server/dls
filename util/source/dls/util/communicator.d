@@ -31,21 +31,21 @@ private __gshared File _stdout;
 
 shared static this()
 {
-    import std.stdio : stderr, stdin, stdout;
+    import std.stdio : stdin, stdout;
 
     _stdin = stdin;
     _stdout = stdout;
 
     version (Windows)
     {
-        stdin = File("NUL", "r");
+        stdin = File("NUL", "rb");
+        stdout = File("NUL", "wb");
     }
     else version (Posix)
     {
-        stdin = File("/dev/null", "r");
+        stdin = File("/dev/null", "rb");
+        stdout = File("/dev/null", "wb");
     }
-
-    stdout = stderr;
 }
 
 @property Communicator communicator()
@@ -72,27 +72,36 @@ class StdioCommunicator : Communicator
 {
     import std.parallelism : Task, TaskPool;
 
+    private bool _checkPending;
     private TaskPool _pool;
     private Task!(readChar)* _background;
 
     static char readChar()
     {
-        static char[1] buffer;
-        auto result = _stdin.rawRead(buffer);
-
-        if (result.length > 0)
+        if (!_stdin.eof)
         {
-            return result[0];
+            static char[1] buffer;
+            auto result = _stdin.rawRead(buffer);
+
+            if (result.length > 0)
+            {
+                return result[0];
+            }
         }
 
         throw new Exception("No input data");
     }
 
-    this()
+    this(bool checkPendingData)
     {
-        _pool = new TaskPool(1);
-        _pool.isDaemon = true;
-        startBackground();
+        _checkPending = checkPendingData;
+
+        if (checkPendingData)
+        {
+            _pool = new TaskPool(1);
+            _pool.isDaemon = true;
+            startBackground();
+        }
     }
 
     bool hasData()
@@ -102,6 +111,11 @@ class StdioCommunicator : Communicator
 
     bool hasPendingData()
     {
+        if (!_checkPending)
+        {
+            return false;
+        }
+
         try
         {
             return _background.done;
@@ -122,23 +136,29 @@ class StdioCommunicator : Communicator
         static char[] buffer;
         buffer.length = size;
 
-        scope (exit)
+        if (_checkPending)
         {
-            startBackground();
-        }
+            try
+            {
+                buffer[0] = _background.yieldForce();
+            }
+            catch (Exception e)
+            {
+                return _stdin.eof ? [] : _stdin.rawRead(buffer);
+            }
+            finally
+            {
+                startBackground();
+            }
 
-        try
-        {
-            buffer[0] = _background.yieldForce();
+            if (size > 1)
+            {
+                _stdin.rawRead(_checkPending ? buffer[1 .. $] : buffer);
+            }
         }
-        catch (Exception e)
+        else
         {
             return _stdin.rawRead(buffer);
-        }
-
-        if (size > 1)
-        {
-            _stdin.rawRead(buffer[1 .. $]);
         }
 
         return buffer;
