@@ -258,8 +258,8 @@ class AnalysisTool : Tool
                 {
                     auto title = tr(Tr.app_command_diagnostic_disableCheck_local, [code]);
                     auto document = Document.get(uri);
-                    auto line = document.lines[range.end.line].stripRight();
-                    auto pos = new Position(range.end.line, line.length);
+                    auto line = document.lines[diagnostic.range.end.line].stripRight();
+                    auto pos = new Position(diagnostic.range.end.line, line.length);
                     auto textEdit = new TextEdit(new Range(pos, pos), " // @suppress(" ~ code ~ ")");
                     auto edit = makeFileWorkspaceEdit(uri, [textEdit]);
                     result ~= new Command(title, Commands.workspaceEdit,
