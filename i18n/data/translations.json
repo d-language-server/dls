@@ -15,6 +15,14 @@
         "en": "Value: <integer>  Connect to a socket on a specified port",
         "fr": "Valeur: <entier>  Se connecter à une socket sur le port spécifié"
     },
+    "app.version.dlsVersion": {
+        "en": "DLS version $1 [$2, $3, $4]",
+        "fr": "DLS version $1 [$2, $3, $4]"
+    },
+    "app.version.compilerVersion": {
+        "en": "Compiled with $1 $2 (DMDFE: $3)",
+        "fr": "Compilé avec $1 $2 (DMDFE: $3)"
+    },
     "app.rpc.errorCodes.parseError": {
         "en": "Parse error",
         "fr": "Erreur d'analyse"

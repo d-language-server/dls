@@ -32,6 +32,8 @@ enum Tr : string
     app_upgradeSelections_error = "app.upgradeSelections.error",
     app_upgradeSelections_upgrade = "app.upgradeSelections.upgrade",
     app_upgradeSelections_upgrading = "app.upgradeSelections.upgrading",
+    app_version_compilerVersion = "app.version.compilerVersion",
+    app_version_dlsVersion = "app.version.dlsVersion",
     bootstrap_help_check = "bootstrap.help.check",
     bootstrap_help_default = "bootstrap.help.default",
     bootstrap_help_localization = "bootstrap.help.localization",

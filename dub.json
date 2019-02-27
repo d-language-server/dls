@@ -23,7 +23,7 @@
 		"StdLoggerDisableFatal"
 	],
 	"preGenerateCommands": [
-		"rdmd $PACKAGE_DIR/data/version.d"
+		"rdmd $PACKAGE_DIR/data/data.d"
 	],
 	"subPackages": [
 		"bootstrap",

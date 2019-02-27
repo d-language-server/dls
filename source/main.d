@@ -20,13 +20,15 @@
 
 int main(string[] args)
 {
-    import dls.info : currentVersion;
+    import dls.info : buildArch, buildPlatform, buildType, compilerVersion, currentVersion;
     import dls.protocol.interfaces : InitializeParams;
     import dls.protocol.state : initOptions;
     import dls.server : Server;
     import dls.util.communicator : SocketCommunicator, StdioCommunicator, communicator;
     import dls.util.getopt : printHelp;
     import dls.util.i18n : Tr, tr;
+    import std.compiler : name;
+    import std.conv : text;
     import std.getopt : config, getopt;
 
     bool stdio = true;
@@ -73,7 +75,11 @@ int main(string[] args)
     else if (version_)
     {
         communicator = new StdioCommunicator();
-        communicator.write(currentVersion);
+        communicator.write(tr(Tr.app_version_dlsVersion, [currentVersion,
+                buildPlatform, buildArch, buildType]));
+        communicator.write("\n");
+        communicator.write(tr(Tr.app_version_compilerVersion, [name,
+                compilerVersion, text(__VERSION__)]));
         communicator.write("\n");
         communicator.flush();
         return 0;

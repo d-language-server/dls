@@ -20,4 +20,8 @@
 
 module dls.info;
 
-immutable currentVersion = import("version.txt");
+immutable currentVersion = import("dls-version.txt");
+immutable buildPlatform = import("build-platform.txt");
+immutable buildArch = import("build-arch.txt");
+immutable buildType = import("build-type.txt");
+immutable compilerVersion = import("compiler-version.txt");

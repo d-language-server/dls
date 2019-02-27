@@ -18,25 +18,43 @@
  *
  */
 
-private immutable dubPackageDir = "DUB_PACKAGE_DIR";
-private immutable dubPackageVersion = "DUB_PACKAGE_VERSION";
-
 void main()
 {
     import std.file : exists, readText, write;
     import std.path : buildNormalizedPath;
     import std.process : environment;
 
-    immutable versionDataFile = buildNormalizedPath(environment[dubPackageDir],
-            "data", "version.txt");
-    immutable fileVersion = exists(versionDataFile) ? readText(versionDataFile) : "";
-    immutable currentVersion = dubPackageVersion in environment ? environment[dubPackageVersion]
-        : getVersionFromDescription();
+    immutable dataPath = buildNormalizedPath(environment["DUB_PACKAGE_DIR"], "data");
 
-    if (currentVersion != fileVersion)
+    //dfmt off
+    immutable fileFillers = [
+        "dls-version.txt" : environment.get("DUB_PACKAGE_VERSION", getVersionFromDescription()),
+        "build-platform.txt": environment.get("DUB_PLATFORM", "unknown-build-platform"),
+        "build-arch.txt": environment.get("DUB_ARCH", "unknown-build-arch"),
+        "build-type.txt": environment.get("DUB_BUILD_TYPE", "unknown-build-type"),
+        "compiler-version.txt" : getCompilerVersion()
+    ];
+    //dfmt on
+
+    foreach (file, newContent; fileFillers)
     {
-        write(versionDataFile, currentVersion);
+        immutable dataFile = buildNormalizedPath(dataPath, file);
+        immutable oldContent = exists(dataFile) ? readText(dataFile) : "";
+
+        if (newContent != oldContent)
+        {
+            write(dataFile, newContent);
+        }
     }
+}
+
+string getCompilerVersion()
+{
+    import std.process : environment, execute;
+    import std.regex : matchFirst, regex;
+
+    return execute([environment["DC"], "--version"]).output.matchFirst(
+            regex(`\d+\.\d+\.\d+`)).front;
 }
 
 string getVersionFromDescription()
