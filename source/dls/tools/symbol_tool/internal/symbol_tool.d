@@ -141,6 +141,7 @@ class SymbolTool : Tool
     import dls.protocol.interfaces : CompletionItem, DocumentHighlight, DocumentSymbol, Hover;
     import dsymbol.modulecache : ModuleCache;
     import dub.dub : Dub;
+    import std.container : SList;
 
     private static SymbolTool _instance;
 
@@ -219,7 +220,8 @@ class SymbolTool : Tool
         private static immutable string[] _compilerConfigPaths;
     }
 
-    private ProjectType[string] _workspaceProjectTypes;
+    private ProjectType[string] _projectTypes;
+    private SList!string _workspacePaths;
     private string[string][string] _workspaceDependencies;
     private string[][string] _workspaceDependenciesPaths;
     private ModuleCache _cache;
@@ -248,7 +250,7 @@ class SymbolTool : Tool
         }
 
         return reduce!q{a ~ b}(Document.uris.array,
-                _workspaceDependencies.byKey.map!(w => dirEntries(w, SpanMode.depth).map!q{a.name}
+                _workspacePaths[].map!(w => dirEntries(w, SpanMode.depth).map!q{a.name}
                     .filter!(file => globMatch(file, "*.{d,di}"))
                     .filter!(file => !Document.uris
                     .map!q{a.path}
@@ -431,7 +433,7 @@ class SymbolTool : Tool
 
         string[] workspacePathParts;
 
-        foreach (path; _workspaceDependencies.byKey)
+        foreach (path; _workspacePaths)
         {
             auto splitter = pathSplitter(path);
 
@@ -455,6 +457,8 @@ class SymbolTool : Tool
         import std.algorithm : any;
         import std.file : exists;
         import std.path : buildNormalizedPath;
+
+        _workspacePaths.insertFront(uri.path);
 
         if (["dub.json", "dub.sdl"].any!(f => buildNormalizedPath(uri.path, f).exists()))
         {
@@ -648,7 +652,17 @@ class SymbolTool : Tool
 
     void clearPath(const Uri uri)
     {
-        _workspaceProjectTypes.remove(uri.path);
+        import std.algorithm : startsWith;
+
+        foreach (path; _projectTypes.byKey)
+        {
+            if (path.startsWith(uri.path))
+            {
+                _projectTypes.remove(path);
+            }
+        }
+
+        _workspacePaths.linearRemoveElement(uri.path);
         _workspaceDependencies.remove(uri.path);
         _workspaceDependenciesPaths.remove(uri.path);
         clearDirectories([uri.path]);
@@ -1092,11 +1106,11 @@ class SymbolTool : Tool
 
     private bool validateProjectType(const Uri uri, ProjectType type)
     {
-        if (uri.path !in _workspaceProjectTypes)
+        if (uri.path !in _projectTypes)
         {
-            _workspaceProjectTypes[uri.path] = type;
+            _projectTypes[uri.path] = type;
         }
-        else if (_workspaceProjectTypes[uri.path] != type)
+        else if (_projectTypes[uri.path] != type)
         {
             return false;
         }
