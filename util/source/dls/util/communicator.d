@@ -78,7 +78,7 @@ class StdioCommunicator : Communicator
 
     static char readChar()
     {
-        if (!_stdin.eof)
+        if (_stdin.isOpen && !_stdin.eof)
         {
             static char[1] buffer;
             auto result = _stdin.rawRead(buffer);
@@ -104,9 +104,14 @@ class StdioCommunicator : Communicator
         }
     }
 
+    ~this()
+    {
+        _pool.stop();
+    }
+
     bool hasData()
     {
-        return !_stdin.eof;
+        return _stdin.isOpen && !_stdin.eof;
     }
 
     bool hasPendingData()
@@ -144,7 +149,7 @@ class StdioCommunicator : Communicator
             }
             catch (Exception e)
             {
-                return _stdin.eof ? [] : _stdin.rawRead(buffer);
+                return (!_stdin.isOpen || _stdin.eof) ? [] : _stdin.rawRead(buffer);
             }
             finally
             {
@@ -178,8 +183,11 @@ class StdioCommunicator : Communicator
     {
         import std.parallelism : task;
 
-        _background = task!readChar;
-        _pool.put(_background);
+        if (_checkPending && _stdin.isOpen && !_stdin.eof)
+        {
+            _background = task!readChar;
+            _pool.put(_background);
+        }
     }
 }
 

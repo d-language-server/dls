@@ -92,5 +92,6 @@ int main(string[] args)
     }
 
     Server.loop();
+    destroy(communicator);
     return Server.initialized ? 1 : 0;
 }
