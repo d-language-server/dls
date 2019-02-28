@@ -4,6 +4,9 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.22.4
+- Fixed broken stdio communication (yet again)
+
 #### 0.22.3
 - Fixed DLS waiting for input with `--help` or `--version`
 
