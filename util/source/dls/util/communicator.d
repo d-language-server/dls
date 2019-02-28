@@ -149,6 +149,11 @@ class StdioCommunicator : Communicator
             return _stdin.rawRead(buffer);
         }
 
+        scope(exit)
+        {
+            startBackground();
+        }
+
         try
         {
             buffer[0] = _background.yieldForce();
@@ -156,10 +161,6 @@ class StdioCommunicator : Communicator
         catch (Exception e)
         {
             return (_stdin.isOpen && !_stdin.eof) ? _stdin.rawRead(buffer) : [];
-        }
-        finally
-        {
-            startBackground();
         }
 
         if (size > 1)
