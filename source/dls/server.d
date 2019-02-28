@@ -122,7 +122,7 @@ final abstract class Server
         string[string] headers;
         string line;
 
-        while (communicator.hasData() && !exit)
+        while (!exit && communicator.hasData())
         {
             headers.clear();
 

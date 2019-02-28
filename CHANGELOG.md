@@ -4,6 +4,9 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.22.3
+- Fixed DLS waiting for input with `--help` or `--version`
+
 #### 0.22.2
 - Fixed D-Scanner config files not always being picked up ([#30](https://github.com/d-language-server/dls/issues/30))
 - Fixed potentially wrong text insertion in code actions

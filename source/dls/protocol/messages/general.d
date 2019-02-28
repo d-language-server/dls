@@ -101,10 +101,8 @@ InitializeResult initialize(InitializeParams params)
             if (!textDocCaps.hover.isNull)
                 hoverProvider = initOptions.capabilities.hover;
 
-            if (!textDocCaps.completion.isNull)
-                completionProvider = initOptions.capabilities.completion
-                    ? new CompletionOptions(true.nullable, ["."].nullable)
-                    : Nullable!CompletionOptions();
+            if (!textDocCaps.completion.isNull && initOptions.capabilities.completion)
+                completionProvider = new CompletionOptions(true.nullable, ["."].nullable);
 
             if (!textDocCaps.definition.isNull)
                 definitionProvider = initOptions.capabilities.definition;
@@ -130,10 +128,9 @@ InitializeResult initialize(InitializeParams params)
             if (!textDocCaps.rangeFormatting.isNull)
                 documentRangeFormattingProvider = initOptions.capabilities.documentRangeFormatting;
 
-            if (!textDocCaps.onTypeFormatting.isNull)
-                documentOnTypeFormattingProvider = initOptions.capabilities.documentOnTypeFormatting
-                    ? new DocumentOnTypeFormattingOptions(";")
-                    : Nullable!DocumentOnTypeFormattingOptions();
+            if (!textDocCaps.onTypeFormatting.isNull
+                    && initOptions.capabilities.documentOnTypeFormatting)
+                documentOnTypeFormattingProvider = new DocumentOnTypeFormattingOptions(";");
 
             if (!textDocCaps.rename.isNull)
             {
@@ -153,10 +150,8 @@ InitializeResult initialize(InitializeParams params)
             if (!workspaceCaps.symbol.isNull)
                 workspaceSymbolProvider = initOptions.capabilities.workspaceSymbol;
 
-            if (!workspaceCaps.executeCommand.isNull)
-                executeCommandProvider = initOptions.capabilities.codeAction
-                    ? new ExecuteCommandOptions(CommandTool.instance.commands)
-                    : Nullable!ExecuteCommandOptions();
+            if (!workspaceCaps.executeCommand.isNull && initOptions.capabilities.codeAction)
+                executeCommandProvider = new ExecuteCommandOptions(CommandTool.instance.commands);
 
             if (!workspaceCaps.workspaceFolders.isNull && workspaceCaps.workspaceFolders.get())
                 workspace = new ServerCapabilities.Workspace(
