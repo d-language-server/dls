@@ -77,7 +77,7 @@ private class TestCommunicator : Communicator
         return false;
     }
 
-    char[] read(size_t size)
+    char[] read(const size_t size)
     {
         auto currentMessage = _directoriesMessages[_directory][0];
         auto result = currentMessage.content[0 .. size];

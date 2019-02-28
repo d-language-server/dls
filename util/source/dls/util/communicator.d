@@ -71,7 +71,7 @@ interface Communicator
 {
     bool hasData();
     bool hasPendingData();
-    char[] read(size_t size);
+    char[] read(const size_t size);
     void write(const char[] data);
     void flush();
 }
@@ -86,15 +86,12 @@ class StdioCommunicator : Communicator
 
     static char readChar()
     {
-        if (_stdin.isOpen && !_stdin.eof)
-        {
-            static char[1] buffer;
-            auto result = _stdin.rawRead(buffer);
+        static char[1] buffer;
+        auto result = _stdin.rawRead(buffer);
 
-            if (result.length > 0)
-            {
-                return result[0];
-            }
+        if (result.length > 0)
+        {
+            return result[0];
         }
 
         throw new Exception("No input data");
@@ -127,14 +124,9 @@ class StdioCommunicator : Communicator
 
     bool hasPendingData()
     {
-        if (!_checkPending)
-        {
-            return false;
-        }
-
         try
         {
-            return _background.done;
+            return _checkPending && _background.done;
         }
         catch (Exception e)
         {
@@ -142,7 +134,7 @@ class StdioCommunicator : Communicator
         }
     }
 
-    char[] read(size_t size)
+    char[] read(const size_t size)
     {
         if (size == 0)
         {
@@ -152,29 +144,28 @@ class StdioCommunicator : Communicator
         static char[] buffer;
         buffer.length = size;
 
-        if (_checkPending)
-        {
-            try
-            {
-                buffer[0] = _background.yieldForce();
-            }
-            catch (Exception e)
-            {
-                return (!_stdin.isOpen || _stdin.eof) ? [] : _stdin.rawRead(buffer);
-            }
-            finally
-            {
-                startBackground();
-            }
-
-            if (size > 1)
-            {
-                _stdin.rawRead(_checkPending ? buffer[1 .. $] : buffer);
-            }
-        }
-        else
+        if (!_checkPending)
         {
             return _stdin.rawRead(buffer);
+        }
+
+        scope(exit)
+        {
+            startBackground();
+        }
+
+        try
+        {
+            buffer[0] = _background.yieldForce();
+        }
+        catch (Exception e)
+        {
+            return (_stdin.isOpen && !_stdin.eof) ? _stdin.rawRead(buffer) : [];
+        }
+
+        if (size > 1)
+        {
+            buffer = buffer[0 .. _stdin.rawRead(buffer[1 .. $]).length + 1];
         }
 
         return buffer;
@@ -194,7 +185,7 @@ class StdioCommunicator : Communicator
     {
         import std.parallelism : task;
 
-        if (_checkPending && _stdin.isOpen && !_stdin.eof)
+        if (_checkPending)
         {
             _background = task!readChar;
             _pool.put(_background);
@@ -242,7 +233,7 @@ class SocketCommunicator : Communicator
         return result != Socket.ERROR && result > 0;
     }
 
-    char[] read(size_t size)
+    char[] read(const size_t size)
     {
         static char[] buffer;
         buffer.length = size;
