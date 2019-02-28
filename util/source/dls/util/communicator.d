@@ -48,6 +48,14 @@ shared static this()
     }
 }
 
+shared static ~this()
+{
+    if (_communicator !is null)
+    {
+        destroy(communicator);
+    }
+}
+
 @property Communicator communicator()
 {
     return _communicator;
