@@ -86,15 +86,12 @@ class StdioCommunicator : Communicator
 
     static char readChar()
     {
-        if (_stdin.isOpen && !_stdin.eof)
-        {
-            static char[1] buffer;
-            auto result = _stdin.rawRead(buffer);
+        static char[1] buffer;
+        auto result = _stdin.rawRead(buffer);
 
-            if (result.length > 0)
-            {
-                return result[0];
-            }
+        if (result.length > 0)
+        {
+            return result[0];
         }
 
         throw new Exception("No input data");
@@ -187,7 +184,7 @@ class StdioCommunicator : Communicator
     {
         import std.parallelism : task;
 
-        if (_checkPending && _stdin.isOpen && !_stdin.eof)
+        if (_checkPending)
         {
             _background = task!readChar;
             _pool.put(_background);
