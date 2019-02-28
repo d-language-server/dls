@@ -114,7 +114,10 @@ class StdioCommunicator : Communicator
 
     ~this()
     {
-        _pool.stop();
+        if (_checkPending)
+        {
+            _pool.stop();
+        }
     }
 
     bool hasData()
