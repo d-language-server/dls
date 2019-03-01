@@ -23,6 +23,7 @@ private immutable dubPackageDir = "DUB_PACKAGE_DIR";
 void main()
 {
     import std.algorithm : sort;
+    import std.ascii : newline;
     import std.file : readText, write;
     import std.format : format;
     import std.json : parseJSON;
@@ -39,20 +40,23 @@ void main()
     string content;
 
     content ~= format(q{/+ This file is generated automatically by %s.d +/}, __MODULE__);
-    content ~= "\n\n";
+    content ~= newline ~ newline;
     content ~= q{module dls.util.i18n.constants;};
-    content ~= "\n\n";
+    content ~= newline ~ newline;
     content ~= q{enum Tr : string};
-    content ~= "\n{\n";
+    content ~= newline;
+    content ~= "{";
+    content ~= newline;
     content ~= q{    _ = "### BAD TRANSLATION KEY ###",};
-    content ~= "\n";
+    content ~= newline;
 
     foreach (key; sort(translations.object.keys))
     {
-        content ~= format("    %s = \"%s\"%s\n", key.replace(".", "_"), key, ",");
+        content ~= format("    %s = \"%s\"%s" ~ newline, key.replace(".", "_"), key, ",");
     }
 
-    content ~= "}\n";
+    content ~= "}";
+    content ~= newline;
 
     if (content != trModuleContent)
     {

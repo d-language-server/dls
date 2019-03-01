@@ -78,12 +78,13 @@ shared static this()
     }
     else
     {
-        static assert(false, "Platform not supported");
+        locale = defaultLocale;
     }
 }
 
 string tr(Tr identifier, string[] args = [])
 {
+    import std.ascii : newline;
     import std.conv : text;
     import std.range : replace;
 
@@ -95,7 +96,7 @@ string tr(Tr identifier, string[] args = [])
         localizedMessage = localizedMessage.replace('$' ~ text(i + 1), arg);
     }
 
-    return localizedMessage;
+    return localizedMessage.replace("$n", newline);
 }
 
 MessageType trType(Tr message)

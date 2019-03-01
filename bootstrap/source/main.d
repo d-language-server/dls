@@ -37,6 +37,7 @@ int main(string[] args)
     import dls.bootstrap : canDownloadDls, buildDls, downloadDls, linkDls;
     import dls.util.i18n : Tr, tr;
     import dls.util.getopt : printHelp;
+    import std.ascii : newline;
     import std.conv : text;
     import std.file : thisExePath;
     import std.format : format;
@@ -97,16 +98,19 @@ int main(string[] args)
         {
             stderr.rawWrite("installing:" ~ tr(Tr.bootstrap_installDls_installing) ~ '\t');
             stderr.rawWrite("downloading:" ~ tr(Tr.bootstrap_installDls_downloading) ~ '\t');
-            stderr.rawWrite("extracting:" ~ tr(Tr.bootstrap_installDls_extracting) ~ '\n');
+            stderr.rawWrite("extracting:" ~ tr(Tr.bootstrap_installDls_extracting));
+            stderr.rawWrite(newline);
             stderr.flush();
         }
 
         immutable printSize = progress ? (size_t size) {
-            stderr.rawWrite(text(size) ~ '\n');
+            stderr.rawWrite(text(size));
+            stderr.rawWrite(newline);
             stderr.flush();
         } : null;
         immutable printExtract = progress ? () {
-            stderr.rawWrite("extract\n");
+            stderr.rawWrite("extract");
+            stderr.rawWrite(newline);
             stderr.flush();
         } : null;
 
@@ -116,15 +120,6 @@ int main(string[] args)
     }
 
     stdout.rawWrite(output);
-
-    version (Windows)
-    {
-        stdout.rawWrite("\r\n");
-    }
-    else
-    {
-        stdout.rawWrite("\n");
-    }
-
+    stdout.rawWrite(newline);
     return status;
 }

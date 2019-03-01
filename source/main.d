@@ -27,6 +27,7 @@ int main(string[] args)
     import dls.util.communicator : SocketCommunicator, StdioCommunicator, communicator;
     import dls.util.getopt : printHelp;
     import dls.util.i18n : Tr, tr;
+    import std.ascii : newline;
     import std.getopt : config, getopt;
 
     bool stdio = true;
@@ -74,7 +75,7 @@ int main(string[] args)
     {
         communicator = new StdioCommunicator(false);
         communicator.write(currentVersion);
-        communicator.write("\n");
+        communicator.write(newline);
         communicator.flush();
         return 0;
     }
