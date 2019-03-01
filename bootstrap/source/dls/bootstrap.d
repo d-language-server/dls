@@ -57,8 +57,9 @@ else
 private immutable string dlsArchiveName;
 private immutable string dlsDirName = "dls-%s";
 private immutable string dlsLatestDirName = "dls-latest";
-private string downloadUrl;
 private string downloadVersion;
+private string downloadUrl;
+private size_t downloadSize;
 
 version (X86_64)
     version = IntelArchitecture;
@@ -99,9 +100,8 @@ shared static this()
 {
     import std.format : format;
     import std.json : parseJSON;
-    import std.net.curl : get;
 
-    return parseJSON(get(format!apiEndpoint("releases"))).array;
+    return parseJSON(cast(char[]) standardDownload(format!apiEndpoint("releases"))).array;
 }
 
 @property bool canDownloadDls()
@@ -125,8 +125,10 @@ shared static this()
                 {
                     if (asset["name"].str == format(dlsArchiveName, release["tag_name"].str))
                     {
-                        downloadUrl = asset["browser_download_url"].str;
                         downloadVersion = release["tag_name"].str;
+                        downloadUrl = asset["browser_download_url"].str;
+                        downloadSize = cast(size_t)(asset["size"].type == JSON_TYPE.INTEGER
+                                ? asset["size"].integer : asset["size"].uinteger);
                         return true;
                     }
                 }
@@ -155,8 +157,6 @@ void downloadDls(const void function(size_t size) totalSizeCallback = null,
     if (downloadUrl.length > 0 || canDownloadDls)
     {
         immutable dlsDir = buildNormalizedPath(dubBinDir, format(dlsDirName, downloadVersion));
-        auto request = HTTP(downloadUrl);
-        auto archiveData = appender!(ubyte[]);
 
         if (exists(dlsDir))
         {
@@ -172,62 +172,19 @@ void downloadDls(const void function(size_t size) totalSizeCallback = null,
 
         mkdirRecurse(dlsDir);
 
-        request.onReceive = (ubyte[] data) {
-            archiveData ~= data;
-            return data.length;
-        };
+        if (totalSizeCallback !is null)
+        {
+            totalSizeCallback(downloadSize);
+        }
 
-        request.onProgress = (size_t dlTotal, size_t dlNow, size_t ulTotal, size_t ulNow) {
-            import core.time : Duration, msecs;
-
-            static if (__VERSION__ >= 2075L)
-            {
-                import std.datetime.stopwatch : StopWatch;
-            }
-            else
-            {
-                import std.datetime : StopWatch;
-            }
-
-            static bool started;
-            static bool stopped;
-            static StopWatch watch;
-
-            if (!started && dlTotal > 0)
-            {
-                started = true;
-                watch.start();
-
-                if (totalSizeCallback !is null)
-                {
-                    totalSizeCallback(dlTotal);
-                }
-            }
-
-            if (started && !stopped && chunkSizeCallback !is null && dlNow > 0
-                    && (cast(Duration) watch.peek() >= 500.msecs || dlNow == dlTotal))
-            {
-                watch.reset();
-                chunkSizeCallback(dlNow);
-
-                if (dlNow == dlTotal)
-                {
-                    stopped = true;
-                    watch.stop();
-                }
-            }
-
-            return 0;
-        };
-
-        request.perform();
+        auto archiveData = standardDownload(downloadUrl, chunkSizeCallback);
 
         if (extractCallback !is null)
         {
             extractCallback();
         }
 
-        auto archive = new ZipArchive(archiveData.data);
+        auto archive = new ZipArchive(archiveData);
 
         foreach (name, member; archive.directory)
         {
@@ -318,6 +275,143 @@ string linkDls()
     return buildNormalizedPath(dubDirPath, dubDirName, "packages", ".bin");
 }
 
+private ubyte[] standardDownload(string url, const void function(size_t size) callback = null)
+{
+    version (CRuntime_Microsoft)
+    {
+        return wininetDownload(url, callback);
+    }
+    else
+    {
+        return curlDownload(url, callback);
+    }
+}
+
+version (CRuntime_Microsoft)
+{
+    private ubyte[] wininetDownload(string url, const void function(size_t size) callback = null)
+    {
+        import core.sys.windows.winbase : GetLastError;
+        import core.sys.windows.windef : BOOL, DWORD, ERROR_SUCCESS, TRUE;
+        import core.sys.windows.wininet : HINTERNET, INTERNET_OPEN_TYPE_PRECONFIG,
+            InternetOpenA, InternetOpenUrlA, InternetReadFile;
+        import core.time : Duration, msecs;
+        import std.string : toStringz;
+
+        static if (__VERSION__ >= 2075L)
+        {
+            import std.datetime.stopwatch : StopWatch;
+        }
+        else
+        {
+            import std.datetime : StopWatch;
+        }
+
+        static void throwIfNull(const HINTERNET h)
+        {
+            if (h is null)
+            {
+                throw new UpgradeFailedException("Could not create Internet handle");
+            }
+        }
+
+        ubyte[] result;
+        StopWatch watch;
+        immutable agent = "DLS";
+        auto hInternet = InternetOpenA(toStringz(agent),
+                INTERNET_OPEN_TYPE_PRECONFIG, null, null, 0);
+        throwIfNull(hInternet);
+        auto hFile = InternetOpenUrlA(hInternet, toStringz(url), null, 0, 0, 0);
+        throwIfNull(hFile);
+
+        DWORD bytesRead;
+        ubyte[64 * 1024] buffer;
+        BOOL success;
+
+        if (callback !is null)
+        {
+            watch.start();
+        }
+
+        do
+        {
+            success = InternetReadFile(hFile, buffer.ptr, cast(DWORD) buffer.length, &bytesRead);
+
+            if (GetLastError() != ERROR_SUCCESS)
+            {
+                throw new UpgradeFailedException("Could not download DLS");
+            }
+
+            result ~= buffer[0 .. bytesRead];
+
+            if (callback !is null && cast(Duration) watch.peek() >= 500.msecs)
+            {
+                watch.reset();
+                callback(result.length);
+            }
+        }
+        while (success == TRUE && bytesRead > 0);
+
+        if (callback !is null)
+        {
+            watch.stop();
+            callback(result.length);
+        }
+
+        return result;
+    }
+}
+
+private ubyte[] curlDownload(string url, const void function(size_t size) callback = null)
+{
+    import core.time : Duration, msecs;
+    import std.net.curl : HTTP;
+
+    static if (__VERSION__ >= 2075L)
+    {
+        import std.datetime.stopwatch : StopWatch;
+    }
+    else
+    {
+        import std.datetime : StopWatch;
+    }
+
+    ubyte[] result;
+    StopWatch watch;
+
+    auto request = HTTP(url);
+
+    request.onReceive = (ubyte[] data) { result ~= data; return data.length; };
+    request.onProgress = (size_t dlTotal, size_t dlNow, size_t ulTotal, size_t ulNow) {
+        static bool started;
+        static bool stopped;
+
+        if (!started && dlTotal > 0)
+        {
+            started = true;
+            watch.start();
+        }
+
+        if (started && !stopped && callback !is null && dlNow > 0
+                && (cast(Duration) watch.peek() >= 500.msecs || dlNow == dlTotal))
+        {
+            watch.reset();
+            callback(dlNow);
+
+            if (dlNow == dlTotal)
+            {
+                stopped = true;
+                watch.stop();
+            }
+        }
+
+        return 0;
+    };
+
+    request.perform();
+    return result;
+}
+
 private void makeLink(const string target, const string link, bool directory)
 {
     version (Windows)
@@ -371,6 +465,6 @@ class UpgradeFailedException : Exception
 {
     this(const string message)
     {
-        super(message);
+        super("Upgrade failed: " ~ message);
     }
 }
