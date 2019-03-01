@@ -4,6 +4,9 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.22.6
+- Fixed error when parsing incorrect code
+
 #### 0.22.5
 - Fixed non-ascii characters handling ([#33](https://github.com/d-language-server/dls/issues/33))
 
