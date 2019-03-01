@@ -64,7 +64,40 @@ abstract class FormatTool : Tool
     }
 
     TextEdit[] formatting(const Uri uri, const FormattingOptions options);
-    TextEdit[] rangeFormatting(const Uri uri, const Range range, const FormattingOptions options);
+
+    TextEdit[] rangeFormatting(const Uri uri, const Range range, const FormattingOptions options)
+    {
+        import dls.util.document : Document;
+        import std.algorithm : filter;
+        import std.array : array;
+
+        const document = Document.get(uri);
+        document.validatePosition(range.start);
+        document.validatePosition(range.end);
+
+        return formatting(uri, options).filter!((edit) {
+            return document.byteAtPosition(edit.range.start) < document.byteAtPosition(range.end)
+                && document.byteAtPosition(edit.range.end) > document.byteAtPosition(range.start);
+        }).array;
+    }
+
     TextEdit[] onTypeFormatting(const Uri uri, const Position position,
-            const FormattingOptions options);
+            const FormattingOptions options)
+    {
+        import dls.util.document : Document;
+        import std.algorithm : filter;
+        import std.array : array;
+        import std.string : stripRight;
+
+        const document = Document.get(uri);
+        document.validatePosition(position);
+
+        if (position.character != stripRight(document.lines[position.line]).length)
+        {
+            return [];
+        }
+
+        return formatting(uri, options).filter!(edit => edit.range.start.line == position.line
+                || edit.range.end.line == position.line).array;
+    }
 }
