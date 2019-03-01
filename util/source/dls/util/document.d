@@ -187,9 +187,9 @@ class Document
 
         static bool isIdentifierChar(wchar c)
         {
-            import std.ascii : isAlphaNum;
+            import std.ascii : isPunctuation, isWhite;
 
-            return c == '_' || isAlphaNum(c);
+            return !isWhite(c) && (!isPunctuation(c) || c == '_');
         }
 
         while (startIndex > 0 && isIdentifierChar(line[minusOne(startIndex)]))
