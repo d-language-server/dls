@@ -157,7 +157,7 @@ class Document
     Position positionAtByte(size_t bytePosition) const
     {
         import std.algorithm : min;
-        import std.utf : codeLength, toUCSindex;
+        import std.utf : codeLength, toUTF8;
 
         size_t i;
         size_t bytes;
@@ -171,7 +171,8 @@ class Document
         immutable lineNumber = minusOne(i);
         immutable line = _lines[lineNumber];
         bytes -= codeLength!char(line);
-        immutable columnNumber = toUCSindex(line, min(bytePosition - bytes, line.length));
+        immutable columnByte = min(bytePosition - bytes, line.length);
+        immutable columnNumber = codeLength!wchar(line.toUTF8()[0 .. columnByte]);
         return new Position(lineNumber, columnNumber);
     }
 
@@ -207,10 +208,10 @@ class Document
 
     Range wordRangeAtLineAndByte(size_t lineNumber, size_t bytePosition) const
     {
-        import std.utf : toUCSindex;
+        import std.utf : codeLength, toUTF8;
 
         return wordRangeAtPosition(new Position(lineNumber,
-                toUCSindex(_lines[lineNumber], bytePosition)));
+                codeLength!wchar(_lines[lineNumber].toUTF8()[0 .. bytePosition])));
     }
 
     Range wordRangeAtByte(size_t bytePosition) const
