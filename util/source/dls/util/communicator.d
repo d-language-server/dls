@@ -160,7 +160,7 @@ class StdioCommunicator : Communicator
         }
         catch (Exception e)
         {
-            return (_stdin.isOpen && !_stdin.eof) ? _stdin.rawRead(buffer) : [];
+            return (hasData()) ? _stdin.rawRead(buffer) : [];
         }
 
         if (size > 1)
@@ -185,7 +185,7 @@ class StdioCommunicator : Communicator
     {
         import std.parallelism : task;
 
-        if (_checkPending)
+        if (_checkPending && hasData())
         {
             _background = task!readChar;
             _pool.put(_background);
