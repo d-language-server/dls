@@ -20,28 +20,215 @@
 
 module dls.tools.format_tool.internal.indent_format_tool;
 
+import dls.protocol.definitions : Range;
 import dls.tools.format_tool.internal.format_tool : FormatTool;
 
 class IndentFormatTool : FormatTool
 {
-    import dls.protocol.definitions : Position, Range, TextEdit;
+    import dls.protocol.definitions : Position, TextEdit;
     import dls.protocol.interfaces : FormattingOptions;
     import dls.util.uri : Uri;
+    import dparse.lexer : Token;
 
     override TextEdit[] formatting(const Uri uri, const FormattingOptions options)
     {
-        return [];
+        import dls.protocol.logger : logger;
+        import dls.tools.format_tool.internal.indent_visitor : IndentVisitor;
+        import dls.util.document : Document;
+        import dparse.lexer : LexerConfig, StringBehavior, StringCache,
+            WhitespaceBehavior, byToken, getTokensForParser, tok;
+        import dparse.parser : parseModule;
+        import dparse.rollback_allocator : RollbackAllocator;
+        import std.algorithm : all, count, filter, sort;
+        import std.array : appender;
+        import std.ascii : isWhite;
+        import std.utf : toUTF16;
+
+        logger.info("Indenting %s", uri.path);
+
+        auto result = appender!(TextEdit[]);
+        const document = Document.get(uri);
+        const data = document.toString();
+        auto config = LexerConfig(uri.path, StringBehavior.source, WhitespaceBehavior.include);
+        auto stringCache = StringCache(StringCache.defaultBucketCount);
+        const tokens = getTokensForParser(data, config, &stringCache);
+        auto commentTokens = byToken(data, config, &stringCache).filter!(
+                t => t.type == tok!"comment");
+        RollbackAllocator rollbackAllocator;
+        auto visitor = new IndentVisitor();
+        visitor.visit(parseModule(tokens, uri.path, &rollbackAllocator));
+
+        size_t[] indentBeginsLines;
+        size_t[] indentEndLines;
+
+        extractIndentLines(tokens, indentBeginsLines, indentEndLines);
+
+        auto indentBegins = sort(indentBeginsLines);
+        auto indentEnds = sort(indentEndLines);
+        size_t indents;
+
+        foreach (line; 0 .. document.lines.length)
+        {
+            while (!indentEnds.empty && indentEnds.front == line + 1)
+            {
+                --indents;
+                indentEnds.popFront();
+            }
+
+            auto shouldIndent = true;
+
+            while (!commentTokens.empty && line >= commentTokens.front.line)
+            {
+                immutable text = commentTokens.front.text;
+                immutable commentEndLine = commentTokens.front.line + text.count(
+                        '\r') + text.count('\n') - text.count("\r\n");
+
+                if (line < commentEndLine)
+                {
+                    shouldIndent = false;
+                    break;
+                }
+                else
+                {
+                    commentTokens.popFront();
+                }
+            }
+
+            const docLine = document.lines[line];
+            shouldIndent &= !docLine.all!isWhite;
+
+            if (shouldIndent)
+            {
+                auto indentRange = getIndentRange(docLine);
+                auto edit = new TextEdit(indentRange);
+                static char[] newText;
+                newText.length = options.insertSpaces ? indents * options.tabSize : indents;
+                newText[] = options.insertSpaces ? ' ' : '\t';
+
+                if (newText.toUTF16() != docLine[0 .. indentRange.end.character])
+                {
+                    edit.range.start.line = edit.range.end.line = line;
+                    edit.newText = newText.dup;
+                    result ~= edit;
+                }
+            }
+
+            while (!indentBegins.empty && indentBegins.front == line + 1)
+            {
+                ++indents;
+                indentBegins.popFront();
+            }
+
+            auto trailingWhitespaceRange = getTrailingWhitespaceRange(docLine);
+
+            if (trailingWhitespaceRange.end.character - trailingWhitespaceRange.start.character > 0)
+            {
+                trailingWhitespaceRange.start.line = trailingWhitespaceRange.end.line = line;
+                result ~= new TextEdit(trailingWhitespaceRange, "");
+            }
+        }
+
+        return result.data;
     }
 
-    override TextEdit[] rangeFormatting(const Uri uri, const Range range,
-            const FormattingOptions options)
+    private void extractIndentLines(const Token[] tokens,
+            ref size_t[] indentBeginsLines, ref size_t[] indentEndLines)
     {
-        return [];
+        import dparse.lexer : tok;
+        import std.algorithm : remove;
+        import std.container : SList;
+
+        SList!size_t indentPairBegins;
+        size_t currentLine;
+
+        foreach (ref token; tokens)
+        {
+            switch (token.type)
+            {
+            case tok!"{", tok!"(", tok!"[":
+                indentPairBegins.insertFront(token.line);
+                break;
+
+            case tok!"}", tok!")", tok!"]":
+                if (indentPairBegins.empty)
+                {
+                    break;
+                }
+
+                if (token.line != indentPairBegins.front)
+                {
+                    indentBeginsLines ~= indentPairBegins.front;
+                    indentEndLines ~= token.line;
+
+                    if (token.line == currentLine)
+                    {
+                        ++indentEndLines[$ - 1];
+                    }
+                }
+
+                indentPairBegins.removeFront();
+                break;
+
+            default:
+                break;
+            }
+
+            if (token.line > currentLine)
+            {
+                currentLine = token.line;
+            }
+        }
+
+        size_t i = 1;
+
+        while (i < indentBeginsLines.length)
+        {
+            if (indentBeginsLines[i - 1] == indentBeginsLines[i])
+            {
+                indentBeginsLines = remove(indentBeginsLines, i);
+                indentEndLines = remove(indentEndLines, i);
+            }
+            else
+            {
+                ++i;
+            }
+        }
+    }
+}
+
+private Range getIndentRange(const wstring line)
+{
+    import std.ascii : isWhite;
+    import std.string : stripRight;
+
+    auto result = new Range();
+    immutable cleanLine = stripRight(line);
+
+    while (result.end.character < cleanLine.length && isWhite(cleanLine[result.end.character]))
+    {
+        ++result.end.character;
     }
 
-    override TextEdit[] onTypeFormatting(const Uri uri, const Position position,
-            const FormattingOptions options)
+    return result;
+}
+
+private Range getTrailingWhitespaceRange(const wstring line)
+{
+    import std.algorithm : among;
+    import std.ascii : isWhite;
+
+    auto result = new Range();
+    result.start.character = result.end.character = line.length;
+
+    while (result.start.character > 0 && isWhite(line[result.start.character - 1]))
     {
-        return [];
+        --result.start.character;
+
+        if (line[result.start.character].among('\r', '\n'))
+        {
+            --result.end.character;
+        }
     }
+
+    return result;
 }

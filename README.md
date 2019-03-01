@@ -136,6 +136,7 @@ All these keys should be formatted as `d.dls.[section].[key]` (e.g. `d.dls.forma
 
 |Section: `format`                   |Type                                    |Default value|
 |------------------------------------|----------------------------------------|-------------|
+|`engine`                            |`"dfmt"` or `"indent"`                  |`"dfmt"`     |
 |`endOfLine`                         |`"lf"` or `"cr"` or `"crlf"`            |`"lf"`       |
 |`maxLineLength`                     |`number`                                |`120`        |
 |`dfmtAlignSwitchStatements`         |`boolean`                               |`true`       |
