@@ -208,10 +208,11 @@ class Document
 
     Range wordRangeAtLineAndByte(size_t lineNumber, size_t bytePosition) const
     {
+        import std.algorithm : min;
         import std.utf : codeLength, toUTF8;
 
         return wordRangeAtPosition(new Position(lineNumber,
-                codeLength!wchar(_lines[lineNumber].toUTF8()[0 .. bytePosition])));
+                codeLength!wchar(_lines[lineNumber].toUTF8()[0 .. min(bytePosition, $)])));
     }
 
     Range wordRangeAtByte(size_t bytePosition) const
