@@ -42,7 +42,7 @@ class IndentFormatTool : FormatTool
         import std.algorithm : all, count, filter, sort;
         import std.array : appender;
         import std.ascii : isWhite;
-        import std.utf : toUTF16;
+        import std.utf : toUTF8;
 
         logger.info("Indenting %s", uri.path);
 
@@ -58,13 +58,9 @@ class IndentFormatTool : FormatTool
         auto visitor = new IndentVisitor();
         visitor.visit(parseModule(tokens, uri.path, &rollbackAllocator));
 
-        size_t[] indentBeginsLines;
-        size_t[] indentEndLines;
-
-        extractIndentLines(tokens, indentBeginsLines, indentEndLines);
-
-        auto indentBegins = sort(indentBeginsLines);
-        auto indentEnds = sort(indentEndLines);
+        auto indentLines = extractIndentLines(tokens);
+        auto indentBegins = sort(indentLines.keys);
+        auto indentEnds = sort(indentLines.values);
         size_t indents;
 
         foreach (line; 0 .. document.lines.length)
@@ -101,14 +97,13 @@ class IndentFormatTool : FormatTool
             {
                 auto indentRange = getIndentRange(docLine);
                 auto edit = new TextEdit(indentRange);
-                static char[] newText;
-                newText.length = options.insertSpaces ? indents * options.tabSize : indents;
+                auto newText = new wchar[options.insertSpaces ? indents * options.tabSize : indents];
                 newText[] = options.insertSpaces ? ' ' : '\t';
 
-                if (newText.toUTF16() != docLine[0 .. indentRange.end.character])
+                if (newText != docLine[0 .. indentRange.end.character])
                 {
                     edit.range.start.line = edit.range.end.line = line;
-                    edit.newText = newText.dup;
+                    edit.newText = newText.toUTF8();
                     result ~= edit;
                 }
             }
@@ -131,14 +126,14 @@ class IndentFormatTool : FormatTool
         return result.data;
     }
 
-    private void extractIndentLines(const Token[] tokens,
-            ref size_t[] indentBeginsLines, ref size_t[] indentEndLines)
+    private size_t[size_t] extractIndentLines(const Token[] tokens)
     {
         import dparse.lexer : tok;
         import std.algorithm : remove;
         import std.container : SList;
 
         SList!size_t indentPairBegins;
+        size_t[size_t] indentLines;
         size_t currentLine;
 
         foreach (ref token; tokens)
@@ -155,14 +150,13 @@ class IndentFormatTool : FormatTool
                     break;
                 }
 
-                if (token.line != indentPairBegins.front)
+                if (token.line != indentPairBegins.front && indentPairBegins.front !in indentLines)
                 {
-                    indentBeginsLines ~= indentPairBegins.front;
-                    indentEndLines ~= token.line;
+                    indentLines[indentPairBegins.front] = token.line;
 
                     if (token.line == currentLine)
                     {
-                        ++indentEndLines[$ - 1];
+                        ++indentLines[indentPairBegins.front];
                     }
                 }
 
@@ -179,20 +173,7 @@ class IndentFormatTool : FormatTool
             }
         }
 
-        size_t i = 1;
-
-        while (i < indentBeginsLines.length)
-        {
-            if (indentBeginsLines[i - 1] == indentBeginsLines[i])
-            {
-                indentBeginsLines = remove(indentBeginsLines, i);
-                indentEndLines = remove(indentEndLines, i);
-            }
-            else
-            {
-                ++i;
-            }
-        }
+        return indentLines;
     }
 }
 
