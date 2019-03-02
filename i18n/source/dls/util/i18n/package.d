@@ -44,18 +44,18 @@ shared static this()
         import std.string : toStringz;
 
         HKEY hKey;
+        auto regKeyCStr = toStringz(`.DEFAULT\Control Panel\International`);
 
-        if (RegOpenKeyExA(HKEY_USERS, toStringz(`.DEFAULT\Control Panel\International`),
-                0, KEY_READ, &hKey) != ERROR_SUCCESS)
+        if (RegOpenKeyExA(HKEY_USERS, regKeyCStr, 0, KEY_READ, &hKey) != ERROR_SUCCESS)
         {
             return;
         }
 
         DWORD size = 32;
         auto buffer = new char[size];
+        auto localeNameCStr = toStringz("LocaleName");
 
-        if (RegQueryValueExA(hKey, toStringz("LocaleName"), null, null,
-                buffer.ptr, &size) != ERROR_SUCCESS)
+        if (RegQueryValueExA(hKey, localeNameCStr, null, null, buffer.ptr, &size) != ERROR_SUCCESS)
         {
             return;
         }

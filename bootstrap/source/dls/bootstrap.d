@@ -317,11 +317,11 @@ version (CRuntime_Microsoft)
 
         ubyte[] result;
         StopWatch watch;
-        immutable agent = "DLS";
-        auto hInternet = InternetOpenA(toStringz(agent),
-                INTERNET_OPEN_TYPE_PRECONFIG, null, null, 0);
+        auto agentCStr = toStringz("DLS");
+        auto hInternet = InternetOpenA(agentCStr, INTERNET_OPEN_TYPE_PRECONFIG, null, null, 0);
         throwIfNull(hInternet);
-        auto hFile = InternetOpenUrlA(hInternet, toStringz(url), null, 0, 0, 0);
+        auto urlCStr = toStringz(url);
+        auto hFile = InternetOpenUrlA(hInternet, urlCStr, null, 0, 0, 0);
         throwIfNull(hFile);
 
         DWORD bytesRead;
