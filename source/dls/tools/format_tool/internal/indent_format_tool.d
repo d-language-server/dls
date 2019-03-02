@@ -36,7 +36,7 @@ class IndentFormatTool : FormatTool
         import dls.tools.format_tool.internal.indent_visitor : IndentVisitor;
         import dls.util.document : Document;
         import dparse.lexer : LexerConfig, StringBehavior, StringCache,
-            WhitespaceBehavior, byToken, getTokensForParser, tok;
+            WhitespaceBehavior, byToken, getTokensForParser, isStringLiteral, tok;
         import dparse.parser : parseModule;
         import dparse.rollback_allocator : RollbackAllocator;
         import std.algorithm : all, count, filter, sort;
@@ -52,8 +52,8 @@ class IndentFormatTool : FormatTool
         auto config = LexerConfig(uri.path, StringBehavior.source, WhitespaceBehavior.include);
         auto stringCache = StringCache(StringCache.defaultBucketCount);
         const tokens = getTokensForParser(data, config, &stringCache);
-        auto commentTokens = byToken(data, config, &stringCache).filter!(
-                t => t.type == tok!"comment");
+        auto multilineTokens = byToken(data, config, &stringCache).filter!(
+                t => t.type == tok!"comment" || isStringLiteral(t.type));
         RollbackAllocator rollbackAllocator;
         auto visitor = new IndentVisitor();
         visitor.visit(parseModule(tokens, uri.path, &rollbackAllocator));
@@ -73,10 +73,10 @@ class IndentFormatTool : FormatTool
 
             auto shouldIndent = true;
 
-            while (!commentTokens.empty && line >= commentTokens.front.line)
+            while (!multilineTokens.empty && line >= multilineTokens.front.line)
             {
-                immutable text = commentTokens.front.text;
-                immutable commentEndLine = commentTokens.front.line + text.count(
+                immutable text = multilineTokens.front.text;
+                immutable commentEndLine = multilineTokens.front.line + text.count(
                         '\r') + text.count('\n') - text.count("\r\n");
 
                 if (line < commentEndLine)
@@ -86,7 +86,7 @@ class IndentFormatTool : FormatTool
                 }
                 else
                 {
-                    commentTokens.popFront();
+                    multilineTokens.popFront();
                 }
             }
 
