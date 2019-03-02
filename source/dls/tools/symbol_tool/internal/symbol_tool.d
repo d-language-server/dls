@@ -1223,12 +1223,14 @@ class SymbolTool : Tool
             const Uri[] files, bool includeDeclaration)
     {
         import dcd.common.messages : CompletionType;
-        import dcd.server.autocomplete.util : getSymbolsForCompletion;
+        import dcd.server.autocomplete.util : SymbolStuff, getExpression,
+            getSymbolsByTokenChain, getSymbolsForCompletion;
         import dls.util.disposable_fiber : DisposableFiber;
         import dls.util.document : Document;
         import dparse.lexer : LexerConfig, StringBehavior, StringCache, Token,
             WhitespaceBehavior, getTokensForParser, tok;
         import dparse.rollback_allocator : RollbackAllocator;
+        import dsymbol.conversion : generateAutocompleteTrees;
         import dsymbol.modulecache : ASTAllocator;
         import dsymbol.string_interning : internString;
         import std.algorithm : filter;
@@ -1315,15 +1317,20 @@ class SymbolTool : Tool
             auto tokens = getTokensForParser(request.sourceCode, LexerConfig(fileUri.path,
                     StringBehavior.compiler, WhitespaceBehavior.skip), &stringCache);
 
-            foreach (ref token; tokens)
+            foreach (i, ref token; tokens)
             {
                 if (token.type == tok!"identifier" && token.text == sourceToken.text)
                 {
                     DisposableFiber.yield();
                     RollbackAllocator ra;
                     request.cursorPosition = token.index + 1;
-                    auto candidateStuff = getSymbolsForCompletion(request,
-                            CompletionType.location, allocator, &ra, stringCache, _cache);
+                    auto beforeTokens = tokens[0 .. i + 1];
+                    auto pair = generateAutocompleteTrees(tokens, allocator,
+                            &ra, request.cursorPosition, _cache);
+                    auto expression = getExpression(beforeTokens);
+                    auto candidateStuff = SymbolStuff(getSymbolsByTokenChain(pair.scope_, expression,
+                            request.cursorPosition, CompletionType.location),
+                            pair.symbol, pair.scope_);
 
                     scope (exit)
                     {
