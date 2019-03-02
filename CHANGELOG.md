@@ -4,6 +4,9 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.22.7
+- Removed libcurl dependency on Windows when linking against Microsoft's C runtime ([#31](https://github.com/d-language-server/dls/issues/31))
+
 #### 0.22.6
 - Fixed error when parsing incorrect code
 
