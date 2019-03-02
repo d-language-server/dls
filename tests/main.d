@@ -258,6 +258,7 @@ private inout(char[]) expandTestUris(inout(char[]) text, const string directory)
 
 private void writeDiff(const string reference, const string output)
 {
+    import std.ascii : newline;
     import std.conv : text;
     import std.file : remove, tempDir, write;
     import std.path : buildPath;
@@ -293,5 +294,5 @@ private void writeDiff(const string reference, const string output)
     }
 
     stderr.write(args.length > 0 ? execute(args, null, Config.suppressConsole)
-            .output : "No diff output available on this platform\n");
+            .output : "No diff output available on this platform" ~ newline);
 }

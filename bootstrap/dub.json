@@ -8,5 +8,8 @@
 	"license": "GPL-3.0 or later",
 	"dependencies": {
 		"dls:i18n": "*"
-	}
+	},
+	"libs-windows": [
+		"wininet"
+	]
 }

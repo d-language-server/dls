@@ -239,5 +239,5 @@ Is it a fix ? Then the latest `release/v<MAJOR>.<MINOR>.x` branch should be targ
 ## Other links
 
 - https://github.com/Pure-D/code-d: a D extension for VSCode
-- https://github.com/Pure-D/serve-d: a language server based on [workspace-d](https://github.com/Pure-D/serve-d)
+- https://github.com/Pure-D/serve-d: a language server based on [workspace-d](https://github.com/Pure-D/workspace-d)
 - https://github.com/dlang/visuald: an extension seamlessly integrating into Visual Studio

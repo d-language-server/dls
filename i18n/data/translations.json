@@ -69,8 +69,8 @@
     },
     "app.upgradeSelections.error": {
         "_type": 1,
-        "en": "Error upgrading selections:\n$1",
-        "fr": "Erreur de mise à jour des sélections:\n$1"
+        "en": "$1",
+        "fr": "$1"
     },
     "app.upgradeDls": {
         "en": "DLS version $1 is available (current version: $2)",

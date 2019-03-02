@@ -292,15 +292,15 @@ class SymbolTool : Tool
 
         return reduce!q{a ~ b}(Document.uris.array,
                 _workspacePaths[].map!(w => dirEntries(w, SpanMode.depth).map!q{a.name}
-                    .filter!(file => globMatch(file, "*.{d,di}"))
-                    .filter!(file => !Document.uris
-                    .map!q{a.path}
-                    .array
-                    .canFind!((a, b) => filenameCmp(a, b) == 0)(file))
-                    .filter!isFile
-                    .map!(Uri.fromPath)
-                    .filter!isImported
-                    .array));
+                .filter!(file => globMatch(file, "*.{d,di}"))
+                .filter!(file => !Document.uris
+                .map!q{a.path}
+                .array
+                .canFind!((a, b) => filenameCmp(a, b) == 0)(file))
+                .filter!isFile
+                .map!(Uri.fromPath)
+                .filter!isImported
+                .array));
     }
 
     @property ref ModuleCache cache()
@@ -717,20 +717,26 @@ class SymbolTool : Tool
 
         logger.info("Upgrading dependencies from %s", dirName(uri.path));
 
-        spawn((string uriString) {
+        spawn((string path) {
             import dls.protocol.interfaces.dls : TranslationParams;
             import dls.protocol.jsonrpc : send;
             import dls.protocol.messages.methods : Dls;
             import dls.protocol.messages.window : Util;
             import dls.util.i18n : Tr;
-            import dub.dub : UpgradeOptions;
-
-            send(Dls.UpgradeSelections.didStart,
-                new TranslationParams(Tr.app_upgradeSelections_upgrading));
+            import std.process : Config, execute;
 
             try
             {
-                getDub(new Uri(uriString)).upgrade(UpgradeOptions.upgrade | UpgradeOptions.select);
+                send(Dls.UpgradeSelections.didStart,
+                    new TranslationParams(Tr.app_upgradeSelections_upgrading));
+
+                const result = execute(["dub", "upgrade"], null,
+                    Config.suppressConsole, size_t.max, path);
+
+                if (result.status != 0)
+                {
+                    Util.sendMessage(Tr.app_upgradeSelections_error, [result.output]);
+                }
             }
             catch (Exception e)
             {
@@ -740,7 +746,7 @@ class SymbolTool : Tool
             {
                 send(Dls.UpgradeSelections.didStop);
             }
-        }, uri.toString());
+        }, uri.path);
     }
 
     SymbolInformation[] symbol(const string query)

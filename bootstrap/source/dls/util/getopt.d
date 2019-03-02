@@ -24,10 +24,11 @@ import std.getopt : Option;
 
 void printHelp(const char[] title, const Option[] options, void delegate(const char[]) sink)
 {
+    import std.ascii : newline;
     import std.algorithm : map, maxElement;
 
     sink(title);
-    sink("\n");
+    sink(newline);
 
     immutable longest = maxElement(options.map!(o => o.optLong.length + (o.optShort.length > 0
             ? o.optShort.length + 1 : 0)));
@@ -52,6 +53,6 @@ void printHelp(const char[] title, const Option[] options, void delegate(const c
             sink(option.help);
         }
 
-        sink("\n");
+        sink(newline);
     }
 }
