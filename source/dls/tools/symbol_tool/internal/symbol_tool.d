@@ -684,12 +684,18 @@ class SymbolTool : Tool
             import dls.util.i18n : Tr;
             import std.process : Config, execute;
 
-            send(Dls.UpgradeSelections.didStart,
-                new TranslationParams(Tr.app_upgradeSelections_upgrading));
-
             try
             {
-                execute(["dub", "upgrade"], null, Config.suppressConsole, size_t.max, path);
+                send(Dls.UpgradeSelections.didStart,
+                    new TranslationParams(Tr.app_upgradeSelections_upgrading));
+
+                const result = execute(["dub", "upgrade"], null,
+                    Config.suppressConsole, size_t.max, path);
+
+                if (result.status != 0)
+                {
+                    Util.sendMessage(Tr.app_upgradeSelections_error, [result.output]);
+                }
             }
             catch (Exception e)
             {
