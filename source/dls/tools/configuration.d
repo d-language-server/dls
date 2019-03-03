@@ -33,6 +33,7 @@ class Configuration
     static class AnalysisConfiguration
     {
         string configFile = "dscanner.ini";
+        string[] filePatterns = [];
     }
 
     static class FormatConfiguration

@@ -212,9 +212,11 @@ void didChangeWatchedFiles(DidChangeWatchedFilesParams params)
         switch (extension(uri.path))
         {
         case ".d", ".di":
-            if (event.type != FileChangeType.deleted
-                    && !Document.uris.canFind!sameFile(uri)
-                    && SymbolTool.instance.workspacesFilesUris.canFind!sameFile(uri))
+            Uri[] discarded;
+
+            if (event.type != FileChangeType.deleted && !Document.uris.canFind!sameFile(uri)
+                    && AnalysisTool.instance.getScannableFilesUris(discarded)
+                    .canFind!sameFile(uri))
             {
                 send(TextDocument.publishDiagnostics, new PublishDiagnosticsParams(uri,
                         AnalysisTool.instance.diagnostics(uri)));

@@ -96,6 +96,15 @@ class AnalysisTool : Tool
     static void initialize()
     {
         _instance = new AnalysisTool();
+        _instance.addConfigHook("filePatterns", (const Uri uri) {
+            const newPatterns = getConfig(uri).analysis.filePatterns;
+
+            if (newPatterns != _instance._currentPatterns)
+            {
+                _instance._currentPatterns = newPatterns.dup;
+                _instance.scanAllWorkspaces();
+            }
+        });
     }
 
     static void shutdown()
@@ -109,22 +118,67 @@ class AnalysisTool : Tool
     }
 
     private StaticAnalysisConfig[string] _analysisConfigs;
+    private string[] _currentPatterns;
+
+    auto getScannableFilesUris(out Uri[] discardedFiles)
+    {
+        import dls.tools.symbol_tool : SymbolTool;
+        import dls.util.uri : sameFile;
+        import std.algorithm : canFind;
+        import std.file : SpanMode, dirEntries;
+        import std.path : buildPath, globMatch;
+        import std.range : chain;
+
+        Uri[] globMatches;
+        auto workspacesFilesUris = SymbolTool.instance.workspacesFilesUris;
+
+        foreach (wUri; workspacesUris)
+        {
+            foreach (entry; dirEntries(wUri.path, SpanMode.depth))
+            {
+                auto entryUri = Uri.fromPath(entry.name);
+
+                foreach (pattern; getConfig(wUri).analysis.filePatterns)
+                {
+                    if (globMatch(entry.name, buildPath(wUri.path, pattern)))
+                    {
+                        globMatches ~= entryUri;
+                        break;
+                    }
+                }
+
+                if (!(globMatches.length > 0 && globMatches[$ - 1] is entryUri)
+                        && !workspacesFilesUris.canFind!sameFile(entryUri))
+                {
+                    discardedFiles ~= entryUri;
+                }
+            }
+        }
+
+        return chain(workspacesFilesUris, globMatches);
+    }
 
     void scanAllWorkspaces()
     {
         import dls.protocol.jsonrpc : send;
         import dls.protocol.interfaces : PublishDiagnosticsParams;
-        import dls.protocol.messages.methods : Client, TextDocument;
-        import dls.tools.symbol_tool : SymbolTool;
+        import dls.protocol.messages.methods : TextDocument;
         import std.algorithm : each;
 
-        SymbolTool.instance.workspacesFilesUris.each!((uri) {
+        Uri[] discardedFiles;
+
+        getScannableFilesUris(discardedFiles).each!((uri) {
             import dls.util.disposable_fiber : DisposableFiber;
 
             DisposableFiber.yield();
             send(TextDocument.publishDiagnostics, new PublishDiagnosticsParams(uri,
                 AnalysisTool.instance.diagnostics(uri)));
         });
+
+        foreach (file; discardedFiles)
+        {
+            send(TextDocument.publishDiagnostics, new PublishDiagnosticsParams(file, []));
+        }
     }
 
     void addAnalysisConfig(const Uri uri)

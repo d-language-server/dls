@@ -98,7 +98,7 @@ void didClose(DidCloseTextDocumentParams params)
     import dls.protocol.jsonrpc : send;
     import dls.protocol.logger : logger;
     import dls.protocol.messages.methods : TextDocument;
-    import dls.tools.symbol_tool : SymbolTool;
+    import dls.tools.analysis_tool : AnalysisTool;
     import dls.util.document : Document;
     import dls.util.uri : Uri, sameFile;
     import std.algorithm : canFind;
@@ -111,7 +111,9 @@ void didClose(DidCloseTextDocumentParams params)
         logger.warning("Document %s is not open", uri.path);
     }
 
-    if (!SymbolTool.instance.workspacesFilesUris.canFind!sameFile(uri))
+    Uri[] discaredFiles;
+
+    if (!AnalysisTool.instance.getScannableFilesUris(discaredFiles).canFind!sameFile(uri))
     {
         send(TextDocument.publishDiagnostics, new PublishDiagnosticsParams(uri, []));
     }
