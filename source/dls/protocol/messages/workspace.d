@@ -214,7 +214,11 @@ void didChangeWatchedFiles(DidChangeWatchedFilesParams params)
         case ".d", ".di":
             Uri[] discarded;
 
-            if (event.type != FileChangeType.deleted && !Document.uris.canFind!sameFile(uri)
+            if (event.type == FileChangeType.deleted)
+            {
+                send(TextDocument.publishDiagnostics, new PublishDiagnosticsParams(uri, []));
+            }
+            else if (!Document.uris.canFind!sameFile(uri)
                     && AnalysisTool.instance.getScannableFilesUris(discarded)
                     .canFind!sameFile(uri))
             {
