@@ -548,27 +548,19 @@ class SymbolTool : Tool
         }
 
         _workspaceDependencies[uri.path] = workspaceDeps;
-        auto packages = appender([d.project.rootPackage]);
+        auto desc = d.project.rootPackage.describe(BuildPlatform.any, null, null);
+
+        if (desc.importPaths.length > 0)
+        {
+            importDirectories(desc.importPaths.map!(path => buildNormalizedPath(uri.path,
+                    path)).array);
+        }
+
+        importDubSelections(uri);
 
         foreach (sub; d.project.rootPackage.subPackages)
         {
-            DisposableFiber.yield();
-            auto p = d.project.packageManager.getSubPackage(d.project.rootPackage,
-                    baseName(sub.path), true);
-
-            if (p !is null)
-            {
-                packages ~= p;
-            }
-        }
-
-        foreach (p; packages.data)
-        {
-            const desc = p.describe(BuildPlatform.any, null, null);
-            importDirectories(desc.importPaths.length > 0
-                    ? desc.importPaths.map!(path => buildNormalizedPath(p.path.toString(),
-                        path)).array : [uri.path]);
-            importDubSelections(Uri.fromPath(desc.path));
+            importDubProject(Uri.fromPath(buildNormalizedPath(uri.path, sub.path)));
         }
     }
 
