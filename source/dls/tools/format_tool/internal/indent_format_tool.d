@@ -39,9 +39,10 @@ class IndentFormatTool : FormatTool
             WhitespaceBehavior, byToken, getTokensForParser, isStringLiteral, tok;
         import dparse.parser : parseModule;
         import dparse.rollback_allocator : RollbackAllocator;
-        import std.algorithm : all, count, filter, sort;
+        import std.algorithm : all, canFind, count, filter, sort;
         import std.array : appender;
         import std.ascii : isWhite;
+        import std.range : chain;
         import std.utf : toUTF8;
 
         logger.info("Indenting %s", uri.path);
@@ -55,12 +56,19 @@ class IndentFormatTool : FormatTool
         auto multilineTokens = byToken(data, config, &stringCache).filter!(
                 t => t.type == tok!"comment" || isStringLiteral(t.type));
         RollbackAllocator rollbackAllocator;
-        auto visitor = new IndentVisitor();
+        auto visitor = new IndentVisitor(tokens);
         visitor.visit(parseModule(tokens, uri.path, &rollbackAllocator));
 
-        auto indentLines = extractIndentLines(tokens);
-        auto indentBegins = sort(indentLines.keys);
-        auto indentEnds = sort(indentLines.values);
+        size_t[] outdents;
+        auto indentSpans = extractIndentLines(tokens, outdents);
+
+        foreach (begin, end; visitor.weakIndentSpans)
+        {
+            indentSpans.require(begin, end);
+        }
+
+        auto indentBegins = sort(chain(indentSpans.keys, visitor.indentSpans.keys));
+        auto indentEnds = sort(chain(indentSpans.values, visitor.indentSpans.values));
         size_t indents;
 
         foreach (line; 0 .. document.lines.length)
@@ -97,7 +105,15 @@ class IndentFormatTool : FormatTool
             {
                 auto indentRange = getIndentRange(docLine);
                 auto edit = new TextEdit(indentRange);
-                auto newText = new wchar[options.insertSpaces ? indents * options.tabSize : indents];
+                auto actualIndents = indents;
+
+                if (actualIndents > 0 && outdents.canFind(line + 1))
+                {
+                    --actualIndents;
+                }
+
+                auto newText = new wchar[options.insertSpaces
+                    ? actualIndents * options.tabSize : actualIndents];
                 newText[] = options.insertSpaces ? ' ' : '\t';
 
                 if (newText != docLine[0 .. indentRange.end.character])
@@ -126,14 +142,14 @@ class IndentFormatTool : FormatTool
         return result.data;
     }
 
-    private size_t[size_t] extractIndentLines(const Token[] tokens)
+    private size_t[size_t] extractIndentLines(const Token[] tokens, ref size_t[] outdents)
     {
         import dparse.lexer : tok;
         import std.algorithm : remove;
         import std.container : SList;
 
         SList!size_t indentPairBegins;
-        size_t[size_t] indentLines;
+        size_t[size_t] indentSpans;
         size_t currentLine;
 
         foreach (ref token; tokens)
@@ -150,17 +166,25 @@ class IndentFormatTool : FormatTool
                     break;
                 }
 
-                if (token.line != indentPairBegins.front && indentPairBegins.front !in indentLines)
+                if (token.line != indentPairBegins.front && indentPairBegins.front !in indentSpans)
                 {
-                    indentLines[indentPairBegins.front] = token.line;
+                    indentSpans[indentPairBegins.front] = token.line;
 
                     if (token.line == currentLine)
                     {
-                        ++indentLines[indentPairBegins.front];
+                        ++indentSpans[indentPairBegins.front];
                     }
                 }
 
                 indentPairBegins.removeFront();
+                break;
+
+            case tok!"case", tok!"default":
+                if (token.line > currentLine)
+                {
+                    outdents ~= token.line;
+                }
+
                 break;
 
             default:
@@ -173,7 +197,7 @@ class IndentFormatTool : FormatTool
             }
         }
 
-        return indentLines;
+        return indentSpans;
     }
 }
 
