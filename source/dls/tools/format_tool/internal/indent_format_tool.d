@@ -39,10 +39,10 @@ class IndentFormatTool : FormatTool
             WhitespaceBehavior, byToken, getTokensForParser, isStringLiteral, tok;
         import dparse.parser : parseModule;
         import dparse.rollback_allocator : RollbackAllocator;
-        import std.algorithm : all, canFind, count, filter, sort;
-        import std.array : appender;
+        import std.algorithm : all, canFind, count, filter, fold, map, sort;
+        import std.array : appender, array;
         import std.ascii : isWhite;
-        import std.range : chain;
+        import std.range : chain, repeat;
         import std.utf : toUTF8;
 
         logger.info("Indenting %s", uri.path);
@@ -60,15 +60,12 @@ class IndentFormatTool : FormatTool
         visitor.visit(parseModule(tokens, uri.path, &rollbackAllocator));
 
         size_t[] outdents;
-        auto indentSpans = extractIndentLines(tokens, outdents);
-
-        foreach (begin, end; visitor.weakIndentSpans)
-        {
-            indentSpans.require(begin, end);
-        }
-
-        auto indentBegins = sort(chain(indentSpans.keys, visitor.indentSpans.keys));
-        auto indentEnds = sort(chain(indentSpans.values, visitor.indentSpans.values));
+        auto indentSpans = extractIndentLines(tokens, visitor.weakIndentSpans, outdents);
+        auto indentBegins = sort(chain(visitor.indentSpans.keys, indentSpans.keys
+                .map!(b => repeat(b, indentSpans[b].length).array)
+                .fold!q{a ~ b}(cast(size_t[])[])));
+        auto indentEnds = sort(chain(visitor.indentSpans.values,
+                indentSpans.values.fold!q{a ~ b}(cast(size_t[])[])));
         size_t indents;
 
         foreach (line; 0 .. document.lines.length)
@@ -142,14 +139,16 @@ class IndentFormatTool : FormatTool
         return result.data;
     }
 
-    private size_t[size_t] extractIndentLines(const Token[] tokens, ref size_t[] outdents)
+    private size_t[][size_t] extractIndentLines(const Token[] tokens,
+            const size_t[size_t] weakIndentSpans, ref size_t[] outdents)
     {
         import dparse.lexer : tok;
         import std.algorithm : remove;
         import std.container : SList;
 
         SList!size_t indentPairBegins;
-        size_t[size_t] indentSpans;
+        size_t[][size_t] indentSpans;
+        bool[][size_t] notFirsts;
         size_t currentLine;
 
         foreach (ref token; tokens)
@@ -166,13 +165,16 @@ class IndentFormatTool : FormatTool
                     break;
                 }
 
-                if (token.line != indentPairBegins.front && indentPairBegins.front !in indentSpans)
+                if (token.line != indentPairBegins.front)
                 {
-                    indentSpans[indentPairBegins.front] = token.line;
+                    immutable isNotFirst = token.line == currentLine;
+                    indentSpans.require(indentPairBegins.front, [token.line]);
+                    notFirsts.require(indentPairBegins.front, [isNotFirst]);
 
-                    if (token.line == currentLine)
+                    if (token.line > indentSpans[indentPairBegins.front][$ - 1])
                     {
-                        ++indentSpans[indentPairBegins.front];
+                        indentSpans[indentPairBegins.front] ~= token.line;
+                        notFirsts[indentPairBegins.front] ~= isNotFirst;
                     }
                 }
 
@@ -194,6 +196,27 @@ class IndentFormatTool : FormatTool
             if (token.line > currentLine)
             {
                 currentLine = token.line;
+            }
+        }
+
+        foreach (begin, end; weakIndentSpans)
+        {
+            indentSpans.require(begin, [end]);
+
+            if (end > indentSpans[begin][$ - 1] + 1)
+            {
+                indentSpans[begin] ~= end;
+            }
+        }
+
+        foreach (begin, ends; notFirsts)
+        {
+            foreach (i, end; ends)
+            {
+                if (end)
+                {
+                    ++indentSpans[begin][i];
+                }
             }
         }
 
