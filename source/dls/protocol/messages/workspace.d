@@ -32,6 +32,7 @@ void workspaceFolders(string id, Nullable!(WorkspaceFolder[]) folders)
     import dls.protocol.state : initState;
     import dls.tools.analysis_tool : AnalysisTool;
     import dls.tools.symbol_tool : SymbolTool;
+    import dls.tools.tool : Tool;
     import dls.util.uri : Uri;
     import std.typecons : nullable;
 
@@ -43,6 +44,7 @@ void workspaceFolders(string id, Nullable!(WorkspaceFolder[]) folders)
         {
             auto uri = new Uri(workspaceFolder.uri);
             items ~= new ConfigurationItem(uri.toString().nullable);
+            Tool.updateConfig(uri, JSONValue());
             SymbolTool.instance.importPath(uri);
             AnalysisTool.instance.addAnalysisConfig(uri);
         }
@@ -71,9 +73,9 @@ void didChangeWorkspaceFolders(DidChangeWorkspaceFoldersParams params)
     foreach (folder; params.event.removed)
     {
         auto uri = new Uri(folder.uri);
+        Tool.removeConfig(uri);
         SymbolTool.instance.clearPath(uri);
         AnalysisTool.instance.removeAnalysisConfig(uri);
-        Tool.removeConfig(uri);
     }
 }
 
