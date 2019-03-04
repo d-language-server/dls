@@ -552,7 +552,6 @@ class SymbolTool : Tool
 
         foreach (sub; d.project.rootPackage.subPackages)
         {
-            DisposableFiber.yield();
             auto p = d.project.packageManager.getSubPackage(d.project.rootPackage,
                     baseName(sub.path), true);
 
@@ -665,7 +664,6 @@ class SymbolTool : Tool
 
         foreach (line; File(gitModulesPath, "r").byLineCopy)
         {
-            DisposableFiber.yield();
             auto parts = findSplit(line, "=");
 
             switch (strip(parts[0]))
