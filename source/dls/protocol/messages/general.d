@@ -43,6 +43,7 @@ InitializeResult initialize(InitializeParams params)
 
     initState = params;
     logger.info("Initializing server");
+    Tool.initialize();
     AnalysisTool.initialize();
     CommandTool.initialize();
     FormatTool.initialize();
@@ -78,7 +79,7 @@ InitializeResult initialize(InitializeParams params)
     foreach (uri; uris.sort!((a, b) => filenameCmp(a, b) < 0)
             .uniq!sameFile)
     {
-        Tool.updateConfig(uri, JSONValue());
+        Tool.instance.updateConfig(uri, JSONValue());
         SymbolTool.instance.importPath(uri);
         AnalysisTool.instance.addAnalysisConfig(uri);
     }
@@ -222,7 +223,7 @@ void initialized(JSONValue nothing)
         {
             auto items = [new ConfigurationItem(Nullable!string(null))];
 
-            foreach (uri; Tool.workspacesUris)
+            foreach (uri; Tool.instance.workspacesUris)
             {
                 items ~= new ConfigurationItem(uri.toString().nullable);
             }
@@ -244,6 +245,7 @@ JSONValue shutdown(JSONValue nothing)
     import dls.tools.command_tool : CommandTool;
     import dls.tools.format_tool : FormatTool;
     import dls.tools.symbol_tool : SymbolTool;
+    import dls.tools.tool : Tool;
     import dls.util.document : Document;
 
     logger.info("Shutting down server");
@@ -252,6 +254,7 @@ JSONValue shutdown(JSONValue nothing)
     CommandTool.shutdown();
     FormatTool.shutdown();
     SymbolTool.shutdown();
+    Tool.shutdown();
 
     foreach (uri; Document.uris)
     {

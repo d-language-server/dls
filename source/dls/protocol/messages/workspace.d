@@ -44,7 +44,7 @@ void workspaceFolders(string id, Nullable!(WorkspaceFolder[]) folders)
         {
             auto uri = new Uri(workspaceFolder.uri);
             items ~= new ConfigurationItem(uri.toString().nullable);
-            Tool.updateConfig(uri, JSONValue());
+            Tool.instance.updateConfig(uri, JSONValue());
             SymbolTool.instance.importPath(uri);
             AnalysisTool.instance.addAnalysisConfig(uri);
         }
@@ -73,7 +73,7 @@ void didChangeWorkspaceFolders(DidChangeWorkspaceFoldersParams params)
     foreach (folder; params.event.removed)
     {
         auto uri = new Uri(folder.uri);
-        Tool.removeConfig(uri);
+        Tool.instance.removeConfig(uri);
         SymbolTool.instance.clearPath(uri);
         AnalysisTool.instance.removeAnalysisConfig(uri);
     }
@@ -84,7 +84,7 @@ void configuration(string id, JSONValue[] configs)
     import dls.protocol.logger : logger;
     import dls.tools.tool : Tool;
 
-    auto uris = null ~ Tool.workspacesUris;
+    auto uris = null ~ Tool.instance.workspacesUris;
 
     logger.info("Updating workspace configurations");
 
@@ -94,7 +94,7 @@ void configuration(string id, JSONValue[] configs)
 
         if ("d" in config && "dls" in config["d"])
         {
-            Tool.updateConfig(uris[i], config["d"]["dls"]);
+            Tool.instance.updateConfig(uris[i], config["d"]["dls"]);
         }
     }
 }
@@ -119,7 +119,7 @@ void didChangeConfiguration(DidChangeConfigurationParams params)
     {
         auto items = [new ConfigurationItem(Nullable!string(null))];
 
-        foreach (uri; Tool.workspacesUris)
+        foreach (uri; Tool.instance.workspacesUris)
         {
             items ~= new ConfigurationItem(uri.toString().nullable);
         }
@@ -129,7 +129,7 @@ void didChangeConfiguration(DidChangeConfigurationParams params)
     else if ("d" in params.settings && "dls" in params.settings["d"])
     {
         logger.info("Updating configuration");
-        Tool.updateConfig(null, params.settings["d"]["dls"]);
+        Tool.instance.updateConfig(null, params.settings["d"]["dls"]);
     }
 }
 

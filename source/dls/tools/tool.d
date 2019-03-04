@@ -24,16 +24,17 @@ import dls.util.uri : Uri;
 
 alias Hook = void delegate(const Uri uri);
 
-abstract class Tool
+class Tool
 {
     import dls.tools.configuration : Configuration;
     import std.json : JSONValue;
 
+    private static Tool _instance;
     private static Configuration _globalConfig;
     private static JSONValue[string] _workspacesConfigs;
     private static Hook[string] _configHooks;
 
-    @property static Uri[] workspacesUris()
+    @property Uri[] workspacesUris()
     {
         import std.algorithm : map, sort;
         import std.array : array;
@@ -41,12 +42,44 @@ abstract class Tool
         return _workspacesConfigs.keys.sort().map!(u => Uri.fromPath(u)).array;
     }
 
-    static this()
+    static void initialize()
     {
+        _instance = new Tool();
         _globalConfig = new Configuration();
     }
 
-    static void updateConfig(const Uri uri, JSONValue json)
+    static void shutdown()
+    {
+        _globalConfig = new Configuration();
+        _workspacesConfigs.clear();
+        _configHooks.clear();
+    }
+
+    protected static Configuration getConfig(const Uri uri)
+    {
+        import dls.util.json : convertToJSON;
+
+        if (uri is null || uri.path !in _workspacesConfigs)
+        {
+            return _globalConfig;
+        }
+
+        auto config = new Configuration();
+        config.merge(convertToJSON(_globalConfig));
+        config.merge(_workspacesConfigs[uri.path]);
+        return config;
+    }
+
+    @property static Tool instance()
+    {
+        return _instance;
+    }
+
+    protected this()
+    {
+    }
+
+    void updateConfig(const Uri uri, JSONValue json)
     {
         import dls.protocol.state : initState;
 
@@ -65,27 +98,12 @@ abstract class Tool
         }
     }
 
-    static void removeConfig(const Uri uri)
+    void removeConfig(const Uri uri)
     {
         if (uri in _workspacesConfigs)
         {
             _workspacesConfigs.remove(uri.path);
         }
-    }
-
-    protected static Configuration getConfig(const Uri uri)
-    {
-        import dls.util.json : convertToJSON;
-
-        if (uri is null || uri.path !in _workspacesConfigs)
-        {
-            return _globalConfig;
-        }
-
-        auto config = new Configuration();
-        config.merge(convertToJSON(_globalConfig));
-        config.merge(_workspacesConfigs[uri.path]);
-        return config;
     }
 
     protected void addConfigHook(string name, Hook hook)
@@ -97,8 +115,4 @@ abstract class Tool
     {
         _configHooks.remove(this.toString() ~ '/' ~ name);
     }
-
-    static void initialize();
-    static void shutdown();
-    @property static T instance(T : Tool)();
 }
