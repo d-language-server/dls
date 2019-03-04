@@ -4,6 +4,9 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.23.1
+- Fixed crash in some Dub project configurations ([#38](https://github.com/d-language-server/dls/issues/38))
+
 ### 0.23.0
 - Added support for specifying glob patterns to analyze with D-Scanner ([#35](https://github.com/d-language-server/dls/issues/35))
 - Added new experimental indenting engine as an alternative to DFMT
