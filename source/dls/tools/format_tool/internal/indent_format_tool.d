@@ -32,7 +32,18 @@ class IndentFormatTool : FormatTool
 
     override TextEdit[] formatting(const Uri uri, const FormattingOptions options)
     {
+        import dls.util.document : Document;
+
+        const document = Document.get(uri);
+        return rangeFormatting(uri, new Range(new Position(0, 0),
+                new Position(document.lines.length, document.lines[$ - 1].length)), options);
+    }
+
+    override TextEdit[] rangeFormatting(const Uri uri, const Range range,
+            const FormattingOptions options)
+    {
         import dls.protocol.logger : logger;
+        import dls.tools.format_tool.internal.format_tool : isValidEditFor;
         import dls.tools.format_tool.internal.indent_visitor : IndentVisitor;
         import dls.util.document : Document;
         import dparse.lexer : LexerConfig, StringBehavior, StringCache,
@@ -47,8 +58,10 @@ class IndentFormatTool : FormatTool
 
         logger.info("Indenting %s", uri.path);
 
-        auto result = appender!(TextEdit[]);
         const document = Document.get(uri);
+        document.validatePosition(range.start);
+
+        auto result = appender!(TextEdit[]);
         const data = document.toString();
         auto config = LexerConfig(uri.path, StringBehavior.source, WhitespaceBehavior.include);
         auto stringCache = StringCache(StringCache.defaultBucketCount);
@@ -97,10 +110,11 @@ class IndentFormatTool : FormatTool
 
             const docLine = document.lines[line];
             shouldIndent &= !docLine.all!isWhite;
+            auto indentRange = getIndentRange(docLine);
+            indentRange.start.line = indentRange.end.line = line;
 
-            if (shouldIndent)
+            if (shouldIndent && indentRange.isValidEditFor(range))
             {
-                auto indentRange = getIndentRange(docLine);
                 auto edit = new TextEdit(indentRange);
                 auto actualIndents = indents;
 
@@ -115,7 +129,6 @@ class IndentFormatTool : FormatTool
 
                 if (newText != docLine[0 .. indentRange.end.character])
                 {
-                    edit.range.start.line = edit.range.end.line = line;
                     edit.newText = newText.toUTF8();
                     result ~= edit;
                 }
@@ -128,15 +141,35 @@ class IndentFormatTool : FormatTool
             }
 
             auto trailingWhitespaceRange = getTrailingWhitespaceRange(docLine);
+            trailingWhitespaceRange.start.line = trailingWhitespaceRange.end.line = line;
 
-            if (trailingWhitespaceRange.end.character - trailingWhitespaceRange.start.character > 0)
+            if (trailingWhitespaceRange.end.character - trailingWhitespaceRange.start.character > 0
+                    && trailingWhitespaceRange.isValidEditFor(range))
             {
-                trailingWhitespaceRange.start.line = trailingWhitespaceRange.end.line = line;
                 result ~= new TextEdit(trailingWhitespaceRange, "");
             }
         }
 
         return result.data;
+    }
+
+    override TextEdit[] onTypeFormatting(const Uri uri, const Position position,
+            const FormattingOptions options)
+    {
+        import dls.util.document : Document;
+        import std.string : stripRight;
+
+        const document = Document.get(uri);
+        document.validatePosition(position);
+        const line = document.lines[position.line];
+
+        if (position.character != stripRight(line).length)
+        {
+            return [];
+        }
+
+        return rangeFormatting(uri, new Range(new Position(position.line, 0),
+                new Position(position.line, line.length)), options);
     }
 
     private size_t[][size_t] extractIndentLines(const Token[] tokens,
