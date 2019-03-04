@@ -262,7 +262,6 @@ class SymbolTool : Tool
     }
 
     private ProjectType[string] _projectTypes;
-    private SList!string _workspacePaths;
     private string[string][string] _workspaceDependencies;
     private string[][string] _workspaceDependenciesPaths;
     private ModuleCache _cache;
@@ -291,16 +290,16 @@ class SymbolTool : Tool
         }
 
         return reduce!q{a ~ b}(Document.uris.array,
-                _workspacePaths[].map!(w => dirEntries(w, SpanMode.depth).map!q{a.name}
-                .filter!(file => globMatch(file, "*.{d,di}"))
-                .filter!(file => !Document.uris
-                .map!q{a.path}
-                .array
-                .canFind!((a, b) => filenameCmp(a, b) == 0)(file))
-                .filter!isFile
-                .map!(Uri.fromPath)
-                .filter!isImported
-                .array));
+                workspacesUris.map!(uri => dirEntries(uri.path, SpanMode.depth).map!q{a.name}
+                    .filter!(file => globMatch(file, "*.{d,di}"))
+                    .filter!(file => !Document.uris
+                    .map!q{a.path}
+                    .array
+                    .canFind!((a, b) => filenameCmp(a, b) == 0)(file))
+                    .filter!isFile
+                    .map!(Uri.fromPath)
+                    .filter!isImported
+                    .array));
     }
 
     @property ref ModuleCache cache()
@@ -474,9 +473,9 @@ class SymbolTool : Tool
 
         string[] workspacePathParts;
 
-        foreach (path; _workspacePaths)
+        foreach (wUri; workspacesUris)
         {
-            auto splitter = pathSplitter(path);
+            auto splitter = pathSplitter(wUri.path);
 
             if (pathSplitter(uri.path).startsWith(splitter))
             {
@@ -498,8 +497,6 @@ class SymbolTool : Tool
         import std.algorithm : any;
         import std.file : exists;
         import std.path : buildNormalizedPath;
-
-        _workspacePaths.insertFront(uri.path);
 
         if (["dub.json", "dub.sdl"].any!(f => buildNormalizedPath(uri.path, f).exists()))
         {
@@ -703,7 +700,6 @@ class SymbolTool : Tool
             }
         }
 
-        _workspacePaths.linearRemoveElement(uri.path);
         _workspaceDependencies.remove(uri.path);
         _workspaceDependenciesPaths.remove(uri.path);
         clearDirectories([uri.path]);
