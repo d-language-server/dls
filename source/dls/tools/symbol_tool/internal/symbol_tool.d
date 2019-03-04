@@ -548,19 +548,26 @@ class SymbolTool : Tool
         }
 
         _workspaceDependencies[uri.path] = workspaceDeps;
-        auto desc = d.project.rootPackage.describe(BuildPlatform.any, null, null);
-
-        if (desc.importPaths.length > 0)
-        {
-            importDirectories(desc.importPaths.map!(path => buildNormalizedPath(uri.path,
-                    path)).array);
-        }
-
-        importDubSelections(uri);
+        auto packages = appender([d.project.rootPackage]);
 
         foreach (sub; d.project.rootPackage.subPackages)
         {
-            importDubProject(Uri.fromPath(buildNormalizedPath(uri.path, sub.path)));
+            auto p = d.project.packageManager.getSubPackage(d.project.rootPackage,
+                    baseName(sub.path), true);
+
+            if (p !is null)
+            {
+                packages ~= p;
+            }
+        }
+
+        foreach (p; packages.data)
+        {
+            const desc = p.describe(BuildPlatform.any, null, null);
+            importDirectories(desc.importPaths.length > 0
+                    ? desc.importPaths.map!(path => buildNormalizedPath(p.path.toString(),
+                        path)).array : [uri.path]);
+            importDubSelections(Uri.fromPath(desc.path));
         }
     }
 
@@ -657,7 +664,6 @@ class SymbolTool : Tool
 
         foreach (line; File(gitModulesPath, "r").byLineCopy)
         {
-            DisposableFiber.yield();
             auto parts = findSplit(line, "=");
 
             switch (strip(parts[0]))
