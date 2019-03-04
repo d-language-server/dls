@@ -131,8 +131,9 @@ All these keys should be formatted as `d.dls.[section].[key]` (e.g. `d.dls.forma
 |`listAllSymbols` |`boolean` |`false`      |
 
 |Section: `analysis`|Type    |Default value   |
-|-------------------|--------|----------------|
-|`configFile`       |`string`|`"dscanner.ini"`|
+|-------------------|----------|----------------|
+|`configFile`       |`string`  |`"dscanner.ini"`|
+|`filePatterns`     |`string[]`|`[]`            |
 
 |Section: `format`                   |Type                                    |Default value|
 |------------------------------------|----------------------------------------|-------------|

@@ -4,6 +4,13 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+### 0.23.0
+- Added support for specifying glob patterns to analyze with D-Scanner ([#35](https://github.com/d-language-server/dls/issues/35))
+- Added new experimental indenting engine as an alternative to DFMT
+- Enhanced druntime/phobos directory detection
+- Updated libraries:
+    - `dub`: `1.13.0` => `1.14.0`
+
 #### 0.22.7
 - Removed libcurl dependency on Windows when linking against Microsoft's C runtime ([#31](https://github.com/d-language-server/dls/issues/31))
 
