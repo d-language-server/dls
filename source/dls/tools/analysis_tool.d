@@ -124,7 +124,7 @@ class AnalysisTool : Tool
     {
         import dls.tools.symbol_tool : SymbolTool;
         import dls.util.uri : sameFile;
-        import std.algorithm : canFind;
+        import std.algorithm : canFind, filter;
         import std.file : SpanMode, dirEntries;
         import std.path : buildPath, globMatch;
         import std.range : chain;
@@ -134,7 +134,7 @@ class AnalysisTool : Tool
 
         foreach (wUri; workspacesUris)
         {
-            foreach (entry; dirEntries(wUri.path, SpanMode.depth))
+            foreach (entry; dirEntries(wUri.path, SpanMode.depth).filter!q{a.isFile})
             {
                 auto entryUri = Uri.fromPath(entry.name);
 
@@ -148,7 +148,8 @@ class AnalysisTool : Tool
                 }
 
                 if (!(globMatches.length > 0 && globMatches[$ - 1] is entryUri)
-                        && !workspacesFilesUris.canFind!sameFile(entryUri))
+                        && !workspacesFilesUris.canFind!sameFile(entryUri)
+                        && globMatch(entry.name, "*.{d,di}"))
                 {
                     discardedFiles ~= entryUri;
                 }
