@@ -16,8 +16,8 @@
         "fr": "Valeur: <entier>  Se connecter à une socket sur le port spécifié"
     },
     "app.version.dlsVersion": {
-        "en": "DLS version $1 [$2, $3, $4]",
-        "fr": "DLS version $1 [$2, $3, $4]"
+        "en": "DLS version $1 [$2, $3, $4, $5]",
+        "fr": "DLS version $1 [$2, $3, $4, $5]"
     },
     "app.version.compilerVersion": {
         "en": "Compiled with $1 $2 (DMDFE: $3)",

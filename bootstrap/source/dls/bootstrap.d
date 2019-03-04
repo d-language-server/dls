@@ -22,6 +22,21 @@ module dls.bootstrap;
 
 import std.json : JSONValue;
 
+enum NetworkBackend : string
+{
+    wininet = "wininet",
+    curl = "curl"
+}
+
+version (CRuntime_Microsoft)
+{
+    immutable networkBackend = NetworkBackend.wininet;
+}
+else
+{
+    immutable networkBackend = NetworkBackend.curl;
+}
+
 immutable apiEndpoint = "https://api.github.com/repos/d-language-server/dls/%s";
 
 version (Windows)
@@ -277,17 +292,21 @@ string linkDls()
 
 private ubyte[] standardDownload(string url, const void function(size_t size) callback = null)
 {
-    version (CRuntime_Microsoft)
+    static if (networkBackend == NetworkBackend.wininet)
     {
         return wininetDownload(url, callback);
     }
-    else
+    else static if (networkBackend == NetworkBackend.curl)
     {
         return curlDownload(url, callback);
     }
+    else
+    {
+        static assert(false, "No available network library");
+    }
 }
 
-version (CRuntime_Microsoft)
+static if (networkBackend == NetworkBackend.wininet)
 {
     private ubyte[] wininetDownload(string url, const void function(size_t size) callback = null)
     {
@@ -361,55 +380,57 @@ version (CRuntime_Microsoft)
         return result;
     }
 }
-
-private ubyte[] curlDownload(string url, const void function(size_t size) callback = null)
+else
 {
-    import core.time : Duration, msecs;
-    import std.net.curl : HTTP;
-
-    static if (__VERSION__ >= 2075L)
+    private ubyte[] curlDownload(string url, const void function(size_t size) callback = null)
     {
-        import std.datetime.stopwatch : StopWatch;
-    }
-    else
-    {
-        import std.datetime : StopWatch;
-    }
+        import core.time : Duration, msecs;
+        import std.net.curl : HTTP;
 
-    ubyte[] result;
-    StopWatch watch;
-
-    auto request = HTTP(url);
-
-    request.onReceive = (ubyte[] data) { result ~= data; return data.length; };
-    request.onProgress = (size_t dlTotal, size_t dlNow, size_t ulTotal, size_t ulNow) {
-        static bool started;
-        static bool stopped;
-
-        if (!started && dlTotal > 0)
+        static if (__VERSION__ >= 2075L)
         {
-            started = true;
-            watch.start();
+            import std.datetime.stopwatch : StopWatch;
+        }
+        else
+        {
+            import std.datetime : StopWatch;
         }
 
-        if (started && !stopped && callback !is null && dlNow > 0
-                && (cast(Duration) watch.peek() >= 500.msecs || dlNow == dlTotal))
-        {
-            watch.reset();
-            callback(dlNow);
+        ubyte[] result;
+        StopWatch watch;
 
-            if (dlNow == dlTotal)
+        auto request = HTTP(url);
+
+        request.onReceive = (ubyte[] data) { result ~= data; return data.length; };
+        request.onProgress = (size_t dlTotal, size_t dlNow, size_t ulTotal, size_t ulNow) {
+            static bool started;
+            static bool stopped;
+
+            if (!started && dlTotal > 0)
             {
-                stopped = true;
-                watch.stop();
+                started = true;
+                watch.start();
             }
-        }
 
-        return 0;
-    };
+            if (started && !stopped && callback !is null && dlNow > 0
+                    && (cast(Duration) watch.peek() >= 500.msecs || dlNow == dlTotal))
+            {
+                watch.reset();
+                callback(dlNow);
 
-    request.perform();
-    return result;
+                if (dlNow == dlTotal)
+                {
+                    stopped = true;
+                    watch.stop();
+                }
+            }
+
+            return 0;
+        };
+
+        request.perform();
+        return result;
+    }
 }
 
 private void makeLink(const string target, const string link, bool directory)

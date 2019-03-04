@@ -20,6 +20,7 @@
 
 int main(string[] args)
 {
+    import dls.bootstrap : networkBackend;
     import dls.info : buildArch, buildPlatform, buildType, compilerVersion, currentVersion;
     import dls.protocol.interfaces : InitializeParams;
     import dls.protocol.state : initOptions;
@@ -77,7 +78,7 @@ int main(string[] args)
     {
         communicator = new StdioCommunicator(false);
         communicator.write(tr(Tr.app_version_dlsVersion, [currentVersion,
-                buildPlatform, buildArch, buildType]));
+                buildPlatform, buildArch, buildType, networkBackend]));
         communicator.write(newline);
         communicator.write(tr(Tr.app_version_compilerVersion, [name,
                 compilerVersion, text(__VERSION__)]));
