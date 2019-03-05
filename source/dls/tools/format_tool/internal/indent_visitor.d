@@ -27,6 +27,7 @@ package class IndentVisitor : ASTVisitor
 {
     size_t[size_t] weakIndentSpans;
     size_t[size_t] indentSpans;
+    size_t[] outdents;
     size_t[] unaryOperatorIndexes;
     size_t[] gluedColonIndexes;
     size_t[] starIndexes;
@@ -272,6 +273,7 @@ package class IndentVisitor : ASTVisitor
             gluedColonIndexes ~= stmt.tokens[1].index;
         }
 
+        outdents ~= stmt.tokens[0].line;
         addWeakSpan(stmt);
         super.visit(stmt);
     }

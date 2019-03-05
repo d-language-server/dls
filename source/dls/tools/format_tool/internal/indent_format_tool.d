@@ -72,13 +72,13 @@ class IndentFormatTool : FormatTool
         auto visitor = new IndentVisitor(tokens);
         visitor.visit(parseModule(tokens, uri.path, &rollbackAllocator));
 
-        size_t[] outdents;
-        auto indentSpans = getIndentLines(tokens, visitor.weakIndentSpans, outdents);
+        auto indentSpans = getIndentLines(tokens, visitor.weakIndentSpans, visitor.outdents);
         auto indentBegins = sort(chain(visitor.indentSpans.keys, indentSpans.keys
                 .map!(b => repeat(b, indentSpans[b].length).array)
                 .fold!q{a ~ b}(cast(size_t[])[])));
         auto indentEnds = sort(chain(visitor.indentSpans.values,
                 indentSpans.values.fold!q{a ~ b}(cast(size_t[])[])));
+        auto outdents = sort(visitor.outdents);
         size_t indents;
 
         foreach (line, docLine; document.lines)
