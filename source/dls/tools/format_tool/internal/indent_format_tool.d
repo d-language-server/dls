@@ -80,7 +80,7 @@ class IndentFormatTool : FormatTool
                 indentSpans.values.fold!q{a ~ b}(cast(size_t[])[])));
         auto outdents = sort(visitor.outdents);
         size_t indents;
-        auto disabledZones = getDisabledZones(
+        auto disabledZones = getDisabledZones(uri,
                 multilineTokens.filter!(t => t.type == tok!"comment").array);
 
         foreach (line, docLine; document.lines)
@@ -115,7 +115,7 @@ class IndentFormatTool : FormatTool
             indentRange.start.line = indentRange.end.line = line;
 
             if (shouldIndent && indentRange.isValidEditFor(range)
-                    && !indentRange.isDisabledFor(uri, disabledZones))
+                    && !indentRange.isDisabledFor(disabledZones))
             {
                 auto edit = new TextEdit(indentRange);
                 auto actualIndents = indents;
@@ -147,7 +147,7 @@ class IndentFormatTool : FormatTool
 
             if (trailingWhitespaceRange.end.character - trailingWhitespaceRange.start.character > 0
                     && trailingWhitespaceRange.isValidEditFor(range)
-                    && !indentRange.isDisabledFor(uri, disabledZones))
+                    && !indentRange.isDisabledFor(disabledZones))
             {
                 result ~= new TextEdit(trailingWhitespaceRange, "");
             }
@@ -175,18 +175,19 @@ class IndentFormatTool : FormatTool
                 new Position(position.line, line.length)), options);
     }
 
-    private size_t[size_t] getDisabledZones(const Token[] commentTokens)
+    private Range[] getDisabledZones(const Uri uri, const Token[] commentTokens)
     {
+        import dls.util.document : Document, minusOne;
         import dparse.lexer : tok;
         import std.algorithm : among, filter, min, splitter;
         import std.array : array;
         import std.string : strip, stripLeft, stripRight;
         import std.uni : toLower;
 
+        const document = Document.get(uri);
         static immutable commentChars = "/*+";
-        size_t[size_t] disabledZones;
-        size_t begin;
-        bool inZone;
+        Range[] disabledZones;
+        Range zone;
 
         foreach (ref token; commentTokens)
         {
@@ -199,18 +200,25 @@ class IndentFormatTool : FormatTool
                 continue;
             }
 
-            if (inZone && commentParts[1] == "on")
+            if (zone is null && commentParts[1] == "off")
             {
-                disabledZones[begin] = token.index;
-                inZone = false;
-                continue;
+                zone = new Range(new Position(minusOne(token.line), minusOne(token.column)));
             }
 
-            if (!inZone && commentParts[1] == "off")
+            if (zone !is null && commentParts[1] == "on")
             {
-                begin = token.index;
-                inZone = true;
+                zone.end.line = minusOne(token.line);
+                zone.end.character = minusOne(token.column);
+                disabledZones ~= zone;
+                zone = null;
+                continue;
             }
+        }
+
+        if (zone !is null)
+        {
+            zone.end = new Position(document.lines.length);
+            disabledZones ~= zone;
         }
 
         return disabledZones;
@@ -301,7 +309,7 @@ class IndentFormatTool : FormatTool
     }
 
     private TextEdit[] getSpacingEdits(const Uri uri, const Range range,
-            const Token[] tokens, size_t[size_t] disabledZones, IndentVisitor visitor)
+            const Token[] tokens, const Range[] disabledZones, IndentVisitor visitor)
     {
         import dls.util.document : Document, minusOne;
         import dparse.lexer : tok;
@@ -343,8 +351,7 @@ class IndentFormatTool : FormatTool
             auto text = spacing == Spacing.empty ? ""w : " "w;
 
             if (docLine[editRange.start.character .. editRange.end.character] != text
-                    && editRange.isValidEditFor(range)
-                    && !editRange.isDisabledFor(uri, disabledZones))
+                    && editRange.isValidEditFor(range) && !editRange.isDisabledFor(disabledZones))
             {
                 lastEditRange = editRange;
                 result ~= new TextEdit(editRange, text.toUTF8());
@@ -739,18 +746,13 @@ private bool equals(const Range a, const Range b)
     //dfmt on
 }
 
-private bool isDisabledFor(const Range editRange, const Uri uri,
-        const ref size_t[size_t] disabledZones)
+private bool isDisabledFor(const Range editRange, const Range[] disabledZones)
 {
-    import dls.util.document : Document;
+    import dls.tools.format_tool.internal.format_tool : isValidEditFor;
 
-    const document = Document.get(uri);
-    immutable begin = document.byteAtPosition(editRange.start);
-    immutable end = document.byteAtPosition(editRange.end);
-
-    foreach (zoneBegin, zoneEnd; disabledZones)
+    foreach (range; disabledZones)
     {
-        if (begin < zoneEnd && end > zoneBegin)
+        if (editRange.isValidEditFor(range))
         {
             return true;
         }
