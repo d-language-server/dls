@@ -259,10 +259,11 @@ class IndentFormatTool : FormatTool
     private TextEdit[] getSpacingEdits(const Uri uri, const Range range,
             const Token[] tokens, IndentVisitor visitor)
     {
-        import dls.util.document : Document;
+        import dls.util.document : Document, minusOne;
         import dparse.lexer : tok;
         import std.algorithm : sort;
         import std.array : appender;
+        import std.utf : codeLength, toUTF8;
 
         const document = Document.get(uri);
         auto sortedUnaryOperators = sort(visitor.unaryOperatorIndexes);
@@ -301,6 +302,18 @@ class IndentFormatTool : FormatTool
         {
             auto left = Spacing.keep;
             auto right = Spacing.keep;
+            Token previous;
+            Token next;
+
+            if (i > 0)
+            {
+                previous = tokens[i - 1];
+            }
+
+            if (i + 1 < tokens.length)
+            {
+                next = tokens[i + 1];
+            }
 
             switch (token.type)
             {
@@ -395,33 +408,28 @@ class IndentFormatTool : FormatTool
                 continue loop;
             }
 
-            immutable line = token.line - 1;
+            immutable line = minusOne(token.line);
             const docLine = document.lines[line];
+            immutable docLineStr = docLine.toUTF8();
 
-            if (left != Spacing.keep && i > 0)
+            if (left != Spacing.keep && previous.type != tok!"" && previous.line == token.line)
             {
-                auto previous = tokens[i - 1];
-
-                if (previous.line == token.line)
-                {
-                    auto editRange = new Range(new Position(line,
-                            previous.column - 1 + tokenLength(previous)),
-                            new Position(line, token.column - 1));
-                    pushEdit(editRange, docLine, left);
-                }
+                immutable startCharacter = codeLength!wchar(
+                        docLineStr[0 .. minusOne(previous.column) + tokenLength(previous)]);
+                immutable endCharacter = codeLength!wchar(docLineStr[0 .. minusOne(token.column)]);
+                auto editRange = new Range(new Position(line, startCharacter),
+                        new Position(line, endCharacter));
+                pushEdit(editRange, docLine, left);
             }
 
-            if (right != Spacing.keep && i + 1 < tokens.length)
+            if (right != Spacing.keep && next.type != tok!"" && next.line == token.line)
             {
-                auto next = tokens[i + 1];
-
-                if (next.line == token.line)
-                {
-                    auto editRange = new Range(new Position(line,
-                            token.column - 1 + tokenLength(token)),
-                            new Position(line, next.column - 1));
-                    pushEdit(editRange, docLine, right);
-                }
+                immutable startCharacter = codeLength!wchar(
+                        docLineStr[0 .. minusOne(token.column) + tokenLength(token)]);
+                immutable endCharacter = codeLength!wchar(docLineStr[0 .. minusOne(next.column)]);
+                auto editRange = new Range(new Position(line, startCharacter),
+                        new Position(line, endCharacter));
+                pushEdit(editRange, docLine, right);
             }
         }
 
