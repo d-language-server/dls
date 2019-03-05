@@ -133,25 +133,25 @@ class Document
 
     size_t byteAtPosition(const Position position) const
     {
-        import std.algorithm : reduce;
-        import std.range : iota;
+        import std.algorithm : min;
         import std.utf : codeLength;
 
-        if (position.line >= _lines.length)
+        size_t result;
+
+        foreach (i, ref line; _lines)
         {
-            return 0;
+            if (i < position.line)
+            {
+                result += codeLength!char(line);
+            }
+            else
+            {
+                result += codeLength!char(line[0 .. min(position.character, $)]);
+                break;
+            }
         }
 
-        immutable linesBytes = reduce!((s, i) => s + codeLength!char(_lines[i]))(
-                cast(size_t) 0, iota(position.line));
-
-        if (position.character > _lines[position.line].length)
-        {
-            return 0;
-        }
-
-        immutable characterBytes = codeLength!char(_lines[position.line][0 .. position.character]);
-        return linesBytes + characterBytes;
+        return result;
     }
 
     Position positionAtByte(size_t bytePosition) const
