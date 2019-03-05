@@ -22,13 +22,13 @@ module dls.tools.format_tool.internal.indent_format_tool;
 
 import dls.protocol.definitions : Range;
 import dls.tools.format_tool.internal.format_tool : FormatTool;
+import dls.util.uri : Uri;
 
 class IndentFormatTool : FormatTool
 {
     import dls.protocol.definitions : Position, TextEdit;
     import dls.protocol.interfaces : FormattingOptions;
     import dls.tools.format_tool.internal.indent_visitor : IndentVisitor;
-    import dls.util.uri : Uri;
     import dparse.lexer : Token;
 
     override TextEdit[] formatting(const Uri uri, const FormattingOptions options)
@@ -80,6 +80,8 @@ class IndentFormatTool : FormatTool
                 indentSpans.values.fold!q{a ~ b}(cast(size_t[])[])));
         auto outdents = sort(visitor.outdents);
         size_t indents;
+        auto disabledZones = getDisabledZones(
+                multilineTokens.filter!(t => t.type == tok!"comment").array);
 
         foreach (line, docLine; document.lines)
         {
@@ -112,7 +114,8 @@ class IndentFormatTool : FormatTool
             auto indentRange = getIndentRange(docLine);
             indentRange.start.line = indentRange.end.line = line;
 
-            if (shouldIndent && indentRange.isValidEditFor(range))
+            if (shouldIndent && indentRange.isValidEditFor(range)
+                    && !indentRange.isDisabledFor(uri, disabledZones))
             {
                 auto edit = new TextEdit(indentRange);
                 auto actualIndents = indents;
@@ -143,14 +146,14 @@ class IndentFormatTool : FormatTool
             trailingWhitespaceRange.start.line = trailingWhitespaceRange.end.line = line;
 
             if (trailingWhitespaceRange.end.character - trailingWhitespaceRange.start.character > 0
-                    && trailingWhitespaceRange.isValidEditFor(range))
+                    && trailingWhitespaceRange.isValidEditFor(range)
+                    && !indentRange.isDisabledFor(uri, disabledZones))
             {
                 result ~= new TextEdit(trailingWhitespaceRange, "");
             }
         }
 
-        result ~= getSpacingEdits(uri, range, tokens, visitor);
-        return result.data;
+        return result.data ~ getSpacingEdits(uri, range, tokens, disabledZones, visitor);
     }
 
     override TextEdit[] onTypeFormatting(const Uri uri, const Position position,
@@ -170,6 +173,47 @@ class IndentFormatTool : FormatTool
 
         return rangeFormatting(uri, new Range(new Position(position.line, 0),
                 new Position(position.line, line.length)), options);
+    }
+
+    private size_t[size_t] getDisabledZones(const Token[] commentTokens)
+    {
+        import dparse.lexer : tok;
+        import std.algorithm : among, filter, min, splitter;
+        import std.array : array;
+        import std.string : strip, stripLeft, stripRight;
+        import std.uni : toLower;
+
+        static immutable commentChars = "/*+";
+        size_t[size_t] disabledZones;
+        size_t begin;
+        bool inZone;
+
+        foreach (ref token; commentTokens)
+        {
+            immutable text = token.text.stripLeft(commentChars)
+                .stripRight(commentChars)[0 .. min(16, $)];
+            immutable commentParts = splitter(text.strip().toLower()).filter!q{!a.empty}.array;
+
+            if (commentParts.length < 2 || !commentParts[0].among("format", "indent", "dfmt"))
+            {
+                continue;
+            }
+
+            if (inZone && commentParts[1] == "on")
+            {
+                disabledZones[begin] = token.index;
+                inZone = false;
+                continue;
+            }
+
+            if (!inZone && commentParts[1] == "off")
+            {
+                begin = token.index;
+                inZone = true;
+            }
+        }
+
+        return disabledZones;
     }
 
     private size_t[][size_t] getIndentLines(const Token[] tokens,
@@ -257,7 +301,7 @@ class IndentFormatTool : FormatTool
     }
 
     private TextEdit[] getSpacingEdits(const Uri uri, const Range range,
-            const Token[] tokens, IndentVisitor visitor)
+            const Token[] tokens, size_t[size_t] disabledZones, IndentVisitor visitor)
     {
         import dls.util.document : Document, minusOne;
         import dparse.lexer : tok;
@@ -298,8 +342,9 @@ class IndentFormatTool : FormatTool
 
             auto text = spacing == Spacing.empty ? ""w : " "w;
 
-            if (editRange.isValidEditFor(range)
-                    && docLine[editRange.start.character .. editRange.end.character] != text)
+            if (docLine[editRange.start.character .. editRange.end.character] != text
+                    && editRange.isValidEditFor(range)
+                    && !editRange.isDisabledFor(uri, disabledZones))
             {
                 lastEditRange = editRange;
                 result ~= new TextEdit(editRange, text.toUTF8());
@@ -692,4 +737,24 @@ private bool equals(const Range a, const Range b)
     return a.start.line == b.start.line && a.start.character == b.start.character
         && a.end.line == b.end.line && a.end.character == b.end.character;
     //dfmt on
+}
+
+private bool isDisabledFor(const Range editRange, const Uri uri,
+        const ref size_t[size_t] disabledZones)
+{
+    import dls.util.document : Document;
+
+    const document = Document.get(uri);
+    immutable begin = document.byteAtPosition(editRange.start);
+    immutable end = document.byteAtPosition(editRange.end);
+
+    foreach (zoneBegin, zoneEnd; disabledZones)
+    {
+        if (begin < zoneEnd && end > zoneBegin)
+        {
+            return true;
+        }
+    }
+
+    return false;
 }
