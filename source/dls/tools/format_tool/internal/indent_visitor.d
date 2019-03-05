@@ -27,6 +27,8 @@ package class IndentVisitor : ASTVisitor
 {
     size_t[size_t] weakIndentSpans;
     size_t[size_t] indentSpans;
+    size_t[] unaryOperatorIndexes;
+    size_t[] gluedColonIndexes;
     private size_t[size_t] _firstTokenIndexes;
 
     this(const Token[] tokens)
@@ -81,6 +83,7 @@ package class IndentVisitor : ASTVisitor
 
     override void visit(const CaseRangeStatement stmt)
     {
+        gluedColonIndexes ~= stmt.colonLocation;
         const nodes = [stmt.low, stmt.high];
         addWeakSpan(nodes);
         addSpan(nodes);
@@ -89,6 +92,7 @@ package class IndentVisitor : ASTVisitor
 
     override void visit(const CaseStatement stmt)
     {
+        gluedColonIndexes ~= stmt.colonLocation;
         addWeakSpan(stmt.argumentList);
         addSpan(stmt.argumentList);
         super.visit(stmt);
@@ -150,6 +154,12 @@ package class IndentVisitor : ASTVisitor
     {
         addWeakSpan(spec);
         super.visit(spec);
+    }
+
+    override void visit(const DefaultStatement stmt)
+    {
+        gluedColonIndexes ~= stmt.colonLocation;
+        super.visit(stmt);
     }
 
     override void visit(const DeleteStatement stmt)
@@ -256,6 +266,11 @@ package class IndentVisitor : ASTVisitor
 
     override void visit(const LabeledStatement stmt)
     {
+        if (stmt.tokens.length > 1)
+        {
+            gluedColonIndexes ~= stmt.tokens[1].index;
+        }
+
         addWeakSpan(stmt);
         super.visit(stmt);
     }
@@ -354,6 +369,19 @@ package class IndentVisitor : ASTVisitor
     {
         addSpan(stmt.declarationOrStatement);
         super.visit(stmt);
+    }
+
+    override void visit(const UnaryExpression expr)
+    {
+        foreach (op; [expr.prefix, expr.suffix])
+        {
+            if (op.type != tok!"")
+            {
+                unaryOperatorIndexes ~= op.index;
+            }
+        }
+
+        super.visit(expr);
     }
 
     override void visit(const VariableDeclaration dec)

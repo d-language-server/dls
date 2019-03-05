@@ -27,6 +27,7 @@ class IndentFormatTool : FormatTool
 {
     import dls.protocol.definitions : Position, TextEdit;
     import dls.protocol.interfaces : FormattingOptions;
+    import dls.tools.format_tool.internal.indent_visitor : IndentVisitor;
     import dls.util.uri : Uri;
     import dparse.lexer : Token;
 
@@ -44,7 +45,6 @@ class IndentFormatTool : FormatTool
     {
         import dls.protocol.logger : logger;
         import dls.tools.format_tool.internal.format_tool : isValidEditFor;
-        import dls.tools.format_tool.internal.indent_visitor : IndentVisitor;
         import dls.util.document : Document;
         import dparse.lexer : LexerConfig, StringBehavior, StringCache,
             WhitespaceBehavior, byToken, getTokensForParser, isStringLiteral, tok;
@@ -73,7 +73,7 @@ class IndentFormatTool : FormatTool
         visitor.visit(parseModule(tokens, uri.path, &rollbackAllocator));
 
         size_t[] outdents;
-        auto indentSpans = extractIndentLines(tokens, visitor.weakIndentSpans, outdents);
+        auto indentSpans = getIndentLines(tokens, visitor.weakIndentSpans, outdents);
         auto indentBegins = sort(chain(visitor.indentSpans.keys, indentSpans.keys
                 .map!(b => repeat(b, indentSpans[b].length).array)
                 .fold!q{a ~ b}(cast(size_t[])[])));
@@ -81,7 +81,7 @@ class IndentFormatTool : FormatTool
                 indentSpans.values.fold!q{a ~ b}(cast(size_t[])[])));
         size_t indents;
 
-        foreach (line; 0 .. document.lines.length)
+        foreach (line, docLine; document.lines)
         {
             while (!indentEnds.empty && indentEnds.front == line + 1)
             {
@@ -108,7 +108,6 @@ class IndentFormatTool : FormatTool
                 }
             }
 
-            const docLine = document.lines[line];
             shouldIndent &= !docLine.all!isWhite;
             auto indentRange = getIndentRange(docLine);
             indentRange.start.line = indentRange.end.line = line;
@@ -150,6 +149,7 @@ class IndentFormatTool : FormatTool
             }
         }
 
+        result ~= getSpacingEdits(uri, range, tokens, visitor);
         return result.data;
     }
 
@@ -172,7 +172,7 @@ class IndentFormatTool : FormatTool
                 new Position(position.line, line.length)), options);
     }
 
-    private size_t[][size_t] extractIndentLines(const Token[] tokens,
+    private size_t[][size_t] getIndentLines(const Token[] tokens,
             const size_t[size_t] weakIndentSpans, ref size_t[] outdents)
     {
         import dparse.lexer : tok;
@@ -254,6 +254,178 @@ class IndentFormatTool : FormatTool
         }
 
         return indentSpans;
+    }
+
+    private TextEdit[] getSpacingEdits(const Uri uri, const Range range,
+            const Token[] tokens, IndentVisitor visitor)
+    {
+        import dls.util.document : Document;
+        import dparse.lexer : tok;
+        import std.algorithm : sort;
+        import std.array : appender;
+
+        const document = Document.get(uri);
+        auto sortedUnaryOperators = sort(visitor.unaryOperatorIndexes);
+        auto sortedGluedColons = sort(visitor.gluedColonIndexes);
+        auto result = appender!(TextEdit[]);
+
+        static enum Spacing
+        {
+            keep,
+            empty,
+            space
+        }
+
+        static size_t tokenLength(const ref Token token)
+        {
+            import dparse.lexer : str;
+
+            return token.text.length > 0 ? token.text.length : str(token.type).length;
+        }
+
+        void pushEdit(Range editRange, const wstring docLine, Spacing spacing)
+        {
+            import dls.tools.format_tool.internal.format_tool : isValidEditFor;
+            import std.utf : toUTF8;
+
+            auto text = spacing == Spacing.empty ? ""w : " "w;
+
+            if (editRange.isValidEditFor(range)
+                    && docLine[editRange.start.character .. editRange.end.character] != text)
+            {
+                result ~= new TextEdit(editRange, text.toUTF8());
+            }
+        }
+
+        loop: foreach (i, ref token; tokens)
+        {
+            auto left = Spacing.keep;
+            auto right = Spacing.keep;
+
+            switch (token.type)
+            {
+            case tok!"++":
+            case tok!"--":
+            case tok!"+":
+            case tok!"-":
+            case tok!"*":
+            case tok!"/":
+            case tok!"%":
+            case tok!"^^":
+            case tok!"!":
+            case tok!"~":
+            case tok!"&":
+            case tok!"|":
+            case tok!"^":
+            case tok!"&&":
+            case tok!"||":
+            case tok!"=":
+            case tok!"+=":
+            case tok!"-=":
+            case tok!"*=":
+            case tok!"/=":
+            case tok!"%=":
+            case tok!"^^=":
+            case tok!"!=":
+            case tok!"~=":
+            case tok!"&=":
+            case tok!"|=":
+            case tok!"^=":
+            case tok!"==":
+            case tok!"<":
+            case tok!">":
+            case tok!"<<":
+            case tok!">>":
+            case tok!">>>":
+            case tok!"<=":
+            case tok!">=":
+            case tok!"<<=":
+            case tok!">>=":
+            case tok!">>>=":
+            case tok!"<>=":
+            case tok!"!<":
+            case tok!"!>":
+            case tok!"!<=":
+            case tok!"!>=":
+            case tok!"!<>":
+            case tok!"!<>=":
+            case tok!"=>":
+            case tok!"?":
+            case tok!"..":
+                if (sortedUnaryOperators.empty || token.index != sortedUnaryOperators.front)
+                {
+                    left = Spacing.space;
+                    right = Spacing.space;
+                }
+                else
+                {
+                    right = Spacing.empty;
+                }
+
+                if (!sortedUnaryOperators.empty && token.index >= sortedUnaryOperators.front)
+                {
+                    sortedUnaryOperators.popFront();
+                }
+
+                break;
+            case tok!":":
+                left = (sortedGluedColons.empty || token.index != sortedGluedColons.front) ? Spacing.space
+                    : Spacing.empty;
+                right = Spacing.space;
+
+                if (!sortedGluedColons.empty && token.index >= sortedGluedColons.front)
+                {
+                    sortedGluedColons.popFront();
+                }
+
+                break;
+            case tok!",":
+            case tok!";":
+                left = Spacing.empty;
+                right = Spacing.space;
+                break;
+            case tok!"...":
+                left = Spacing.empty;
+                break;
+            case tok!".":
+                left = Spacing.empty;
+                right = Spacing.empty;
+                break;
+            default:
+                continue loop;
+            }
+
+            immutable line = token.line - 1;
+            const docLine = document.lines[line];
+
+            if (left != Spacing.keep && i > 0)
+            {
+                auto previous = tokens[i - 1];
+
+                if (previous.line == token.line)
+                {
+                    auto editRange = new Range(new Position(line,
+                            previous.column - 1 + tokenLength(previous)),
+                            new Position(line, token.column - 1));
+                    pushEdit(editRange, docLine, left);
+                }
+            }
+
+            if (right != Spacing.keep && i + 1 < tokens.length)
+            {
+                auto next = tokens[i + 1];
+
+                if (next.line == token.line)
+                {
+                    auto editRange = new Range(new Position(line,
+                            token.column - 1 + tokenLength(token)),
+                            new Position(line, next.column - 1));
+                    pushEdit(editRange, docLine, right);
+                }
+            }
+        }
+
+        return result.data;
     }
 }
 
