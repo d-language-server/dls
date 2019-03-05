@@ -298,8 +298,20 @@ class IndentFormatTool : FormatTool
             }
         }
 
+        immutable formatRangeStartIndex = document.byteAtPosition(range.start);
+        immutable formatRangeEndIndex = document.byteAtPosition(range.end);
+
         loop: foreach (i, ref token; tokens)
         {
+            if (token.index + tokenLength(token) <= formatRangeStartIndex)
+            {
+                continue;
+            }
+            else if (token.index >= formatRangeEndIndex)
+            {
+                break;
+            }
+
             auto left = Spacing.keep;
             auto right = Spacing.keep;
             Token previous;
