@@ -269,6 +269,7 @@ class IndentFormatTool : FormatTool
         auto sortedUnaryOperators = sort(visitor.unaryOperatorIndexes);
         auto sortedGluedColons = sort(visitor.gluedColonIndexes);
         auto result = appender!(TextEdit[]);
+        Range lastEditRange;
 
         static enum Spacing
         {
@@ -289,11 +290,17 @@ class IndentFormatTool : FormatTool
             import dls.tools.format_tool.internal.format_tool : isValidEditFor;
             import std.utf : toUTF8;
 
+            if (editRange.equals(lastEditRange))
+            {
+                return;
+            }
+
             auto text = spacing == Spacing.empty ? ""w : " "w;
 
             if (editRange.isValidEditFor(range)
                     && docLine[editRange.start.character .. editRange.end.character] != text)
             {
+                lastEditRange = editRange;
                 result ~= new TextEdit(editRange, text.toUTF8());
             }
         }
@@ -484,4 +491,17 @@ private Range getTrailingWhitespaceRange(const wstring line)
     }
 
     return result;
+}
+
+private bool equals(const Range a, const Range b)
+{
+    if (a is null || b is null)
+    {
+        return false;
+    }
+
+    //dfmt off
+    return a.start.line == b.start.line && a.start.character == b.start.character
+        && a.end.line == b.end.line && a.end.character == b.end.character;
+    //dfmt on
 }
