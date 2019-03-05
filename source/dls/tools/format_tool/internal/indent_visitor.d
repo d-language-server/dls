@@ -29,6 +29,7 @@ package class IndentVisitor : ASTVisitor
     size_t[size_t] indentSpans;
     size_t[] unaryOperatorIndexes;
     size_t[] gluedColonIndexes;
+    size_t[] starIndexes;
     private size_t[size_t] _firstTokenIndexes;
 
     this(const Token[] tokens)
@@ -369,6 +370,16 @@ package class IndentVisitor : ASTVisitor
     {
         addSpan(stmt.declarationOrStatement);
         super.visit(stmt);
+    }
+
+    override void visit(const TypeSuffix s)
+    {
+        if (s.star.type != tok!"")
+        {
+            starIndexes ~= s.star.index;
+        }
+
+        super.visit(s);
     }
 
     override void visit(const UnaryExpression expr)

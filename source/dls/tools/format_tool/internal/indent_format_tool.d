@@ -214,7 +214,7 @@ class IndentFormatTool : FormatTool
                 indentPairBegins.removeFront();
                 break;
 
-            case tok!"case", tok!"default":
+            case tok!"align", tok!"case", tok!"default":
                 if (token.line > currentLine)
                 {
                     outdents ~= token.line;
@@ -261,13 +261,14 @@ class IndentFormatTool : FormatTool
     {
         import dls.util.document : Document, minusOne;
         import dparse.lexer : tok;
-        import std.algorithm : sort;
+        import std.algorithm : among, sort;
         import std.array : appender;
         import std.utf : codeLength, toUTF8;
 
         const document = Document.get(uri);
         auto sortedUnaryOperators = sort(visitor.unaryOperatorIndexes);
         auto sortedGluedColons = sort(visitor.gluedColonIndexes);
+        auto sortedStars = sort(visitor.starIndexes);
         auto result = appender!(TextEdit[]);
         Range lastEditRange;
 
@@ -307,6 +308,7 @@ class IndentFormatTool : FormatTool
 
         immutable formatRangeStartIndex = document.byteAtPosition(range.start);
         immutable formatRangeEndIndex = document.byteAtPosition(range.end);
+        bool insideExtern;
 
         loop: foreach (i, ref token; tokens)
         {
@@ -336,15 +338,34 @@ class IndentFormatTool : FormatTool
 
             switch (token.type)
             {
+            case tok!"!":
+                if (!sortedUnaryOperators.empty && token.index == sortedUnaryOperators.front)
+                {
+                    goto case tok!"..";
+                }
+
+                left = next.type.among(tok!"in", tok!"is") ? Spacing.space : Spacing.empty;
+                right = Spacing.empty;
+                break;
+
+            case tok!"*":
+                if (sortedStars.empty || token.index != sortedStars.front)
+                {
+                    goto case tok!"..";
+                }
+
+                left = Spacing.empty;
+                right = Spacing.space;
+                sortedStars.popFront();
+                break;
+
             case tok!"++":
             case tok!"--":
             case tok!"+":
             case tok!"-":
-            case tok!"*":
             case tok!"/":
             case tok!"%":
             case tok!"^^":
-            case tok!"!":
             case tok!"~":
             case tok!"&":
             case tok!"|":
@@ -352,13 +373,13 @@ class IndentFormatTool : FormatTool
             case tok!"&&":
             case tok!"||":
             case tok!"=":
+            case tok!"!=":
             case tok!"+=":
             case tok!"-=":
             case tok!"*=":
             case tok!"/=":
             case tok!"%=":
             case tok!"^^=":
-            case tok!"!=":
             case tok!"~=":
             case tok!"&=":
             case tok!"|=":
@@ -384,6 +405,9 @@ class IndentFormatTool : FormatTool
             case tok!"=>":
             case tok!"?":
             case tok!"..":
+            case tok!"nothrow":
+            case tok!"override":
+            case tok!"pure":
                 if (sortedUnaryOperators.empty || token.index != sortedUnaryOperators.front)
                 {
                     left = Spacing.space;
@@ -400,6 +424,7 @@ class IndentFormatTool : FormatTool
                 }
 
                 break;
+
             case tok!":":
                 left = (sortedGluedColons.empty || token.index != sortedGluedColons.front) ? Spacing.space
                     : Spacing.empty;
@@ -411,20 +436,183 @@ class IndentFormatTool : FormatTool
                 }
 
                 break;
+
             case tok!",":
             case tok!";":
                 left = Spacing.empty;
                 right = Spacing.space;
                 break;
+
             case tok!"...":
                 left = Spacing.empty;
                 break;
+
             case tok!".":
                 left = Spacing.empty;
                 right = Spacing.empty;
                 break;
+
+            case tok!"(":
+                if (previous.type == tok!"extern")
+                {
+                    insideExtern = true;
+                }
+
+                goto case;
+
+            case tok!"[":
+                right = Spacing.empty;
+                break;
+
+            case tok!")":
+                if (insideExtern)
+                {
+                    insideExtern = false;
+                }
+
+                goto case;
+
+            case tok!"]":
+                left = Spacing.empty;
+                break;
+
+            case tok!"{":
+                if (previous.type.among(tok!")", tok!"identifier"))
+                {
+                    left = Spacing.space;
+                }
+
+                right = Spacing.space;
+                break;
+
+            case tok!"}":
+                left = Spacing.space;
+                break;
+
+            case tok!"@":
+            case tok!"assert":
+            case tok!"cast":
+            case tok!"typeid":
+            case tok!"typeof":
+            case tok!"__traits":
+                right = Spacing.empty;
+                break;
+
+            case tok!"abstract":
+            case tok!"alias":
+            case tok!"asm":
+            case tok!"auto":
+            case tok!"case":
+            case tok!"catch":
+            case tok!"delete":
+            case tok!"do":
+            case tok!"else":
+            case tok!"export":
+            case tok!"extern":
+            case tok!"final":
+            case tok!"finally":
+            case tok!"for":
+            case tok!"foreach":
+            case tok!"foreach_reverse":
+            case tok!"goto":
+            case tok!"if":
+            case tok!"invariant":
+            case tok!"lazy":
+            case tok!"module":
+            case tok!"new":
+            case tok!"out":
+            case tok!"package":
+            case tok!"private":
+            case tok!"protected":
+            case tok!"public":
+            case tok!"ref":
+            case tok!"scope":
+            case tok!"static":
+            case tok!"switch":
+            case tok!"synchronized":
+            case tok!"template":
+            case tok!"throw":
+            case tok!"try":
+            case tok!"unittest":
+            case tok!"version":
+            case tok!"while":
+            case tok!"with":
+            case tok!"__gshared":
+                right = Spacing.space;
+                break;
+
+            case tok!"align":
+            case tok!"debug":
+                if (next.type == tok!"(")
+                {
+                    right = Spacing.space;
+                }
+
+                break;
+
+            case tok!"break":
+            case tok!"continue":
+            case tok!"return":
+                if (!next.type.among(tok!";", tok!")"))
+                {
+                    right = Spacing.space;
+                }
+
+                break;
+
+            case tok!"class":
+            case tok!"const":
+            case tok!"delegate":
+            case tok!"deprecated":
+            case tok!"enum":
+            case tok!"function":
+            case tok!"import":
+            case tok!"immutable":
+            case tok!"inout":
+            case tok!"interface":
+            case tok!"mixin":
+            case tok!"pragma":
+            case tok!"shared":
+            case tok!"struct":
+            case tok!"union":
+            case tok!"__vector":
+                right = next.type.among(tok!"(", tok!")") ? Spacing.empty : Spacing.space;
+                break;
+
+            case tok!"in":
+                if (!next.type.among(tok!"(", tok!"{") && previous.type != tok!"!")
+                {
+                    left = Spacing.space;
+                }
+
+                right = Spacing.space;
+                break;
+
+            case tok!"is":
+                if (next.type == tok!"(")
+                {
+                    right = Spacing.empty;
+                }
+                else
+                {
+                    if (previous.type != tok!"!")
+                    {
+                        left = Spacing.space;
+                    }
+
+                    right = Spacing.space;
+                }
+
+                break;
+
             default:
                 continue loop;
+            }
+
+            if (insideExtern && previous.type != tok!"extern")
+            {
+                left = Spacing.empty;
+                right = Spacing.empty;
             }
 
             immutable line = minusOne(token.line);
