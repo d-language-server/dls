@@ -63,11 +63,12 @@ class IndentFormatTool : FormatTool
 
         auto result = appender!(TextEdit[]);
         const data = document.toString();
-        auto config = LexerConfig(uri.path, StringBehavior.source, WhitespaceBehavior.include);
+        auto config = LexerConfig(uri.path, StringBehavior.source, WhitespaceBehavior.skip);
         auto stringCache = StringCache(StringCache.defaultBucketCount);
         const tokens = getTokensForParser(data, config, &stringCache);
-        auto multilineTokens = byToken(data, config, &stringCache).filter!(
-                t => t.type == tok!"comment" || isStringLiteral(t.type));
+        const allTokens = byToken(data, config, &stringCache).array;
+        auto multilineTokens = allTokens.filter!(t => t.type == tok!"comment"
+                || isStringLiteral(t.type));
         RollbackAllocator rollbackAllocator;
         auto visitor = new IndentVisitor(tokens);
         visitor.visit(parseModule(tokens, uri.path, &rollbackAllocator));
@@ -153,7 +154,7 @@ class IndentFormatTool : FormatTool
             }
         }
 
-        return result.data ~ getSpacingEdits(uri, range, tokens, disabledZones, visitor);
+        return result.data ~ getSpacingEdits(uri, range, allTokens, disabledZones, visitor);
     }
 
     override TextEdit[] onTypeFormatting(const Uri uri, const Position position,
@@ -653,6 +654,11 @@ class IndentFormatTool : FormatTool
 
                 break;
 
+            case tok!"comment":
+                left = Spacing.space;
+                right = Spacing.space;
+                break;
+
             default:
                 continue loop;
             }
@@ -661,6 +667,11 @@ class IndentFormatTool : FormatTool
             {
                 left = Spacing.empty;
                 right = Spacing.empty;
+            }
+
+            if (next.type == tok!"comment")
+            {
+                right = Spacing.space;
             }
 
             immutable line = minusOne(token.line);
