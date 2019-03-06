@@ -20,6 +20,6 @@
 
 module dls.tools.format_tool;
 
+public import dls.tools.format_tool.internal.builtin_format_tool;
 public import dls.tools.format_tool.internal.dfmt_format_tool;
 public import dls.tools.format_tool.internal.format_tool;
-public import dls.tools.format_tool.internal.indent_format_tool;

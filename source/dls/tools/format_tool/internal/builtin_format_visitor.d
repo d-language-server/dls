@@ -18,12 +18,12 @@
  *
  */
 
-module dls.tools.format_tool.internal.indent_visitor;
+module dls.tools.format_tool.internal.builtin_format_visitor;
 
 import dparse.ast;
 import dparse.lexer;
 
-package class IndentVisitor : ASTVisitor
+package class BuiltinFormatVisitor : ASTVisitor
 {
     size_t[size_t] weakIndentSpans;
     size_t[size_t] indentSpans;

@@ -41,7 +41,7 @@ class Configuration
         static enum Engine : string
         {
             dfmt = "dfmt",
-            indent = "indent"
+            builtin = "builtin"
         }
 
         static enum BraceStyle : string

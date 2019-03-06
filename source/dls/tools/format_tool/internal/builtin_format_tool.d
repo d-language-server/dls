@@ -18,17 +18,17 @@
  *
  */
 
-module dls.tools.format_tool.internal.indent_format_tool;
+module dls.tools.format_tool.internal.builtin_format_tool;
 
 import dls.protocol.definitions : Range;
 import dls.tools.format_tool.internal.format_tool : FormatTool;
 import dls.util.uri : Uri;
 
-class IndentFormatTool : FormatTool
+class BuiltinFormatTool : FormatTool
 {
     import dls.protocol.definitions : Position, TextEdit;
     import dls.protocol.interfaces : FormattingOptions;
-    import dls.tools.format_tool.internal.indent_visitor : IndentVisitor;
+    import dls.tools.format_tool.internal.builtin_format_visitor : BuiltinFormatVisitor;
     import dparse.lexer : Token;
 
     override TextEdit[] formatting(const Uri uri, const FormattingOptions options)
@@ -70,7 +70,7 @@ class IndentFormatTool : FormatTool
         auto multilineTokens = allTokens.filter!(t => t.type == tok!"comment"
                 || isStringLiteral(t.type));
         RollbackAllocator rollbackAllocator;
-        auto visitor = new IndentVisitor(tokens);
+        auto visitor = new BuiltinFormatVisitor(tokens);
         visitor.visit(parseModule(tokens, uri.path, &rollbackAllocator));
 
         auto indentSpans = getIndentLines(tokens, visitor.weakIndentSpans, visitor.outdents);
@@ -310,7 +310,7 @@ class IndentFormatTool : FormatTool
     }
 
     private TextEdit[] getSpacingEdits(const Uri uri, const Range range,
-            const Token[] tokens, const Range[] disabledZones, IndentVisitor visitor)
+            const Token[] tokens, const Range[] disabledZones, BuiltinFormatVisitor visitor)
     {
         import dls.util.document : Document, minusOne;
         import dparse.lexer : tok;

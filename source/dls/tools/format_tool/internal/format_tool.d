@@ -34,8 +34,8 @@ abstract class FormatTool : Tool
     static void initialize(FormatTool tool)
     {
         import dls.tools.configuration : Configuration;
+        import dls.tools.format_tool.internal.builtin_format_tool : BuiltinFormatTool;
         import dls.tools.format_tool.internal.dfmt_format_tool : DfmtFormatTool;
-        import dls.tools.format_tool.internal.indent_format_tool : IndentFormatTool;
 
         _instance = tool;
         _instance.addConfigHook("engine", (const Uri uri) {
@@ -49,7 +49,7 @@ abstract class FormatTool : Tool
 
             FormatTool.shutdown();
             FormatTool.initialize(config.format.engine == Configuration.FormatConfiguration.Engine.dfmt
-                ? new DfmtFormatTool() : new IndentFormatTool());
+                ? new DfmtFormatTool() : new BuiltinFormatTool());
         });
     }
 
