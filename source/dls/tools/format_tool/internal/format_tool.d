@@ -102,8 +102,8 @@ package bool isValidEditFor(const Range editRange, const Range formatRange)
 {
     //dfmt off
     return (editRange.start.line < formatRange.end.line
-        || (editRange.start.line == formatRange.end.line && editRange.start.character < formatRange.end.character))
+        || (editRange.start.line == formatRange.end.line && editRange.start.character <= formatRange.end.character))
         && (editRange.end.line > formatRange.start.line
-        || (editRange.end.line == formatRange.start.line && editRange.end.character > formatRange.start.character));
+        || (editRange.end.line == formatRange.start.line && editRange.end.character >= formatRange.start.character));
     //dfmt on
 }
