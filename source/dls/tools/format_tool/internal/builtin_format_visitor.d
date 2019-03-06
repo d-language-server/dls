@@ -31,6 +31,7 @@ package class BuiltinFormatVisitor : ASTVisitor
     size_t[size_t] indentSpans;
     size_t[] outdents;
     size_t[] unaryOperatorIndexes;
+    size_t[] destructorThisIndexes;
     size_t[] gluedColonIndexes;
     size_t[] starIndexes;
     size_t[] leftSpacedTokenIndexes;
@@ -196,6 +197,14 @@ package class BuiltinFormatVisitor : ASTVisitor
     {
         addWeakSpan(stmt);
         super.visit(stmt);
+    }
+
+    override void visit(const Destructor des)
+    {
+        import std.algorithm : find;
+
+        destructorThisIndexes ~= des.tokens.find!(t => t.type == tok!"this")[0].index;
+        super.visit(des);
     }
 
     override void visit(const DoStatement stmt)
@@ -387,10 +396,26 @@ package class BuiltinFormatVisitor : ASTVisitor
         super.visit(stmt);
     }
 
+    override void visit(const SharedStaticDestructor des)
+    {
+        import std.algorithm : find;
+
+        destructorThisIndexes ~= des.tokens.find!(t => t.type == tok!"this")[0].index;
+        super.visit(des);
+    }
+
     override void visit(const StaticAssertStatement stmt)
     {
         addWeakSpan(stmt);
         super.visit(stmt);
+    }
+
+    override void visit(const StaticDestructor des)
+    {
+        import std.algorithm : find;
+
+        destructorThisIndexes ~= des.tokens.find!(t => t.type == tok!"this")[0].index;
+        super.visit(des);
     }
 
     override void visit(const StructMemberInitializer init)

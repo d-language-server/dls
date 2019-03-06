@@ -341,6 +341,7 @@ class BuiltinFormatTool : FormatTool
 
         const document = Document.get(uri);
         auto sortedUnaryOperators = sort(visitor.unaryOperatorIndexes);
+        auto sortedDestructorThese = sort(visitor.destructorThisIndexes);
         auto sortedGluedColons = sort(visitor.gluedColonIndexes);
         auto sortedStars = sort(visitor.starIndexes);
         auto sortedLeftSpacedTokens = sort(visitor.leftSpacedTokenIndexes);
@@ -421,6 +422,11 @@ class BuiltinFormatTool : FormatTool
                 }
             }
 
+            while (!sortedDestructorThese.empty && next.index > sortedDestructorThese.front)
+            {
+                sortedDestructorThese.popFront();
+            }
+
             switch (token.type)
             {
             case tok!"!":
@@ -443,6 +449,16 @@ class BuiltinFormatTool : FormatTool
                 right = Spacing.space;
                 break;
 
+            case tok!"~":
+                if (sortedDestructorThese.empty || next.index != sortedDestructorThese.front)
+                {
+                    goto case tok!"..";
+                }
+
+                left = Spacing.space;
+                right = Spacing.empty;
+                break;
+
             case tok!"++":
             case tok!"--":
             case tok!"+":
@@ -450,7 +466,6 @@ class BuiltinFormatTool : FormatTool
             case tok!"/":
             case tok!"%":
             case tok!"^^":
-            case tok!"~":
             case tok!"&":
             case tok!"|":
             case tok!"^":
@@ -611,7 +626,6 @@ class BuiltinFormatTool : FormatTool
             case tok!"template":
             case tok!"throw":
             case tok!"try":
-            case tok!"unittest":
             case tok!"version":
             case tok!"while":
             case tok!"with":
@@ -662,6 +676,7 @@ class BuiltinFormatTool : FormatTool
             case tok!"shared":
             case tok!"struct":
             case tok!"union":
+            case tok!"unittest":
             case tok!"__vector":
                 right = next.type.among(tok!"(", tok!")") ? Spacing.empty : Spacing.space;
                 break;
