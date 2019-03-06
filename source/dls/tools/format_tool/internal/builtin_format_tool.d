@@ -682,6 +682,11 @@ class BuiltinFormatTool : FormatTool
                 right = Spacing.empty;
             }
 
+            if (previous.type == tok!"comment")
+            {
+                left = Spacing.space;
+            }
+
             if (next.type == tok!"comment")
             {
                 right = Spacing.space;
