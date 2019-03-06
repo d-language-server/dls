@@ -274,7 +274,6 @@ package class IndentVisitor : ASTVisitor
         }
 
         outdents ~= stmt.tokens[0].line;
-        addWeakSpan(stmt);
         super.visit(stmt);
     }
 
