@@ -142,15 +142,16 @@ All these keys should be formatted as `d.dls.[section].[key]` (e.g. `d.dls.forma
 |`insertFinalNewline`                |`boolean`                               |`true`       |
 |`trimTrailingWhitespace`            |`boolean`                               |`true`       |
 |`maxLineLength`                     |`number`                                |`120`        |
+|`spaceBeforeSelectiveImportColons`  |`boolean`                               |`true`       |
+|`spaceBeforeAAColons`               |`boolean`                               |`false`      |
+|`spaceAfterKeywords`                |`boolean`                               |`true`       |
 |`dfmtAlignSwitchStatements`         |`boolean`                               |`true`       |
 |`dfmtBraceStyle`                    |`"allman"` or `"otbs"` or `"stroustrup"`|`"allman"`   |
 |`dfmtOutdentAttributes`             |`boolean`                               |`true`       |
 |`dfmtSoftMaxLineLength`             |`number`                                |`80`         |
 |`dfmtSpaceAfterCast`                |`boolean`                               |`true`       |
-|`dfmtSpaceAfterKeywords`            |`boolean`                               |`true`       |
 |`dfmtSpaceBeforeFunctionParameters` |`boolean`                               |`false`      |
 |`dfmtSplitOperatorAtLineEnd`        |`boolean`                               |`false`      |
-|`dfmtSelectiveImportSpace`          |`boolean`                               |`true`       |
 |`dfmtCompactLabeledStatements`      |`boolean`                               |`true`       |
 |`dfmtTemplateConstraintStyle`       |`"conditionalNewlineIndent"` or `"conditionalNewline"` or `"alwaysNewline"` or `"alwaysNewlineIndent"`|`"conditionalNewlineIndent"`|
 |`dfmtSingleTemplateConstraintIndent`|`boolean`                               |`false`      |

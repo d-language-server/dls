@@ -71,15 +71,16 @@ class Configuration
         bool insertFinalNewline = true;
         bool trimTrailingWhitespace = true;
         int maxLineLength = 120;
+        bool spaceBeforeSelectiveImportColons = true;
+        bool spaceBeforeAAColons = false;
+        bool spaceAfterKeywords = true;
         bool dfmtAlignSwitchStatements = true;
         BraceStyle dfmtBraceStyle = BraceStyle.allman;
         bool dfmtOutdentAttributes = true;
         int dfmtSoftMaxLineLength = 80;
         bool dfmtSpaceAfterCast = true;
-        bool dfmtSpaceAfterKeywords = true;
         bool dfmtSpaceBeforeFunctionParameters = false;
         bool dfmtSplitOperatorAtLineEnd = false;
-        bool dfmtSelectiveImportSpace = true;
         bool dfmtCompactLabeledStatements = true;
         TemplateConstraintStyle dfmtTemplateConstraintStyle = TemplateConstraintStyle
             .conditionalNewlineIndent;

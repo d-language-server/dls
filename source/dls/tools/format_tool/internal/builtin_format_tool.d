@@ -69,8 +69,9 @@ class BuiltinFormatTool : FormatTool
         const allTokens = byToken(data, config, &stringCache).array;
         auto multilineTokens = allTokens.filter!(t => t.type == tok!"comment"
                 || isStringLiteral(t.type));
+        const formatConfig = getConfig(uri).format;
+        auto visitor = new BuiltinFormatVisitor(tokens, formatConfig);
         RollbackAllocator rollbackAllocator;
-        auto visitor = new BuiltinFormatVisitor(tokens);
         visitor.visit(parseModule(tokens, uri.path, &rollbackAllocator));
 
         auto indentSpans = getIndentLines(tokens, visitor.weakIndentSpans, visitor.outdents);
@@ -83,7 +84,6 @@ class BuiltinFormatTool : FormatTool
         size_t indents;
         auto disabledZones = getDisabledZones(uri,
                 multilineTokens.filter!(t => t.type == tok!"comment").array);
-        const formatConfig = getConfig(uri).format;
         size_t numLF;
         size_t numCR;
 
@@ -381,6 +381,7 @@ class BuiltinFormatTool : FormatTool
             }
         }
 
+        const formatConfig = getConfig(uri).format;
         immutable formatRangeStartIndex = document.byteAtPosition(range.start);
         immutable formatRangeEndIndex = document.byteAtPosition(range.end);
         bool insideExtern;
@@ -615,7 +616,8 @@ class BuiltinFormatTool : FormatTool
             case tok!"while":
             case tok!"with":
             case tok!"__gshared":
-                right = Spacing.space;
+                right = next.type == tok!"(" && !formatConfig.spaceAfterKeywords
+                    ? Spacing.empty : Spacing.space;
                 break;
 
             case tok!"align":

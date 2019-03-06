@@ -25,6 +25,8 @@ import dparse.lexer;
 
 package class BuiltinFormatVisitor : ASTVisitor
 {
+    import dls.tools.configuration : Configuration;
+
     size_t[size_t] weakIndentSpans;
     size_t[size_t] indentSpans;
     size_t[] outdents;
@@ -33,13 +35,16 @@ package class BuiltinFormatVisitor : ASTVisitor
     size_t[] starIndexes;
     size_t[] leftSpacedTokenIndexes;
     private size_t[size_t] _firstTokenIndexes;
+    private const Configuration.FormatConfiguration _config;
 
-    this(const Token[] tokens)
+    this(const Token[] tokens, const Configuration.FormatConfiguration config)
     {
         foreach (ref token; tokens)
         {
             _firstTokenIndexes.require(token.line, token.index);
         }
+
+        _config = config;
     }
 
     override void visit(const AliasDeclaration dec)
@@ -278,6 +283,13 @@ package class BuiltinFormatVisitor : ASTVisitor
 
     override void visit(const ImportBindings bdgs)
     {
+        import std.algorithm : find;
+
+        if (!_config.spaceBeforeSelectiveImportColons)
+        {
+            gluedColonIndexes ~= bdgs.tokens.find!(t => t.type == tok!":")[0].index;
+        }
+
         addWeakSpan(bdgs);
         super.visit(bdgs);
     }
@@ -296,6 +308,11 @@ package class BuiltinFormatVisitor : ASTVisitor
 
     override void visit(const KeyValuePair pair)
     {
+        if (!_config.spaceBeforeAAColons)
+        {
+            gluedColonIndexes ~= pair.tokens[pair.key.tokens.length].index;
+        }
+
         addWeakSpan(pair);
         super.visit(pair);
     }
