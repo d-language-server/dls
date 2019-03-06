@@ -343,6 +343,7 @@ class BuiltinFormatTool : FormatTool
         auto sortedUnaryOperators = sort(visitor.unaryOperatorIndexes);
         auto sortedGluedColons = sort(visitor.gluedColonIndexes);
         auto sortedStars = sort(visitor.starIndexes);
+        auto sortedLeftSpacedTokens = sort(visitor.leftSpacedTokenIndexes);
         auto result = appender!(TextEdit[]);
         Range lastEditRange;
 
@@ -410,7 +411,8 @@ class BuiltinFormatTool : FormatTool
                 next = tokens[i + 1];
             }
 
-            foreach (sortedStuff; [&sortedUnaryOperators, &sortedGluedColons, &sortedStars])
+            foreach (sortedStuff; [&sortedUnaryOperators, &sortedGluedColons,
+                    &sortedStars, &sortedLeftSpacedTokens])
             {
                 while (!sortedStuff.empty && token.index > sortedStuff.front)
                 {
@@ -694,7 +696,12 @@ class BuiltinFormatTool : FormatTool
                 break;
 
             default:
-                continue loop;
+                if (!sortedLeftSpacedTokens.empty && token.index == sortedLeftSpacedTokens.front)
+                {
+                    left = Spacing.space;
+                }
+
+                break;
             }
 
             if (insideExtern && previous.type != tok!"extern")
@@ -711,6 +718,11 @@ class BuiltinFormatTool : FormatTool
             if (next.type == tok!"comment")
             {
                 right = Spacing.space;
+            }
+
+            if (left == Spacing.keep && right == Spacing.keep)
+            {
+                continue loop;
             }
 
             immutable line = minusOne(token.line);

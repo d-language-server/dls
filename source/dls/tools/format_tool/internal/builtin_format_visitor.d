@@ -31,6 +31,7 @@ package class BuiltinFormatVisitor : ASTVisitor
     size_t[] unaryOperatorIndexes;
     size_t[] gluedColonIndexes;
     size_t[] starIndexes;
+    size_t[] leftSpacedTokenIndexes;
     private size_t[size_t] _firstTokenIndexes;
 
     this(const Token[] tokens)
@@ -49,6 +50,9 @@ package class BuiltinFormatVisitor : ASTVisitor
 
     override void visit(const AliasThisDeclaration dec)
     {
+        import std.algorithm : find;
+
+        leftSpacedTokenIndexes ~= dec.tokens.find!(t => t.type == tok!"this")[0].index;
         addWeakSpan(dec);
         super.visit(dec);
     }
@@ -69,6 +73,12 @@ package class BuiltinFormatVisitor : ASTVisitor
     {
         addWeakSpan(init);
         super.visit(init);
+    }
+
+    override void visit(const AutoDeclarationPart part)
+    {
+        leftSpacedTokenIndexes ~= part.identifier.index;
+        super.visit(part);
     }
 
     override void visit(const BreakStatement stmt)
@@ -100,8 +110,15 @@ package class BuiltinFormatVisitor : ASTVisitor
         super.visit(stmt);
     }
 
+    override void visit(const CastExpression expr)
+    {
+        leftSpacedTokenIndexes ~= expr.unaryExpression.tokens[0].index;
+        super.visit(expr);
+    }
+
     override void visit(const Catch c)
     {
+        leftSpacedTokenIndexes ~= c.identifier.index;
         addSpan(c.declarationOrStatement);
         super.visit(c);
     }
@@ -156,6 +173,12 @@ package class BuiltinFormatVisitor : ASTVisitor
     {
         addWeakSpan(spec);
         super.visit(spec);
+    }
+
+    override void visit(const Declarator dec)
+    {
+        leftSpacedTokenIndexes ~= dec.name.index;
+        super.visit(dec);
     }
 
     override void visit(const DefaultStatement stmt)
@@ -218,6 +241,12 @@ package class BuiltinFormatVisitor : ASTVisitor
         super.visit(stmt);
     }
 
+    override void visit(const FunctionDeclaration dec)
+    {
+        leftSpacedTokenIndexes ~= dec.name.index;
+        super.visit(dec);
+    }
+
     override void visit(const StaticForeachDeclaration dec)
     {
         if (dec.declarations.length == 1
@@ -237,6 +266,11 @@ package class BuiltinFormatVisitor : ASTVisitor
 
     override void visit(const IfStatement stmt)
     {
+        if (stmt.identifier.type != tok!"")
+        {
+            leftSpacedTokenIndexes ~= stmt.identifier.index;
+        }
+
         addSpan(stmt.thenStatement);
         addSpan(stmt.elseStatement);
         super.visit(stmt);
@@ -303,6 +337,11 @@ package class BuiltinFormatVisitor : ASTVisitor
 
     override void visit(const Parameter par)
     {
+        if (par.name.type != tok!"")
+        {
+            leftSpacedTokenIndexes ~= par.name.index;
+        }
+
         addWeakSpan(par);
         super.visit(par);
     }
@@ -355,9 +394,25 @@ package class BuiltinFormatVisitor : ASTVisitor
         super.visit(stmt);
     }
 
+    override void visit(const TemplateAliasParameter par)
+    {
+        if (par.identifier.type != tok!"")
+        {
+            leftSpacedTokenIndexes ~= par.identifier.index;
+        }
+
+        super.visit(par);
+    }
+
     override void visit(const TemplateParameter par)
     {
         addWeakSpan(par);
+        super.visit(par);
+    }
+
+    override void visit(const TemplateValueParameter par)
+    {
+        leftSpacedTokenIndexes ~= par.identifier.index;
         super.visit(par);
     }
 
