@@ -388,6 +388,14 @@ class IndentFormatTool : FormatTool
                 next = tokens[i + 1];
             }
 
+            foreach (sortedStuff; [&sortedUnaryOperators, &sortedGluedColons, &sortedStars])
+            {
+                while (!sortedStuff.empty && token.index > sortedStuff.front)
+                {
+                    sortedStuff.popFront();
+                }
+            }
+
             switch (token.type)
             {
             case tok!"!":
@@ -408,7 +416,6 @@ class IndentFormatTool : FormatTool
 
                 left = Spacing.empty;
                 right = Spacing.space;
-                sortedStars.popFront();
                 break;
 
             case tok!"++":
@@ -470,23 +477,12 @@ class IndentFormatTool : FormatTool
                     right = Spacing.empty;
                 }
 
-                if (!sortedUnaryOperators.empty && token.index >= sortedUnaryOperators.front)
-                {
-                    sortedUnaryOperators.popFront();
-                }
-
                 break;
 
             case tok!":":
                 left = (sortedGluedColons.empty || token.index != sortedGluedColons.front) ? Spacing.space
                     : Spacing.empty;
                 right = Spacing.space;
-
-                if (!sortedGluedColons.empty && token.index >= sortedGluedColons.front)
-                {
-                    sortedGluedColons.popFront();
-                }
-
                 break;
 
             case tok!",":
