@@ -551,7 +551,6 @@ class IndentFormatTool : FormatTool
             case tok!"alias":
             case tok!"asm":
             case tok!"auto":
-            case tok!"case":
             case tok!"catch":
             case tok!"delete":
             case tok!"do":
@@ -599,10 +598,18 @@ class IndentFormatTool : FormatTool
 
                 break;
 
-            case tok!"break":
-            case tok!"continue":
             case tok!"return":
-                if (!next.type.among(tok!";", tok!")"))
+                if (next.type != tok!")")
+                {
+                    goto case;
+                }
+
+                break;
+
+            case tok!"break":
+            case tok!"case":
+            case tok!"continue":
+                if (next.type != tok!";")
                 {
                     right = Spacing.space;
                 }
