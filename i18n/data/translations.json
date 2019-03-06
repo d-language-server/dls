@@ -92,10 +92,9 @@
         "en": "Extracting",
         "fr": "Extraction"
     },
-    "app.upgradeDls.buildError": {
-        "_type": 1,
-        "en": "DLS could not be built",
-        "fr": "DLS n'a pas pu être compilé"
+    "app.upgradeDls.downloadError": {
+        "en": "DLS could not be downloaded",
+        "fr": "DLS n'a pas pu être téléchargé"
     },
     "app.upgradeDls.linkError": {
         "_type": 1,
@@ -126,14 +125,6 @@
         "en": "default",
         "fr": "défaut"
     },
-    "bootstrap.help.method": {
-        "en": "Value: %s|%s|%s  The installation method.",
-        "fr": "Valeur: %s|%s|%s  La méthode d'installation."
-    },
-    "bootstrap.help.method.auto": {
-        "en": "`%s` tries `%s`, and falls back to `%s` if unavailable).",
-        "fr": "`%s` tente `%s`, puis `%s` s'il n'est pas disponible)."
-    },
     "bootstrap.help.check": {
         "en": "Checks if the selected method is available.",
         "fr": "Vérifie si la méthode sélectionnée est disponible."
@@ -143,8 +134,8 @@
         "fr": "Émettre des chaînes pour la localisation."
     },
     "bootstrap.help.progress": {
-        "en": "Show progress (only for method `%s`).",
-        "fr": "Montrer le progrès (uniquement pour la méthode `%s`)."
+        "en": "Show progress.",
+        "fr": "Montrer le progrès."
     },
     "bootstrap.installDls.installing": {
         "en": "Installing DLS",

@@ -104,8 +104,8 @@ void cleanup()
 void update(bool autoUpdate)
 {
     import core.time : hours;
-    import dls.bootstrap : UpgradeFailedException, buildDls, canDownloadDls,
-        downloadDls, allReleases, linkDls;
+    import dls.bootstrap : UpgradeFailedException, canDownloadDls, downloadDls,
+        allReleases, linkDls;
     import dls.info : currentVersion;
     static import dls.protocol.jsonrpc;
     import dls.protocol.interfaces.dls : DlsUpgradeSizeParams, TranslationParams;
@@ -114,16 +114,12 @@ void update(bool autoUpdate)
     import dls.protocol.messages.window : Util;
     import dls.protocol.state : initOptions;
     import dls.util.i18n : Tr;
-    import dub.dependency : Dependency;
-    import dub.dub : Dub, FetchOptions;
     import dub.semver : compareVersions;
     import std.algorithm : filter, stripLeft;
-    import std.array : array;
     import std.concurrency : ownerTid, receiveOnly, register, send, thisTid;
     import std.datetime : Clock, SysTime;
     import std.format : format;
     import std.json : JSON_TYPE;
-    import std.path : asNormalizedPath;
 
     auto validReleases = allReleases.filter!(r => r["prerelease"].type == JSON_TYPE.FALSE
             || initOptions.preReleaseBuilds);
@@ -193,38 +189,7 @@ void update(bool autoUpdate)
         catch (Exception e)
         {
             logger.error("Could not download DLS: %s", e.msg);
-        }
-    }
-
-    if (!upgradeSuccessful)
-    {
-        auto dub = new Dub();
-        FetchOptions fetchOpts;
-        fetchOpts |= FetchOptions.forceBranchUpgrade;
-        const pack = dub.fetch("dls", Dependency(">=0.0.0"),
-                dub.defaultPlacementLocation, fetchOpts);
-
-        int i;
-        immutable additionalArgs = [[], ["--force"]];
-
-        do
-        {
-            try
-            {
-                buildDls(pack.path.toString().asNormalizedPath.array, additionalArgs[i]);
-                upgradeSuccessful = true;
-            }
-            catch (UpgradeFailedException e)
-            {
-                ++i;
-            }
-        }
-        while (i < additionalArgs.length && !upgradeSuccessful);
-
-        if (!upgradeSuccessful)
-        {
-            Util.sendMessage(Tr.app_upgradeDls_buildError);
-            return;
+            Util.sendMessage(Tr.app_upgradeDls_downloadError);
         }
     }
 
@@ -238,6 +203,7 @@ void update(bool autoUpdate)
     }
     catch (UpgradeFailedException e)
     {
+        logger.error("Could not symlink DLS: %s", e.msg);
         Util.sendMessage(Tr.app_upgradeDls_linkError);
     }
 }

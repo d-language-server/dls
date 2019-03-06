@@ -18,13 +18,6 @@
  *
  */
 
-private enum Method : string
-{
-    auto_ = "auto",
-    download = "download",
-    build = "build"
-}
-
 shared static this()
 {
     import dls.util.setup : initialSetup;
@@ -34,7 +27,7 @@ shared static this()
 
 int main(string[] args)
 {
-    import dls.bootstrap : canDownloadDls, buildDls, downloadDls, linkDls;
+    import dls.bootstrap : canDownloadDls, downloadDls, linkDls;
     import dls.util.i18n : Tr, tr;
     import dls.util.getopt : printHelp;
     import std.ascii : newline;
@@ -45,7 +38,6 @@ int main(string[] args)
     import std.path : dirName;
     import std.stdio : stderr, stdout;
 
-    Method method;
     bool check;
     bool localization;
     bool progress;
@@ -54,12 +46,6 @@ int main(string[] args)
     {
         //dfmt off
         auto info = getopt(args, config.passThrough,
-                "method|m",
-                format(tr(Tr.bootstrap_help_method), cast(string) Method.auto_, Method.download, Method.build)
-                ~ ' '
-                ~ format(tr(Tr.bootstrap_help_method_auto), cast(string) Method.auto_, Method.download, Method.build)
-                ~ format!" [%s = %s]"(tr(Tr.bootstrap_help_default), cast(string) method),
-                &method,
                 "check|c",
                 tr(Tr.bootstrap_help_check),
                 &check,
@@ -67,7 +53,7 @@ int main(string[] args)
                 tr(Tr.bootstrap_help_localization),
                 &localization,
                 "progress|p",
-                format(tr(Tr.bootstrap_help_progress), Method.download),
+                format(tr(Tr.bootstrap_help_progress)),
                 &progress);
         //dfmt on
 
@@ -88,7 +74,7 @@ int main(string[] args)
 
     if (check)
     {
-        immutable ok = method != Method.download || canDownloadDls;
+        immutable ok = canDownloadDls;
         output = text(ok);
         status = ok ? 0 : 1;
     }
@@ -114,8 +100,7 @@ int main(string[] args)
             stderr.flush();
         } : null;
 
-        (method == Method.download || (method == Method.auto_ && canDownloadDls)) ? downloadDls(printSize,
-                printSize, printExtract) : buildDls(thisExePath.dirName.dirName);
+        downloadDls(printSize, printSize, printExtract);
         output = linkDls();
     }
 

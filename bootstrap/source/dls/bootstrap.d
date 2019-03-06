@@ -223,27 +223,6 @@ void downloadDls(const void function(size_t size) totalSizeCallback = null,
     }
 }
 
-void buildDls(const string dlsDir, const string[] additionalArgs = [])
-{
-    import core.cpuid : isX86_64;
-    import std.path : buildNormalizedPath;
-    import std.process : Config, execute;
-
-    auto cmdLine = ["dub", "build", "--build=release"] ~ additionalArgs;
-
-    version (Windows)
-    {
-        cmdLine ~= ["--compiler=dmd", "--arch=" ~ (isX86_64 ? "x86_64" : "x86_mscoff")];
-    }
-
-    immutable result = execute(cmdLine, null, Config.none, size_t.max, dlsDir);
-
-    if (result.status != 0)
-    {
-        throw new UpgradeFailedException("Build failed: " ~ result.output);
-    }
-}
-
 string linkDls()
 {
     import std.file : exists, isFile, mkdirRecurse, remove;
