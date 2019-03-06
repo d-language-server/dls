@@ -68,6 +68,8 @@ class Configuration
 
         Engine engine = Engine.dfmt;
         EndOfLine endOfLine = EndOfLine.lf;
+        bool insertFinalNewline = true;
+        bool trimTrailingWhitespace = true;
         int maxLineLength = 120;
         bool dfmtAlignSwitchStatements = true;
         BraceStyle dfmtBraceStyle = BraceStyle.allman;

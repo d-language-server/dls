@@ -50,7 +50,7 @@ class BuiltinFormatTool : FormatTool
             WhitespaceBehavior, byToken, getTokensForParser, isStringLiteral, tok;
         import dparse.parser : parseModule;
         import dparse.rollback_allocator : RollbackAllocator;
-        import std.algorithm : all, canFind, count, filter, fold, map, sort;
+        import std.algorithm : all, canFind, count, filter, fold, map, max, predSwitch, sort;
         import std.array : appender, array;
         import std.ascii : isWhite;
         import std.range : chain, repeat;
@@ -83,6 +83,9 @@ class BuiltinFormatTool : FormatTool
         size_t indents;
         auto disabledZones = getDisabledZones(uri,
                 multilineTokens.filter!(t => t.type == tok!"comment").array);
+        const formatConfig = getConfig(uri).format;
+        size_t numLF;
+        size_t numCR;
 
         foreach (line, docLine; document.lines)
         {
@@ -143,7 +146,12 @@ class BuiltinFormatTool : FormatTool
                 indentBegins.popFront();
             }
 
-            auto trailingWhitespaceRange = getTrailingWhitespaceRange(docLine);
+            if (!formatConfig.trimTrailingWhitespace)
+            {
+                continue;
+            }
+
+            auto trailingWhitespaceRange = getTrailingWhitespaceRange(docLine, numLF, numCR);
             trailingWhitespaceRange.start.line = trailingWhitespaceRange.end.line = line;
 
             if (trailingWhitespaceRange.end.character - trailingWhitespaceRange.start.character > 0
@@ -154,7 +162,20 @@ class BuiltinFormatTool : FormatTool
             }
         }
 
-        return result.data ~ getSpacingEdits(uri, range, allTokens, disabledZones, visitor);
+        if (formatConfig.insertFinalNewline && document.lines[$ - 1].length > 0)
+        {
+            immutable numCRLF = numCR + numLF - document.lines.length;
+            auto insertPos = new Position(document.lines.length - 1, document.lines[$ - 1].length);
+            auto editRange = new Range(insertPos, insertPos);
+
+            if (editRange.isValidEditFor(range) && !editRange.isDisabledFor(disabledZones))
+            {
+                result ~= new TextEdit(editRange, max(numCR, numLF, numCRLF)
+                        .predSwitch(numLF, "\n", numCR, "\r", numCRLF, "\r\n"));
+            }
+        }
+
+        return result.data ~ getSpacingEdits(uri, range, disabledZones, allTokens, visitor);
     }
 
     override TextEdit[] onTypeFormatting(const Uri uri, const Position position,
@@ -310,7 +331,7 @@ class BuiltinFormatTool : FormatTool
     }
 
     private TextEdit[] getSpacingEdits(const Uri uri, const Range range,
-            const Token[] tokens, const Range[] disabledZones, BuiltinFormatVisitor visitor)
+            const ref Range[] disabledZones, const Token[] tokens, BuiltinFormatVisitor visitor)
     {
         import dls.util.document : Document, minusOne;
         import dparse.lexer : isLiteral, tok;
@@ -737,7 +758,7 @@ private Range getIndentRange(const wstring line)
     return result;
 }
 
-private Range getTrailingWhitespaceRange(const wstring line)
+private Range getTrailingWhitespaceRange(const wstring line, ref size_t numLF, ref size_t numCR)
 {
     import std.algorithm : among;
     import std.ascii : isWhite;
@@ -752,6 +773,7 @@ private Range getTrailingWhitespaceRange(const wstring line)
         if (line[result.start.character].among('\r', '\n'))
         {
             --result.end.character;
+            ++(line[result.start.character] == '\r' ? numCR : numLF);
         }
     }
 
