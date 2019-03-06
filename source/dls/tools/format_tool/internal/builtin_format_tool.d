@@ -313,7 +313,7 @@ class BuiltinFormatTool : FormatTool
             const Token[] tokens, const Range[] disabledZones, BuiltinFormatVisitor visitor)
     {
         import dls.util.document : Document, minusOne;
-        import dparse.lexer : tok;
+        import dparse.lexer : isLiteral, tok;
         import std.algorithm : among, sort;
         import std.array : appender;
         import std.utf : codeLength, toUTF8;
@@ -510,6 +510,12 @@ class BuiltinFormatTool : FormatTool
                 goto case;
 
             case tok!"[":
+                if (previous.type.among(tok!")", tok!"]", tok!"this",
+                        tok!"super", tok!"identifier") || isLiteral(previous.type))
+                {
+                    left = Spacing.empty;
+                }
+
                 right = Spacing.empty;
                 break;
 
