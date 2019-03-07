@@ -74,7 +74,7 @@ class BuiltinFormatTool : FormatTool
         RollbackAllocator rollbackAllocator;
         visitor.visit(parseModule(tokens, uri.path, &rollbackAllocator));
 
-        auto indentSpans = getIndentLines(tokens, visitor.weakIndentSpans, visitor.outdents);
+        auto indentSpans = getIndentLines(uri, tokens, visitor.weakIndentSpans, visitor.outdents);
         auto indentBegins = sort(chain(visitor.indentSpans.keys, indentSpans.keys
                 .map!(b => repeat(b, indentSpans[b].length).array)
                 .fold!q{a ~ b}(cast(size_t[])[])));
@@ -246,13 +246,14 @@ class BuiltinFormatTool : FormatTool
         return disabledZones;
     }
 
-    private size_t[][size_t] getIndentLines(const Token[] tokens,
+    private size_t[][size_t] getIndentLines(const Uri uri, const Token[] tokens,
             const size_t[size_t] weakIndentSpans, ref size_t[] outdents)
     {
         import dparse.lexer : tok;
         import std.algorithm : remove;
         import std.container : SList;
 
+        const formatConfig = getConfig(uri).format;
         SList!size_t indentPairBegins;
         size_t[][size_t] indentSpans;
         bool[][size_t] notFirsts;
@@ -288,7 +289,15 @@ class BuiltinFormatTool : FormatTool
                 indentPairBegins.removeFront();
                 break;
 
-            case tok!"align", tok!"case", tok!"default":
+            case tok!"case", tok!"default":
+                if (formatConfig.alignSwitchStatements)
+                {
+                    goto case;
+                }
+
+                break;
+
+            case tok!"align":
                 if (token.line > currentLine)
                 {
                     outdents ~= token.line;

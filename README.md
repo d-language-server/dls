@@ -149,7 +149,7 @@ All these keys should be formatted as `d.dls.[section].[key]` (e.g. `d.dls.forma
 |`spaceBeforeAAColons`               |`boolean`                               |`false`      |✔      |    |
 |`spaceBeforeFunctionParameters`     |`boolean`                               |`false`      |✔      |✔   |
 |`spaceBeforeSelectiveImportColons`  |`boolean`                               |`true`       |✔      |✔   |
-|`alignSwitchStatements`             |`boolean`                               |`true`       |       |    |
+|`alignSwitchStatements`             |`boolean`                               |`true`       |✔      |    |
 |`compactLabeledStatements`          |`boolean`                               |`true`       |       |✔   |
 |`outdentAttributes`                 |`boolean`                               |`true`       |       |    |
 |`splitOperatorsAtLineEnd`           |`boolean`                               |`false`      |       |✔   |
