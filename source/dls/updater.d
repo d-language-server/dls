@@ -101,7 +101,7 @@ void cleanup()
     }
 }
 
-void update(bool autoUpdate)
+void update(bool autoUpdate, bool preReleaseBuilds)
 {
     import core.time : hours;
     import dls.bootstrap : UpgradeFailedException, canDownloadDls, downloadDls,
@@ -112,7 +112,6 @@ void update(bool autoUpdate)
     import dls.protocol.logger : logger;
     import dls.protocol.messages.methods : Dls;
     import dls.protocol.messages.window : Util;
-    import dls.protocol.state : initOptions;
     import dls.util.i18n : Tr;
     import dub.semver : compareVersions;
     import std.algorithm : filter, stripLeft;
@@ -121,8 +120,8 @@ void update(bool autoUpdate)
     import std.format : format;
     import std.json : JSON_TYPE;
 
-    auto validReleases = allReleases.filter!(r => r["prerelease"].type == JSON_TYPE.FALSE
-            || initOptions.preReleaseBuilds);
+    auto validReleases = allReleases.filter!(
+            r => r["prerelease"].type == JSON_TYPE.FALSE || preReleaseBuilds);
 
     if (validReleases.empty)
     {
