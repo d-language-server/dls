@@ -30,10 +30,13 @@ package class BuiltinFormatVisitor : ASTVisitor
     size_t[size_t] weakIndentSpans;
     size_t[size_t] indentSpans;
     size_t[] outdents;
+
     size_t[] unaryOperatorIndexes;
     size_t[] destructorThisIndexes;
     size_t[] starIndexes;
-    size_t[] gluedColonIndexes;
+    size_t[] castRightParenIndexes;
+
+    size_t[] leftGluedColonIndexes;
     size_t[] leftSpacedParenIndexes;
     size_t[] leftSpacedTokenIndexes;
     private size_t[size_t] _firstTokenIndexes;
@@ -102,7 +105,7 @@ package class BuiltinFormatVisitor : ASTVisitor
 
     override void visit(const CaseRangeStatement stmt)
     {
-        gluedColonIndexes ~= stmt.colonLocation;
+        leftGluedColonIndexes ~= stmt.colonLocation;
         const nodes = [stmt.low, stmt.high];
         addWeakSpan(nodes);
         addSpan(nodes);
@@ -111,7 +114,7 @@ package class BuiltinFormatVisitor : ASTVisitor
 
     override void visit(const CaseStatement stmt)
     {
-        gluedColonIndexes ~= stmt.colonLocation;
+        leftGluedColonIndexes ~= stmt.colonLocation;
         addWeakSpan(stmt.argumentList);
         addSpan(stmt.argumentList);
         super.visit(stmt);
@@ -119,6 +122,7 @@ package class BuiltinFormatVisitor : ASTVisitor
 
     override void visit(const CastExpression expr)
     {
+        castRightParenIndexes ~= expr.tokens[$ - 1 - expr.unaryExpression.tokens.length].index;
         leftSpacedTokenIndexes ~= expr.unaryExpression.tokens[0].index;
         super.visit(expr);
     }
@@ -196,7 +200,7 @@ package class BuiltinFormatVisitor : ASTVisitor
 
     override void visit(const DefaultStatement stmt)
     {
-        gluedColonIndexes ~= stmt.colonLocation;
+        leftGluedColonIndexes ~= stmt.colonLocation;
         super.visit(stmt);
     }
 
@@ -306,7 +310,7 @@ package class BuiltinFormatVisitor : ASTVisitor
 
         if (!_config.spaceBeforeSelectiveImportColons)
         {
-            gluedColonIndexes ~= bdgs.tokens.find!(t => t.type == tok!":")[0].index;
+            leftGluedColonIndexes ~= bdgs.tokens.find!(t => t.type == tok!":")[0].index;
         }
 
         addWeakSpan(bdgs);
@@ -329,7 +333,7 @@ package class BuiltinFormatVisitor : ASTVisitor
     {
         if (!_config.spaceBeforeAAColons)
         {
-            gluedColonIndexes ~= pair.tokens[pair.key.tokens.length].index;
+            leftGluedColonIndexes ~= pair.tokens[pair.key.tokens.length].index;
         }
 
         addWeakSpan(pair);
@@ -340,7 +344,7 @@ package class BuiltinFormatVisitor : ASTVisitor
     {
         if (stmt.tokens.length > 1)
         {
-            gluedColonIndexes ~= stmt.tokens[1].index;
+            leftGluedColonIndexes ~= stmt.tokens[1].index;
         }
 
         outdents ~= stmt.tokens[0].line;

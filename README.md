@@ -144,7 +144,7 @@ All these keys should be formatted as `d.dls.[section].[key]` (e.g. `d.dls.forma
 |`maxLineLength`                     |`number`                                |`120`        |       |✔   |
 |`softMaxLineLength`                 |`number`                                |`80`         |       |✔   |
 |`braceStyle`                        |`"allman"` or `"otbs"` or `"stroustrup"`|`"allman"`   |       |✔   |
-|`spaceAfterCasts`                   |`boolean`                               |`true`       |       |✔   |
+|`spaceAfterCasts`                   |`boolean`                               |`true`       |✔      |✔   |
 |`spaceAfterKeywords`                |`boolean`                               |`true`       |✔      |    |
 |`spaceBeforeAAColons`               |`boolean`                               |`false`      |✔      |    |
 |`spaceBeforeFunctionParameters`     |`boolean`                               |`false`      |✔      |✔   |

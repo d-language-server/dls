@@ -352,7 +352,8 @@ class BuiltinFormatTool : FormatTool
         auto sortedUnaryOperators = sort(visitor.unaryOperatorIndexes);
         auto sortedDestructorThese = sort(visitor.destructorThisIndexes);
         auto sortedStars = sort(visitor.starIndexes);
-        auto sortedGluedColons = sort(visitor.gluedColonIndexes);
+        auto sortedCastRightParens = sort(visitor.castRightParenIndexes);
+        auto sortedLeftGluedColons = sort(visitor.leftGluedColonIndexes);
         auto sortedLeftSpacedParens = sort(visitor.leftSpacedParenIndexes);
         auto sortedLeftSpacedTokens = sort(visitor.leftSpacedTokenIndexes);
         auto result = appender!(TextEdit[]);
@@ -423,8 +424,8 @@ class BuiltinFormatTool : FormatTool
                 next = tokens[i + 1];
             }
 
-            foreach (sortedStuff; [&sortedUnaryOperators, &sortedStars,
-                    &sortedGluedColons, &sortedLeftSpacedParens, &sortedLeftSpacedTokens])
+            foreach (sortedStuff; [&sortedUnaryOperators, &sortedStars, &sortedCastRightParens,
+                    &sortedLeftGluedColons, &sortedLeftSpacedParens, &sortedLeftSpacedTokens])
             {
                 while (!sortedStuff.empty && token.index > sortedStuff.front)
                 {
@@ -530,7 +531,7 @@ class BuiltinFormatTool : FormatTool
                 break;
 
             case tok!":":
-                left = (sortedGluedColons.empty || token.index != sortedGluedColons.front) ? Spacing.space
+                left = (sortedLeftGluedColons.empty || token.index != sortedLeftGluedColons.front) ? Spacing.space
                     : Spacing.empty;
                 right = Spacing.space;
                 break;
@@ -579,6 +580,11 @@ class BuiltinFormatTool : FormatTool
                 if (insideExtern)
                 {
                     insideExtern = false;
+                }
+
+                if (!sortedCastRightParens.empty && token.index == sortedCastRightParens.front)
+                {
+                    right = formatConfig.spaceAfterCasts ? Spacing.space : Spacing.empty;
                 }
 
                 goto case;
