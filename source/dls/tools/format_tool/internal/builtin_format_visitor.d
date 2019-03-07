@@ -32,8 +32,9 @@ package class BuiltinFormatVisitor : ASTVisitor
     size_t[] outdents;
     size_t[] unaryOperatorIndexes;
     size_t[] destructorThisIndexes;
-    size_t[] gluedColonIndexes;
     size_t[] starIndexes;
+    size_t[] gluedColonIndexes;
+    size_t[] leftSpacedParenIndexes;
     size_t[] leftSpacedTokenIndexes;
     private size_t[size_t] _firstTokenIndexes;
     private const Configuration.FormatConfiguration _config;
@@ -169,6 +170,12 @@ package class BuiltinFormatVisitor : ASTVisitor
         super.visit(stmt);
     }
 
+    override void visit(const Constructor cons)
+    {
+        collectConstructorOrDestructorInfo(cons, false);
+        super.visit(cons);
+    }
+
     override void visit(const ContinueStatement stmt)
     {
         addWeakSpan(stmt);
@@ -203,7 +210,7 @@ package class BuiltinFormatVisitor : ASTVisitor
     {
         import std.algorithm : find;
 
-        destructorThisIndexes ~= des.tokens.find!(t => t.type == tok!"this")[0].index;
+        collectConstructorOrDestructorInfo(des, true);
         super.visit(des);
     }
 
@@ -257,7 +264,10 @@ package class BuiltinFormatVisitor : ASTVisitor
 
     override void visit(const FunctionDeclaration dec)
     {
+        import std.algorithm : find;
+
         leftSpacedTokenIndexes ~= dec.name.index;
+        collectFunctionInfo(dec, dec.tokens.find!(t => t.index == dec.name.index));
         super.visit(dec);
     }
 
@@ -396,11 +406,17 @@ package class BuiltinFormatVisitor : ASTVisitor
         super.visit(stmt);
     }
 
+    override void visit(const SharedStaticConstructor cons)
+    {
+        collectConstructorOrDestructorInfo(cons, false);
+        super.visit(cons);
+    }
+
     override void visit(const SharedStaticDestructor des)
     {
         import std.algorithm : find;
 
-        destructorThisIndexes ~= des.tokens.find!(t => t.type == tok!"this")[0].index;
+        collectConstructorOrDestructorInfo(des, true);
         super.visit(des);
     }
 
@@ -410,11 +426,17 @@ package class BuiltinFormatVisitor : ASTVisitor
         super.visit(stmt);
     }
 
+    override void visit(const StaticConstructor cons)
+    {
+        collectConstructorOrDestructorInfo(cons, false);
+        super.visit(cons);
+    }
+
     override void visit(const StaticDestructor des)
     {
         import std.algorithm : find;
 
-        destructorThisIndexes ~= des.tokens.find!(t => t.type == tok!"this")[0].index;
+        collectConstructorOrDestructorInfo(des, true);
         super.visit(des);
     }
 
@@ -567,6 +589,28 @@ package class BuiltinFormatVisitor : ASTVisitor
 
         immutable begin = nodes[0].tokens[0].line - (includeStartingLine ? 1 : 0);
         spans.require(begin, nodes[$ - 1].tokens[$ - 1].line + 1);
+    }
+
+    private void collectConstructorOrDestructorInfo(const BaseNode node, bool isDestructor)
+    {
+        import std.algorithm : find;
+
+        const tokens = node.tokens.find!(t => t.type == tok!"this");
+
+        if (isDestructor)
+        {
+            destructorThisIndexes ~= tokens[0].index;
+        }
+
+        collectFunctionInfo(node, tokens);
+    }
+
+    private void collectFunctionInfo(const BaseNode node, const Token[] tokensFromName)
+    {
+        if (_config.spaceBeforeFunctionParameters)
+        {
+            leftSpacedParenIndexes ~= tokensFromName[1].index;
+        }
     }
 
     alias visit = ASTVisitor.visit;

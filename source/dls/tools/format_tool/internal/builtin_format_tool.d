@@ -342,8 +342,9 @@ class BuiltinFormatTool : FormatTool
         const document = Document.get(uri);
         auto sortedUnaryOperators = sort(visitor.unaryOperatorIndexes);
         auto sortedDestructorThese = sort(visitor.destructorThisIndexes);
-        auto sortedGluedColons = sort(visitor.gluedColonIndexes);
         auto sortedStars = sort(visitor.starIndexes);
+        auto sortedGluedColons = sort(visitor.gluedColonIndexes);
+        auto sortedLeftSpacedParens = sort(visitor.leftSpacedParenIndexes);
         auto sortedLeftSpacedTokens = sort(visitor.leftSpacedTokenIndexes);
         auto result = appender!(TextEdit[]);
         Range lastEditRange;
@@ -413,8 +414,8 @@ class BuiltinFormatTool : FormatTool
                 next = tokens[i + 1];
             }
 
-            foreach (sortedStuff; [&sortedUnaryOperators, &sortedGluedColons,
-                    &sortedStars, &sortedLeftSpacedTokens])
+            foreach (sortedStuff; [&sortedUnaryOperators, &sortedStars,
+                    &sortedGluedColons, &sortedLeftSpacedParens, &sortedLeftSpacedTokens])
             {
                 while (!sortedStuff.empty && token.index > sortedStuff.front)
                 {
@@ -546,7 +547,14 @@ class BuiltinFormatTool : FormatTool
                     insideExtern = true;
                 }
 
-                goto case;
+                if (sortedLeftSpacedParens.empty || token.index != sortedLeftSpacedParens.front)
+                {
+                    goto case;
+                }
+
+                left = Spacing.space;
+                right = Spacing.empty;
+                break;
 
             case tok!"[":
                 if (previous.type.among(tok!")", tok!"]", tok!"this",

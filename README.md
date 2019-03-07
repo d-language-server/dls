@@ -147,7 +147,7 @@ All these keys should be formatted as `d.dls.[section].[key]` (e.g. `d.dls.forma
 |`spaceAfterCasts`                   |`boolean`                               |`true`       |       |✔   |
 |`spaceAfterKeywords`                |`boolean`                               |`true`       |✔      |    |
 |`spaceBeforeAAColons`               |`boolean`                               |`false`      |✔      |    |
-|`spaceBeforeFunctionParameters`     |`boolean`                               |`false`      |       |✔   |
+|`spaceBeforeFunctionParameters`     |`boolean`                               |`false`      |✔      |✔   |
 |`spaceBeforeSelectiveImportColons`  |`boolean`                               |`true`       |✔      |✔   |
 |`alignSwitchStatements`             |`boolean`                               |`true`       |       |    |
 |`compactLabeledStatements`          |`boolean`                               |`true`       |       |✔   |
