@@ -4,6 +4,9 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.24.1
+- Fixed prerelease builds being ignored even with `preReleaseBuilds` enabled
+
 ### 0.24.0
 - __Removed building from source as install/update method, as it's a heavy process and binaries are built for all major platforms__
 - __Changed "indent" formatter name to "builtin", as it's now doing more than just indenting; it might be the default in a future version (set `d.dls.format.engine` to `"dfmt"` to keep using DFMT)__
@@ -18,6 +21,13 @@ Breaking changes will be in bold.
     - Added support for toggling switch statements alignment
     - Added option to toggle spaces before colons in associative arrays
     - Fixed code being indented after labels
+- Updated libraries:
+    - `dcd`: `0.10.2` => `0.11.0`
+    - `dfmt`: `0.9.0` => `0.10.0-beta.1`
+    - `dscanner`: `0.6.0` => `0.7.0`
+    - `dsymbol`: `0.5.7` => `0.6.2`
+    - `libddoc`: `0.5.1` => `0.6.1`
+    - `libdparse`: `0.10.13` => `0.11.4`
 
 #### 0.23.1
 - Fixed crash in some Dub project configurations ([#38](https://github.com/d-language-server/dls/issues/38))
@@ -105,7 +115,7 @@ Breaking changes will be in bold.
 - Updated libraries:
     - `dcd`: `0.9.13` => `0.10.2`
     - `dfmt`: `0.8.3` => `0.9.0`
-    - `dscanner`: `0.8.3` => `0.9.0`
+    - `dscanner`: `0.5.11` => `0.6.0`
     - `dsymbol`: `0.4.8` => `0.5.7`
     - `libddoc`: `0.4.0` => `0.5.1`
     - `libdparse`: `0.9.10` => `0.10.12`
