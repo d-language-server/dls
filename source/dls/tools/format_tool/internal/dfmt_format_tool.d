@@ -20,39 +20,9 @@
 
 module dls.tools.format_tool.internal.dfmt_format_tool;
 
-import dfmt.config : BraceStyle, TemplateConstraintStyle;
-import dfmt.editorconfig : EOL;
-import dls.tools.configuration : Configuration;
 import dls.tools.format_tool.internal.format_tool : FormatTool;
 
-private immutable EOL[Configuration.FormatConfiguration.EndOfLine] eolMap;
-private immutable BraceStyle[Configuration.FormatConfiguration.BraceStyle] braceStyleMap;
-private immutable TemplateConstraintStyle[Configuration.FormatConfiguration.TemplateConstraintStyle] templateConstraintStyleMap;
 private immutable configPattern = "dummy.d";
-
-shared static this()
-{
-    //dfmt off
-    eolMap = [
-        Configuration.FormatConfiguration.EndOfLine.lf   : EOL.lf,
-        Configuration.FormatConfiguration.EndOfLine.cr   : EOL.cr,
-        Configuration.FormatConfiguration.EndOfLine.crlf : EOL.crlf
-    ];
-
-    braceStyleMap = [
-        Configuration.FormatConfiguration.BraceStyle.allman     : BraceStyle.allman,
-        Configuration.FormatConfiguration.BraceStyle.otbs       : BraceStyle.otbs,
-        Configuration.FormatConfiguration.BraceStyle.stroustrup : BraceStyle.stroustrup
-    ];
-
-    templateConstraintStyleMap = [
-        Configuration.FormatConfiguration.TemplateConstraintStyle.conditionalNewlineIndent : TemplateConstraintStyle.conditional_newline_indent,
-        Configuration.FormatConfiguration.TemplateConstraintStyle.conditionalNewline       : TemplateConstraintStyle.conditional_newline,
-        Configuration.FormatConfiguration.TemplateConstraintStyle.alwaysNewline            : TemplateConstraintStyle.always_newline,
-        Configuration.FormatConfiguration.TemplateConstraintStyle.alwaysNewlineIndent      : TemplateConstraintStyle.always_newline_indent
-    ];
-    //dfmt on
-}
 
 class DfmtFormatTool : FormatTool
 {
@@ -80,7 +50,9 @@ class DfmtFormatTool : FormatTool
 
     private Config getFormatConfig(const Uri uri, const FormattingOptions options)
     {
-        import dfmt.editorconfig : IndentStyle, OptionalBoolean, getConfigFor;
+        import dfmt.config : BraceStyle, TemplateConstraintStyle;
+        import dfmt.editorconfig : EOL, IndentStyle, OptionalBoolean, getConfigFor;
+        import dls.tools.configuration : Configuration;
         import dls.tools.symbol_tool : SymbolTool;
 
         static OptionalBoolean toOptBool(bool b)
@@ -92,27 +64,66 @@ class DfmtFormatTool : FormatTool
         Config config;
         config.initializeWithDefaults();
         config.pattern = configPattern;
-        config.end_of_line = eolMap[formatConf.endOfLine];
         config.indent_style = options.insertSpaces ? IndentStyle.space : IndentStyle.tab;
         config.indent_size = cast(typeof(config.indent_size)) options.tabSize;
         config.tab_width = config.indent_size;
         config.max_line_length = formatConf.maxLineLength;
-        config.dfmt_align_switch_statements = toOptBool(formatConf.dfmtAlignSwitchStatements);
-        config.dfmt_brace_style = braceStyleMap[formatConf.dfmtBraceStyle];
-        config.dfmt_outdent_attributes = toOptBool(formatConf.dfmtOutdentAttributes);
-        config.dfmt_soft_max_line_length = formatConf.dfmtSoftMaxLineLength;
-        config.dfmt_space_after_cast = toOptBool(formatConf.dfmtSpaceAfterCast);
+        config.dfmt_align_switch_statements = toOptBool(formatConf.alignSwitchStatements);
+        config.dfmt_outdent_attributes = toOptBool(formatConf.outdentAttributes);
+        config.dfmt_soft_max_line_length = formatConf.softMaxLineLength;
+        config.dfmt_space_after_cast = toOptBool(formatConf.spaceAfterCasts);
         config.dfmt_space_after_keywords = toOptBool(formatConf.spaceAfterKeywords);
         config.dfmt_space_before_function_parameters = toOptBool(
-                formatConf.dfmtSpaceBeforeFunctionParameters);
-        config.dfmt_split_operator_at_line_end = toOptBool(formatConf.dfmtSplitOperatorAtLineEnd);
+                formatConf.spaceBeforeFunctionParameters);
+        config.dfmt_split_operator_at_line_end = toOptBool(formatConf.splitOperatorsAtLineEnd);
         config.dfmt_selective_import_space = toOptBool(formatConf.spaceBeforeSelectiveImportColons);
-        config.dfmt_compact_labeled_statements = formatConf.dfmtCompactLabeledStatements
+        config.dfmt_compact_labeled_statements = formatConf.compactLabeledStatements
             ? OptionalBoolean.t : OptionalBoolean.f;
-        config.dfmt_template_constraint_style
-            = templateConstraintStyleMap[formatConf.dfmtTemplateConstraintStyle];
         config.dfmt_single_template_constraint_indent = toOptBool(
-                formatConf.dfmtSingleTemplateConstraintIndent);
+                formatConf.templateConstraintsSingleIndent);
+
+        final switch (formatConf.endOfLine)
+        {
+        case Configuration.FormatConfiguration.EndOfLine.lf:
+            config.end_of_line = EOL.lf;
+            break;
+        case Configuration.FormatConfiguration.EndOfLine.cr:
+            config.end_of_line = EOL.cr;
+            break;
+        case Configuration.FormatConfiguration.EndOfLine.crlf:
+            config.end_of_line = EOL.crlf;
+            break;
+        }
+
+        final switch (formatConf.braceStyle)
+        {
+        case Configuration.FormatConfiguration.BraceStyle.allman:
+            config.dfmt_brace_style = BraceStyle.allman;
+            break;
+        case Configuration.FormatConfiguration.BraceStyle.otbs:
+            config.dfmt_brace_style = BraceStyle.otbs;
+            break;
+        case Configuration.FormatConfiguration.BraceStyle.stroustrup:
+            config.dfmt_brace_style = BraceStyle.stroustrup;
+            break;
+        }
+
+        final switch (formatConf.templateConstraintsStyle)
+        {
+        case Configuration.FormatConfiguration.TemplateConstraintsStyle.conditionalNewlineIndent:
+            config.dfmt_template_constraint_style
+                = TemplateConstraintStyle.conditional_newline_indent;
+            break;
+        case Configuration.FormatConfiguration.TemplateConstraintsStyle.conditionalNewline:
+            config.dfmt_template_constraint_style = TemplateConstraintStyle.conditional_newline;
+            break;
+        case Configuration.FormatConfiguration.TemplateConstraintsStyle.alwaysNewline:
+            config.dfmt_template_constraint_style = TemplateConstraintStyle.always_newline;
+            break;
+        case Configuration.FormatConfiguration.TemplateConstraintsStyle.alwaysNewlineIndent:
+            config.dfmt_template_constraint_style = TemplateConstraintStyle.always_newline_indent;
+            break;
+        }
 
         auto fileConfig = getConfigFor!Config(uri.path);
         fileConfig.pattern = configPattern;

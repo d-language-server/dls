@@ -135,26 +135,26 @@ All these keys should be formatted as `d.dls.[section].[key]` (e.g. `d.dls.forma
 |`configFile`       |`string`  |`"dscanner.ini"`|
 |`filePatterns`     |`string[]`|`[]`            |
 
-|Section: `format`                   |Type                                    |Default value|
-|------------------------------------|----------------------------------------|-------------|
-|`engine`                            |`"dfmt"` or `"indent"`                  |`"dfmt"`     |
-|`endOfLine`                         |`"lf"` or `"cr"` or `"crlf"`            |`"lf"`       |
-|`insertFinalNewline`                |`boolean`                               |`true`       |
-|`trimTrailingWhitespace`            |`boolean`                               |`true`       |
-|`maxLineLength`                     |`number`                                |`120`        |
-|`spaceBeforeSelectiveImportColons`  |`boolean`                               |`true`       |
-|`spaceBeforeAAColons`               |`boolean`                               |`false`      |
-|`spaceAfterKeywords`                |`boolean`                               |`true`       |
-|`dfmtAlignSwitchStatements`         |`boolean`                               |`true`       |
-|`dfmtBraceStyle`                    |`"allman"` or `"otbs"` or `"stroustrup"`|`"allman"`   |
-|`dfmtOutdentAttributes`             |`boolean`                               |`true`       |
-|`dfmtSoftMaxLineLength`             |`number`                                |`80`         |
-|`dfmtSpaceAfterCast`                |`boolean`                               |`true`       |
-|`dfmtSpaceBeforeFunctionParameters` |`boolean`                               |`false`      |
-|`dfmtSplitOperatorAtLineEnd`        |`boolean`                               |`false`      |
-|`dfmtCompactLabeledStatements`      |`boolean`                               |`true`       |
-|`dfmtTemplateConstraintStyle`       |`"conditionalNewlineIndent"` or `"conditionalNewline"` or `"alwaysNewline"` or `"alwaysNewlineIndent"`|`"conditionalNewlineIndent"`|
-|`dfmtSingleTemplateConstraintIndent`|`boolean`                               |`false`      |
+|Section: `format`                   |Type                                    |Default value|Builtin|DFMT|
+|------------------------------------|----------------------------------------|-------------|-------|----|
+|`engine`                            |`"dfmt"` or `"indent"`                  |`"dfmt"`     |       |    |
+|`endOfLine`                         |`"lf"` or `"cr"` or `"crlf"`            |`"lf"`       |       |✔   |
+|`insertFinalNewline`                |`boolean`                               |`true`       |       |✔   |
+|`trimTrailingWhitespace`            |`boolean`                               |`true`       |✔      |    |
+|`maxLineLength`                     |`number`                                |`120`        |       |✔   |
+|`softMaxLineLength`                 |`number`                                |`80`         |       |✔   |
+|`braceStyle`                        |`"allman"` or `"otbs"` or `"stroustrup"`|`"allman"`   |       |✔   |
+|`spaceAfterCasts`                   |`boolean`                               |`true`       |       |✔   |
+|`spaceAfterKeywords`                |`boolean`                               |`true`       |✔      |    |
+|`spaceBeforeAAColons`               |`boolean`                               |`false`      |✔      |    |
+|`spaceBeforeFunctionParameters`     |`boolean`                               |`false`      |       |✔   |
+|`spaceBeforeSelectiveImportColons`  |`boolean`                               |`true`       |✔      |✔   |
+|`alignSwitchStatements`             |`boolean`                               |`true`       |       |    |
+|`compactLabeledStatements`          |`boolean`                               |`true`       |       |✔   |
+|`outdentAttributes`                 |`boolean`                               |`true`       |       |    |
+|`splitOperatorsAtLineEnd`           |`boolean`                               |`false`      |       |✔   |
+|`templateConstraintsStyle`          |`"conditionalNewlineIndent"` or `"conditionalNewline"` or `"alwaysNewline"` or `"alwaysNewlineIndent"`|`"conditionalNewlineIndent"`| |✔|
+|`templateConstraintsSingleIndent`   |`boolean`                               |`false`      |       |✔   |
 
 ## Server initialization options
 

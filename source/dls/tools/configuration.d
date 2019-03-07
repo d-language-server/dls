@@ -58,7 +58,7 @@ class Configuration
             crlf = "crlf"
         }
 
-        static enum TemplateConstraintStyle : string
+        static enum TemplateConstraintsStyle : string
         {
             conditionalNewlineIndent = "conditionalNewlineIndent",
             conditionalNewline = "conditionalNewline",
@@ -71,20 +71,20 @@ class Configuration
         bool insertFinalNewline = true;
         bool trimTrailingWhitespace = true;
         int maxLineLength = 120;
-        bool spaceBeforeSelectiveImportColons = true;
-        bool spaceBeforeAAColons = false;
+        int softMaxLineLength = 80;
+        BraceStyle braceStyle = BraceStyle.allman;
+        bool spaceAfterCasts = true;
         bool spaceAfterKeywords = true;
-        bool dfmtAlignSwitchStatements = true;
-        BraceStyle dfmtBraceStyle = BraceStyle.allman;
-        bool dfmtOutdentAttributes = true;
-        int dfmtSoftMaxLineLength = 80;
-        bool dfmtSpaceAfterCast = true;
-        bool dfmtSpaceBeforeFunctionParameters = false;
-        bool dfmtSplitOperatorAtLineEnd = false;
-        bool dfmtCompactLabeledStatements = true;
-        TemplateConstraintStyle dfmtTemplateConstraintStyle = TemplateConstraintStyle
+        bool spaceBeforeAAColons = false;
+        bool spaceBeforeFunctionParameters = false;
+        bool spaceBeforeSelectiveImportColons = true;
+        bool alignSwitchStatements = true;
+        bool compactLabeledStatements = true;
+        bool outdentAttributes = true;
+        bool splitOperatorsAtLineEnd = false;
+        TemplateConstraintsStyle templateConstraintsStyle = TemplateConstraintsStyle
             .conditionalNewlineIndent;
-        bool dfmtSingleTemplateConstraintIndent = false;
+        bool templateConstraintsSingleIndent = false;
     }
 
     SymbolConfiguration symbol;
