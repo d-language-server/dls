@@ -90,7 +90,7 @@ DLS will automatically update itself whenever a new version is out.
             :server-id 'dls))
     ```
 
-If it's not working with your editor of choice, [submit an issue](https://github.com/d-language-server/dls/issues/new)!
+If it's not working with your editor of choice, [submit a new issue](https://github.com/d-language-server/dls/issues/new) !
 
 ### Notes about FreeBSD
 
@@ -113,13 +113,16 @@ The main steps to enable Linux binary compatibility are:
     mount /compat/linux/dev/shm
     ```
 
-More detailed information can be found in the [FreeBSD documentation](https://www.freebsd.org/doc/handbook/linuxemu-lbc-install.html).
+More detailed/up-to-date information can be found in the [FreeBSD documentation](https://www.freebsd.org/doc/handbook/linuxemu-lbc-install.html).
 
 ### Command line options
 
 Some command line options exist to control the behavior of DLS:
 - `--stdio`: use standard input and output streams for communication (default behavior)
 - `--socket=<PORT>` or `--tcp=<PORT>`: use a socket to connect on the specified port for communication
+- `--version`: show version information
+- `--help`: show full list of command line options
+- `--init.*`: specify an [initialization option](#server-initialization-options)
 
 ## Client side configuration
 
@@ -137,7 +140,7 @@ All these keys should be formatted as `d.dls.[section].[key]` (e.g. `d.dls.forma
 
 |Section: `format`                   |Type                                    |Default value|Builtin|DFMT|
 |------------------------------------|----------------------------------------|-------------|-------|----|
-|`engine`                            |`"dfmt"` or `"indent"`                  |`"dfmt"`     |       |    |
+|`engine`                            |`"dfmt"` or `"builtin"`                 |`"dfmt"`     |       |    |
 |`endOfLine`                         |`"lf"` or `"cr"` or `"crlf"`            |`"lf"`       |       |✔   |
 |`insertFinalNewline`                |`boolean`                               |`true`       |       |✔   |
 |`trimTrailingWhitespace`            |`boolean`                               |`true`       |✔      |    |
@@ -187,6 +190,10 @@ interface InitializationOptions: {
     }
 }
 ```
+
+Every initialization option can be toggled via a [command line option](#command-line-options).
+Example: `./dls --init.logFile=path/to/file.log`.
+Initialization options set suring the initialization phase will override ones set with command line options.
 
 ## Caveats
 

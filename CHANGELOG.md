@@ -4,6 +4,21 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+### 0.24.0
+- __Removed building from source as install/update method, as it's a heavy process and binaries are built for all major platforms__
+- __Changed "indent" formatter name to "builtin", as it's now doing more than just indenting; it might be the default in a future version (set `d.dls.format.engine` to `"dfmt"` to keep using DFMT)__
+- __Changed all format configuration property names to unify DFMT and built-in configuration__
+- Built-in formatter:
+    - Added support for adjusting spaces around operators and keywords
+    - Added support for disabling formatting via comments: `// format off` or `// indent off` or `// dfmt off` (and `// format on`, `// indent on`, `// dfmt on` to re-enable)
+    - Added support for toggling spaces before colons in associative arrays
+    - Added support for toggling spaces bewteen keywords like `if`, `foreach`, etc. and their opening parenthesis
+    - Added support for toggling spaces before function parameters
+    - Added support for toggling spaces after casts
+    - Added support for toggling switch statements alignment
+    - Added option to toggle spaces before colons in associative arrays
+    - Fixed code being indented after labels
+
 #### 0.23.1
 - Fixed crash in some Dub project configurations ([#38](https://github.com/d-language-server/dls/issues/38))
 
