@@ -27,25 +27,12 @@ import std.typecons : Nullable;
 
 void didOpen(DidOpenTextDocumentParams params)
 {
-    import dls.protocol.interfaces : PublishDiagnosticsParams;
-    import dls.protocol.jsonrpc : send;
     import dls.protocol.logger : logger;
-    import dls.protocol.messages.methods : TextDocument;
-    import dls.tools.analysis_tool : AnalysisTool;
-    import dls.tools.symbol_tool : SymbolTool;
     import dls.util.document : Document;
-    import dls.util.uri : Uri, sameFile;
-    import std.algorithm : canFind;
-    import std.uni : toLower;
+    import dls.util.uri : Uri;
 
     auto uri = new Uri(params.textDocument.uri);
     logger.info("Document opened: %s", uri.path);
-
-    if (!SymbolTool.instance.workspacesFilesUris.canFind!sameFile(uri))
-    {
-        send(TextDocument.publishDiagnostics, new PublishDiagnosticsParams(uri,
-                AnalysisTool.instance.diagnostics(uri)));
-    }
 
     if (!Document.open(params.textDocument))
     {
@@ -79,29 +66,18 @@ TextEdit[] willSaveWaitUntil(WillSaveTextDocumentParams params)
 
 void didSave(DidSaveTextDocumentParams params)
 {
-    import dls.protocol.interfaces : PublishDiagnosticsParams;
-    import dls.protocol.jsonrpc : send;
     import dls.protocol.logger : logger;
-    import dls.protocol.messages.methods : TextDocument;
-    import dls.tools.analysis_tool : AnalysisTool;
     import dls.util.uri : Uri;
 
     auto uri = new Uri(params.textDocument.uri);
     logger.info("Document saved: %s", uri.path);
-    send(TextDocument.publishDiagnostics, new PublishDiagnosticsParams(uri,
-            AnalysisTool.instance.diagnostics(uri)));
 }
 
 void didClose(DidCloseTextDocumentParams params)
 {
-    import dls.protocol.interfaces : PublishDiagnosticsParams;
-    import dls.protocol.jsonrpc : send;
     import dls.protocol.logger : logger;
-    import dls.protocol.messages.methods : TextDocument;
-    import dls.tools.analysis_tool : AnalysisTool;
     import dls.util.document : Document;
-    import dls.util.uri : Uri, sameFile;
-    import std.algorithm : canFind;
+    import dls.util.uri : Uri;
 
     auto uri = new Uri(params.textDocument.uri);
     logger.info("Document closed: %s", uri.path);
@@ -110,37 +86,22 @@ void didClose(DidCloseTextDocumentParams params)
     {
         logger.warning("Document %s is not open", uri.path);
     }
-
-    Uri[] discaredFiles;
-
-    if (!AnalysisTool.instance.getScannableFilesUris(discaredFiles).canFind!sameFile(uri))
-    {
-        send(TextDocument.publishDiagnostics, new PublishDiagnosticsParams(uri, []));
-    }
 }
 
 CompletionItem[] completion(CompletionParams params)
 {
-    import dls.tools.symbol_tool : SymbolTool;
-    import dls.util.uri : Uri;
-
-    return SymbolTool.instance.completion(new Uri(params.textDocument.uri), params.position);
+    return [];
 }
 
 @("completionItem", "resolve")
 CompletionItem completionItem_resolve(CompletionItem item)
 {
-    import dls.tools.symbol_tool : SymbolTool;
-
-    return SymbolTool.instance.completionResolve(item);
+    return null;
 }
 
 Hover hover(TextDocumentPositionParams params)
 {
-    import dls.tools.symbol_tool : SymbolTool;
-    import dls.util.uri : Uri;
-
-    return SymbolTool.instance.hover(new Uri(params.textDocument.uri), params.position);
+    return null;
 }
 
 SignatureHelp signatureHelp(TextDocumentPositionParams params)
@@ -150,23 +111,17 @@ SignatureHelp signatureHelp(TextDocumentPositionParams params)
 
 Location[] declaration(TextDocumentPositionParams params)
 {
-    return definition(params);
+    return [];
 }
 
 Location[] definition(TextDocumentPositionParams params)
 {
-    import dls.tools.symbol_tool : SymbolTool;
-    import dls.util.uri : Uri;
-
-    return SymbolTool.instance.definition(new Uri(params.textDocument.uri), params.position);
+    return [];
 }
 
 Location[] typeDefinition(TextDocumentPositionParams params)
 {
-    import dls.tools.symbol_tool : SymbolTool;
-    import dls.util.uri : Uri;
-
-    return SymbolTool.instance.typeDefinition(new Uri(params.textDocument.uri), params.position);
+    return [];
 }
 
 Location implementation(TextDocumentPositionParams params)
@@ -176,61 +131,22 @@ Location implementation(TextDocumentPositionParams params)
 
 Location[] references(ReferenceParams params)
 {
-    import dls.tools.symbol_tool : SymbolTool;
-    import dls.util.uri : Uri;
-
-    return SymbolTool.instance.references(new Uri(params.textDocument.uri),
-            params.position, params.context.includeDeclaration);
+    return [];
 }
 
 DocumentHighlight[] documentHighlight(TextDocumentPositionParams params)
 {
-    import dls.tools.symbol_tool : SymbolTool;
-    import dls.util.uri : Uri;
-
-    return SymbolTool.instance.highlight(new Uri(params.textDocument.uri), params.position);
+    return [];
 }
 
-JSONValue documentSymbol(DocumentSymbolParams params)
+JSONValue documentSymbol(DocumentSymbolParams params) // (DocumentSymbol | SymbolInformation)[]
 {
-    import dls.protocol.state : initState;
-    import dls.tools.symbol_tool : SymbolTool;
-    import dls.util.json : convertToJSON;
-    import dls.util.uri : Uri;
-
-    auto uri = new Uri(params.textDocument.uri);
-
-    if (!initState.capabilities.textDocument.isNull && !initState.capabilities.textDocument.documentSymbol.isNull
-            && !initState.capabilities.textDocument.documentSymbol.hierarchicalDocumentSymbolSupport.isNull
-            && initState.capabilities.textDocument.documentSymbol.hierarchicalDocumentSymbolSupport)
-    {
-        return convertToJSON(SymbolTool.instance.symbol!DocumentSymbol(uri, null));
-    }
-    else
-    {
-        return convertToJSON(SymbolTool.instance.symbol!SymbolInformation(uri, null));
-    }
+    return JSONValue();
 }
 
-JSONValue codeAction(CodeActionParams params)
+JSONValue codeAction(CodeActionParams params) // (Command | CodeAction)[]
 {
-    import dls.protocol.state : initState;
-    import dls.tools.analysis_tool : AnalysisTool;
-    import dls.util.json : convertToJSON;
-    import dls.util.uri : Uri;
-
-    if (initState.capabilities.textDocument.isNull || initState.capabilities.textDocument.codeAction.isNull
-            || initState.capabilities.textDocument.codeAction.codeActionLiteralSupport.isNull)
-    {
-        return convertToJSON(AnalysisTool.instance.codeAction(new Uri(params.textDocument.uri),
-                params.range, params.context.diagnostics, true));
-    }
-    else
-    {
-        return convertToJSON(AnalysisTool.instance.codeAction(new Uri(params.textDocument.uri),
-                params.range, params.context.diagnostics,
-                params.context.only.isNull ? [] : params.context.only.get()));
-    }
+    return JSONValue();
 }
 
 CodeLens[] codeLens(CodeLensParams params)
@@ -267,45 +183,27 @@ ColorPresentation[] colorPresentation(ColorPresentationParams params)
 
 TextEdit[] formatting(DocumentFormattingParams params)
 {
-    import dls.tools.format_tool : FormatTool;
-    import dls.util.uri : Uri;
-
-    return FormatTool.instance.formatting(new Uri(params.textDocument.uri), params.options);
+    return [];
 }
 
 TextEdit[] rangeFormatting(DocumentRangeFormattingParams params)
 {
-    import dls.tools.format_tool : FormatTool;
-    import dls.util.uri : Uri;
-
-    return FormatTool.instance.rangeFormatting(new Uri(params.textDocument.uri),
-            params.range, params.options);
+    return [];
 }
 
 TextEdit[] onTypeFormatting(DocumentOnTypeFormattingParams params)
 {
-    import dls.tools.format_tool : FormatTool;
-    import dls.util.uri : Uri;
-
-    return FormatTool.instance.onTypeFormatting(new Uri(params.textDocument.uri),
-            params.position, params.options);
+    return [];
 }
 
 WorkspaceEdit rename(RenameParams params)
 {
-    import dls.tools.symbol_tool : SymbolTool;
-    import dls.util.uri : Uri;
-
-    return SymbolTool.instance.rename(new Uri(params.textDocument.uri),
-            params.position, params.newName);
+    return null;
 }
 
 Range prepareRename(TextDocumentPositionParams params)
 {
-    import dls.tools.symbol_tool : SymbolTool;
-    import dls.util.uri : Uri;
-
-    return SymbolTool.instance.prepareRename(new Uri(params.textDocument.uri), params.position);
+    return null;
 }
 
 FoldingRange[] foldingRange(FoldingRangeParams params)

@@ -26,7 +26,6 @@ import std.typecons : Nullable;
 void showMessageRequest(string id, Nullable!MessageActionItem item)
 {
     import dls.protocol.logger : logger;
-    import dls.tools.symbol_tool : SymbolTool;
     import dls.util.i18n : Tr, tr;
     import dls.util.uri : Uri;
     import std.concurrency : locate, receiveOnly, send;
@@ -46,7 +45,7 @@ void showMessageRequest(string id, Nullable!MessageActionItem item)
             if (item.title == tr(Tr.app_upgradeSelections_upgrade))
             {
                 auto uri = new Uri(Util.messageRequestInfo[id][1]);
-                SymbolTool.instance.upgradeSelections(uri);
+                // TODO: upgrade selections using dub
             }
 
             break;

@@ -69,7 +69,6 @@ class CommandTool : Tool
         import dls.protocol.jsonrpc : send;
         import dls.protocol.logger : logger;
         import dls.protocol.messages.methods : Workspace;
-        import dls.tools.analysis_tool : AnalysisTool;
         import dls.util.json : convertFromJSON;
         import dls.util.uri : Uri;
         import std.json : JSONException;
@@ -87,8 +86,7 @@ class CommandTool : Tool
                 break;
 
             case Commands.codeAction_analysis_disableCheck:
-                AnalysisTool.instance.disableCheck(new Uri(convertFromJSON!string(arguments[0])),
-                        convertFromJSON!string(arguments[1]));
+                // TODO: disable check
                 break;
             }
         }

@@ -30,10 +30,7 @@ InitializeResult initialize(InitializeParams params)
     import dls.protocol.logger : logger;
     import dls.protocol.state : initOptions, initState;
     import dls.server : Server;
-    import dls.tools.analysis_tool : AnalysisTool;
     import dls.tools.command_tool : CommandTool;
-    import dls.tools.format_tool : DfmtFormatTool, FormatTool;
-    import dls.tools.symbol_tool : SymbolTool;
     import dls.tools.tool : Tool;
     import dls.util.json : convertToJSON;
     import dls.util.uri : Uri, filenameCmp, sameFile;
@@ -44,10 +41,7 @@ InitializeResult initialize(InitializeParams params)
     initState = params;
     logger.info("Initializing server");
     Tool.initialize(new Tool());
-    AnalysisTool.initialize(new AnalysisTool());
     CommandTool.initialize(new CommandTool());
-    FormatTool.initialize(new DfmtFormatTool());
-    SymbolTool.initialize(new SymbolTool());
 
     debug
     {
@@ -80,8 +74,6 @@ InitializeResult initialize(InitializeParams params)
             .uniq!sameFile)
     {
         Tool.instance.updateConfig(uri, JSONValue());
-        SymbolTool.instance.importPath(uri);
-        AnalysisTool.instance.addAnalysisConfig(uri);
     }
 
     auto result = new InitializeResult();
@@ -99,57 +91,57 @@ InitializeResult initialize(InitializeParams params)
         {
             const textDocCaps = params.capabilities.textDocument.get();
 
-            if (!textDocCaps.hover.isNull)
-                hoverProvider = initOptions.capabilities.hover;
+            // if (!textDocCaps.hover.isNull)
+            //     hoverProvider = initOptions.capabilities.hover;
 
-            if (!textDocCaps.completion.isNull && initOptions.capabilities.completion)
-                completionProvider = new CompletionOptions(true.nullable, ["."].nullable);
+            // if (!textDocCaps.completion.isNull && initOptions.capabilities.completion)
+            //     completionProvider = new CompletionOptions(true.nullable, ["."].nullable);
 
-            if (!textDocCaps.definition.isNull)
-                definitionProvider = initOptions.capabilities.definition;
+            // if (!textDocCaps.definition.isNull)
+            //     definitionProvider = initOptions.capabilities.definition;
 
-            if (!textDocCaps.typeDefinition.isNull)
-                typeDefinitionProvider = JSONValue(initOptions.capabilities.definition);
+            // if (!textDocCaps.typeDefinition.isNull)
+            //     typeDefinitionProvider = JSONValue(initOptions.capabilities.definition);
 
-            if (!textDocCaps.references.isNull)
-                referencesProvider = initOptions.capabilities.references;
+            // if (!textDocCaps.references.isNull)
+            //     referencesProvider = initOptions.capabilities.references;
 
-            if (!textDocCaps.documentHighlight.isNull)
-                documentHighlightProvider = initOptions.capabilities.documentHighlight;
+            // if (!textDocCaps.documentHighlight.isNull)
+            //     documentHighlightProvider = initOptions.capabilities.documentHighlight;
 
-            if (!textDocCaps.documentSymbol.isNull)
-                documentSymbolProvider = initOptions.capabilities.documentSymbol;
+            // if (!textDocCaps.documentSymbol.isNull)
+            //     documentSymbolProvider = initOptions.capabilities.documentSymbol;
 
-            if (!textDocCaps.codeAction.isNull)
-                codeActionProvider = JSONValue(initOptions.capabilities.codeAction);
+            // if (!textDocCaps.codeAction.isNull)
+            //     codeActionProvider = JSONValue(initOptions.capabilities.codeAction);
 
-            if (!textDocCaps.formatting.isNull)
-                documentFormattingProvider = initOptions.capabilities.documentFormatting;
+            // if (!textDocCaps.formatting.isNull)
+            //     documentFormattingProvider = initOptions.capabilities.documentFormatting;
 
-            if (!textDocCaps.rangeFormatting.isNull)
-                documentRangeFormattingProvider = initOptions.capabilities.documentRangeFormatting;
+            // if (!textDocCaps.rangeFormatting.isNull)
+            //     documentRangeFormattingProvider = initOptions.capabilities.documentRangeFormatting;
 
-            if (!textDocCaps.onTypeFormatting.isNull
-                    && initOptions.capabilities.documentOnTypeFormatting)
-                documentOnTypeFormattingProvider = new DocumentOnTypeFormattingOptions(";");
+            // if (!textDocCaps.onTypeFormatting.isNull
+            //         && initOptions.capabilities.documentOnTypeFormatting)
+            //     documentOnTypeFormattingProvider = new DocumentOnTypeFormattingOptions(";");
 
-            if (!textDocCaps.rename.isNull)
-            {
-                immutable prepareSupport = !textDocCaps.rename.prepareSupport.isNull
-                    && textDocCaps.rename.prepareSupport.get();
+            // if (!textDocCaps.rename.isNull)
+            // {
+            //     immutable prepareSupport = !textDocCaps.rename.prepareSupport.isNull
+            //         && textDocCaps.rename.prepareSupport.get();
 
-                renameProvider = initOptions.capabilities.rename ? prepareSupport
-                    ? convertToJSON(new RenameOptions(true.nullable))
-                    : JSONValue(true) : JSONValue(false);
-            }
+            //     renameProvider = initOptions.capabilities.rename ? prepareSupport
+            //         ? convertToJSON(new RenameOptions(true.nullable))
+            //         : JSONValue(true) : JSONValue(false);
+            // }
         }
 
         if (!params.capabilities.workspace.isNull)
         {
             const workspaceCaps = params.capabilities.workspace.get();
 
-            if (!workspaceCaps.symbol.isNull)
-                workspaceSymbolProvider = initOptions.capabilities.workspaceSymbol;
+            // if (!workspaceCaps.symbol.isNull)
+            //     workspaceSymbolProvider = initOptions.capabilities.workspaceSymbol;
 
             if (!workspaceCaps.executeCommand.isNull && initOptions.capabilities.codeAction)
                 executeCommandProvider = new ExecuteCommandOptions(CommandTool.instance.commands);
@@ -176,7 +168,6 @@ void initialized(JSONValue nothing)
     import dls.protocol.messages.methods : Client, Workspace;
     import dls.protocol.state : initOptions, initState;
     import dls.server : Server;
-    import dls.tools.analysis_tool : AnalysisTool;
     import dls.tools.tool : Tool;
     import std.typecons : Nullable, nullable;
 
@@ -231,8 +222,6 @@ void initialized(JSONValue nothing)
             send(Workspace.configuration, new ConfigurationParams(items));
         }
     }
-
-    AnalysisTool.instance.scanAllWorkspaces();
 }
 
 @("")
@@ -241,19 +230,13 @@ JSONValue shutdown(JSONValue nothing)
     import dls.protocol.definitions : TextDocumentIdentifier;
     import dls.protocol.logger : logger;
     import dls.server : Server;
-    import dls.tools.analysis_tool : AnalysisTool;
     import dls.tools.command_tool : CommandTool;
-    import dls.tools.format_tool : FormatTool;
-    import dls.tools.symbol_tool : SymbolTool;
     import dls.tools.tool : Tool;
     import dls.util.document : Document;
 
     logger.info("Shutting down server");
     Server.initialized = false;
-    AnalysisTool.shutdown();
     CommandTool.shutdown();
-    FormatTool.shutdown();
-    SymbolTool.shutdown();
     Tool.shutdown();
 
     foreach (uri; Document.uris)

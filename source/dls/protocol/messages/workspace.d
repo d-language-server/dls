@@ -30,8 +30,6 @@ void workspaceFolders(string id, Nullable!(WorkspaceFolder[]) folders)
     import dls.protocol.jsonrpc : send;
     import dls.protocol.messages.methods : Workspace;
     import dls.protocol.state : initState;
-    import dls.tools.analysis_tool : AnalysisTool;
-    import dls.tools.symbol_tool : SymbolTool;
     import dls.tools.tool : Tool;
     import dls.util.uri : Uri;
     import std.typecons : nullable;
@@ -45,8 +43,6 @@ void workspaceFolders(string id, Nullable!(WorkspaceFolder[]) folders)
             auto uri = new Uri(workspaceFolder.uri);
             items ~= new ConfigurationItem(uri.toString().nullable);
             Tool.instance.updateConfig(uri, JSONValue());
-            SymbolTool.instance.importPath(uri);
-            AnalysisTool.instance.addAnalysisConfig(uri);
         }
 
         immutable conf = !initState.capabilities.workspace.isNull
@@ -62,8 +58,6 @@ void workspaceFolders(string id, Nullable!(WorkspaceFolder[]) folders)
 
 void didChangeWorkspaceFolders(DidChangeWorkspaceFoldersParams params)
 {
-    import dls.tools.analysis_tool : AnalysisTool;
-    import dls.tools.symbol_tool : SymbolTool;
     import dls.tools.tool : Tool;
     import dls.util.uri : Uri;
     import std.typecons : nullable;
@@ -74,8 +68,6 @@ void didChangeWorkspaceFolders(DidChangeWorkspaceFoldersParams params)
     {
         auto uri = new Uri(folder.uri);
         Tool.instance.removeConfig(uri);
-        SymbolTool.instance.clearPath(uri);
-        AnalysisTool.instance.removeAnalysisConfig(uri);
     }
 }
 
@@ -135,114 +127,11 @@ void didChangeConfiguration(DidChangeConfigurationParams params)
 
 void didChangeWatchedFiles(DidChangeWatchedFilesParams params)
 {
-    import dls.protocol.interfaces : FileChangeType, PublishDiagnosticsParams;
-    import dls.protocol.jsonrpc : send;
-    import dls.protocol.logger : logger;
-    import dls.protocol.messages.methods : TextDocument;
-    import dls.tools.analysis_tool : AnalysisTool;
-    import dls.tools.symbol_tool : SymbolTool;
-    import dls.util.document : Document;
-    import dls.util.uri : Uri, sameFile;
-    import std.algorithm : canFind, filter, startsWith;
-    import std.file : exists, isFile;
-    import std.path : baseName, dirName, extension, pathSplitter;
-
-    foreach (event; params.changes.filter!(event => event.type == FileChangeType.deleted))
-    {
-        auto workspaceUri = SymbolTool.instance.getWorkspace(new Uri(event.uri));
-
-        if (workspaceUri !is null && !exists(workspaceUri.path))
-        {
-            SymbolTool.instance.clearPath(workspaceUri);
-        }
-    }
-
-    outer: foreach (event; params.changes)
-    {
-        auto uri = new Uri(event.uri);
-        auto dirPath = dirName(uri.path);
-
-        foreach (part; pathSplitter(dirPath))
-        {
-            if (part.startsWith('.'))
-            {
-                continue outer;
-            }
-        }
-
-        auto dirUri = Uri.fromPath(dirPath);
-
-        logger.info("Resource %s: %s", event.type, uri.path);
-
-        if (exists(uri.path) && !isFile(uri.path))
-        {
-            continue;
-        }
-
-        switch (baseName(uri.path))
-        {
-        case "dub.json", "dub.sdl":
-            if (event.type != FileChangeType.deleted)
-            {
-                SymbolTool.instance.importDubProject(dirUri);
-            }
-
-            continue;
-
-        case "dub.selections.json":
-            if (event.type != FileChangeType.deleted)
-            {
-                SymbolTool.instance.importDubSelections(dirUri);
-            }
-
-            continue;
-
-        case ".gitmodules":
-            if (event.type != FileChangeType.deleted)
-            {
-                SymbolTool.instance.importGitSubmodules(dirUri);
-            }
-
-            continue;
-
-        default:
-            break;
-        }
-
-        switch (extension(uri.path))
-        {
-        case ".d", ".di":
-            Uri[] discarded;
-
-            if (event.type == FileChangeType.deleted)
-            {
-                send(TextDocument.publishDiagnostics, new PublishDiagnosticsParams(uri, []));
-            }
-            else if (!Document.uris.canFind!sameFile(uri)
-                    && AnalysisTool.instance.getScannableFilesUris(discarded)
-                    .canFind!sameFile(uri))
-            {
-                send(TextDocument.publishDiagnostics, new PublishDiagnosticsParams(uri,
-                        AnalysisTool.instance.diagnostics(uri)));
-            }
-
-            continue;
-
-        case ".ini":
-            AnalysisTool.instance.updateAnalysisConfig(dirUri);
-            continue;
-
-        default:
-            break;
-        }
-    }
 }
 
 SymbolInformation[] symbol(WorkspaceSymbolParams params)
 {
-    import dls.tools.symbol_tool : SymbolTool;
-
-    return SymbolTool.instance.symbol(params.query);
+    return [];
 }
 
 JSONValue executeCommand(ExecuteCommandParams params)
