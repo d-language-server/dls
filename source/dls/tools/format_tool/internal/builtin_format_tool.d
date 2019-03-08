@@ -378,6 +378,11 @@ class BuiltinFormatTool : FormatTool
             import dls.tools.format_tool.internal.format_tool : isValidEditFor;
             import std.utf : toUTF8;
 
+            scope (exit)
+            {
+                lastEditRange = editRange;
+            }
+
             if (editRange.equals(lastEditRange))
             {
                 return;
@@ -388,7 +393,6 @@ class BuiltinFormatTool : FormatTool
             if (docLine[editRange.start.character .. editRange.end.character] != text
                     && editRange.isValidEditFor(range) && !editRange.isDisabledFor(disabledZones))
             {
-                lastEditRange = editRange;
                 result ~= new TextEdit(editRange, text.toUTF8());
             }
         }
@@ -705,7 +709,7 @@ class BuiltinFormatTool : FormatTool
                 break;
 
             case tok!"in":
-                if (!next.type.among(tok!"(", tok!"{") && previous.type != tok!"!")
+                if (!next.type.among(tok!"(", tok!"{"))
                 {
                     left = Spacing.space;
                 }
@@ -720,11 +724,7 @@ class BuiltinFormatTool : FormatTool
                 }
                 else
                 {
-                    if (previous.type != tok!"!")
-                    {
-                        left = Spacing.space;
-                    }
-
+                    left = Spacing.space;
                     right = Spacing.space;
                 }
 
