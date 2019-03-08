@@ -4,6 +4,11 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.24.2
+- Built-in formatter:
+    - Fixed formatting switching back and forth between putting a space or not in cast expressions
+    - Fixed forced space before colon in attribute declarations
+
 #### 0.24.1
 - Fixed prerelease builds being ignored even with `preReleaseBuilds` enabled
 

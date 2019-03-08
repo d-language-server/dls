@@ -85,6 +85,12 @@ package class BuiltinFormatVisitor : ASTVisitor
         super.visit(init);
     }
 
+    override void visit(const AttributeDeclaration dec)
+    {
+        leftGluedColonIndexes ~= dec.tokens[$ - 1].index;
+        super.visit(dec);
+    }
+
     override void visit(const AutoDeclarationPart part)
     {
         leftSpacedTokenIndexes ~= part.identifier.index;
@@ -342,11 +348,7 @@ package class BuiltinFormatVisitor : ASTVisitor
 
     override void visit(const LabeledStatement stmt)
     {
-        if (stmt.tokens.length > 1)
-        {
-            leftGluedColonIndexes ~= stmt.tokens[1].index;
-        }
-
+        leftGluedColonIndexes ~= stmt.tokens[1].index;
         outdents ~= stmt.tokens[0].line;
         super.visit(stmt);
     }
