@@ -519,9 +519,7 @@ class BuiltinFormatTool : FormatTool
             case tok!"=>":
             case tok!"?":
             case tok!"..":
-            case tok!"nothrow":
             case tok!"override":
-            case tok!"pure":
                 if (sortedUnaryOperators.empty || token.index != sortedUnaryOperators.front)
                 {
                     left = Spacing.space;
@@ -617,6 +615,12 @@ class BuiltinFormatTool : FormatTool
             case tok!"typeof":
             case tok!"__traits":
                 right = Spacing.empty;
+                break;
+
+            case tok!"nothrow":
+            case tok!"pure":
+                left = Spacing.space;
+                right = next.type == tok!":" ? Spacing.empty : Spacing.space;
                 break;
 
             case tok!"abstract":
