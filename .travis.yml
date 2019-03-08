@@ -36,7 +36,7 @@ before_script:
 script:
   - if [[ -n $TRAVIS_TAG ]]; then export BUILD=release; export OP=build; fi
   - export PATH="$HOME:$PATH"
-  - dub ${OP:-test --main-file=tests/main.d} --arch=${ARCH:-x86_64} --compiler=$DC --build=${BUILD:-debug}
+  - dub ${OP:-test} --arch=${ARCH:-x86_64} --compiler=$DC --build=${BUILD:-debug}
 before_deploy:
   - if which strip; then strip dls; fi
   - zip -9 dls-${TRAVIS_TAG:-untagged}.$TRAVIS_OS_NAME.$ARCH.zip dls LICENSE.txt
