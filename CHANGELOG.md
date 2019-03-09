@@ -4,6 +4,9 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.24.3
+- Fixed Dub dependencies import paths sometimes being incorrect
+
 #### 0.24.2
 - Built-in formatter:
     - Fixed formatting switching back and forth between putting a space or not in cast expressions
