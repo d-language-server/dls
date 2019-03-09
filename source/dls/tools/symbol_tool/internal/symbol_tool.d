@@ -623,9 +623,11 @@ class SymbolTool : Tool
 
         foreach (dep; d.project.dependencies)
         {
-            auto sourcePaths = reduce!q{a ~ b}(cast(string[])[],
-                    dep.recipe.buildSettings.sourcePaths.values);
-            auto pathsToImport = sourcePaths.map!(path => buildNormalizedPath(dep.path.toString(),
+            const imports = dep.recipe.buildSettings.importPaths.values;
+            const sources = dep.recipe.buildSettings.sourcePaths.values;
+            auto importPaths = reduce!q{a ~ b}(cast(string[])[],
+                    imports.length > 0 ? imports : sources);
+            auto pathsToImport = importPaths.map!(path => buildNormalizedPath(dep.path.toString(),
                     path).normalized).array;
             newDependenciesPaths ~= pathsToImport;
         }
