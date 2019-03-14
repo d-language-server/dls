@@ -89,19 +89,7 @@ shared static this()
     {
         import core.cpuid : isX86_64;
 
-        version (Posix)
-        {
-            import std.process : execute;
-            import std.string : strip;
-            import std.uni : toLower;
-
-            immutable arch = execute("uname").output.strip()
-                .toLower() != "freebsd" && isX86_64 ? "x86_64" : "x86";
-        }
-        else
-        {
-            immutable arch = isX86_64 ? "x86_64" : "x86";
-        }
+        immutable arch = isX86_64 ? "x86_64" : "x86";
     }
     else
     {

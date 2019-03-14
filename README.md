@@ -94,10 +94,10 @@ If it's not working with your editor of choice, [submit a new issue](https://git
 
 ### Notes about FreeBSD
 
-DLS is usable using FreeBSD's Linux binary compatibility system.
+DLS is usable using FreeBSD's Linux binary compatibility system (tested on FreeBSD 12.0-RELEASE).
 The main steps to enable Linux binary compatibility are:
 - Adding `enable_linux="YES"` to `/etc/rc.conf`
-- Running `kldload linux` (only the 32bit binaries will be used; the 64bit Linux binaries crash on FreeBSD)
+- Running `kldload linux64`
 - Running `pkg install emulators/linux_base-c7` (or `emulators/linux_base-c6`)
 - Running `pkg install ftp/linux-c7-curl` (or `ftp/linux-c6-curl`)
 - Adding the following lines to `/etc/fstab`:
