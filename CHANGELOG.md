@@ -4,6 +4,10 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.24.4
+- Enhanced diagnostic snappiness by sending them without waiting for files to be flushed on disk when saved
+- Enhanced FreeBSD support by allowing x86_64 builds to be downloaded instead of only x86 ones
+
 #### 0.24.3
 - Fixed Dub dependencies import paths sometimes being incorrect
 
