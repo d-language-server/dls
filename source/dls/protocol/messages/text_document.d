@@ -70,15 +70,6 @@ void didChange(DidChangeTextDocumentParams params)
 
 void willSave(WillSaveTextDocumentParams params)
 {
-}
-
-TextEdit[] willSaveWaitUntil(WillSaveTextDocumentParams params)
-{
-    return [];
-}
-
-void didSave(DidSaveTextDocumentParams params)
-{
     import dls.protocol.interfaces : PublishDiagnosticsParams;
     import dls.protocol.jsonrpc : send;
     import dls.protocol.logger : logger;
@@ -90,6 +81,15 @@ void didSave(DidSaveTextDocumentParams params)
     logger.info("Document saved: %s", uri.path);
     send(TextDocument.publishDiagnostics, new PublishDiagnosticsParams(uri,
             AnalysisTool.instance.diagnostics(uri)));
+}
+
+TextEdit[] willSaveWaitUntil(WillSaveTextDocumentParams params)
+{
+    return [];
+}
+
+void didSave(DidSaveTextDocumentParams params)
+{
 }
 
 void didClose(DidCloseTextDocumentParams params)

@@ -160,7 +160,7 @@ class StdioCommunicator : Communicator
         }
         catch (Exception e)
         {
-            return (hasData()) ? _stdin.rawRead(buffer) : [];
+            return hasData() ? _stdin.rawRead(buffer) : [];
         }
 
         if (size > 1)
