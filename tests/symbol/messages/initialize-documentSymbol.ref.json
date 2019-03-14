@@ -8,9 +8,7 @@
                 "textDocumentSync": {
                     "change": 2,
                     "openClose": true,
-                    "save": {
-                        "includeText": false
-                    }
+                    "willSave": true
                 },
                 "workspaceSymbolProvider": true
             }
