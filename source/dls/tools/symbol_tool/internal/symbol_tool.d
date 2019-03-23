@@ -51,7 +51,9 @@ shared static this()
         CompletionKind.moduleName           : CompletionItemKind.module_,
         CompletionKind.aliasName            : CompletionItemKind.variable,
         CompletionKind.templateName         : CompletionItemKind.function_,
-        CompletionKind.mixinTemplateName    : CompletionItemKind.function_
+        CompletionKind.mixinTemplateName    : CompletionItemKind.function_,
+        CompletionKind.variadicTmpParam     : CompletionItemKind.typeParameter,
+        CompletionKind.typeTmpParam         : CompletionItemKind.typeParameter
     ];
 
     symbolKinds = [
@@ -69,7 +71,9 @@ shared static this()
         CompletionKind.moduleName           : SymbolKind.module_,
         CompletionKind.aliasName            : SymbolKind.variable,
         CompletionKind.templateName         : SymbolKind.function_,
-        CompletionKind.mixinTemplateName    : SymbolKind.function_
+        CompletionKind.mixinTemplateName    : SymbolKind.function_,
+        CompletionKind.variadicTmpParam     : SymbolKind.typeParameter,
+        CompletionKind.typeTmpParam         : SymbolKind.typeParameter
     ];
     //dfmt on
 }
