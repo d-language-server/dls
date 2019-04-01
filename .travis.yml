@@ -8,14 +8,8 @@ matrix:
       os: linux
       env: ARCH=x86_64
     - d: ldc
-      os: linux
-      env: ARCH=x86
-    - d: ldc
       os: osx
       env: ARCH=x86_64
-    - d: ldc
-      os: osx
-      env: ARCH=x86
     - d: dmd-beta
       os: linux
     - d: ldc-beta
@@ -26,11 +20,6 @@ matrix:
 cache:
   directories:
     - $HOME/.dub
-addons:
-  apt:
-    update: true
-    packages:
-      - gcc-multilib
 before_script:
   - ln -s /usr/bin/ld.gold ~/ld
 script:
