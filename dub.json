@@ -15,9 +15,9 @@
 		"dls:protocol": "*",
 		"dls:util": "*",
 		"dub": "~>1.14.0",
-		"dcd": "~>0.11.0",
-		"dscanner": "~>0.7.0",
-		"dfmt": "~>0.10.0-beta.1"
+		"dcd": "~>0.11.1",
+		"dscanner": "~>0.7.1",
+		"dfmt": "~>0.10.0"
 	},
 	"versions": [
 		"StdLoggerDisableFatal"

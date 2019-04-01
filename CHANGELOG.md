@@ -4,6 +4,15 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+### 0.25.0
+- __Removed support for 32-bit builds__
+- Updated libraries:
+    - `dcd`: `0.11.0` => `0.11.1`
+    - `dfmt`: `0.10.0-beta.1` => `0.10.0`
+    - `dscanner`: `0.7.0` => `0.7.1`
+    - `dsymbol`: `0.6.2` => `0.6.4`
+    - `emsi_containers`: `0.8.0-alpha.11` => `0.8.0-alpha.13`
+
 #### 0.24.5
 - Fixed missing completion and symbol kinds
 
