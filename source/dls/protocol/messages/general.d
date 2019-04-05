@@ -91,12 +91,29 @@ InitializeResult initialize(InitializeParams params)
         import std.json : JSONValue;
         import std.typecons : Nullable;
 
-        textDocumentSync = new TextDocumentSyncOptions(true.nullable,
-                TextDocumentSyncKind.incremental.nullable, true.nullable);
+        textDocumentSync = new TextDocumentSyncOptions(
+            true.nullable,
+            TextDocumentSyncKind.incremental.nullable,
+            true.nullable,
+            false.nullable,
+            new SaveOptions(false.nullable).nullable
+        );
 
         if (!params.capabilities.textDocument.isNull)
         {
             const textDocCaps = params.capabilities.textDocument.get();
+
+            if (!textDocCaps.synchronisation.isNull)
+            {
+                if (!textDocCaps.synchronisation.willSave.isNull && textDocCaps.synchronisation.willSave.get())
+                {
+                    textDocumentSync.save.nullify();
+                }
+                else if (!textDocCaps.synchronisation.didSave.isNull && textDocCaps.synchronisation.didSave.get())
+                {
+                    textDocumentSync.willSave.nullify();
+                }
+            }
 
             if (!textDocCaps.hover.isNull)
                 hoverProvider = initOptions.capabilities.hover;

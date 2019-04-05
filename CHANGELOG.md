@@ -4,6 +4,9 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.25.1
+- Fixed diagnostics not necessarily being sent upon saving documents
+
 ### 0.25.0
 - __Removed support for 32-bit builds__
 - Updated libraries:

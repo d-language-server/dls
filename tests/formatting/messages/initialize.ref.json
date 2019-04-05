@@ -12,7 +12,11 @@
                 "textDocumentSync": {
                     "change": 2,
                     "openClose": true,
-                    "willSave": true
+                    "save": {
+                        "includeText": false
+                    },
+                    "willSave": true,
+                    "willSaveWaitUntil": false
                 }
             }
         }

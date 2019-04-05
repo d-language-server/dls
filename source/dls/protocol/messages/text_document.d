@@ -70,17 +70,10 @@ void didChange(DidChangeTextDocumentParams params)
 
 void willSave(WillSaveTextDocumentParams params)
 {
-    import dls.protocol.interfaces : PublishDiagnosticsParams;
-    import dls.protocol.jsonrpc : send;
-    import dls.protocol.logger : logger;
-    import dls.protocol.messages.methods : TextDocument;
-    import dls.tools.analysis_tool : AnalysisTool;
-    import dls.util.uri : Uri;
-
-    auto uri = new Uri(params.textDocument.uri);
-    logger.info("Document saved: %s", uri.path);
-    send(TextDocument.publishDiagnostics, new PublishDiagnosticsParams(uri,
-            AnalysisTool.instance.diagnostics(uri)));
+    if (scanOnWillSave(true))
+    {
+        scanDocument(params.textDocument);
+    }
 }
 
 TextEdit[] willSaveWaitUntil(WillSaveTextDocumentParams params)
@@ -90,6 +83,10 @@ TextEdit[] willSaveWaitUntil(WillSaveTextDocumentParams params)
 
 void didSave(DidSaveTextDocumentParams params)
 {
+    if (!scanOnWillSave(false))
+    {
+        scanDocument(params.textDocument);
+    }
 }
 
 void didClose(DidCloseTextDocumentParams params)
@@ -311,4 +308,34 @@ Range prepareRename(TextDocumentPositionParams params)
 FoldingRange[] foldingRange(FoldingRangeParams params)
 {
     return [];
+}
+
+private bool scanOnWillSave(bool will)
+{
+    import std.functional : memoize;
+
+    static bool result;
+
+    static bool impl()
+    {
+        return result;
+    }
+
+    result = will;
+    return memoize!impl();
+}
+
+private void scanDocument(const TextDocumentIdentifier textDocument)
+{
+    import dls.protocol.interfaces : PublishDiagnosticsParams;
+    import dls.protocol.jsonrpc : send;
+    import dls.protocol.logger : logger;
+    import dls.protocol.messages.methods : TextDocument;
+    import dls.tools.analysis_tool : AnalysisTool;
+    import dls.util.uri : Uri;
+
+    auto uri = new Uri(textDocument.uri);
+    logger.info("Document saved: %s", uri.path);
+    send(TextDocument.publishDiagnostics, new PublishDiagnosticsParams(uri,
+            AnalysisTool.instance.diagnostics(uri)));
 }
