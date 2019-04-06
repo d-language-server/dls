@@ -180,7 +180,7 @@ class AnalysisTool : Tool
 
             DisposableFiber.yield();
             send(TextDocument.publishDiagnostics, new PublishDiagnosticsParams(uri,
-                AnalysisTool.instance.diagnostics(uri)));
+                _instance.diagnostics(uri)));
         });
 
         foreach (file; discardedFiles)
@@ -217,11 +217,6 @@ class AnalysisTool : Tool
 
         if (exists(configPath))
         {
-            if (workspaceUri.path in _analysisConfigs)
-            {
-                conf = _analysisConfigs[workspaceUri.path];
-            }
-
             logger.info("Updating config from file %s", configPath);
             readINIFile(conf, configPath);
         }
@@ -418,7 +413,7 @@ class AnalysisTool : Tool
 
         const workspaceUri = SymbolTool.instance.getWorkspace(uri);
         immutable workspacePath = workspaceUri is null ? "" : workspaceUri.path;
-        return (workspacePath in _analysisConfigs) ? _analysisConfigs[workspacePath] : defaultStaticAnalysisConfig();
+        return _analysisConfigs.get(workspacePath, defaultStaticAnalysisConfig());
     }
 
     private string* getDiagnosticParameter(return ref StaticAnalysisConfig config, const string code)
