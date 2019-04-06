@@ -105,6 +105,7 @@ class AnalysisTool : Tool
                 _instance.scanAllWorkspaces();
             }
         });
+        _instance.addConfigHook("configFile", &_instance.updateAnalysisConfig);
     }
 
     static void shutdown()
