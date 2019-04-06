@@ -96,6 +96,12 @@ class AnalysisTool : Tool
     static void initialize(AnalysisTool tool)
     {
         _instance = tool;
+        _instance.addConfigHook("configFile", (const Uri uri) {
+            if (getConfig(uri).analysis.configFile != _instance._analysisConfigPaths.get(uri.path, ""))
+            {
+                _instance.updateAnalysisConfig(uri);
+            }
+        });
         _instance.addConfigHook("filePatterns", (const Uri uri) {
             const newPatterns = getConfig(uri).analysis.filePatterns;
 
@@ -117,6 +123,7 @@ class AnalysisTool : Tool
         return _instance;
     }
 
+    private string[string] _analysisConfigPaths;
     private StaticAnalysisConfig[string] _analysisConfigs;
     private string[] _currentPatterns;
 
@@ -192,10 +199,8 @@ class AnalysisTool : Tool
 
     void removeAnalysisConfig(const Uri workspaceUri)
     {
-        if (workspaceUri.path in _analysisConfigs)
-        {
-            _analysisConfigs.remove(workspaceUri.path);
-        }
+        _analysisConfigPaths.remove(workspaceUri.path);
+        _analysisConfigs.remove(workspaceUri.path);
     }
 
     void updateAnalysisConfig(const Uri workspaceUri)
@@ -221,6 +226,7 @@ class AnalysisTool : Tool
             readINIFile(conf, configPath);
         }
 
+        _analysisConfigPaths[workspaceUri.path] = configPath;
         _analysisConfigs[workspaceUri.path] = conf;
 
         if (Server.initialized)
@@ -388,7 +394,7 @@ class AnalysisTool : Tool
 
         auto config = getAnalysisConfig(uri);
         *getDiagnosticParameter(config, code) = Check.disabled;
-        writeINIFile(config, getAnalysisConfigUri(SymbolTool.instance.getWorkspace(uri)).path);
+        writeINIFile(config, _analysisConfigPaths[SymbolTool.instance.getWorkspace(uri).path]);
     }
 
     private Uri getAnalysisConfigUri(const Uri workspaceUri)
@@ -412,8 +418,7 @@ class AnalysisTool : Tool
 
         const workspaceUri = SymbolTool.instance.getWorkspace(uri);
         immutable workspacePath = workspaceUri is null ? "" : workspaceUri.path;
-        return (workspacePath in _analysisConfigs) ? _analysisConfigs[workspacePath]
-            : defaultStaticAnalysisConfig();
+        return (workspacePath in _analysisConfigs) ? _analysisConfigs[workspacePath] : defaultStaticAnalysisConfig();
     }
 
     private string* getDiagnosticParameter(return ref StaticAnalysisConfig config, const string code)
