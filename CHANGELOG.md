@@ -4,6 +4,10 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.25.2
+- Fixed D-Scanner config not being reloaded when changing config file path ([#41](https://github.com/d-language-server/dls/issues/41), [#42](https://github.com/d-language-server/dls/issues/42))
+- Fixed D-Scanner config properties not being reset when removed from config file
+
 #### 0.25.1
 - Fixed diagnostics not necessarily being sent upon saving documents
 
