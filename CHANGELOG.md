@@ -4,6 +4,10 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.25.3
+- Updated libraries:
+    - `dfmt`: `0.10.0` => `0.10.1`
+
 #### 0.25.2
 - Fixed D-Scanner config not being reloaded when changing config file path ([#41](https://github.com/d-language-server/dls/issues/41), [#42](https://github.com/d-language-server/dls/issues/42))
 - Fixed D-Scanner config properties not being reset when removed from config file
