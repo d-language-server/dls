@@ -4,6 +4,10 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.25.4
+- Updated libraries:
+    - `emsi_containers`: `0.8.0-alpha.13` => `0.8.0-alpha.14`
+
 #### 0.25.3
 - Updated libraries:
     - `dfmt`: `0.10.0` => `0.10.1`
