@@ -114,58 +114,37 @@ InitializeResult initialize(InitializeParams params)
                     textDocumentSync.willSave.nullify();
                 }
             }
-
-            if (!textDocCaps.hover.isNull)
-                hoverProvider = initOptions.capabilities.hover;
-
-            if (!textDocCaps.completion.isNull && initOptions.capabilities.completion)
-                completionProvider = new CompletionOptions(true.nullable, ["."].nullable);
-
-            if (!textDocCaps.definition.isNull)
-                definitionProvider = initOptions.capabilities.definition;
-
-            if (!textDocCaps.typeDefinition.isNull)
-                typeDefinitionProvider = JSONValue(initOptions.capabilities.definition);
-
-            if (!textDocCaps.references.isNull)
-                referencesProvider = initOptions.capabilities.references;
-
-            if (!textDocCaps.documentHighlight.isNull)
-                documentHighlightProvider = initOptions.capabilities.documentHighlight;
-
-            if (!textDocCaps.documentSymbol.isNull)
-                documentSymbolProvider = initOptions.capabilities.documentSymbol;
-
-            if (!textDocCaps.codeAction.isNull)
-                codeActionProvider = JSONValue(initOptions.capabilities.codeAction);
-
-            if (!textDocCaps.formatting.isNull)
-                documentFormattingProvider = initOptions.capabilities.documentFormatting;
-
-            if (!textDocCaps.rangeFormatting.isNull)
-                documentRangeFormattingProvider = initOptions.capabilities.documentRangeFormatting;
-
-            if (!textDocCaps.onTypeFormatting.isNull
-                    && initOptions.capabilities.documentOnTypeFormatting)
-                documentOnTypeFormattingProvider = new DocumentOnTypeFormattingOptions(";");
-
-            if (!textDocCaps.rename.isNull)
-            {
-                immutable prepareSupport = !textDocCaps.rename.prepareSupport.isNull
-                    && textDocCaps.rename.prepareSupport.get();
-
-                renameProvider = initOptions.capabilities.rename ? prepareSupport
-                    ? convertToJSON(new RenameOptions(true.nullable))
-                    : JSONValue(true) : JSONValue(false);
-            }
         }
+
+        hoverProvider = true;
+
+        completionProvider = new CompletionOptions(true.nullable, ["."].nullable);
+
+        definitionProvider = true;
+
+        typeDefinitionProvider = JSONValue(true);
+
+        referencesProvider = true;
+
+        documentHighlightProvider = true;
+
+        documentSymbolProvider = true;
+
+        codeActionProvider = JSONValue(true);
+
+        documentFormattingProvider = true;
+
+        documentRangeFormattingProvider = true;
+
+        documentOnTypeFormattingProvider = new DocumentOnTypeFormattingOptions(";");
+
+        renameProvider = JSONValue(true);
+
+        workspaceSymbolProvider = true;
 
         if (!params.capabilities.workspace.isNull)
         {
             const workspaceCaps = params.capabilities.workspace.get();
-
-            if (!workspaceCaps.symbol.isNull)
-                workspaceSymbolProvider = initOptions.capabilities.workspaceSymbol;
 
             if (!workspaceCaps.executeCommand.isNull && initOptions.capabilities.codeAction)
                 executeCommandProvider = new ExecuteCommandOptions(CommandTool.instance.commands);
