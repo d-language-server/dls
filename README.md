@@ -245,8 +245,12 @@ Adding new strings is straightforward, simply add new entries in the `message` o
 
 ### Which branch should be targeted by pull requests ?
 
-Is it work on a new feature ? Then the `master` branch should be targeted.
-Is it a fix ? Then the latest `release/v<MAJOR>.<MINOR>.x` branch should be targeted.
+- Is it work on a new feature ? Then the `master` branch should be targeted.
+- Is it a fix ? Then the latest `release/v<MAJOR>.<MINOR>.x` branch should be targeted.
+
+### Testing
+
+To run automated tests, run `dub test --main-file=tests/main.d`.
 
 ## Other links
 
