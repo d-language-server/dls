@@ -107,11 +107,11 @@ class AnalysisTool : Tool
             }
         });
         _instance.addConfigHook("filePatterns", (const Uri uri) {
-            const newPatterns = getConfig(uri).analysis.filePatterns;
+            auto newPatterns = getConfig(uri).analysis.filePatterns;
 
-            if (newPatterns != _instance._currentPatterns)
+            if (newPatterns != _instance._currentPatterns.get(uri, []))
             {
-                _instance._currentPatterns = newPatterns.dup;
+                _instance._currentPatterns[uri] = newPatterns;
                 _instance.scanAllWorkspaces();
             }
         });
@@ -129,7 +129,7 @@ class AnalysisTool : Tool
 
     private string[string] _analysisConfigPaths;
     private StaticAnalysisConfig[string] _analysisConfigs;
-    private string[] _currentPatterns;
+    private string[][string] _currentPatterns;
 
     auto getScannableFilesUris(out Uri[] discardedFiles)
     {
@@ -145,11 +145,14 @@ class AnalysisTool : Tool
 
         foreach (wUri; workspacesUris)
         {
+            auto filePatterns = getConfig(wUri).analysis.filePatterns;
+            _currentPatterns[wUri] = filePatterns;
+
             foreach (entry; dirEntries(wUri.path, SpanMode.depth).filter!q{a.isFile})
             {
                 auto entryUri = Uri.fromPath(entry.name);
 
-                foreach (pattern; getConfig(wUri).analysis.filePatterns)
+                foreach (pattern; filePatterns)
                 {
                     if (globMatch(entry.name, buildPath(wUri.path, pattern)))
                     {
