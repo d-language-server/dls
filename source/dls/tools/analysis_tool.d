@@ -97,7 +97,11 @@ class AnalysisTool : Tool
     {
         _instance = tool;
         _instance.addConfigHook("configFile", (const Uri uri) {
-            if (getConfig(uri).analysis.configFile != _instance._analysisConfigPaths.get(uri.path, ""))
+            import std.path : baseName;
+
+            const currentConfigFile = _instance._analysisConfigPaths.get(uri.path, "dscanner.ini").baseName;
+
+            if (getConfig(uri).analysis.configFile != currentConfigFile)
             {
                 _instance.updateAnalysisConfig(uri);
             }
