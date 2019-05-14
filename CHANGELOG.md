@@ -4,6 +4,12 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.25.5
+- Fixed D-Scanner potentially over-analyzing projects with multiple workspaces
+- Updated libraries:
+    - `dub`: `1.14.0` => `1.15.0`
+    - `emsi_containers`: `0.8.0-alpha.14` => `0.8.0-alpha.15`
+
 #### 0.25.4
 - Updated libraries:
     - `emsi_containers`: `0.8.0-alpha.13` => `0.8.0-alpha.14`
