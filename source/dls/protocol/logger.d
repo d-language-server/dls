@@ -36,8 +36,8 @@ shared static this()
     //dfmt off
     traceToType = [
         InitializeParams.Trace.off      : 0,
-        InitializeParams.Trace.messages : MessageType.warning,
-        InitializeParams.Trace.verbose  : MessageType.info
+        InitializeParams.Trace.messages : MessageType.info,
+        InitializeParams.Trace.verbose  : MessageType.log
     ];
 
     messageSeverity = [
@@ -98,31 +98,31 @@ private shared class LspLogger
         import std.path : dirName;
         import std.stdio : File;
 
-        if (initOptions.logFile.length > 0)
-        {
-            static bool firstLog = true;
-
-            if (firstLog)
-            {
-                mkdirRecurse(dirName(initOptions.logFile));
-            }
-
-            synchronized
-            {
-                auto log = File(initOptions.logFile, firstLog ? "w" : "a");
-                log.writefln(logMessageFormat, Clock.currTime.toString(),
-                        messageSeverity[type], message);
-                log.flush();
-            }
-
-            if (firstLog)
-            {
-                firstLog = false;
-            }
-        }
-
         if (type <= _messageType)
         {
+            if (initOptions.logFile.length > 0)
+            {
+                static bool firstLog = true;
+
+                if (firstLog)
+                {
+                    mkdirRecurse(dirName(initOptions.logFile));
+                }
+
+                synchronized
+                {
+                    auto log = File(initOptions.logFile, firstLog ? "w" : "a");
+                    log.writefln(logMessageFormat, Clock.currTime.toString(),
+                            messageSeverity[type], message);
+                    log.flush();
+                }
+
+                if (firstLog)
+                {
+                    firstLog = false;
+                }
+            }
+
             send(Window.logMessage, new LogMessageParams(type, format(logMessageFormat,
                     Clock.currTime.toString(), messageSeverity[type], message)));
         }
