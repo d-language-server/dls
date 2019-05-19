@@ -172,13 +172,13 @@ private void send(T : Message)(T m)
     import std.utf : toUTF8;
 
     auto message = convertToJSON(m);
-    auto messageString = message.get().toString();
+    auto messageString = message.get().toString().toUTF8();
 
     synchronized
     {
         foreach (chunk; ["Content-Length: ", text(messageString.length), eol, eol, messageString])
         {
-            communicator.write(chunk.toUTF8());
+            communicator.write(chunk);
         }
 
         communicator.flush();
