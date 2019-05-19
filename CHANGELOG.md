@@ -4,6 +4,9 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.25.6
+- Fixed file logging not respecting trace level
+
 #### 0.25.5
 - Fixed D-Scanner potentially over-analyzing projects with multiple workspaces
 - Updated libraries:
