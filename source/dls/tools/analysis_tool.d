@@ -183,9 +183,6 @@ class AnalysisTool : Tool
         Uri[] discardedFiles;
 
         getScannableFilesUris(discardedFiles).each!((uri) {
-            import dls.util.disposable_fiber : DisposableFiber;
-
-            DisposableFiber.yield();
             send(TextDocument.publishDiagnostics, new PublishDiagnosticsParams(uri,
                 _instance.diagnostics(uri)));
         });
