@@ -41,15 +41,17 @@ void didOpen(DidOpenTextDocumentParams params)
     auto uri = new Uri(params.textDocument.uri);
     logger.info("Document opened: %s", uri.path);
 
-    if (!SymbolTool.instance.workspacesFilesUris.canFind!sameFile(uri))
-    {
-        send(TextDocument.publishDiagnostics, new PublishDiagnosticsParams(uri,
-                AnalysisTool.instance.diagnostics(uri)));
-    }
+    immutable loneFile = !SymbolTool.instance.workspacesFilesUris.canFind!sameFile(uri);
 
     if (!Document.open(params.textDocument))
     {
         logger.warning("Document %s is already open", uri.path);
+    }
+    
+    if (loneFile)
+    {
+        send(TextDocument.publishDiagnostics, new PublishDiagnosticsParams(uri,
+                AnalysisTool.instance.diagnostics(uri)));
     }
 }
 
