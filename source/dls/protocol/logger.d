@@ -123,8 +123,11 @@ private shared class LspLogger
                 }
             }
 
-            send(Window.logMessage, new LogMessageParams(type, format(logMessageFormat,
+            if (type != MessageType.log)
+            {
+                send(Window.logMessage, new LogMessageParams(type, format(logMessageFormat,
                     Clock.currTime.toString(), messageSeverity[type], message)));
+            }
         }
     }
 }
