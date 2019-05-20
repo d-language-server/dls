@@ -47,7 +47,7 @@ void didOpen(DidOpenTextDocumentParams params)
     {
         logger.warning("Document %s is already open", uri.path);
     }
-    
+
     if (loneFile)
     {
         send(TextDocument.publishDiagnostics, new PublishDiagnosticsParams(uri,
