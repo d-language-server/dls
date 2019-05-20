@@ -25,8 +25,7 @@ class Uri
     import dls.protocol.definitions : DocumentUri;
     import std.regex : regex;
 
-    private static enum _reg = regex(
-                `(?:([\w-]+)://)?([\w.]+(?::\d+)?)?([^\?#]+)(?:\?([\w=&]+))?(?:#([\w-]+))?`);
+    private static enum _reg = regex(`([\w-]+):(?://([\w.@]+(?::\d+)?))?([^\?#]+)(?:\?([\w=&]+))?(?:#([\w-]+))?`);
     private string _uri;
     private string _scheme;
     private string _authority;
