@@ -294,13 +294,14 @@ class SymbolTool : Tool
             return false;
         }
 
-        return reduce!q{a ~ b}(Document.uris.array,
+        auto documentUris = Document.uris.array;
+
+        return reduce!q{a ~ b}(documentUris,
             workspacesUris.map!(uri => dirEntries(uri.path, SpanMode.depth)
                 .filter!q{a.isFile}
                 .map!q{a.name}
-                .filter!(file => globMatch(file, "*.{d,di}"))
+                .filter!(file => !documentUris.canFind!q{a.path == b}(file) && globMatch(file, "*.{d,di}"))
                 .map!(Uri.fromPath)
-                .filter!(uri => !Document.uris.canFind!sameFile(uri))
                 .filter!isImported
                 .array));
     }
@@ -753,6 +754,7 @@ class SymbolTool : Tool
         import dls.protocol.logger : logger;
         import dls.util.disposable_fiber : DisposableFiber;
         import dls.util.document : Document;
+        import dls.util.uri : sameFile;
         import dsymbol.string_interning : internString;
         import dsymbol.symbol : DSymbol;
         import std.algorithm : any, canFind, map, startsWith;
@@ -795,7 +797,7 @@ class SymbolTool : Tool
 
         foreach (moduleUri; workspacesFilesUris)
         {
-            if (Document.uris.map!q{a.path}.canFind(moduleUri.path))
+            if (Document.uris.canFind!sameFile(moduleUri))
             {
                 DisposableFiber.yield();
                 result.insert(symbol!SymbolInformation(moduleUri, query));
