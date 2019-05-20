@@ -4,6 +4,12 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.25.8
+- Enhanced workspace Uri listing a bit more ([#46](https://github.com/d-language-server/dls/issues/46))
+- Fixed infinite loop on maximum logging level
+- Fixed files being read from disk unecessarily when opened by a client
+- Fixed out-of-workspace opened files not being scanned properly on startup
+
 #### 0.25.7
 - Optimized some Uri handling ([#46](https://github.com/d-language-server/dls/issues/46))
 
