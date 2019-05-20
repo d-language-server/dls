@@ -4,6 +4,9 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.25.7
+- Optimized some Uri handling ([#46](https://github.com/d-language-server/dls/issues/46))
+
 #### 0.25.6
 - Fixed file logging not respecting trace level
 

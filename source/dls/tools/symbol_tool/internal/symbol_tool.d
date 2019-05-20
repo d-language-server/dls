@@ -273,10 +273,11 @@ class SymbolTool : Tool
     @property Uri[] workspacesFilesUris()
     {
         import dls.util.document : Document;
+        import dls.util.uri : sameFile;
         import std.algorithm : canFind, filter, map, reduce;
         import std.array : array;
-        import std.file : SpanMode, dirEntries, isFile;
-        import std.path : filenameCmp, globMatch;
+        import std.file : SpanMode, dirEntries;
+        import std.path : globMatch;
 
         bool isImported(const Uri uri)
         {
@@ -294,16 +295,14 @@ class SymbolTool : Tool
         }
 
         return reduce!q{a ~ b}(Document.uris.array,
-                workspacesUris.map!(uri => dirEntries(uri.path, SpanMode.depth).map!q{a.name}
-                    .filter!(file => globMatch(file, "*.{d,di}"))
-                    .filter!(file => !Document.uris
-                    .map!q{a.path}
-                    .array
-                    .canFind!((a, b) => filenameCmp(a, b) == 0)(file))
-                    .filter!isFile
-                    .map!(Uri.fromPath)
-                    .filter!isImported
-                    .array));
+            workspacesUris.map!(uri => dirEntries(uri.path, SpanMode.depth)
+                .filter!q{a.isFile}
+                .map!q{a.name}
+                .filter!(file => globMatch(file, "*.{d,di}"))
+                .map!(Uri.fromPath)
+                .filter!(uri => !Document.uris.canFind!sameFile(uri))
+                .filter!isImported
+                .array));
     }
 
     @property ref ModuleCache cache()

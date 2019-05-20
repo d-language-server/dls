@@ -25,8 +25,7 @@ class Uri
     import dls.protocol.definitions : DocumentUri;
     import std.regex : regex;
 
-    private static enum _reg = regex(
-                `(?:([\w-]+)://)?([\w.]+(?::\d+)?)?([^\?#]+)(?:\?([\w=&]+))?(?:#([\w-]+))?`);
+    private static enum _reg = regex(`([\w-]+):(?://([\w.@]+(?::\d+)?))?([^\?#]+)(?:\?([\w=&]+))?(?:#([\w-]+))?`);
     private string _uri;
     private string _scheme;
     private string _authority;
@@ -56,6 +55,36 @@ class Uri
         //dfmt on
     }
 
+    private this(string scheme, string authority, string path, string query, string fragment)
+    {
+        _uri = scheme ~ ':';
+
+        if (authority !is null)
+        {
+            _uri ~= "//" ~ authority;
+        }
+
+        _uri ~= path;
+        
+        if (query !is null)
+        {
+            _uri ~= '?' ~ query;
+        }
+        
+        if (fragment !is null)
+        {
+            _uri ~= '#' ~ fragment;
+        }
+
+        //dfmt off
+        _scheme    = scheme;
+        _authority = authority;
+        _path      = path.normalized;
+        _query     = query;
+        _fragment  = fragment;
+        //dfmt on
+    }
+
     override string toString() const
     {
         return _uri;
@@ -69,7 +98,7 @@ class Uri
         import std.uri : encode;
 
         immutable uriPath = path.tr(`\`, `/`);
-        return new Uri(encode(format!"file://%s%s"(uriPath.startsWith('/') ? "" : "/", uriPath)));
+        return new Uri("file", "", (uriPath.startsWith('/') ? "" : "/") ~ uriPath, null, null);
     }
 
     alias toString this;
