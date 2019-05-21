@@ -176,10 +176,12 @@ private void send(T : Message)(T m)
 
     synchronized
     {
-        foreach (chunk; ["Content-Length: ", text(messageString.length), eol, eol, messageString])
-        {
-            communicator.write(chunk);
-        }
+        communicator.write(
+            "Content-Length: ".toUTF8()
+            ~ text(messageString.length).toUTF8()
+            ~ eol.toUTF8()
+            ~ eol.toUTF8()
+            ~ messageString.toUTF8());
 
         communicator.flush();
     }
