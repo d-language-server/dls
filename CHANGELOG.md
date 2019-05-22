@@ -4,6 +4,9 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.25.9
+- Enhanced socket communication performance ([#46](https://github.com/d-language-server/dls/issues/46))
+
 #### 0.25.8
 - Enhanced workspace Uri listing a bit more ([#46](https://github.com/d-language-server/dls/issues/46))
 - Fixed infinite loop on maximum logging level
