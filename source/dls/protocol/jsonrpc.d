@@ -169,18 +169,17 @@ private void send(T : Message)(T m)
     import dls.util.communicator : communicator;
     import dls.util.json : convertToJSON;
     import std.conv : text;
-    import std.utf : toUTF8;
 
     auto message = convertToJSON(m);
-    auto messageString = message.get().toString().toUTF8();
+    auto messageString = message.get().toString();
 
     synchronized
     {
         communicator.write(
-            "Content-Length: ".toUTF8()
-            ~ text(messageString.length).toUTF8()
-            ~ jsonrpcSeparator.toUTF8()
-            ~ messageString.toUTF8()
+            "Content-Length: "
+            ~ text(messageString.length)
+            ~ jsonrpcSeparator
+            ~ messageString
         );
 
         communicator.flush();
