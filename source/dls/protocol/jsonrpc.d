@@ -25,7 +25,7 @@ import std.json : JSONValue;
 import std.typecons : Nullable, Tuple, tuple;
 
 private enum jsonrpcVersion = "2.0";
-private enum eol = "\r\n";
+private enum jsonrpcSeparator = "\r\n\r\n";
 
 abstract class Message
 {
@@ -169,17 +169,18 @@ private void send(T : Message)(T m)
     import dls.util.communicator : communicator;
     import dls.util.json : convertToJSON;
     import std.conv : text;
-    import std.utf : toUTF8;
 
     auto message = convertToJSON(m);
-    auto messageString = message.get().toString().toUTF8();
+    auto messageString = message.get().toString();
 
     synchronized
     {
-        foreach (chunk; ["Content-Length: ", text(messageString.length), eol, eol, messageString])
-        {
-            communicator.write(chunk);
-        }
+        communicator.write(
+            "Content-Length: "
+            ~ text(messageString.length)
+            ~ jsonrpcSeparator
+            ~ messageString
+        );
 
         communicator.flush();
     }
