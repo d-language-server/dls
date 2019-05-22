@@ -25,7 +25,7 @@ import std.json : JSONValue;
 import std.typecons : Nullable, Tuple, tuple;
 
 private enum jsonrpcVersion = "2.0";
-private enum eol = "\r\n";
+private enum jsonrpcSeparator = "\r\n\r\n";
 
 abstract class Message
 {
@@ -179,9 +179,9 @@ private void send(T : Message)(T m)
         communicator.write(
             "Content-Length: ".toUTF8()
             ~ text(messageString.length).toUTF8()
-            ~ eol.toUTF8()
-            ~ eol.toUTF8()
-            ~ messageString.toUTF8());
+            ~ jsonrpcSeparator.toUTF8()
+            ~ messageString.toUTF8()
+        );
 
         communicator.flush();
     }
