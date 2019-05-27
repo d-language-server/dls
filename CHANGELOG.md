@@ -4,6 +4,10 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.25.11
+- Updated libraries:
+    - `libdparse`: `0.11.4` => `0.11.5`
+
 #### 0.25.10
 - Enhanced file scanning performance ([#48](https://github.com/d-language-server/dls/issues/48))
 
