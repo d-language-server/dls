@@ -134,21 +134,21 @@ class AnalysisTool : Tool
     auto getScannableFilesUris(out Uri[] discardedFiles)
     {
         import dls.tools.symbol_tool : SymbolTool;
-        import dls.util.uri : sameFile;
-        import std.algorithm : canFind, filter;
+        import dls.util.uri : filenameCmp;
+        import std.algorithm : filter, sort;
         import std.file : SpanMode, dirEntries;
         import std.path : buildPath, globMatch;
         import std.range : chain;
 
         Uri[] globMatches;
-        auto workspacesFilesUris = SymbolTool.instance.workspacesFilesUris;
+        auto workspacesFilesUris = SymbolTool.instance.workspacesFilesUris.sort!((a, b) => filenameCmp(a, b) < 0);
 
         foreach (wUri; workspacesUris)
         {
             auto filePatterns = getConfig(wUri).analysis.filePatterns;
             _currentPatterns[wUri] = filePatterns;
 
-            foreach (entry; dirEntries(wUri.path, SpanMode.depth).filter!q{a.isFile})
+            LNextFile: foreach (entry; dirEntries(wUri.path, SpanMode.depth).filter!q{a.isFile})
             {
                 auto entryUri = Uri.fromPath(entry.name);
 
@@ -157,13 +157,11 @@ class AnalysisTool : Tool
                     if (globMatch(entry.name, buildPath(wUri.path, pattern)))
                     {
                         globMatches ~= entryUri;
-                        break;
+                        continue LNextFile;
                     }
                 }
 
-                if (!(globMatches.length > 0 && globMatches[$ - 1] is entryUri)
-                        && !workspacesFilesUris.canFind!sameFile(entryUri)
-                        && globMatch(entry.name, "*.{d,di}"))
+                if (globMatch(entry.name, "*.{d,di}") && !workspacesFilesUris.contains(entryUri))
                 {
                     discardedFiles ~= entryUri;
                 }

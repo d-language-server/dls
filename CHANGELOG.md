@@ -4,6 +4,9 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.25.10
+- Enhanced file scanning performance ([#48](https://github.com/d-language-server/dls/issues/48))
+
 #### 0.25.9
 - Enhanced socket communication performance ([#46](https://github.com/d-language-server/dls/issues/46))
 
