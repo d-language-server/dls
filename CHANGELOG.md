@@ -4,6 +4,10 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.25.12
+- Updated libraries:
+    - `dscanner`: `0.7.1` => `0.7.2`
+
 #### 0.25.11
 - Updated libraries:
     - `libdparse`: `0.11.4` => `0.11.5`
