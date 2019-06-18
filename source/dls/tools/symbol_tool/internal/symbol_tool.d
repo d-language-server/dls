@@ -27,6 +27,8 @@ import dsymbol.symbol : CompletionKind;
 
 private string[string] macros;
 private immutable CompletionItemKind[CompletionKind] completionKinds;
+private immutable string[CompletionKind] sortTexts;
+private immutable sortTextsSpecialIdentifiers = ["__monitor", "__vptr", "classinfo"];
 private immutable SymbolKind[CompletionKind] symbolKinds;
 
 shared static this()
@@ -54,6 +56,26 @@ shared static this()
         CompletionKind.mixinTemplateName    : CompletionItemKind.function_,
         CompletionKind.variadicTmpParam     : CompletionItemKind.typeParameter,
         CompletionKind.typeTmpParam         : CompletionItemKind.typeParameter
+    ];
+
+    sortTexts = [
+        CompletionKind.className            : "7",
+        CompletionKind.interfaceName        : "7",
+        CompletionKind.structName           : "7",
+        CompletionKind.unionName            : "7",
+        CompletionKind.variableName         : "1",
+        CompletionKind.memberVariableName   : "1",
+        CompletionKind.keyword              : "3",
+        CompletionKind.functionName         : "2",
+        CompletionKind.enumName             : "7",
+        CompletionKind.enumMember           : "1",
+        CompletionKind.packageName          : "5",
+        CompletionKind.moduleName           : "6",
+        CompletionKind.aliasName            : "4",
+        CompletionKind.templateName         : "2",
+        CompletionKind.mixinTemplateName    : "4",
+        CompletionKind.variadicTmpParam     : "4",
+        CompletionKind.typeTmpParam         : "4"
     ];
 
     symbolKinds = [
@@ -757,7 +779,7 @@ class SymbolTool : Tool
         import dls.util.uri : sameFile;
         import dsymbol.string_interning : internString;
         import dsymbol.symbol : DSymbol;
-        import std.algorithm : any, canFind, map, startsWith;
+        import std.algorithm : any, canFind, map;
         import std.array : appender, array;
         import std.container : RedBlackTree;
         import std.file : SpanMode, dirEntries;
@@ -858,6 +880,7 @@ class SymbolTool : Tool
                 position.line, position.character);
 
         auto request = getPreparedRequest(uri, position, RequestKind.autocomplete);
+
         static bool compareCompletionsLess(const AutocompleteResponse.Completion a,
                 const AutocompleteResponse.Completion b)
         {
@@ -877,6 +900,17 @@ class SymbolTool : Tool
                 && a.symbolLocation == b.symbolLocation;
         }
 
+        static string getSortText(const string identifier, const CompletionKind kind)
+        {
+            import std.algorithm : canFind, startsWith;
+
+            return sortTextsSpecialIdentifiers.canFind(identifier)
+                ? "15"
+                : identifier.startsWith('_')
+                    ? sortTexts[kind] ~ "0"
+                    : sortTexts[kind];
+        }
+
         auto result = complete(request, _cache);
 
         if (result.completionType != CompletionType.identifiers)
@@ -890,11 +924,14 @@ class SymbolTool : Tool
             .chunkBy!q{a.identifier == b.identifier}
             .map!((resultGroup) {
                 import std.array : appender;
+                import std.typecons : nullable;
                 import std.uni : toLower;
 
                 auto firstResult = resultGroup.front;
                 auto item = new CompletionItem(firstResult.identifier);
-                item.kind = completionKinds[cast(CompletionKind) firstResult.kind];
+                auto resultKind = cast(CompletionKind) firstResult.kind;
+                item.kind = completionKinds[resultKind];
+                item.sortText = getSortText(item.label, resultKind).nullable;
                 item.detail = firstResult.definition;
 
                 auto data = appender!(string[][]);

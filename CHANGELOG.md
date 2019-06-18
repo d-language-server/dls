@@ -4,6 +4,9 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.25.13
+- Fixed completions being sorted alphabetically ([#51](https://github.com/d-language-server/dls/issues/51))
+
 #### 0.25.12
 - Updated libraries:
     - `dscanner`: `0.7.1` => `0.7.2`
