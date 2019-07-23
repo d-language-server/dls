@@ -4,6 +4,11 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.25.14
+- Updated libraries:
+    - `emsi_containers`: `0.8.0-alpha.15` => `0.8.0-alpha.16`
+    - `msgpack-d`: `1.0.0-beta.8` => `1.0.0`
+
 #### 0.25.13
 - Fixed completions being sorted alphabetically ([#51](https://github.com/d-language-server/dls/issues/51))
 
