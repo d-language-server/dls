@@ -30,7 +30,7 @@ Converts a `JSONValue` to an object of type `T` by filling its fields with the J
 T convertFromJSON(T)(JSONValue json)
         if ((is(T == class) || is(T == struct)) && !is(T == JSONValue))
 {
-    import std.json : JSONException, JSON_TYPE;
+    import std.json : JSONException, JSONType;
     import std.meta : Alias;
     import std.traits : isSomeFunction, isType;
 
@@ -43,7 +43,7 @@ T convertFromJSON(T)(JSONValue json)
         auto result = T();
     }
 
-    if (json.type != JSON_TYPE.OBJECT)
+    if (json.type != JSONType.object)
     {
         throw new JSONException(json.toString() ~ " is not an object type");
     }
@@ -127,10 +127,10 @@ unittest
 
 N convertFromJSON(N : Nullable!T, T)(JSONValue json)
 {
-    import std.json : JSON_TYPE;
+    import std.json : JSONType;
     import std.typecons : nullable;
 
-    return (json.type == JSON_TYPE.NULL) ? N() : convertFromJSON!T(json).nullable;
+    return (json.type == JSONType.null_) ? N() : convertFromJSON!T(json).nullable;
 }
 
 unittest
@@ -158,26 +158,26 @@ unittest
 T convertFromJSON(T)(JSONValue json) if (isNumeric!T || isSomeChar!T)
 {
     import std.conv : to;
-    import std.json : JSONException, JSON_TYPE;
+    import std.json : JSONException, JSONType;
 
     switch (json.type)
     {
-    case JSON_TYPE.NULL, JSON_TYPE.FALSE:
+    case JSONType.null_, JSONType.false_:
         return 0.to!T;
 
-    case JSON_TYPE.TRUE:
+    case JSONType.true_:
         return 1.to!T;
 
-    case JSON_TYPE.FLOAT:
+    case JSONType.float_:
         return json.floating.to!T;
 
-    case JSON_TYPE.INTEGER:
+    case JSONType.integer:
         return json.integer.to!T;
 
-    case JSON_TYPE.UINTEGER:
+    case JSONType.uinteger:
         return json.uinteger.to!T;
 
-    case JSON_TYPE.STRING:
+    case JSONType.string:
         return json.str.to!T;
 
     default:
@@ -203,23 +203,23 @@ unittest
 
 T convertFromJSON(T)(JSONValue json) if (isBoolean!T)
 {
-    import std.json : JSON_TYPE;
+    import std.json : JSONType;
 
     switch (json.type)
     {
-    case JSON_TYPE.NULL, JSON_TYPE.FALSE:
+    case JSONType.null_, JSONType.false_:
         return false;
 
-    case JSON_TYPE.FLOAT:
+    case JSONType.float_:
         return json.floating != 0;
 
-    case JSON_TYPE.INTEGER:
+    case JSONType.integer:
         return json.integer != 0;
 
-    case JSON_TYPE.UINTEGER:
+    case JSONType.uinteger:
         return json.uinteger != 0;
 
-    case JSON_TYPE.STRING:
+    case JSONType.string:
         return json.str.length > 0;
 
     default:
@@ -251,7 +251,7 @@ T convertFromJSON(T)(JSONValue json)
         if (isSomeString!T || is(T : string) || is(T : wstring) || is(T : dstring))
 {
     import std.conv : to;
-    import std.json : JSONException, JSON_TYPE;
+    import std.json : JSONException, JSONType;
 
     static if (is(T == enum))
     {
@@ -269,7 +269,7 @@ T convertFromJSON(T)(JSONValue json)
     }
     else
     {
-        return (json.type == JSON_TYPE.STRING ? json.str : json.toString()).to!T;
+        return (json.type == JSONType.string ? json.str : json.toString()).to!T;
     }
 }
 
@@ -317,23 +317,23 @@ T convertFromJSON(T : U[], U)(JSONValue json)
 {
     import std.algorithm : map;
     import std.array : array;
-    import std.json : JSONException, JSON_TYPE;
+    import std.json : JSONException, JSONType;
 
     switch (json.type)
     {
-    case JSON_TYPE.NULL:
+    case JSONType.null_:
         return [];
 
-    case JSON_TYPE.FALSE:
+    case JSONType.false_:
         return [convertFromJSON!U(JSONValue(false))];
 
-    case JSON_TYPE.TRUE:
+    case JSONType.true_:
         return [convertFromJSON!U(JSONValue(true))];
 
-    case JSON_TYPE.ARRAY:
+    case JSONType.array:
         return json.array.map!(value => convertFromJSON!U(value)).array;
 
-    case JSON_TYPE.OBJECT:
+    case JSONType.object:
         throw new JSONException(json.toString() ~ " is not a string type");
 
     default:
@@ -359,16 +359,16 @@ unittest
 T convertFromJSON(T : U[string], U)(JSONValue json) if (isAssociativeArray!T)
 {
     import std.conv : text;
-    import std.json : JSONException, JSON_TYPE;
+    import std.json : JSONException, JSONType;
 
     U[string] result;
 
     switch (json.type)
     {
-    case JSON_TYPE.NULL:
+    case JSONType.null_:
         return result;
 
-    case JSON_TYPE.OBJECT:
+    case JSONType.object:
         foreach (key, value; json.object)
         {
             result[key] = convertFromJSON!U(value);
@@ -376,7 +376,7 @@ T convertFromJSON(T : U[string], U)(JSONValue json) if (isAssociativeArray!T)
 
         break;
 
-    case JSON_TYPE.ARRAY:
+    case JSONType.array:
         foreach (key, value; json.array)
         {
             result[text(key)] = convertFromJSON!U(value);
