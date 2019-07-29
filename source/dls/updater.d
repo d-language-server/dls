@@ -118,10 +118,10 @@ void update(bool autoUpdate, bool preReleaseBuilds)
     import std.concurrency : ownerTid, receiveOnly, register, send, thisTid;
     import std.datetime : Clock, SysTime;
     import std.format : format;
-    import std.json : JSON_TYPE;
+    import std.json : JSONType;
 
     auto validReleases = allReleases.filter!(
-            r => r["prerelease"].type == JSON_TYPE.FALSE || preReleaseBuilds);
+            r => r["prerelease"].type == JSONType.false_ || preReleaseBuilds);
 
     if (validReleases.empty)
     {
