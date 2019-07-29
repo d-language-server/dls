@@ -4,6 +4,12 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.25.15
+- Fixed deprecation warnings from using the old `JSON_TYPE` enum name ([#57](https://github.com/d-language-server/dls/issues/57))
+- Updated libraries:
+    - `libdparse`: `0.11.5` => `0.11.6`
+    - `msgpack-d`: `1.0.0` => `1.0.1`
+
 #### 0.25.14
 - Updated libraries:
     - `emsi_containers`: `0.8.0-alpha.15` => `0.8.0-alpha.16`
