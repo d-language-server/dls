@@ -113,7 +113,21 @@ shared static this()
     import std.algorithm : min;
     import std.datetime : Clock, SysTime;
     import std.format : format;
-    import std.json : JSON_TYPE;
+
+    static if (__VERSION__ >= 2082L)
+    {
+        import std.json : JSONType;
+
+        alias jsonFalse = JSONType.false_;
+        alias jsonInt = JSONType.integer;
+    }
+    else
+    {
+        import std.json : JSON_TYPE;
+
+        alias jsonFalse = JSON_TYPE.FALSE;
+        alias jsonInt = JSON_TYPE.INTEGER;
+    }
 
     try
     {
@@ -122,7 +136,7 @@ shared static this()
             immutable releaseDate = SysTime.fromISOExtString(release["published_at"].str);
 
             if (Clock.currTime.toUTC() - releaseDate > 1.hours
-                    && release["prerelease"].type == JSON_TYPE.FALSE)
+                    && release["prerelease"].type == jsonFalse)
             {
                 foreach (asset; release["assets"].array)
                 {
@@ -130,7 +144,7 @@ shared static this()
                     {
                         downloadVersion = release["tag_name"].str;
                         downloadUrl = asset["browser_download_url"].str;
-                        downloadSize = cast(size_t)(asset["size"].type == JSON_TYPE.INTEGER
+                        downloadSize = cast(size_t)(asset["size"].type == jsonInt
                                 ? asset["size"].integer : asset["size"].uinteger);
                         return true;
                     }
