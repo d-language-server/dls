@@ -4,6 +4,10 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.25.16
+- Updated libraries:
+    - `emsi_containers`: `0.8.0-alpha.16` => `0.8.0-alpha.18`
+
 #### 0.25.15
 - Fixed deprecation warnings from using the old `JSON_TYPE` enum name ([#57](https://github.com/d-language-server/dls/issues/57))
 - Updated libraries:
