@@ -4,6 +4,13 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.25.17
+- Enhanced build process by removing dependency on `rdmd`
+- Fixed segfault when opening files outside of a workspace ([#61](https://github.com/d-language-server/dls/issues/61))
+- Updated libraries:
+    - `dub`: `1.15.0` => `1.17.0`
+    - `emsi_containers`: `0.8.0-alpha.18` => `0.8.0-alpha.19`
+
 #### 0.25.16
 - Updated libraries:
     - `emsi_containers`: `0.8.0-alpha.16` => `0.8.0-alpha.18`
