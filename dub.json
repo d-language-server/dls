@@ -23,7 +23,8 @@
 		"StdLoggerDisableFatal"
 	],
 	"preGenerateCommands": [
-		"rdmd $PACKAGE_DIR/data/data.d"
+		"dmd $PACKAGE_DIR/data/data.d -of=$PACKAGE_DIR/data/data.exe || ldc2 $PACKAGE_DIR/data/data.d -of=$PACKAGE_DIR/data/data.exe || gdc $PACKAGE_DIR/data/data.d -o $PACKAGE_DIR/data/data.exe",
+		"$PACKAGE_DIR/data/data.exe"
 	],
 	"subPackages": [
 		"bootstrap",
