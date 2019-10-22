@@ -2,6 +2,8 @@ initialize
 initialized
 textDocument_references_1
 textDocument_references_1_noDeclaration
+textDocument_references_2
+textDocument_references_2_noDeclaration
 textDocument_references_3
 textDocument_references_3_noDeclaration
 textDocument_references_4
