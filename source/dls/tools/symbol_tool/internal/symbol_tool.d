@@ -184,11 +184,14 @@ class SymbolTool : Tool
 
             auto paths = getConfig(uri).symbol.importPaths;
 
-            foreach (ref path; paths)
+            if (uri !is null)
             {
-                if (!(isAbsolute(path) || path is null))
+                foreach (ref path; paths)
                 {
-                    path = buildNormalizedPath(uri.path, path);
+                    if (!(isAbsolute(path) || path is null))
+                    {
+                        path = buildNormalizedPath(uri.path, path);
+                    }
                 }
             }
 

@@ -13,6 +13,7 @@
 		"dls:protocol": "*"
 	},
 	"preGenerateCommands": [
-		"rdmd $PACKAGE_DIR/data/translations.d"
+		"dmd $PACKAGE_DIR/data/translations.d -of=$PACKAGE_DIR/data/translations.exe || ldc2 $PACKAGE_DIR/data/translations.d -of=$PACKAGE_DIR/data/translations.exe || gdc $PACKAGE_DIR/data/translations.d -o $PACKAGE_DIR/data/translations.exe",
+		"$PACKAGE_DIR/data/translations.exe"
 	]
 }

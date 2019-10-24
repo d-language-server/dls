@@ -99,6 +99,11 @@ class AnalysisTool : Tool
         _instance.addConfigHook("configFile", (const Uri uri) {
             import std.path : baseName;
 
+            if (uri is null)
+            {
+                return;
+            }
+
             const currentConfigFile = _instance._analysisConfigPaths.get(uri.path, "dscanner.ini").baseName;
 
             if (getConfig(uri).analysis.configFile != currentConfigFile)
@@ -107,6 +112,11 @@ class AnalysisTool : Tool
             }
         });
         _instance.addConfigHook("filePatterns", (const Uri uri) {
+            if (uri is null)
+            {
+                return;
+            }
+
             auto newPatterns = getConfig(uri).analysis.filePatterns;
 
             if (newPatterns != _instance._currentPatterns.get(uri, []))
