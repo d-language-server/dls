@@ -61,8 +61,9 @@ string getVersionFromDescription()
 {
     import std.algorithm : find;
     import std.json : parseJSON;
-    import std.process : execute;
+    import std.process : Config, environment, execute;
 
-    immutable desc = parseJSON(execute(["dub", "describe"]).output);
+    immutable describe = execute(["dub", "describe"], null, Config.none, size_t.max, environment["DUB_PACKAGE_DIR"]);
+    immutable desc = parseJSON(describe.output);
     return desc["packages"].array.find!(p => p["name"] == desc["rootPackage"])[0]["version"].str;
 }
