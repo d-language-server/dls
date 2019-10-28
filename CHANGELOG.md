@@ -4,6 +4,9 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.25.18
+- Fixed building from source after fetching from Dub ([#64](https://github.com/d-language-server/dls/issues/64))
+
 #### 0.25.17
 - Enhanced build process by removing dependency on `rdmd`
 - Fixed segfault when opening files outside of a workspace ([#61](https://github.com/d-language-server/dls/issues/61))
