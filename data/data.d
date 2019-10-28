@@ -25,16 +25,13 @@ void main()
     import std.process : environment;
 
     immutable dataPath = buildNormalizedPath(environment["DUB_PACKAGE_DIR"], "data");
-
-    //dfmt off
     immutable fileFillers = [
         "dls-version.txt" : environment.get("DUB_PACKAGE_VERSION", getVersionFromDescription()),
-        "build-platform.txt": environment.get("DUB_PLATFORM", "unknown-build-platform"),
-        "build-arch.txt": environment.get("DUB_ARCH", "unknown-build-arch"),
-        "build-type.txt": environment.get("DUB_BUILD_TYPE", "unknown-build-type"),
+        "build-platform.txt" : environment.get("DUB_PLATFORM", "unknown-build-platform"),
+        "build-arch.txt" : environment.get("DUB_ARCH", "unknown-build-arch"),
+        "build-type.txt" : environment.get("DUB_BUILD_TYPE", "unknown-build-type"),
         "compiler-version.txt" : getCompilerVersion()
     ];
-    //dfmt on
 
     foreach (file, newContent; fileFillers)
     {
@@ -53,8 +50,7 @@ string getCompilerVersion()
     import std.process : environment, execute;
     import std.regex : matchFirst, regex;
 
-    return execute([environment["DC"], "--version"]).output.matchFirst(
-            regex(`\d+\.\d+\.\d+`)).front;
+    return execute([environment["DC"], "--version"]).output.matchFirst(regex(`\d+\.\d+\.\d+`)).front;
 }
 
 string getVersionFromDescription()
