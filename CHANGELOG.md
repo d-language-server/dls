@@ -4,6 +4,9 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.25.19
+- Fixed crash on empty modules ([#65](https://github.com/d-language-server/dls/issues/65))
+
 #### 0.25.18
 - Fixed building from source after fetching from Dub ([#64](https://github.com/d-language-server/dls/issues/64))
 
