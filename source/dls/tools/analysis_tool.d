@@ -275,6 +275,12 @@ class AnalysisTool : Tool
         };
 
         const mod = parseModule(tokens, uri.path, &ra, syntaxProblemhandler);
+
+        if (mod.declarations.length == 0)
+        {
+            return diagnostics.data;
+        }
+        
         const analysisResults = analyze(uri.path, mod, getAnalysisConfig(uri),
                 SymbolTool.instance.cache, tokens, true);
 
