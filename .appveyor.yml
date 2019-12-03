@@ -1,5 +1,5 @@
 platform: x64
-image: Visual Studio 2017
+image: Visual Studio 2019
 environment:
   matrix:
     - ARCH: x86_64
