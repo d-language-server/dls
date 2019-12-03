@@ -4,6 +4,16 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+### 0.26.0
+- Updated libraries:
+    - `dcd`: `0.11.1` => `0.12.0`
+    - `dfmt`: `0.10.1` => `0.11.0`
+    - `dscanner`: `0.7.2` => `0.8.0`
+    - `dsymbol`: `0.6.4` => `0.9.0`
+    - `libddoc`: `0.6.1` => `0.7.0`
+    - `libdparse`: `0.11.6` => `0.13.1`
+    - `msgpack-d`: `1.0.1` => `1.0.2`
+
 #### 0.25.19
 - Fixed crash on empty modules ([#65](https://github.com/d-language-server/dls/issues/65))
 
