@@ -4,12 +4,12 @@
 		"dcd": "0.12.0",
 		"dfmt": "0.11.0",
 		"dscanner": "0.8.0",
-		"dsymbol": "0.9.0",
-		"dub": "1.17.0",
+		"dsymbol": "0.9.1",
+		"dub": "1.19.0",
 		"emsi_containers": "0.8.0-alpha.19",
 		"inifiled": "1.3.1",
-		"libddoc": "0.7.0",
-		"libdparse": "0.13.1",
+		"libddoc": "0.7.1",
+		"libdparse": "0.13.2",
 		"msgpack-d": "1.0.2",
 		"stdx-allocator": "2.77.5"
 	}

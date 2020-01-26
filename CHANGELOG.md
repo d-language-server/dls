@@ -4,6 +4,13 @@ This changlelog tracks meaningful changes. Various improvements and fixes are om
 
 Breaking changes will be in bold.
 
+#### 0.26.1
+- Updated libraries:
+    - `dsymbol`: `0.9.0` => `0.9.1`
+    - `dub`: `1.17.0` => `1.19.0`
+    - `libddoc`: `0.7.0` => `0.7.1`
+    - `libdparse`: `0.13.1` => `0.13.2`
+
 ### 0.26.0
 - Updated libraries:
     - `dcd`: `0.11.1` => `0.12.0`
