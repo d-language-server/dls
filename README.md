@@ -2,6 +2,8 @@
 
 [![GitHub](https://img.shields.io/github/license/d-language-server/dls.svg?style=social)](https://www.gnu.org/licenses/gpl.html)
 
+## This project is unmaintained, please use another one such as [serve-d](https://github.com/pure-d/serve-d)
+
 |DUB|Travis|AppVeyor|
 |---|------|--------|
 |[![DUB](https://img.shields.io/dub/v/dls.svg?style=flat-square)](https://code.dlang.org/packages/dls)|[![Travis](https://img.shields.io/travis/d-language-server/dls.svg?style=flat-square)](https://travis-ci.org/d-language-server/dls)|[![AppVeyor](https://img.shields.io/appveyor/ci/dlanguageserver/dls.svg?style=flat-square)](https://ci.appveyor.com/project/dlanguageserver/dls)
