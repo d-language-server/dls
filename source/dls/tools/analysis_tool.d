@@ -24,6 +24,12 @@ import dls.tools.tool : Tool;
 
 private immutable diagnosticSource = "D-Scanner";
 
+private enum CONFIG_FILE_NAME = "dscanner.ini";
+version (linux) version = useXDG;
+version (BSD) version = useXDG;
+version (FreeBSD) version = useXDG;
+version (OSX) version = useXDG;
+
 //dfmt off
 private enum DScannerWarnings : string
 {
@@ -215,6 +221,37 @@ class AnalysisTool : Tool
         _analysisConfigs.remove(workspaceUri.path);
     }
 
+	/**
+	 * Locates the default configuration file
+	 * (Taken from DScanner source)
+	 */
+	string getDefaultConfigurationLocation()
+	{
+		import std.process : environment;
+		import std.exception : enforce;
+		import std.path : buildPath;
+		version (useXDG)
+		{
+			string configDir = environment.get("XDG_CONFIG_HOME", null);
+			if (configDir is null)
+			{
+				configDir = environment.get("HOME", null);
+				enforce(configDir !is null, "Both $XDG_CONFIG_HOME and $HOME are unset");
+				configDir = buildPath(configDir, ".config", "dscanner", CONFIG_FILE_NAME);
+			}
+			else
+				configDir = buildPath(configDir, "dscanner", CONFIG_FILE_NAME);
+			return configDir;
+		}
+		else version(Windows)
+		{
+			string configDir = environment.get("APPDATA", null);
+			enforce(configDir !is null, "%APPDATA% is unset");
+			configDir = buildPath(configDir, "dscanner", CONFIG_FILE_NAME);
+			return configDir;
+		}
+	}
+
     void updateAnalysisConfig(const Uri workspaceUri)
     {
         import dls.protocol.logger : logger;
@@ -231,6 +268,13 @@ class AnalysisTool : Tool
         {
             logger.info("Updating config from file %s", configPath);
             readINIFile(conf, configPath);
+        } else {
+			static import std.process;
+			immutable defaultConfigurationPath = getDefaultConfigurationLocation;
+			if (exists(defaultConfigurationPath)){
+				logger.info("Updating config from file %s", defaultConfigurationPath);
+				readINIFile(conf, defaultConfigurationPath);
+			}
         }
 
         _analysisConfigPaths[workspaceUri.path] = configPath;
@@ -511,3 +555,4 @@ class AnalysisTool : Tool
         return new WorkspaceEdit(changes.nullable, documentChanges.nullable);
     }
 }
+
